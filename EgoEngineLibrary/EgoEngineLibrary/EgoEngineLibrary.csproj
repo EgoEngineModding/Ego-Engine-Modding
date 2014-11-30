@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F86348B9-87B8-445D-912E-A1732439E36A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>EgoEngineLibrary</RootNamespace>
+    <AssemblyName>EgoEngineLibrary</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MiscUtil, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d3c42c4bfacf7596, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\References\MiscUtil.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Archive\JpkBinaryReader.cs" />
+    <Compile Include="Archive\JpkBinaryWriter.cs" />
+    <Compile Include="Archive\JpkFile.cs" />
+    <Compile Include="Data\DatabaseBinaryReader.cs" />
+    <Compile Include="Data\DatabaseBinaryWriter.cs" />
+    <Compile Include="Data\DatabaseFile.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Graphics\DdsFile.cs" />
+    <Compile Include="Graphics\DdsHeader.cs" />
+    <Compile Include="Graphics\DdsPixelFormat.cs" />
+    <Compile Include="Graphics\PssgAttribute.cs" />
+    <Compile Include="Graphics\PssgAttributeCollection.cs" />
+    <Compile Include="Graphics\PssgBinaryReader.cs" />
+    <Compile Include="Graphics\PssgBinaryWriter.cs" />
+    <Compile Include="Graphics\PssgFile.cs" />
+    <Compile Include="Graphics\PssgNode.cs" />
+    <Compile Include="Graphics\PssgNodeCollection.cs" />
+    <Compile Include="Graphics\PssgSchema.cs" />
+    <Compile Include="Helper\HexHelper.cs" />
+    <Compile Include="Language\Bucket.cs" />
+    <Compile Include="Language\HashEntry.cs" />
+    <Compile Include="Language\HashTable.cs" />
+    <Compile Include="Language\Hshs.cs" />
+    <Compile Include="Language\Hsht.cs" />
+    <Compile Include="Language\LngB.cs" />
+    <Compile Include="Language\LngBinaryReader.cs" />
+    <Compile Include="Language\LngBinaryWriter.cs" />
+    <Compile Include="Language\LngFile.cs" />
+    <Compile Include="Language\SidA.cs" />
+    <Compile Include="Language\SidaEntry.cs" />
+    <Compile Include="Language\SidB.cs" />
+    <Compile Include="Vehicle\CsvFile.cs" />
+    <Compile Include="Vehicle\CsvStreamReader.cs" />
+    <Compile Include="Vehicle\CsvStreamWriter.cs" />
+    <Compile Include="Vehicle\CtfBinaryReader.cs" />
+    <Compile Include="Vehicle\CtfBinaryWriter.cs" />
+    <Compile Include="Vehicle\CtfEditorGamePage.cs" />
+    <Compile Include="Vehicle\CtfEntryInfo.cs" />
+    <Compile Include="Vehicle\CtfFile.cs" />
+    <Compile Include="Vehicle\FloatList.cs" />
+    <Compile Include="Vehicle\PerformanceFile.cs" />
+    <Compile Include="Vehicle\TngBinaryReader.cs" />
+    <Compile Include="Vehicle\TngBinaryWriter.cs" />
+    <Compile Include="Vehicle\TngEntry.cs" />
+    <Compile Include="Vehicle\TngFile.cs" />
+    <Compile Include="Vehicle\TngInfo.cs" />
+    <Compile Include="Xml\BinaryXmlAttribute.cs" />
+    <Compile Include="Xml\BinaryXmlElement.cs" />
+    <Compile Include="Xml\BinaryXmlString.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Xml\XmlBinaryReader.cs" />
+    <Compile Include="Xml\XmlBinaryWriter.cs" />
+    <Compile Include="Xml\XmlFile.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

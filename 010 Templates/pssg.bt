@@ -1,0 +1,101 @@
+//--------------------------------------
+//--- 010 Editor v3.1.3 Binary Template
+//
+// File: pssg.bt
+// Author: Miek
+// Purpose: Label Codemasters PSSG files (only tested on DiRT 3 model/texture archives so far)
+//--------------------------------------
+
+BigEndian();
+typedef struct {
+    int length;
+    char str[length];
+} STRING <read=readString>;
+
+string readString(STRING &s) {
+    return s.str;
+}
+
+typedef struct {
+    int id;
+    STRING name;
+} ITEM <read=readItem>;
+
+string readItem(ITEM &i) {
+    string ret;
+    SPrintf(ret, "%s = %d", i.name.str, i.id);
+    return ret;
+}
+
+typedef struct {
+    int id;
+    STRING name;
+    int itemcount;
+    if (itemcount) ITEM items[itemcount] <optimize=false>;
+} NODEINFO <read=readNodeInfo>;
+
+string readNodeInfo(NODEINFO &s) {
+    string ret;
+    SPrintf(ret, "%d = %s", s.id, s.name.str);
+    return ret;
+}
+
+struct ARG {
+    int id;
+    int size;
+    // TODO: May need a list of arg types to do this properly :/
+    //if (size == 4) int v;
+    //else STRING v;
+    char v[size];
+};
+
+string readarg(struct ARG &a) {
+    string ret;
+    SPrintf(ret, "%d", n.id);
+    return ret;
+}
+
+struct ARGS {
+    int size;
+    local int end = size + FTell();
+    while (FTell() < end) {
+        ARG a <read=readarg>;
+    }
+};
+
+struct NODE {
+    int id <bgcolor=cGreen>;
+    int size <bgcolor=cLtGreen>;
+    local int end = size + FTell();
+    ARGS args <bgcolor=cLtRed>;
+    // This stops recursion when it hits a node which just has raw data within it
+    // Bit hacky, haven't found a proper way yet
+    switch (file.nodedefs.nd[id - 1].name.str) {
+        case "BOUNDINGBOX":
+        case "DATABLOCKDATA":
+        case "DATABLOCKBUFFERED":
+        case "INDEXSOURCEDATA":
+        case "INVERSEBINDMATRIX":
+        case "MODIFIERNETWORKINSTANCEUNIQUEMODIFIERINPUT":
+        case "RENDERINTERFACEBOUNDBUFFERED":
+        case "SHADERINPUT":
+        case "TEXTUREIMAGEBLOCKDATA":
+        case "TRANSFORM":
+            char data[end - FTell()] <bgcolor=cRed>;
+        break;
+        default:
+            while (FTell() < end) struct NODE n <read=readnode>;
+    }
+};
+string readnode(struct NODE &n) { return file.nodedefs.nd[n.id - 1].name.str; }
+
+struct {
+    char magic[4];
+    int size;
+    struct NODEDEFS {
+        int attributeinfocount;
+        int nodeinfocount;
+        NODEINFO nd[nodeinfocount] <optimize=false>;
+    } nodedefs <bgcolor=cLtBlue>;
+    NODE root <read=readnode>;
+} file;

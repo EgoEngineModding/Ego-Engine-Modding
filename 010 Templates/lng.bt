@@ -1,0 +1,50 @@
+//--------------------------------------
+//--- 010 Editor v3.1.3 Binary Template
+//
+// File: lng.bt
+// Author: Mike
+// Purpose: Label ego engine .lng files
+//--------------------------------------
+BigEndian();
+
+char magic[4];
+int filesize;
+
+struct HSHS {
+    char hshs[4];
+    int size;
+    int buckets;
+    int seed;
+    int multiplier;
+} hshs;
+
+struct HSHT {
+    char hsht[4];
+    int size;
+    struct HSHT_Entry {
+        int bucket;
+        int count;
+    } items[size / 8];
+} hsht;
+
+struct SIDA {
+    char hsht[4];
+    int size;
+    int entryCount;
+    struct SIDA_Entry {
+        int sidb_offset;
+        int lngb_offset;
+    } items[size / 8];
+} sida;
+
+struct SIDB {
+    char sidb[4];
+    int size;
+    char items[size];
+} sidb;
+
+struct LNGB {
+    char lngb[4];
+    int size;
+    char items[size];
+} lngb;

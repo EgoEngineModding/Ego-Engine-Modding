@@ -1,0 +1,79 @@
+//--------------------------------------
+//--- 010 Editor v3.1 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+LittleEndian();
+
+SetBackColor(cLtGray);
+
+typedef struct {
+    int stringOffset <bgcolor=cGreen>;
+
+    local int64 currentPos = FTell();
+    FSeek(12 + stringOffset);
+    string name <bgcolor=cLtYellow>;
+    FSeek(currentPos);
+
+    float val;
+    float val2;
+    int num;
+} ChildEntry;
+
+struct {
+    struct HEADER {
+        int magic;
+        int entryCount;
+        int textLength;
+    } header;
+
+    FSeek(12 + header.textLength);
+
+    struct Entry {
+        int stringOffset <bgcolor=cGreen>;
+
+        local int64 currentPos = FTell();
+        FSeek(12 + stringOffset);
+        string name <bgcolor=cLtYellow>;
+        FSeek(currentPos);
+
+        int16 id;
+
+        int instructionCode;
+        switch (instructionCode) {
+            case 0:
+                float val;
+                break;
+            case 1:
+                int linkedInfoId;
+                float val;
+                break;
+        }
+
+        int instructionCode2;
+        switch (instructionCode2) {
+            case 4:
+            case 1:
+            case 0:
+                float val2;
+                float val3;
+                break;
+            case 3:
+                int linkedInfoId2;
+                break;
+        }
+
+        int childCount;
+        ChildEntry childEntry[childCount] <bgcolor=cLtRed,read=childEntryName,optimize=false>;
+    } entry[header.entryCount] <bgcolor=cLtBlue,read=entryName,optimize=false>;
+} file;
+
+string entryName(Entry &entry) {
+    return entry.name;
+}
+string childEntryName(ChildEntry &entry) {
+    return entry.name;
+}

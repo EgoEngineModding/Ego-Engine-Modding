@@ -1,0 +1,48 @@
+LittleEndian();
+
+int magic;
+int restOfFileLength;
+
+int magic_2;
+int section3And4Length;
+
+int magic_3;
+int sectionLength;
+local int i = 0;
+for (i = 0; i < sectionLength; i++) {
+    struct string_list s;
+    i = i - 1 + sizeof(s);
+}
+
+int magic_4;
+int sectionLength2;
+local int numStrings = sectionLength2/4;
+int stringOffsets[numStrings];
+
+int magic_5;
+int sectionLength3;
+local int xmlElementCount = sectionLength3/24;
+struct xmlElement elements[xmlElementCount];
+
+int magic_6;
+int sectionLength4;
+local int xmlAttrCount = sectionLength4/8;
+struct xmlAttr attributes[xmlAttrCount];
+
+struct string_list {
+    string s;
+};
+
+struct xmlElement {
+    int elementNameID;
+    int elementValueID;
+    int attributeCount;
+    int attributeStartID;
+    int childElementCount;
+    int childElementStartID;
+};
+
+struct xmlAttr {
+    int attributeNameID;
+    int valueStringID;
+};

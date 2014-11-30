@@ -1,0 +1,337 @@
+//--------------------------------------
+//--- 010 Editor v3.1.3 Binary Template
+//
+// File: ctf.bt
+// Author: Mike
+// Purpose: Label ego engine .ctf files
+//--------------------------------------
+LittleEndian();
+
+int pad;
+int flag;
+if (flag >= 10) float abs_strength;
+if (flag >= 8) float air_density_multiple;
+float air_resistance_x;
+float air_resistance_y;
+float air_resistance_z;
+if (flag >= 12) float ambient_temperature;
+float anti_roll_front;
+float anti_roll_rear;
+if (flag >= 10) float atc_strength;
+float auto_clutch_full_point;
+if (flag >= 14) float auto_clutch_gear_delay;
+float auto_clutch_zero_point;
+if (flag >= 28) {
+    float boost_duration;
+    float boost_multiplier;
+}
+float unknown; // bool
+if (flag < 9) {
+    float brake_torque_front;
+    float brake_torque_rear;
+} else {
+    float brake_bias;
+    float brake_torque_total;
+}
+if (flag >= 21) float bumpy_surface_amplification;
+float bumpy_surface_factor;
+if (flag >= 30) float camber_back_grip;
+float camber_back_left;
+float camber_back_right;
+if (flag >= 30) float camber_front_grip;
+float camber_front_left;
+float camber_front_right;
+float centre_diff_full_effect_rate;
+float centre_diff_max_torque;
+float centre_dff_no_effect_rate;
+float chase_cam_velocity_prop;
+float clutch_gear_time;
+float clutch_lift_rate;
+float clutch_max_torque;
+string s;
+float com_y;
+float com_z;
+if (flag >= 24) {
+    float cs_history_time;
+    float cs_maximum_boost;
+    float cs_tighest_corner_radius; // not my typo!
+}
+if (flag >= 26) {
+    float da_additional_acc;
+    float da_drift_angle;
+    float da_enable_speed;
+    float da_full_speed;
+    float da_proportion_to_turn_acc;
+}
+float damping_front;
+float damping_rear;
+float diff_off_throttle_multiplier;
+int unknown;
+float downforce_central;
+float downforce_directionality;
+float downforce_pressure_point;
+float downforce_pressure_point_in_air;
+float downforce_pressure_point_in_air_upwards;
+float downforce_proportion_front_bumper;
+float downforce_proportion_front_wing;
+float downforce_proportion_spoiler;
+float downforce_rear_and_front;
+int unknown;
+string s2;
+float engine_friction;
+float engine_inertia;
+string s3;
+int unknown_bitfield;
+int pad;
+float front_burst_tyre_grip_multiple;
+float front_castor;
+if (flag <= 6) float front_damper_post_zone_scale; // odd!
+float front_damper_zone_division;
+float front_diff_full_effect_rate;
+float front_diff_max_torque;
+float front_diff_no_effect_rate;
+if (flag >= 7) {
+    float front_fast_bump;
+    float front_fast_rebound;
+}
+float front_peak_slip;
+if (flag >= 22) float front_peak_slip_ratio;
+float front_peak_tyre_depth;
+float front_pressure;
+float front_radius;
+if (flag <= 6) float front_rebound_damper_multiplier; // odd!
+int unknown; // bool
+float front_roll_centre;
+float front_rolling_resistance;
+float front_slow_rebound;
+if (flag <= 3) float front_tyre_spring_constant; // odd!
+float front_visual_camber;
+float front_visual_sqsh_cam;
+float front_visual_sqsh_lin;
+float front_visual_sqsh_quad;
+float front_visual_stch_cam;
+float front_visual_stch_lin;
+float front_visual_stch_quad;
+float front_width;
+int pad;
+int pad;
+float gear_1st;
+float gear_1st_downshift_multiple;
+float gear_2nd;
+float gear_3rd;
+float gear_4th;
+float gear_5th;
+float gear_6th;
+float gear_7th;
+float gear_8th;
+if (flag >= 17) float gear_all_downshift_multiple;
+float gear_change_throttle_off_time;
+float gear_change_throttle_on_time;
+if (flag >= 35) {
+    float gear_power_mod_1;
+    float gear_power_mod_2;
+    float gear_power_mod_3;
+    float gear_power_mod_4;
+    float gear_power_mod_5;
+    float gear_power_mod_6;
+    float gear_power_mod_7;
+}
+float grip_reverse;
+float grip_front;
+float grip_rear;
+if (flag >= 29) {
+    float grip_weight_1;
+    float grip_weight_2;
+    float grip_weight_3;
+}
+if (flag >= 27) {
+    float gsteer_lock_reduce_rate;
+    float gsteer_proportion;
+}
+float handbrake_grip_loss;
+float handbrake_strength_multiple;
+if (flag >= 0) int unknown;
+float high_speed_for_steering_rate;
+float high_speed_steering_rate;
+float idle_rate;
+float inerter_front;
+float inerter_rear;
+float inertia_x;
+float inertia_y;
+float inertia_z;
+if (flag >= 19) float jump_anti_gravity;
+if (flag >= 18) {
+    float jumpassist_fall_rate;
+    float jumpassist_multiple_cap;
+    float jumpassist_fall_rate; // Again? you so crazy CM
+}
+int pad; // bool
+int flag_unk1; // bool
+int pad;
+float low_speed_for_steering_rate;
+float low_speed_steering_rate;
+float lowspeed_engine_momentum_boost;
+float magic_brake;
+float mass;
+float max_steering_lock;
+float max_wheel_height_front;
+float max_wheel_height_rear;
+float min_wheel_height_front;
+float min_wheel_height_rear;
+string s5;
+int unknown;
+float pad_auto_steer;
+float pad_linearity;
+if (flag_unk1) {
+    struct float_list u;
+}
+float pad_min_lock;
+int unknown; // bool
+struct float_list u;
+float rear_burst_tyre_grip_multiple;
+float rear_castor;
+if (flag <= 6) float rear_damper_post_zone_scale; // odd!
+float rear_damper_zone_divison;
+float rear_diff_full_effect_rate;
+float rear_diff_max_torque;
+float rear_diff_no_effect_rate;
+float rear_drive_proportion;
+if (flag >= 7) {
+    float rear_fast_bump;
+    float rear_fast_rebound;
+}
+float rear_peak_slip;
+if (flag >= 22) float rear_peak_slp_ratio;
+float rear_peak_tyre_depth;
+if (flag >= 4) float rear_pressure;
+float rear_radius;
+int unknown; // bool
+float rear_roll_centre;
+float rear_rolling_resistance;
+if (flag >= 7) float rear_slow_rebound;
+if (flag <= 3) float rear_tyre_spring_constant; // odd!
+float rear_visual_camber;
+float rear_visual_sqsh_cam;
+float rear_visual_sqsh_lin;
+float rear_visual_sqsh_quad;
+float rear_visual_stch_cam;
+float rear_visual_stch_lin;
+float rear_visual_stch_quad;
+if (flag >= 4) float rear_width;
+if (flag <= 6) float rebound_damping_multiple; // odd!
+float rev_limit;
+float reverse_to_1st_transition_speed;
+float ride_height_adjust_front;
+if (flag >= 5) float ride_height_adjust_rear;
+float road_angle_for_no_grip;
+float selfsteer_angle_threshold;
+int unknown; // bool
+float selfsteer_low_speeds;
+float selfsteer_lowangle_threshold;
+if (flag >= 16) {
+    float selfsteer_max_return_rate;
+    float selfsteer_min_return_rate;
+}
+if (flag >= 2) float selfsteer_only_if_correcting;
+float selfsteer_only_when_needed;
+if (flag >= 16) int unknown; // bool
+float selfsteer_speed_threshold;
+float skidding_grip_drop;
+float speed_for_full_pad_lock;
+float speed_for_full_starting_wheelspin;
+float speed_for_no_starting_wheelspin;
+if (flag >= 34) float speed_for_optimal_launch;
+if (flag >= 25) {
+    float stability_control_max_angle;
+    float stability_control_max_atc;
+    float stability_control_off_speed;
+    float stability_control_on_speed;
+}
+float starter_motor_strength_multiple;
+float stating_wheelspin_grip_loss; // not my typo!
+float steering_rate_to_centre_mult;
+float steering_rate_to_desired_mult;
+float suspension_strength_front;
+float suspension_strength_rear;
+if (flag >= 23) {
+    float third_spring_dmp_front;
+    float third_spring_dmp_rear;
+    float third_spring_str_front;
+    float third_spring_str_rear;
+}
+float toe_in_front;
+float toe_in_rear;
+string s6;
+string s7;
+if (flag >= 6) {
+    float tyre_damping_factor_front;
+    float tyre_damping_factor_rear;
+}
+if (flag >= 13) float type_inertia_multiple_with_drift_steer;
+float tyre_inertieas_high_speed;
+float tyre_inertias_lowest_speed;
+float tyre_inertias_mid_speed;
+if (flag >= 12) {
+    float tyre_patch_shape_front;
+    float tyre_patch_shape_rear;
+    float tyre_patch_temp_road_rate;
+    float tyre_patch_temp_roll_rate;
+    float tyre_patch_temp_spread_rate;
+    float type_patch_temp_work_rate;
+}
+float tyre_x_inertia_multiple_high;
+float tyre_x_inertia_multiple_mid;
+float tyre_y_inertia_multiple_high;
+float tyre_y_inertia_multiple_mid;
+float tyre_z_inertia_multiple_high;
+float tyre_z_inertia_multiple_mid;
+int unknown; // bool
+string s8;
+float visual_acc_cap_pitch;
+float visual_acc_cap_roll;
+float visual_acc_new_rate;
+float visual_acc_scale_pitch;
+float visual_acc_scale_roll;
+float visual_amplification_pitch;
+float visual_amplification_roll;
+float visual_front_max_height;
+float visual_rear_max_height;
+float visual_turn_rate;
+float visual_vib_bottom_amount;
+float visual_vib_bottom_speed;
+float visual_vib_frequency;
+float visual_vib_interval;
+float visual_vib_max_threshold;
+float visual_vib_min_threshold;
+float visual_vib_top_amount;
+float visual_vib_top_speed;
+float visual_wheel_xv_limit;
+float wear_rate_multiple;
+float weather_power_multiple;
+float weight_grip_power;
+float wheel_force_bottom_factor;
+float wheel_inertia_front;
+float wheel_inertia_rear;
+float wheel_max_side_shift;
+float wheel_side_force_to_shift;
+float wiper_cycle_offset;
+if (flag >= 32) {
+    float edamp_accel_damping;
+    float edamp_accel_threshold;
+    float edamp_deaccel_damping;
+    float edamp_deaccel_threshold;
+    float edamp_g_sensor;
+    float edamp_lateral_multiple;
+    float edamp_lateral_threshold;
+}
+if (flag >= 30) float front_rebound_cutoff;
+if (flag >= 31) float front_rebound_zone_division;
+if (flag >= 33) float gear_downshift_skid;
+if (flag >= 30) float rear_rebound_cutoff;
+if (flag >= 31) float rear_rebound_zone_division;
+
+struct float_list {
+    int count;
+    float unknown;
+    float list[count];
+};
