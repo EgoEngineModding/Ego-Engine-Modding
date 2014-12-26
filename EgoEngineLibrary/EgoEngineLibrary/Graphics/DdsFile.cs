@@ -17,28 +17,28 @@
             magic = 0x20534444;
             header.size = 124;
             header.flags |= DdsHeader.Flags.DDSD_CAPS | DdsHeader.Flags.DDSD_HEIGHT | DdsHeader.Flags.DDSD_WIDTH | DdsHeader.Flags.DDSD_PIXELFORMAT;
-            header.height = (uint)(node.attributes["height"].Value);
-            header.width = (uint)(node.attributes["width"].Value);
-            switch ((string)node.attributes["texelFormat"].Value)
+            header.height = (uint)(node.Attributes["height"].Value);
+            header.width = (uint)(node.Attributes["width"].Value);
+            switch ((string)node.Attributes["texelFormat"].Value)
             {
                 case "dxt1":
                     header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.attributes["width"].Value) + 3) / 4) * 8);
+                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.Attributes["width"].Value) + 3) / 4) * 8);
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
-                    header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes(((string)node.attributes["texelFormat"].Value).ToUpper()), 0);
+                    header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes(((string)node.Attributes["texelFormat"].Value).ToUpper()), 0);
                     break;
                 case "dxt2":
                 case "dxt3":
                 case "dxt4":
                 case "dxt5":
                     header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.attributes["width"].Value) + 3) / 4) * 16);
+                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.Attributes["width"].Value) + 3) / 4) * 16);
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
-                    header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes(((string)node.attributes["texelFormat"].Value).ToUpper()), 0);
+                    header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes(((string)node.Attributes["texelFormat"].Value).ToUpper()), 0);
                     break;
                 case "ui8x4":
                     header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.attributes["width"].Value) + 3) / 4) * 16); // is this right?
+                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.Attributes["width"].Value) + 3) / 4) * 16); // is this right?
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_ALPHAPIXELS | DdsPixelFormat.Flags.DDPF_RGB;
                     header.ddspf.fourCC = 0;
                     header.ddspf.rGBBitCount = 32;
@@ -49,7 +49,7 @@
                     break;
                 case "u8":
                     header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.attributes["width"].Value) + 3) / 4) * 16); // is this right?
+                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.Attributes["width"].Value) + 3) / 4) * 16); // is this right?
                     // Interchanging the commented values will both work, not sure which is better
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_LUMINANCE;
                     //header.ddspf.flags |= DDS_PIXELFORMAT.Flags.DDPF_ALPHA;
@@ -61,10 +61,10 @@
             }
             if (node.HasAttribute("automipmap") == true && node.HasAttribute("numberMipMapLevels") == true)
             {
-                if ((uint)node.attributes["automipmap"].Value == 0 && (uint)node.attributes["numberMipMapLevels"].Value > 0)
+                if ((uint)node.Attributes["automipmap"].Value == 0 && (uint)node.Attributes["numberMipMapLevels"].Value > 0)
                 {
                     header.flags |= DdsHeader.Flags.DDSD_MIPMAPCOUNT;
-                    header.mipMapCount = (uint)((uint)node.attributes["numberMipMapLevels"].Value + 1);
+                    header.mipMapCount = (uint)((uint)node.Attributes["numberMipMapLevels"].Value + 1);
                     header.caps |= DdsHeader.Caps.DDSCAPS_MIPMAP | DdsHeader.Caps.DDSCAPS_COMPLEX;
                 }
             }
@@ -72,12 +72,12 @@
             header.ddspf.size = 32;
             header.caps |= DdsHeader.Caps.DDSCAPS_TEXTURE;
             List<PssgNode> textureImageBlocks = node.FindNodes("TEXTUREIMAGEBLOCK");
-            if ((uint)node.attributes["imageBlockCount"].Value > 1)
+            if ((uint)node.Attributes["imageBlockCount"].Value > 1)
             {
                 bdata2 = new Dictionary<int, byte[]>();
                 for (int i = 0; i < textureImageBlocks.Count; i++)
                 {
-                    switch (textureImageBlocks[i].attributes["typename"].ToString())
+                    switch (textureImageBlocks[i].Attributes["typename"].ToString())
                     {
                         case "Raw":
                             header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEX;
@@ -109,7 +109,7 @@
                 {
                     header.caps2 = 0;
                 }
-                else if (bdata2.Count == (uint)node.attributes["imageBlockCount"].Value)
+                else if (bdata2.Count == (uint)node.Attributes["imageBlockCount"].Value)
                 {
                     header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP;
                     header.flags = header.flags ^ DdsHeader.Flags.DDSD_LINEARSIZE;
@@ -274,43 +274,43 @@
         }
         public void Write(PssgNode node)
         {
-            node.attributes["height"].Value = header.height;
-            node.attributes["width"].Value = header.width;
+            node.Attributes["height"].Value = header.height;
+            node.Attributes["width"].Value = header.width;
             if (node.HasAttribute("numberMipMapLevels") == true)
             {
                 if ((int)header.mipMapCount - 1 >= 0)
                 {
-                    node.attributes["numberMipMapLevels"].Value = header.mipMapCount - 1;
+                    node.Attributes["numberMipMapLevels"].Value = header.mipMapCount - 1;
                 }
                 else
                 {
-                    node.attributes["numberMipMapLevels"].Value = 0u;
+                    node.Attributes["numberMipMapLevels"].Value = 0u;
                 }
             }
             if (header.ddspf.rGBBitCount == 32)
             {
-                node.attributes["texelFormat"].Value = "ui8x4";
+                node.Attributes["texelFormat"].Value = "ui8x4";
             }
             else if (header.ddspf.rGBBitCount == 8)
             {
-                node.attributes["texelFormat"].Value = "u8";
+                node.Attributes["texelFormat"].Value = "u8";
             }
             else
             {
-                node.attributes["texelFormat"].Value = Encoding.UTF8.GetString(BitConverter.GetBytes(header.ddspf.fourCC)).ToLower();
+                node.Attributes["texelFormat"].Value = Encoding.UTF8.GetString(BitConverter.GetBytes(header.ddspf.fourCC)).ToLower();
             }
             List<PssgNode> textureImageBlocks = node.FindNodes("TEXTUREIMAGEBLOCK");
             if (bdata2 != null && bdata2.Count > 0)
             {
                 for (int i = 0; i < textureImageBlocks.Count; i++)
                 {
-                    switch (textureImageBlocks[i].attributes["typename"].ToString())
+                    switch (textureImageBlocks[i].Attributes["typename"].ToString())
                     {
                         case "Raw":
                             if (bdata2.ContainsKey(0) == true)
                             {
                                 textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value = bdata2[0];
-                                textureImageBlocks[i].attributes["size"].Value = (UInt32)bdata2[0].Length;
+                                textureImageBlocks[i].Attributes["size"].Value = (UInt32)bdata2[0].Length;
                             }
                             else
                             {
@@ -321,7 +321,7 @@
                             if (bdata2.ContainsKey(1) == true)
                             {
                                 textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value = bdata2[1];
-                                textureImageBlocks[i].attributes["size"].Value = (UInt32)bdata2[1].Length;
+                                textureImageBlocks[i].Attributes["size"].Value = (UInt32)bdata2[1].Length;
                             }
                             else
                             {
@@ -332,7 +332,7 @@
                             if (bdata2.ContainsKey(2) == true)
                             {
                                 textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value = bdata2[2];
-                                textureImageBlocks[i].attributes["size"].Value = (UInt32)bdata2[2].Length;
+                                textureImageBlocks[i].Attributes["size"].Value = (UInt32)bdata2[2].Length;
                             }
                             else
                             {
@@ -343,7 +343,7 @@
                             if (bdata2.ContainsKey(3) == true)
                             {
                                 textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value = bdata2[3];
-                                textureImageBlocks[i].attributes["size"].Value = (UInt32)bdata2[3].Length;
+                                textureImageBlocks[i].Attributes["size"].Value = (UInt32)bdata2[3].Length;
                             }
                             else
                             {
@@ -354,7 +354,7 @@
                             if (bdata2.ContainsKey(4) == true)
                             {
                                 textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value = bdata2[4];
-                                textureImageBlocks[i].attributes["size"].Value = (UInt32)bdata2[4].Length;
+                                textureImageBlocks[i].Attributes["size"].Value = (UInt32)bdata2[4].Length;
                             }
                             else
                             {
@@ -365,7 +365,7 @@
                             if (bdata2.ContainsKey(5) == true)
                             {
                                 textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value = bdata2[5];
-                                textureImageBlocks[i].attributes["size"].Value = (UInt32)bdata2[5].Length;
+                                textureImageBlocks[i].Attributes["size"].Value = (UInt32)bdata2[5].Length;
                             }
                             else
                             {
@@ -377,12 +377,12 @@
             }
             else
             {
-                if ((uint)node.attributes["imageBlockCount"].Value > 1)
+                if ((uint)node.Attributes["imageBlockCount"].Value > 1)
                 {
                     throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
                 }
                 textureImageBlocks[0].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value = bdata;
-                textureImageBlocks[0].attributes["size"].Value = (UInt32)bdata.Length;
+                textureImageBlocks[0].Attributes["size"].Value = (UInt32)bdata.Length;
             }
         }
     }

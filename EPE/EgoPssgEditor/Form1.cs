@@ -22,7 +22,7 @@ namespace EgoPssgEditor
         // 2.0 - Support for texelformats "ui8x4" and "u8", Auto-Update "All Sections", Export/Import Data Nodes, Add/Remove Attributes to Nodes, Hogs Less Resources, PSSG Backend, textures search bar
         // 2.0.1 - Fixed Tag Errors on Save, Improved Open/SaveFileDialog Usability, Cleaned Up Some Code, Reduced Size from Icon
         // 10.0 -- Use EgoEngineLibrary, Added Dirt support, MainMenus, Export/Import Xml, Schema System, Move Nodes, Supports Compressed Pssg
-        string schemaPath = Application.StartupPath + "\\defines.xml";
+        string schemaPath = Application.StartupPath + "\\schema.xml";
         PssgFile pssg;
         string filePath = @"C:\";
         string[] args;
@@ -96,13 +96,13 @@ namespace EgoPssgEditor
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                filePath = openFileDialog.FileName;
-                openFileDialog.Dispose();
-                clearVars(true);
-                pssg = PssgFile.Open(File.Open(filePath, FileMode.Open, FileAccess.Read));
-                setupEditor(MainTabs.Auto);
                 try
                 {
+                    filePath = openFileDialog.FileName;
+                    openFileDialog.Dispose();
+                    clearVars(true);
+                    pssg = PssgFile.Open(File.Open(filePath, FileMode.Open, FileAccess.Read));
+                    setupEditor(MainTabs.Auto);
                 }
                 catch (Exception excp)
                 {
@@ -147,87 +147,37 @@ namespace EgoPssgEditor
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                //tag();
+                tag();
                 saveFileDialog.Dispose();
-                FileStream fileStream = File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-                if (type == 0)
+                try
                 {
-                    pssg.Save(fileStream); // Auto
-                }
-                else if (type == 1)
-                {
-                    pssg.WritePssg(fileStream, false); // Pssg
-                }
-                else if (type == 2)
-                {
-                    // Compressed
-                    using (MemoryStream memory = new MemoryStream())
+                    FileStream fileStream = File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+                    if (type == 0)
                     {
-                        pssg.WritePssg(memory, false);
-                        using (GZipStream gzip = new GZipStream(fileStream, CompressionMode.Compress))
+                        pssg.Save(fileStream); // Auto
+                    }
+                    else if (type == 1)
+                    {
+                        pssg.WritePssg(fileStream, false); // Pssg
+                    }
+                    else if (type == 2)
+                    {
+                        // Compressed
+                        using (MemoryStream memory = new MemoryStream())
                         {
-                            gzip.Write(memory.ToArray(), 0, (int)memory.Length);
+                            pssg.WritePssg(memory, false);
+                            using (GZipStream gzip = new GZipStream(fileStream, CompressionMode.Compress))
+                            {
+                                gzip.Write(memory.ToArray(), 0, (int)memory.Length);
+                            }
                         }
                     }
-                }
-                else
-                {
-                    pssg.WriteXml(fileStream); // Xml
-                }
-                filePath = saveFileDialog.FileName;
-                try
-                {
+                    else
+                    {
+                        pssg.WriteXml(fileStream); // Xml
+                    }
+                    filePath = saveFileDialog.FileName;
                     this.Text = "Ego PSSG Editor - " + Path.GetFileName(filePath);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("The program could not save this file! The error is displayed below:" + Environment.NewLine + Environment.NewLine + ex.Message, "Could Not Save", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-        private void importAsXmlToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            openFileDialog.FilterIndex = 3;
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                openFileDialog.FileName = Path.GetFileNameWithoutExtension(filePath);
-                openFileDialog.InitialDirectory = Path.GetDirectoryName(filePath);
-            }
-
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                filePath = openFileDialog.FileName;
-                openFileDialog.Dispose();
-                clearVars(true);
-                pssg = PssgFile.ReadXml(File.Open(filePath, FileMode.Open, FileAccess.Read));
-                setupEditor(MainTabs.Auto);
-                try
-                {
-                }
-                catch (Exception excp)
-                {
-                    // Fail
-                    this.Text = "Ego PSSG Editor";
-                    MessageBox.Show("The program could not open this file!" + Environment.NewLine + Environment.NewLine + excp.Message, "Could Not Open", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-        private void exportAsXmlToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (pssg == null)
-            {
-                return;
-            }
-            saveFileDialog.FilterIndex = 3;
-            saveFileDialog.FileName = Path.GetFileNameWithoutExtension(filePath);
-            saveFileDialog.InitialDirectory = Path.GetDirectoryName(filePath);
-
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                try
-                {
-                    saveFileDialog.Dispose();
-                    pssg.WriteXml(File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read));
                 }
                 catch (Exception ex)
                 {
@@ -252,21 +202,18 @@ namespace EgoPssgEditor
         private void tag()
         {
             PssgNode node;
-            if (pssg.rootNode == null)
+            if (pssg.RootNode == null)
             {
                 node = new PssgNode("PSSGDATABASE", pssg, null);
-                pssg.rootNode = node;
+                pssg.RootNode = node;
+                setupEditor(MainTabs.All);
             }
             else
             {
-                node = pssg.rootNode;
+                node = pssg.RootNode;
             }
 
-            PssgAttribute attribute = node.AddAttribute("creatorApplication", "RyderPSSGEditor");
-            if (attribute == null)
-            {
-                node.attributes["creatorApplication"].Value = "RyderPSSGEditor";
-            }
+            PssgAttribute attribute = node.AddAttribute("creatorApplication", "EgoPSSGEditor 10.0");
         }
         private void clearVars(bool clearPSSG)
         {
@@ -303,7 +250,7 @@ namespace EgoPssgEditor
             // BackEnd Tab
             mainTabControl.BringToFront();
 
-            this.Text = "Ryder PSSG Editor";
+            this.Text = "Ego PSSG Editor";
             if (clearPSSG == true)
             {
                 pssg = null;
@@ -313,9 +260,9 @@ namespace EgoPssgEditor
         {
             dataGridView.Columns.Add("valueColumn", "Value");
             dataGridView.Columns[0].SortMode = DataGridViewColumnSortMode.NotSortable;
-            if (pssg.rootNode != null)
+            if (pssg.RootNode != null)
             {
-                treeView.Nodes.Add(pssg.CreateTreeViewNode(pssg.rootNode));
+                treeView.Nodes.Add(pssg.CreateTreeViewNode(pssg.RootNode));
                 pssg.CreateSpecificTreeViewNode(textureTreeView, "TEXTURE");
                 pssg.CreateSpecificTreeViewNode(cubeMapTreeView, "CUBEMAPTEXTURE");
             }
@@ -330,7 +277,7 @@ namespace EgoPssgEditor
                 mainTabControl.SelectedTab = mainTabControl.TabPages["cubeMapTabPage"];
                 mainTabControl.SelectedTab = mainTabControl.TabPages["texturesTabPage"];
             }
-            this.Text = "Ryder PSSG Editor - " + Path.GetFileName(filePath);
+            this.Text = "Ego PSSG Editor - " + Path.GetFileName(filePath);
         }
         public enum MainTabs
         {
@@ -353,7 +300,7 @@ namespace EgoPssgEditor
             PssgNode node = ((PssgNode)treeView.SelectedNode.Tag);
             if (node.HasAttribute("id") == true)
             {
-                idTextBox.Text = node.attributes["id"].Value.ToString();
+                idTextBox.Text = node.Attributes["id"].Value.ToString();
             }
             createView(node);
         }
@@ -364,7 +311,7 @@ namespace EgoPssgEditor
 
             if (e.Control && e.Shift && e.KeyCode == Keys.A)
             {
-                if (pssg.rootNode != null && treeView.SelectedNode == null)
+                if (pssg.RootNode != null && treeView.SelectedNode == null)
                     return;
                 //allTvAddNode();
             }
@@ -426,7 +373,7 @@ namespace EgoPssgEditor
                 {
                     removeAttributeToolStripMenuItem.Enabled = true;
                 }
-                if (((PssgNode)treeView.SelectedNode.Tag).subNodes.Count > 0)
+                if (((PssgNode)treeView.SelectedNode.Tag).ChildNodes.Count > 0)
                 {
                     exportNodeDataToolStripMenuItem.Enabled = false;
                     importNodeDataToolStripMenuItem.Enabled = false;
@@ -444,7 +391,7 @@ namespace EgoPssgEditor
             dataGridView.Rows.Clear();
             dataGridView.TopLeftHeaderCell.Value = node.Name;
             int i = 0;
-            foreach (PssgAttribute pair in node.attributes)
+            foreach (PssgAttribute pair in node.Attributes)
             {
                 dataGridView.Rows.Add(pair.Value);
                 dataGridView.Rows[i].HeaderCell.Value = pair.Name;
@@ -458,7 +405,7 @@ namespace EgoPssgEditor
             {
                 richTextBox1.Text = node.ToString();//EndianBitConverter.ToString(node.data);
                 richTextBox1.Visible = true;
-                if (node.attributes.Count == 0)
+                if (node.Attributes.Count == 0)
                 {
                     richTextBox1.Dock = DockStyle.Fill;
                     richTextBox1.BringToFront();
@@ -479,7 +426,7 @@ namespace EgoPssgEditor
         {
             PssgNode node = ((PssgNode)dataGridView.Tag);
             string attrName = (string)dataGridView.Rows[e.RowIndex].HeaderCell.Value;
-            PssgAttribute attr = node.attributes[(string)dataGridView.Rows[e.RowIndex].HeaderCell.Value];
+            PssgAttribute attr = node.Attributes[(string)dataGridView.Rows[e.RowIndex].HeaderCell.Value];
             if (attr.Value == dataGridView.Rows[e.RowIndex].Cells[0].Value)
             {
                 return;
@@ -579,7 +526,7 @@ namespace EgoPssgEditor
                         }
                         else
                         {
-                            node.File.rootNode = newNode;
+                            node.File.RootNode = newNode;
                         }
                     }
 
@@ -666,16 +613,16 @@ namespace EgoPssgEditor
         }
         private void allTvAddNode()
         {
-            PssgNode parentNode = pssg.rootNode == null ? null : ((PssgNode)treeView.SelectedNode.Tag);
+            PssgNode parentNode = pssg.RootNode == null ? null : ((PssgNode)treeView.SelectedNode.Tag);
             using (AddBox aBox = new AddBox(pssg, 0))
             {
                 if (aBox.ShowDialog() == DialogResult.OK)
                 {
                     PssgNode newNode;
-                    if (pssg.rootNode == null)
+                    if (pssg.RootNode == null)
                     {
                         newNode = new PssgNode(aBox.NodeName, pssg, null);
-                        pssg.rootNode = newNode;
+                        pssg.RootNode = newNode;
                     }
                     else
                     {
@@ -703,7 +650,7 @@ namespace EgoPssgEditor
             }
             else
             {
-                node.File.rootNode = null;
+                node.File.RootNode = null;
             }
             treeView.SelectedNode.Remove();
         }
@@ -824,7 +771,7 @@ namespace EgoPssgEditor
                 // Copy and Edit Name
                 PssgNode nodeToCopy = (PssgNode)textureTreeView.SelectedNode.Tag;
                 PssgNode newTexture = new PssgNode(nodeToCopy);
-                newTexture.attributes["id"].Value = ATForm.TName;
+                newTexture.Attributes["id"].Value = ATForm.TName;
                 // Add to Library
                 if (nodeToCopy.ParentNode != null)
                 {
@@ -866,7 +813,7 @@ namespace EgoPssgEditor
             SaveFileDialog dialog = new SaveFileDialog();
             dialog.Filter = "Dds files|*.dds|All files|*.*";
             dialog.Title = "Select the dds save location and file name";
-            dialog.FileName = node.attributes["id"].ToString() + ".dds";
+            dialog.FileName = node.Attributes["id"].ToString() + ".dds";
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -892,7 +839,7 @@ namespace EgoPssgEditor
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "Dds files|*.dds|All files|*.*";
             dialog.Title = "Select a dds file";
-            dialog.FileName = node.attributes["id"].ToString() + ".dds";
+            dialog.FileName = node.Attributes["id"].ToString() + ".dds";
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -1065,7 +1012,7 @@ namespace EgoPssgEditor
             SaveFileDialog dialog = new SaveFileDialog();
             dialog.Filter = "DDS files|*.dds|All files|*.*";
             dialog.Title = "Select the dds save location and file name";
-            dialog.FileName = node.attributes["id"].ToString() + ".dds";
+            dialog.FileName = node.Attributes["id"].ToString() + ".dds";
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -1091,7 +1038,7 @@ namespace EgoPssgEditor
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "DDS files|*.dds|All files|*.*";
             dialog.Title = "Select a cubemap dds file";
-            dialog.FileName = node.attributes["id"].ToString() + ".dds";
+            dialog.FileName = node.Attributes["id"].ToString() + ".dds";
             dialog.Multiselect = true;
             if (dialog.ShowDialog() == DialogResult.OK)
             {

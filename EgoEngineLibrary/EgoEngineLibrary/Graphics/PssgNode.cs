@@ -13,8 +13,6 @@
         // id, size, and attributeSize are only used during Reading/Writing
         private int size;
         private int attributeSize;
-        public PssgAttributeCollection attributes;
-        public PssgNodeCollection subNodes;
         private object data;
 
         public int Id
@@ -24,6 +22,16 @@
         public string Name
         {
             get { return NodeInfo.Name; }
+        }
+        public PssgAttributeCollection Attributes
+        {
+            get;
+            set;
+        }
+        public PssgNodeCollection ChildNodes
+        {
+            get;
+            set;
         }
         public object Value
         {
@@ -48,7 +56,7 @@
         {
             get
             {
-                if (this.subNodes.Count == 0)
+                if (this.ChildNodes.Count == 0)
                 {
                     if (ValueType == typeof(Single[]))
                     {
@@ -68,9 +76,22 @@
             }
         }
 
-        public PssgFile File;
-        public PssgNode ParentNode;
-        public TreeNode TreeNode;
+        public PssgFile File
+        {
+            get;
+            set;
+        }
+        public PssgNode ParentNode
+        {
+            get;
+            set;
+        }
+        public TreeNode TreeNode
+        {
+            get;
+            set;
+        }
+        // NodeInfo should never be null
         public PssgSchema.Node NodeInfo
         {
             get;
@@ -95,12 +116,12 @@
                             "Get an older version of the program if you wish to take out its contents, but, put it back together using this program and a non-modded version of the pssg file.");
             }
             // Each attr is at least 8 bytes (id + size), so take a conservative guess
-            this.attributes = new PssgAttributeCollection();
+            this.Attributes = new PssgAttributeCollection();
             PssgAttribute attr;
             while (reader.BaseStream.Position < attributeEnd)
             {
                 attr = new PssgAttribute(reader, file, this);
-                this.attributes.Add(attr);
+                this.Attributes.Add(attr);
             }
 
             bool isDataNode = false;
@@ -158,18 +179,18 @@
             if (isDataNode)
             {
                 this.data = reader.ReadNodeValue(GetValueType(), (int)(end - reader.BaseStream.Position));
-                this.subNodes = new PssgNodeCollection();
+                this.ChildNodes = new PssgNodeCollection();
                 //data = reader.ReadBytes((int)(end - reader.BaseStream.Position));
             }
             else
             {
                 this.data = new byte[0];
                 // Each node at least 12 bytes (id + size + arg size)
-                this.subNodes = new PssgNodeCollection((int)(end - reader.BaseStream.Position) / 12);
+                this.ChildNodes = new PssgNodeCollection((int)(end - reader.BaseStream.Position) / 12);
                 int nodeCount = 0;
                 while (reader.BaseStream.Position < end)
                 {
-                    this.subNodes.Add(new PssgNode(reader, file, this, useDataNodeCheck));
+                    this.ChildNodes.Add(new PssgNode(reader, file, this, useDataNodeCheck));
                     nodeCount++;
                 }
             }
@@ -181,28 +202,28 @@
             this.ParentNode = node;
             this.NodeInfo = PssgSchema.AddNode(elem.Name.LocalName);// PssgSchema.GetNode(elem.Name.LocalName);
 
-            this.attributes = new PssgAttributeCollection();
+            this.Attributes = new PssgAttributeCollection();
             PssgAttribute attr;
             foreach (XAttribute xAttr in elem.Attributes())
             {
                 attr = new PssgAttribute(xAttr, file, this);
-                this.attributes.Add(attr);
+                this.Attributes.Add(attr);
             }
 
             // Add data, and sub nodes code here
             if (elem.FirstNode != null && elem.FirstNode is XText)
             {
                 this.data = this.FromString(elem.Value);
-                this.subNodes = new PssgNodeCollection();
+                this.ChildNodes = new PssgNodeCollection();
             }
             else
             {
                 this.data = new byte[0];
-                this.subNodes = new PssgNodeCollection(elem.Elements().Count());
+                this.ChildNodes = new PssgNodeCollection(elem.Elements().Count());
                 int nodeCount = 0;
                 foreach (XElement subElem in elem.Elements())
                 {
-                    this.subNodes.Add(new PssgNode(subElem, file, this));
+                    this.ChildNodes.Add(new PssgNode(subElem, file, this));
                     ++nodeCount;
                 }
             }
@@ -216,29 +237,29 @@
             this.NodeInfo = nodeToCopy.NodeInfo;
             this.size = nodeToCopy.size;
             this.attributeSize = nodeToCopy.attributeSize;
-            this.attributes = new PssgAttributeCollection();
+            this.Attributes = new PssgAttributeCollection();
             PssgAttribute attr;
-            foreach (PssgAttribute attrToCopy in nodeToCopy.attributes)
+            foreach (PssgAttribute attrToCopy in nodeToCopy.Attributes)
             {
                 attr = new PssgAttribute(attrToCopy);
-                this.attributes.Add(attr);
+                this.Attributes.Add(attr);
             }
 
 
             if (nodeToCopy.IsDataNode)
             {
                 this.data = nodeToCopy.data;
-                this.subNodes = new PssgNodeCollection();
+                this.ChildNodes = new PssgNodeCollection();
             }
             else
             {
                 this.data = new byte[0];
                 // Each node at least 12 bytes (id + size + arg size)
-                this.subNodes = new PssgNodeCollection(nodeToCopy.subNodes.Count);
+                this.ChildNodes = new PssgNodeCollection(nodeToCopy.ChildNodes.Count);
                 int nodeCount = 0;
-                foreach (PssgNode subNodeToCopy in nodeToCopy.subNodes)
+                foreach (PssgNode subNodeToCopy in nodeToCopy.ChildNodes)
                 {
-                    this.subNodes.Add(new PssgNode(subNodeToCopy));
+                    this.ChildNodes.Add(new PssgNode(subNodeToCopy));
                     nodeCount++;
                 }
             }
@@ -248,9 +269,9 @@
             this.File = file;
             this.ParentNode = node;
             this.NodeInfo = PssgSchema.AddNode(name);
-            this.attributes = new PssgAttributeCollection();
+            this.Attributes = new PssgAttributeCollection();
             this.data = new byte[0];
-            this.subNodes = new PssgNodeCollection();
+            this.ChildNodes = new PssgNodeCollection();
         }
 
         private Type GetValueType()
@@ -267,12 +288,12 @@
                 string linkAttrName;
                 if (sNode.LinkAttributeName[0] == '^')
                 {
-                    attrs = this.ParentNode.attributes;
+                    attrs = this.ParentNode.Attributes;
                     linkAttrName = sNode.LinkAttributeName.Substring(1);
                 }
                 else
                 {
-                    attrs = this.attributes;
+                    attrs = this.Attributes;
                     linkAttrName = sNode.LinkAttributeName;
                 }
 
@@ -299,9 +320,9 @@
             writer.Write(this.Id);
             writer.Write(size);
             writer.Write(attributeSize);
-            if (attributes != null)
+            if (Attributes != null)
             {
-                foreach (PssgAttribute attr in attributes)
+                foreach (PssgAttribute attr in Attributes)
                 {
                     attr.Write(writer);
                 }
@@ -312,7 +333,7 @@
             }
             else
             {
-                foreach (PssgNode node in subNodes)
+                foreach (PssgNode node in ChildNodes)
                 {
                     node.Write(writer);
                 }
@@ -322,9 +343,9 @@
         {
             XElement pNode = new XElement(Name);
 
-            if (attributes != null)
+            if (Attributes != null)
             {
-                foreach (PssgAttribute attr in attributes)
+                foreach (PssgAttribute attr in Attributes)
                 {
                     pNode.Add(new XAttribute(attr.Name, attr.ToString()));
                 }
@@ -337,7 +358,7 @@
             }
             else
             {
-                foreach (PssgNode node in subNodes)
+                foreach (PssgNode node in ChildNodes)
                 {
                     node.WriteXml(pNode);
                 }
@@ -354,17 +375,17 @@
             }
 
             //this.id = sNode.Id;
-            if (attributes != null)
+            if (Attributes != null)
             {
-                foreach (PssgAttribute attr in attributes)
+                foreach (PssgAttribute attr in Attributes)
                 {
                     attr.UpdateId(ref attributeNameCount);
                 }
             }
 
-            if (subNodes != null)
+            if (ChildNodes != null)
             {
-                foreach (PssgNode node in subNodes)
+                foreach (PssgNode node in ChildNodes)
                 {
                     node.UpdateId(ref nodeNameCount, ref attributeNameCount);
                 }
@@ -373,9 +394,9 @@
         public void UpdateSize()
         {
             attributeSize = 0;
-            if (attributes != null)
+            if (Attributes != null)
             {
-                foreach (PssgAttribute attr in attributes)
+                foreach (PssgAttribute attr in Attributes)
                 {
                     attr.UpdateSize();
                     attributeSize += 8 + attr.Size;
@@ -400,7 +421,7 @@
             }
             else
             {
-                foreach (PssgNode node in subNodes)
+                foreach (PssgNode node in ChildNodes)
                 {
                     node.UpdateSize();
                     size += 8 + node.size;
@@ -425,14 +446,14 @@
                 return null;
             }
 
-            if (this.subNodes == null)
+            if (this.ChildNodes == null)
             {
-                this.subNodes = new PssgNodeCollection();
+                this.ChildNodes = new PssgNodeCollection();
             }
 
             childNode.File = this.File;
             childNode.ParentNode = this;
-            this.subNodes.Add(childNode);
+            this.ChildNodes.Add(childNode);
             childNode.NodeInfo = PssgSchema.AddNode(childNode);
 
             return childNode;
@@ -441,22 +462,22 @@
         {
             newChildNode.File = this.File;
             newChildNode.ParentNode = this;
-            PssgNode node = this.subNodes.Set(childNode, newChildNode);
+            PssgNode node = this.ChildNodes.Set(childNode, newChildNode);
             if (node != null) node.NodeInfo = PssgSchema.AddNode(node);
             return node;
         }
         public void RemoveChild(PssgNode childNode)
         {
-            this.subNodes.Remove(childNode);
+            this.ChildNodes.Remove(childNode);
             childNode.ParentNode = null;
             childNode.File = null;
         }
 
         public PssgAttribute AddAttribute(string attributeName, object data)
         {
-            if (this.attributes == null)
+            if (this.Attributes == null)
             {
-                this.attributes = new PssgAttributeCollection();
+                this.Attributes = new PssgAttributeCollection();
             }
             else if (this.HasAttribute(attributeName))
             {
@@ -465,13 +486,13 @@
             }
 
             PssgAttribute newAttr = new PssgAttribute(PssgSchema.AddAttribute(this.Name, attributeName, data.GetType()), data, this.File, this);
-            this.attributes.Add(newAttr);
+            this.Attributes.Add(newAttr);
 
             return newAttr;
         }
         public void RemoveAttribute(string attributeName)
         {
-            this.attributes.Remove(this.GetAttribute(attributeName));
+            this.Attributes.Remove(this.GetAttribute(attributeName));
         }
 
         public List<PssgNode> FindNodes(string nodeName, string attributeName = null, string attributeValue = null)
@@ -496,7 +517,7 @@
                 }
                 else if (attributeValue != null)
                 {
-                    foreach (PssgAttribute pair in attributes)
+                    foreach (PssgAttribute pair in Attributes)
                     {
                         if (pair.ToString() == attributeValue)
                         {
@@ -510,9 +531,9 @@
                     ret.Add(this);
                 }
             }
-            if (subNodes != null)
+            if (ChildNodes != null)
             {
-                foreach (PssgNode subNode in subNodes)
+                foreach (PssgNode subNode in ChildNodes)
                 {
                     ret.AddRange(subNode.FindNodes(nodeName, attributeName, attributeValue));
                 }
@@ -524,16 +545,9 @@
         {
             get
             {
-                return this.subNodes[index];
+                return this.ChildNodes[index];
             }
         }
-        //public PssgNode this[string nodeName]
-        //{
-        //    get
-        //    {
-        //        return this.subNodes[nodeName];
-        //    }
-        //}
 
         /// <summary>
         /// Gets the node attribute associated with the specified attribute name.
@@ -541,7 +555,7 @@
         /// <param name="attributeName">The name of the attribute to get.</param>
         public PssgAttribute GetAttribute(string attributeName)
         {
-            return this.attributes[attributeName];
+            return this.Attributes[attributeName];
         }
         /// <summary>
         /// Determines whether the current node has an attribute with the specified name.
@@ -549,19 +563,19 @@
         /// <param name="attributeName">The name of the attribute to find.</param>
         public bool HasAttribute(string attributeName)
         {
-            return this.attributes[attributeName] != null;
+            return this.Attributes[attributeName] != null;
         }
         public bool HasAttributes
         {
             get
             {
-                if (this.attributes == null)
+                if (this.Attributes == null)
                 {
                     return false;
                 }
                 else
                 {
-                    return this.attributes.Count > 0;
+                    return this.Attributes.Count > 0;
                 }
             }
         }

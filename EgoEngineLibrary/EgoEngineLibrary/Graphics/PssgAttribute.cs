@@ -97,7 +97,11 @@
         }
 
         private PssgFile file;
-        public PssgNode ParentNode;
+        public PssgNode ParentNode
+        {
+            get;
+            set;
+        }
         public PssgSchema.Attribute AttributeInfo
         {
             get;

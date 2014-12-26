@@ -23,7 +23,11 @@
             get;
             set;
         }
-        public PssgNode rootNode;
+        public PssgNode RootNode
+        {
+            get;
+            set;
+        }
 
         public PssgFile(PssgFileType fileType)
         {
@@ -98,11 +102,11 @@
                 PssgSchema.LoadFromPssg(reader);
                 long positionAfterInfo = reader.BaseStream.Position;
 
-                file.rootNode = new PssgNode(reader, file, null, true);
+                file.RootNode = new PssgNode(reader, file, null, true);
                 if (reader.BaseStream.Position < reader.BaseStream.Length)
                 {
                     reader.BaseStream.Position = positionAfterInfo;
-                    file.rootNode = new PssgNode(reader, file, null, false);
+                    file.RootNode = new PssgNode(reader, file, null, false);
                     if (reader.BaseStream.Position < reader.BaseStream.Length)
                     {
                         throw new Exception("This file is improperly saved and not supported by this version of the PSSG editor." + Environment.NewLine + Environment.NewLine +
@@ -120,7 +124,7 @@
 
             //PssgSchema.CreatePssgInfo(out file.nodeInfo, out file.attributeInfo);
 
-            file.rootNode = new PssgNode((XElement)((XElement)xDoc.FirstNode).FirstNode, file, null);
+            file.RootNode = new PssgNode((XElement)((XElement)xDoc.FirstNode).FirstNode, file, null);
 
             fileStream.Close();
             return file;
@@ -156,18 +160,18 @@
                 writer.Write(Encoding.ASCII.GetBytes("PSSG"));
                 writer.Write(0); // Length, filled in later
 
-                if (rootNode != null)
+                if (RootNode != null)
                 {
                     int nodeNameCount = 0;
                     int attributeNameCount = 0;
                     PssgSchema.ClearSchemaIds(); // make all ids -1
-                    rootNode.UpdateId(ref nodeNameCount, ref attributeNameCount);
+                    RootNode.UpdateId(ref nodeNameCount, ref attributeNameCount);
                     writer.Write(attributeNameCount);
                     writer.Write(nodeNameCount);
                     PssgSchema.SaveToPssg(writer); // Update Ids again, to make sequential
 
-                    rootNode.UpdateSize();
-                    rootNode.Write(writer);
+                    RootNode.UpdateSize();
+                    RootNode.Write(writer);
                 }
                 writer.BaseStream.Position = 4;
                 writer.Write((int)writer.BaseStream.Length - 8);
@@ -198,7 +202,7 @@
             settings.CloseOutput = true;
 
             XElement pssg = (XElement)xDoc.FirstNode;
-            rootNode.WriteXml(pssg);
+            RootNode.WriteXml(pssg);
 
             using (XmlWriter writer = XmlWriter.Create(fileStream, settings))
             {
@@ -213,14 +217,14 @@
             pssg.DocumentElement.AppendChild(pssg.CreateAttribute("version"));
             pssg.DocumentElement.Attributes["version"].InnerText = "1.5.0";
 
-            if (rootNode.HasAttributes)
+            if (RootNode.HasAttributes)
             {
                 XmlElement asset = pssg.CreateElement("asset");
-                if (rootNode.HasAttribute("creator"))
+                if (RootNode.HasAttribute("creator"))
                 {
                     asset.AppendChild(pssg.CreateElement("contributor"));
                     asset.LastChild.AppendChild(pssg.CreateElement("author"));
-                    asset.LastChild.LastChild.InnerText = rootNode.GetAttribute("creator").ToString();
+                    asset.LastChild.LastChild.InnerText = RootNode.GetAttribute("creator").ToString();
                 }
                 // TODO: unit meter 1, created, up axis, scale?, creatorMachine
 
@@ -233,9 +237,9 @@
             TreeNode treeNode = new TreeNode();
             treeNode.Text = node.Name;
             treeNode.Tag = node;
-            if (node.subNodes != null)
+            if (node.ChildNodes != null)
             {
-                foreach (PssgNode subNode in node.subNodes)
+                foreach (PssgNode subNode in node.ChildNodes)
                 {
                     treeNode.Nodes.Add(CreateTreeViewNode(subNode));
                 }
@@ -265,7 +269,7 @@
             TreeNode treeNode = new TreeNode();
             foreach (PssgNode texture in textureNodes)
             {
-                treeNode.Text = texture.attributes["id"].ToString();
+                treeNode.Text = texture.Attributes["id"].ToString();
                 treeNode.Tag = texture;
                 tv.Nodes.Add(treeNode);
                 treeNode = new TreeNode();
@@ -274,11 +278,11 @@
 
         public List<PssgNode> FindNodes(string name, string attributeName = null, string attributeValue = null)
         {
-            if (rootNode == null)
+            if (RootNode == null)
             {
                 return new List<PssgNode>();
             }
-            return rootNode.FindNodes(name, attributeName, attributeValue);
+            return RootNode.FindNodes(name, attributeName, attributeValue);
         }
 
         public void MoveNode(PssgNode source, PssgNode target)

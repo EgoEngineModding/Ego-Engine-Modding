@@ -402,6 +402,8 @@
             }
             else
             {
+                PssgSchema.SetNodeDataTypeIfNull(entries[node.Name], node.DataType);
+
                 foreach (Attribute attrEntry in node.Attributes)
                 {
                     bool add = true;
@@ -410,6 +412,7 @@
                         if (entries[node.Name].Attributes[i].Name == attrEntry.Name)
                         {
                             add = false;
+                            PssgSchema.SetAttributeDataTypeIfNull(entries[node.Name].Attributes[i], attrEntry.DataType);
                             break;
                         }
                     }
@@ -421,7 +424,8 @@
                 }
             }
         }
-        public static Attribute AddAttribute(string nodeName, string attributeName, Type attrType, bool overwrite = false)
+
+        public static Attribute AddAttribute(string nodeName, string attributeName, Type attrType)
         {
             Node node = PssgSchema.AddNode(nodeName);
 
@@ -432,12 +436,9 @@
                 {
                     if (node.Attributes[i].Name == attributeName)
                     {
-                        // Allow overwrite if current data type is null
                         add = false;
-                        if (overwrite || node.Attributes[i].DataType == typeof(System.Exception))
-                        {
-                            node.Attributes[i].DataType = attrType;
-                        }
+                        // Allow overwrite if current data type is null
+                        PssgSchema.SetAttributeDataTypeIfNull(node.Attributes[i], attrType);
                         return node.Attributes[i];
                     }
                 }
@@ -484,6 +485,8 @@
                 if (node.Attributes[i].Name == attribute.Name)
                 {
                     add = false;
+                    // Allow overwrite if current data type is null
+                    PssgSchema.SetAttributeDataTypeIfNull(node.Attributes[i], attribute.DataType);
                     break;
                 }
             }
@@ -523,19 +526,20 @@
             Node sNode = new Node(node.Name);
             sNode.DataType = node.ValueType;
 
-            foreach (PssgAttribute attr in node.attributes)
+            foreach (PssgAttribute attr in node.Attributes)
             {
                 Attribute sAttr = new Attribute(attr.Name, attr.ValueType);
                 sNode.Attributes.Add(sAttr);
             }
 
+            PssgSchema.AddNode(sNode);
             return sNode;
         }
         public static PssgSchema.Node RenameNode(PssgNode pssgNode, string nodeName)
         {
             PssgSchema.Node node = PssgSchema.AddNode(nodeName);
 
-            foreach (PssgAttribute attr in pssgNode.attributes)
+            foreach (PssgAttribute attr in pssgNode.Attributes)
             {
                 PssgSchema.AddAttribute(node.Name, attr.AttributeInfo.Name, attr.AttributeInfo.DataType);
             }
