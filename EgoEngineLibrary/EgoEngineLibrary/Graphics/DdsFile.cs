@@ -27,6 +27,12 @@
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes(((string)node.Attributes["texelFormat"].Value).ToUpper()), 0);
                     break;
+                case "dxt1_srgb":
+                    header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.Attributes["width"].Value) + 3) / 4) * 8);
+                    header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+                    header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT1"), 0);
+                    break;
                 case "dxt2":
                 case "dxt3":
                 case "dxt4":
@@ -35,6 +41,12 @@
                     header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.Attributes["width"].Value) + 3) / 4) * 16);
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes(((string)node.Attributes["texelFormat"].Value).ToUpper()), 0);
+                    break;
+                case "dxt5_srgb":
+                    header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.Attributes["width"].Value) + 3) / 4) * 16);
+                    header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+                    header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT5"), 0);
                     break;
                 case "ui8x4":
                     header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;

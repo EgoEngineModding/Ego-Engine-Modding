@@ -22,6 +22,8 @@ namespace EgoPssgEditor
         // 2.0 - Support for texelformats "ui8x4" and "u8", Auto-Update "All Sections", Export/Import Data Nodes, Add/Remove Attributes to Nodes, Hogs Less Resources, PSSG Backend, textures search bar
         // 2.0.1 - Fixed Tag Errors on Save, Improved Open/SaveFileDialog Usability, Cleaned Up Some Code, Reduced Size from Icon
         // 10.0 -- Use EgoEngineLibrary, Added Dirt support, MainMenus, Export/Import Xml, Schema System, Move Nodes, Supports Compressed Pssg
+        // 10.1 -- Added two texelTypes for Dirt Rally
+        // 10.2 -- Fixed bug when copying node a new node info was created even if the same name already existed
         string schemaPath = Application.StartupPath + "\\schema.xml";
         PssgFile pssg;
         string filePath = @"C:\";
@@ -213,7 +215,7 @@ namespace EgoPssgEditor
                 node = pssg.RootNode;
             }
 
-            PssgAttribute attribute = node.AddAttribute("creatorApplication", "EgoPSSGEditor 10.0");
+            PssgAttribute attribute = node.AddAttribute("creatorApplication", "EgoPSSGEditor 10.2");
         }
         private void clearVars(bool clearPSSG)
         {

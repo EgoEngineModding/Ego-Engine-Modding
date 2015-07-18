@@ -394,11 +394,12 @@
 
             return entries[nodeName];
         }
-        internal static void AddNode(Node node)
+        internal static Node AddNode(Node node)
         {
             if (!entries.ContainsKey(node.Name))
             {
                 entries.Add(node.Name, node);
+                return node;
             }
             else
             {
@@ -422,6 +423,8 @@
                         entries[node.Name].Attributes.Add(attrEntry);
                     }
                 }
+
+                return entries[node.Name];
             }
         }
 
@@ -532,8 +535,7 @@
                 sNode.Attributes.Add(sAttr);
             }
 
-            PssgSchema.AddNode(sNode);
-            return sNode;
+            return PssgSchema.AddNode(sNode);
         }
         public static PssgSchema.Node RenameNode(PssgNode pssgNode, string nodeName)
         {

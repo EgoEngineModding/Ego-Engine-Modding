@@ -242,6 +242,7 @@
             foreach (PssgAttribute attrToCopy in nodeToCopy.Attributes)
             {
                 attr = new PssgAttribute(attrToCopy);
+                attr.ParentNode = this;
                 this.Attributes.Add(attr);
             }
 
@@ -256,11 +257,11 @@
                 this.data = new byte[0];
                 // Each node at least 12 bytes (id + size + arg size)
                 this.ChildNodes = new PssgNodeCollection(nodeToCopy.ChildNodes.Count);
-                int nodeCount = 0;
                 foreach (PssgNode subNodeToCopy in nodeToCopy.ChildNodes)
                 {
-                    this.ChildNodes.Add(new PssgNode(subNodeToCopy));
-                    nodeCount++;
+                    PssgNode node = new PssgNode(subNodeToCopy);
+                    node.ParentNode = this;
+                    this.ChildNodes.Add(node);
                 }
             }
         }

@@ -13,6 +13,7 @@ namespace EgoJpkExtractor
     public partial class Form1 : Form
     {
         // TODO: Rewrite code in OOP format within EgoEngineLibrary (EEL)
+        // July2015 -- Added fix for Dirt 3 save thanks to Radek Dutkiewicz
         List<Entry> entries = new List<Entry>();
         Dictionary<string, int> entriesFill = new Dictionary<string, int>();
         byte[] header = new byte[20];
@@ -33,6 +34,7 @@ namespace EgoJpkExtractor
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            openFileDialog.FileName = Path.GetFileName(fileName);
             if (openFileDialog.ShowDialog() != DialogResult.Cancel)
             {
                 fileName = openFileDialog.FileName;
@@ -124,7 +126,7 @@ namespace EgoJpkExtractor
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            saveFileDialog.FileName = fileName;
+            saveFileDialog.FileName = Path.GetFileName(fileName);
             if (saveFileDialog.ShowDialog() != DialogResult.Cancel)
             {
                 WriteJPK(saveFileDialog.FileName);
@@ -168,9 +170,13 @@ namespace EgoJpkExtractor
                 {
                     if (entriesFill.ContainsKey(info.Name) == true)
                     {
-                        if (entriesFill[info.Name] != 0)
+                        if (entriesFill[info.Name] > 0)
                         {
                             b.Write(new byte[entriesFill[info.Name]]);
+                        }
+                        else if (entriesFill[info.Name] < 0)
+                        {
+                            b.Seek(entriesFill[info.Name], SeekOrigin.Current);
                         }
                     }
                     b.Write(info.File);

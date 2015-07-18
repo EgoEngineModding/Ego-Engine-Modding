@@ -18,6 +18,9 @@ namespace EgoBxmlConverter
             {
                 // Drag/Drop Single File
                 convert(args[0], Path.ChangeExtension(args[0], "C.xml"));
+
+                Console.Write("Press Any Key to Exit...");
+                Console.ReadKey(true);
             }
             else if (args.Length == 4 && args[0] == "-c" && Int32.TryParse(args[1], out conversionType))
             {
@@ -31,6 +34,9 @@ namespace EgoBxmlConverter
                 {
                     convert(args[i], Path.ChangeExtension(args[i], "C.xml"));
                 }
+
+                Console.Write("Press Any Key to Exit...");
+                Console.ReadKey(true);
             }
             else if (args.Length > 2 && args[0] == "-b" && Int32.TryParse(args[1], out conversionType))
             {
@@ -44,15 +50,13 @@ namespace EgoBxmlConverter
             {
                 Console.WriteLine("ERROR: Incorrect Arguments!");
             }
-            Console.Write("Press Any Key to Exit...");
-            Console.ReadKey(true);
         }
 
         private static void convert(string path, string path2, int conversionType = 0)
         {
             // Get ConvertType
-            XMLType convertType = XMLType.Text;
-            if (convertType > 0 && !IntToXmlType(conversionType, out convertType))
+            XMLType convertType = (XMLType)conversionType;
+            if (!Enum.IsDefined(typeof(XMLType), conversionType))
             {
                 Console.WriteLine("ERROR: Could not figure out the conversion type!");
                 return;
@@ -65,23 +69,26 @@ namespace EgoBxmlConverter
             // Make sure File Type and Conversion Type are different
             if (file.type == convertType)
             {
-                do
+                while (true)
                 {
                     Console.WriteLine("WARNING: Invalid conversion type entered because the file is already in this format!");
+                    Console.WriteLine("0 -- Text, 1 -- Bin Xml, 2 -- BXML Big, 3 -- BXML Little");
                     Console.WriteLine("Please enter the conversion type (excluding {0}), or type 'Exit' to quit: ", (int)file.type);
+
                     string cType = Console.ReadLine();
                     if (cType == "Exit")
                     {
                         return;
                     }
-                    if (Int32.TryParse(cType, out conversionType) && !IntToXmlType(conversionType, out convertType, (int)file.type))
+
+                    if (Int32.TryParse(cType, out conversionType) &&
+                        conversionType != (int)file.type &&
+                        Enum.IsDefined(typeof(XMLType), conversionType))
                     {
-                        // If changing the Convert Type failed, reset it to its default value because IntToXmlType function 
-                        // changed it to XmlType.Text
-                        convertType = file.type;
-                        //Console.WriteLine("{0}", convertType);
+                        convertType = (XMLType)conversionType;
+                        break;
                     }
-                } while (file.type == convertType);
+                }
             }
 
             // Convert
@@ -93,25 +100,6 @@ namespace EgoBxmlConverter
             catch (Exception ex)
             {
                 Console.WriteLine("ERROR: " + ex.Message);
-            }
-        }
-
-        private static bool IntToXmlType(int conversionType, out XMLType xmlType, int exclude = -1)
-        {
-            xmlType = XMLType.Text;
-            if (exclude == conversionType)
-            {
-                return false;
-            }
-            if (Enum.IsDefined(typeof(XMLType), conversionType))
-            {
-                // Even if the conversion type is not defined, Enum.ToObject does not throw an exception
-                xmlType = (XMLType)Enum.ToObject(typeof(XMLType), conversionType);
-                return true;
-            }
-            else
-            {
-                return false;
             }
         }
     }
