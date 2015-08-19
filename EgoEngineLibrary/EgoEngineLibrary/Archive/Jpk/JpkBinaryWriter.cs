@@ -1,4 +1,4 @@
-﻿namespace EgoEngineLibrary.Archive
+﻿namespace EgoEngineLibrary.Archive.Jpk
 {
     using MiscUtil.Conversion;
     using MiscUtil.IO;
@@ -28,6 +28,12 @@
             {
                 throw new Exception("The writer does not recognize this data type! (" + data.GetType() + ")");
             }
+        }
+        public new void Write(string str)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(str);
+            this.Write(data);
+            this.Write((byte)0x0);
         }
         public void WriteTerminatedString(string s, byte terminator)
         {

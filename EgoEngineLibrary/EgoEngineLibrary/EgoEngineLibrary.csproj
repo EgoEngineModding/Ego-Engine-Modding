@@ -51,9 +51,10 @@
     <Compile Include="Archive\ErpEntry.cs" />
     <Compile Include="Archive\ErpFile.cs" />
     <Compile Include="Archive\ErpResource.cs" />
-    <Compile Include="Archive\JpkBinaryReader.cs" />
-    <Compile Include="Archive\JpkBinaryWriter.cs" />
-    <Compile Include="Archive\JpkFile.cs" />
+    <Compile Include="Archive\Jpk\JpkBinaryReader.cs" />
+    <Compile Include="Archive\Jpk\JpkBinaryWriter.cs" />
+    <Compile Include="Archive\Jpk\JpkEntry.cs" />
+    <Compile Include="Archive\Jpk\JpkFile.cs" />
     <Compile Include="Data\DatabaseBinaryReader.cs" />
     <Compile Include="Data\DatabaseBinaryWriter.cs" />
     <Compile Include="Data\DatabaseFile.cs">

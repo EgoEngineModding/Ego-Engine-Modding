@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoCtfEditor", "..\ECE\EgoC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoDatabaseEditor", "..\EDE\EgoDatabaseEditor\EgoDatabaseEditor.csproj", "{C707EB7A-84D8-4167-9B7E-5B38525969F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoJpkExtractor", "..\EJE\EgoJpkExtractor\EgoJpkExtractor.csproj", "{F437FCE3-6708-4E82-9603-9C63316AA13A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoLngEditor", "..\ELE\EgoLngEditor\EgoLngEditor.csproj", "{77AB17BD-707A-4FA0-9D16-C0CDEE0D7939}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoTngEditor", "..\ETE\EgoTngEditor\EgoTngEditor.csproj", "{E921040B-99FF-4423-A18B-A69EF5F097DA}"
@@ -20,6 +18,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoPssgEditor", "..\EPE\EgoPssgEditor\EgoPssgEditor.csproj", "{1BCE5895-D6C0-48D6-B8D4-A3B59CFB4E49}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoErpArchiver", "..\EgoErpArchiver\EgoErpArchiver.csproj", "{806733B7-9C97-4D7F-A2FA-07855B2CC73F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoJpkArchiver", "..\EJA\EgoJpkArchiver\EgoJpkArchiver.csproj", "{F437FCE3-6708-4E82-9603-9C63316AA13A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,16 +61,6 @@ Global
 		{C707EB7A-84D8-4167-9B7E-5B38525969F8}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{C707EB7A-84D8-4167-9B7E-5B38525969F8}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{C707EB7A-84D8-4167-9B7E-5B38525969F8}.Release|x86.ActiveCfg = Release|Any CPU
-		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Debug|x86.ActiveCfg = Debug|x86
-		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Debug|x86.Build.0 = Debug|x86
-		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Release|Any CPU.ActiveCfg = Release|x86
-		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Release|Mixed Platforms.Build.0 = Release|x86
-		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Release|x86.ActiveCfg = Release|x86
-		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Release|x86.Build.0 = Release|x86
 		{77AB17BD-707A-4FA0-9D16-C0CDEE0D7939}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{77AB17BD-707A-4FA0-9D16-C0CDEE0D7939}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{77AB17BD-707A-4FA0-9D16-C0CDEE0D7939}.Debug|Mixed Platforms.Build.0 = Debug|x86
@@ -121,6 +111,16 @@ Global
 		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Release|x86.ActiveCfg = Release|Any CPU
+		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Debug|x86.ActiveCfg = Debug|x86
+		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Debug|x86.Build.0 = Debug|x86
+		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Release|Any CPU.ActiveCfg = Release|x86
+		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Release|Mixed Platforms.Build.0 = Release|x86
+		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Release|x86.ActiveCfg = Release|x86
+		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

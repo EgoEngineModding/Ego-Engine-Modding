@@ -1,18 +1,18 @@
-﻿using BrightIdeasSoftware;
-using EgoEngineLibrary.Archive;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace EgoErpArchiver
+﻿namespace EgoErpArchiver
 {
+    using BrightIdeasSoftware;
+    using EgoEngineLibrary.Archive;
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Data;
+    using System.Drawing;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using System.Windows.Forms;
+
     public partial class Form1 : Form
     {
         ErpFile file = new ErpFile();

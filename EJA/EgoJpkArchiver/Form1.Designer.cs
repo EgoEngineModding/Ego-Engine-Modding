@@ -28,51 +28,31 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.listView = new System.Windows.Forms.ListView();
-            this.nameColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.sizeColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.extractToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.entriesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.listView = new BrightIdeasSoftware.ObjectListView();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.listView)).BeginInit();
             this.SuspendLayout();
-            // 
-            // listView
-            // 
-            this.listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.nameColumnHeader,
-            this.sizeColumnHeader});
-            this.listView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listView.Location = new System.Drawing.Point(0, 24);
-            this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(312, 262);
-            this.listView.TabIndex = 0;
-            this.listView.UseCompatibleStateImageBehavior = false;
-            this.listView.View = System.Windows.Forms.View.Details;
-            // 
-            // nameColumnHeader
-            // 
-            this.nameColumnHeader.Text = "Name";
-            this.nameColumnHeader.Width = 160;
-            // 
-            // sizeColumnHeader
-            // 
-            this.sizeColumnHeader.Text = "Size";
             // 
             // menuStrip1
             // 
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.entriesToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(312, 24);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
+            this.menuStrip1.Size = new System.Drawing.Size(782, 28);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -80,73 +60,90 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem,
-            this.saveToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.extractToolStripMenuItem1,
-            this.importToolStripMenuItem});
+            this.saveToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(44, 24);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // openToolStripMenuItem
             // 
+            this.openToolStripMenuItem.Image = global::EgoJpkArchiver.Properties.Resources.folder;
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(179, 26);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
+            this.saveToolStripMenuItem.Image = global::EgoJpkArchiver.Properties.Resources.disk;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(179, 26);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
-            // toolStripSeparator1
+            // entriesToolStripMenuItem
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(144, 6);
+            this.entriesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.exportToolStripMenuItem,
+            this.importToolStripMenuItem1});
+            this.entriesToolStripMenuItem.Name = "entriesToolStripMenuItem";
+            this.entriesToolStripMenuItem.Size = new System.Drawing.Size(65, 24);
+            this.entriesToolStripMenuItem.Text = "Entries";
             // 
-            // extractToolStripMenuItem1
+            // exportToolStripMenuItem
             // 
-            this.extractToolStripMenuItem1.Name = "extractToolStripMenuItem1";
-            this.extractToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.extractToolStripMenuItem1.Size = new System.Drawing.Size(147, 22);
-            this.extractToolStripMenuItem1.Text = "Export";
-            this.extractToolStripMenuItem1.Click += new System.EventHandler(this.extractToolStripMenuItem1_Click);
+            this.exportToolStripMenuItem.Image = global::EgoJpkArchiver.Properties.Resources.lorry_delete;
+            this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
+            this.exportToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(183, 26);
+            this.exportToolStripMenuItem.Text = "Export";
+            this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
             // 
-            // importToolStripMenuItem
+            // importToolStripMenuItem1
             // 
-            this.importToolStripMenuItem.Name = "importToolStripMenuItem";
-            this.importToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.I)));
-            this.importToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
-            this.importToolStripMenuItem.Text = "Import";
-            this.importToolStripMenuItem.Click += new System.EventHandler(this.importToolStripMenuItem_Click);
+            this.importToolStripMenuItem1.Image = global::EgoJpkArchiver.Properties.Resources.lorry_add;
+            this.importToolStripMenuItem1.Name = "importToolStripMenuItem1";
+            this.importToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
+            this.importToolStripMenuItem1.Size = new System.Drawing.Size(183, 26);
+            this.importToolStripMenuItem1.Text = "Import";
+            this.importToolStripMenuItem1.Click += new System.EventHandler(this.importToolStripMenuItem_Click);
             // 
             // openFileDialog
             // 
             this.openFileDialog.FileName = "raceload.jpk";
-            this.openFileDialog.Filter = "JPK files|*.jpk|All files|*.*";
+            this.openFileDialog.Filter = "Jpk files|*.jpk|All files|*.*";
             // 
             // saveFileDialog
             // 
             this.saveFileDialog.FileName = "raceload.jpk";
-            this.saveFileDialog.Filter = "JPK files|*.jpk|All files|*.*";
+            this.saveFileDialog.Filter = "Jpk files|*.jpk|All files|*.*";
+            // 
+            // listView
+            // 
+            this.listView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView.Location = new System.Drawing.Point(0, 28);
+            this.listView.Name = "listView";
+            this.listView.Size = new System.Drawing.Size(782, 525);
+            this.listView.TabIndex = 2;
+            this.listView.UseCompatibleStateImageBehavior = false;
+            this.listView.View = System.Windows.Forms.View.Details;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(312, 286);
+            this.ClientSize = new System.Drawing.Size(782, 553);
             this.Controls.Add(this.listView);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Form1";
-            this.Text = "Ego JPK Extractor";
+            this.Text = "Ego JPK Archiver";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.listView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -154,19 +151,17 @@
 
         #endregion
 
-        private System.Windows.Forms.ListView listView;
-        private System.Windows.Forms.ColumnHeader nameColumnHeader;
-        private System.Windows.Forms.ColumnHeader sizeColumnHeader;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
-        private System.Windows.Forms.ToolStripMenuItem extractToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripMenuItem importToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog saveFileDialog;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
+        private BrightIdeasSoftware.ObjectListView listView;
+        private System.Windows.Forms.ToolStripMenuItem entriesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importToolStripMenuItem1;
     }
 }
 

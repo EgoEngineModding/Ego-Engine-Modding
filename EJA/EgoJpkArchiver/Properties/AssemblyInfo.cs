@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Ego JPK Extractor")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Ego JPK Archiver")]
+[assembly: AssemblyDescription("Open jpk files for Ego Engine games.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Petar Tasev")]
-[assembly: AssemblyProduct("Ego JPK Extractor")]
-[assembly: AssemblyCopyright("Copyright © Petar Tasev 2013")]
+[assembly: AssemblyProduct("Ego JPK Archiver")]
+[assembly: AssemblyCopyright("Copyright © Petar Tasev 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.0.2013.0527")]
-[assembly: AssemblyFileVersion("2.0.2013.0527")]
+[assembly: AssemblyVersion("2.0.2015.0819")]
+[assembly: AssemblyFileVersion("2.0.2015.0819")]
