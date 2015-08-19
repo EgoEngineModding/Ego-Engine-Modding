@@ -10,7 +10,7 @@
 
     public class DatabaseBinaryWriter : EndianBinaryWriter
     {
-        public DatabaseBinaryWriter(LittleEndianBitConverter bitConverter, Stream stream)
+        public DatabaseBinaryWriter(EndianBitConverter bitConverter, Stream stream)
             : base(bitConverter, stream)
         {
         }

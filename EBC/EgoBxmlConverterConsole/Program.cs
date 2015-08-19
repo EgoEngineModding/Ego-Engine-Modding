@@ -9,7 +9,7 @@ namespace EgoBxmlConverter
 {
     class Program
     {
-        // X.x -- Use EgoEngineLibrary, Remove GUI from Solution
+        // 4.1 -- Uses EgoEngineLibrary, Remove GUI from Solution, Fixed bug with batch conversion, Improved error text
         static void Main(string[] args)
         {
             int conversionType = 0;

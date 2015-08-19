@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Ego BXML Converter")]
-[assembly: AssemblyDescription("Converts all sorts of xml files for the EGO engine.")]
+[assembly: AssemblyTitle("EgoErpArchiver")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Petar Tasev")]
-[assembly: AssemblyProduct("Ego BXML Converter")]
-[assembly: AssemblyCopyright("Copyright © Petar Tasev 2015")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("EgoErpArchiver")]
+[assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("5e9dbffa-3187-4674-9989-0688ba065b2a")]
+[assembly: Guid("a9947e03-3f19-4296-97a7-4a58da75cf9b")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("4.1.2015.0805")]
-[assembly: AssemblyFileVersion("4.1.2015.0805")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

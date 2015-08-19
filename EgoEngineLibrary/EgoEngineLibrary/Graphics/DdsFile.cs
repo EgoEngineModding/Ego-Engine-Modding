@@ -21,15 +21,16 @@
             header.width = (uint)(node.Attributes["width"].Value);
             switch ((string)node.Attributes["texelFormat"].Value)
             {
+                    // gimp doesn't like pitch, so we'll go with linear size
                 case "dxt1":
                     header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.Attributes["width"].Value) + 3) / 4) * 8);
+                    header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value) / 2;
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes(((string)node.Attributes["texelFormat"].Value).ToUpper()), 0);
                     break;
                 case "dxt1_srgb":
                     header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.Attributes["width"].Value) + 3) / 4) * 8);
+                    header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value) / 2;
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT1"), 0);
                     break;
@@ -38,19 +39,19 @@
                 case "dxt4":
                 case "dxt5":
                     header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.Attributes["width"].Value) + 3) / 4) * 16);
+                    header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value);
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes(((string)node.Attributes["texelFormat"].Value).ToUpper()), 0);
                     break;
                 case "dxt5_srgb":
                     header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.Attributes["width"].Value) + 3) / 4) * 16);
+                    header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value);
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT5"), 0);
                     break;
                 case "ui8x4":
                     header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.Attributes["width"].Value) + 3) / 4) * 16); // is this right?
+                    header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value); // is this right?
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_ALPHAPIXELS | DdsPixelFormat.Flags.DDPF_RGB;
                     header.ddspf.fourCC = 0;
                     header.ddspf.rGBBitCount = 32;
@@ -61,7 +62,7 @@
                     break;
                 case "u8":
                     header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    header.pitchOrLinearSize = (uint)(Math.Max(1, (((uint)node.Attributes["width"].Value) + 3) / 4) * 16); // is this right?
+                    header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value); // is this right?
                     // Interchanging the commented values will both work, not sure which is better
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_LUMINANCE;
                     //header.ddspf.flags |= DDS_PIXELFORMAT.Flags.DDPF_ALPHA;

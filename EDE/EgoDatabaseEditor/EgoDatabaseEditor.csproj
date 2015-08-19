@@ -72,7 +72,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DgvFilterPopup">
-      <HintPath>.\DgvFilterPopup.dll</HintPath>
+      <HintPath>..\..\References\DgvFilterPopup.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Design" />

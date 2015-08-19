@@ -24,6 +24,7 @@ namespace EgoDatabaseEditor
         public Form1(string[] Args)
         {
             InitializeComponent();
+            tmppppToolStripMenuItem.Visible = false;
             this.Icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
 			dbFile = new DatabaseFile();
             // Load Schema List

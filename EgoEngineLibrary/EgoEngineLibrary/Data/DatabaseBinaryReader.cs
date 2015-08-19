@@ -10,7 +10,7 @@
 
     public class DatabaseBinaryReader : EndianBinaryReader
     {
-        public DatabaseBinaryReader(LittleEndianBitConverter bitConverter, Stream stream)
+        public DatabaseBinaryReader(EndianBitConverter bitConverter, Stream stream)
             : base(bitConverter, stream)
         {
         }

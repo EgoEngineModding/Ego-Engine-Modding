@@ -8,7 +8,6 @@
     using System.Text;
     using System.Xml;
 
-    // July2015 -- Fixed command line bug
     public class XmlBinaryReader : EndianBinaryReader
     {
         public XmlBinaryReader(EndianBitConverter bitConverter, System.IO.Stream stream)
