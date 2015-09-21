@@ -54,7 +54,7 @@
   <ItemGroup>
     <Reference Include="DgvFilterPopup, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\References\DgvFilterPopup.dll</HintPath>
+      <HintPath>..\..\References\DgvFilterPopup.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

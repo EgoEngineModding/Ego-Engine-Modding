@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Petar Tasev")]
 [assembly: AssemblyProduct("Ego Language Editor")]
-[assembly: AssemblyCopyright("Copyright © Petar Tasev 2013")]
+[assembly: AssemblyCopyright("Copyright © Petar Tasev 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.0.2013.0311")]
-[assembly: AssemblyFileVersion("3.0.2013.0311")]
+[assembly: AssemblyVersion("4.0.2015.0918")]
+[assembly: AssemblyFileVersion("4.0.2015.0918")]

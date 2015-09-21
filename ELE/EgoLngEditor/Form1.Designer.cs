@@ -45,7 +45,6 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.compareFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mergeFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.specialThanksToMiekForFiguringOutTheHashFunctionsToAllowNewValuesToBeInsertedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.lngDataGridView = new System.Windows.Forms.DataGridView();
@@ -57,8 +56,7 @@
             // 
             this.mainMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.editToolStripMenuItem,
-            this.specialThanksToMiekForFiguringOutTheHashFunctionsToAllowNewValuesToBeInsertedToolStripMenuItem});
+            this.editToolStripMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
             this.mainMenuStrip.Size = new System.Drawing.Size(784, 24);
@@ -199,14 +197,6 @@
             this.mergeFilesToolStripMenuItem.Text = "Merge Files";
             this.mergeFilesToolStripMenuItem.Click += new System.EventHandler(this.mergeFilesToolStripMenuItem_Click);
             // 
-            // specialThanksToMiekForFiguringOutTheHashFunctionsToAllowNewValuesToBeInsertedToolStripMenuItem
-            // 
-            this.specialThanksToMiekForFiguringOutTheHashFunctionsToAllowNewValuesToBeInsertedToolStripMenuItem.Enabled = false;
-            this.specialThanksToMiekForFiguringOutTheHashFunctionsToAllowNewValuesToBeInsertedToolStripMenuItem.Name = "specialThanksToMiekForFiguringOutTheHashFunctionsToAllowNewValuesToBeInsertedTool" +
-    "StripMenuItem";
-            this.specialThanksToMiekForFiguringOutTheHashFunctionsToAllowNewValuesToBeInsertedToolStripMenuItem.Size = new System.Drawing.Size(140, 20);
-            this.specialThanksToMiekForFiguringOutTheHashFunctionsToAllowNewValuesToBeInsertedToolStripMenuItem.Text = "Special Thanks to Miek";
-            // 
             // openFileDialog
             // 
             this.openFileDialog.FileName = "language_xxx.lng";
@@ -260,8 +250,7 @@
         private System.Windows.Forms.DataGridView lngDataGridView;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
 		private System.Windows.Forms.ToolStripMenuItem importAsXMLToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem exportAsXMLToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem specialThanksToMiekForFiguringOutTheHashFunctionsToAllowNewValuesToBeInsertedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportAsXMLToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem addRowToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem deleteRowToolStripMenuItem;

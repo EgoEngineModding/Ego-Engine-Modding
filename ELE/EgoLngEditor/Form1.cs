@@ -10,7 +10,7 @@ namespace EgoLngEditor
     public partial class Form1 : Form
     {
         // 3.0 -- Using EgoEngineLibrary, Compare/Merge, QuitSafety, AddRowUIFix
-        // 4.0 -- Rewrote backend, Internal Schema, Find Next/Prev, --ReadForRelease
+        // 4.0 -- Rewrote backend, Internal Schema, Find Next/Prev, --ReadyForRelease 2013
 		LngFile lngFile;
 		DataSet LNG;
 		FindAndReplaceForm fRF;
@@ -46,7 +46,7 @@ namespace EgoLngEditor
         {
             if (lngFile != null && lngFile.hasChanges)
             {
-                if (MessageBox.Show("Are you sure you want to quit?", "Ryder Language Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                if (MessageBox.Show("Are you sure you want to quit?", "Ego Language Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                 {
                     e.Cancel = true;
                 }
@@ -75,7 +75,7 @@ namespace EgoLngEditor
                 }
 				lngDataGridView.DataSource = lngFile.GetDataTable();
 
-				this.Text = "EGO Language Editor - " + filePath;
+				this.Text = "Ego Language Editor - " + filePath;
 			}
 		}
 		private void saveToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -90,7 +90,9 @@ namespace EgoLngEditor
 				Stream s = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 				lngFile.Write(s);
 				saveFileDialog.Dispose();
-			}
+            }
+
+            this.Text = "Ego Language Editor - " + filePath;
 		}
 		private void importAsXMLToolStripMenuItem_Click(object sender, EventArgs e) {
             openFileDialog.FilterIndex = 2;
@@ -114,7 +116,7 @@ namespace EgoLngEditor
 				lngFile = new LngFile(LNG);
 				lngDataGridView.DataSource = LNG.Tables[1];
 				filePath = openFileDialog.FileName;
-				this.Text = "EGO Language Editor - " + openFileDialog.FileName;
+				this.Text = "Ego Language Editor - " + openFileDialog.FileName;
 				openFileDialog.Dispose();
 			}
 		}
@@ -210,7 +212,7 @@ namespace EgoLngEditor
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("The program failed to compare the files:" + Environment.NewLine + Environment.NewLine + ex.Message, "Ryder Language Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("The program failed to compare the files:" + Environment.NewLine + Environment.NewLine + ex.Message, "Ego Language Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -241,7 +243,7 @@ namespace EgoLngEditor
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("The program failed to merge the files:" + Environment.NewLine + Environment.NewLine + ex.Message, "Ryder Database Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("The program failed to merge the files:" + Environment.NewLine + Environment.NewLine + ex.Message, "Ego Database Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
