@@ -474,6 +474,7 @@
             {
                 PssgSchema.Attribute attr = new Attribute(attributeName);
                 node.Attributes.Add(attr);
+                return attr;
             }
 
             return null;

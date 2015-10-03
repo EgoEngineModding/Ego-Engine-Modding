@@ -13,7 +13,7 @@ namespace EgoEngineLibrary.Helper
             var result = new uint[256];
             for (int i = 0; i < 256; i++)
             {
-                string s = i.ToString("x2");
+                string s = i.ToString("X2");
                 result[i] = ((uint)s[0]) + ((uint)s[1] << 16);
             }
             return result;
@@ -61,10 +61,10 @@ namespace EgoEngineLibrary.Helper
                 }
                 uint val = lookup32[bytes[i]];
                 char valc = (char)val;
-                if (valc != '0')
-                {
+                //if (valc != '0')
+                //{
                     result[++j] = valc;
-                }
+                //}
                 result[++j] = (char)(val >> 16);
                 result[++j] = ' ';
             }

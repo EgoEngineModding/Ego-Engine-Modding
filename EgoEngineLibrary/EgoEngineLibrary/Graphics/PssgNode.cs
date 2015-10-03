@@ -348,7 +348,8 @@
             {
                 foreach (PssgAttribute attr in Attributes)
                 {
-                    pNode.Add(new XAttribute(attr.Name, attr.ToString()));
+                    string attrName = attr.Name.StartsWith("2") ? "___" + attr.Name : attr.Name;
+                    pNode.Add(new XAttribute(attrName, attr.ToString()));
                 }
             }
 

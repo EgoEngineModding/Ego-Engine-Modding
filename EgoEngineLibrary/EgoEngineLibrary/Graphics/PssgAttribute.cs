@@ -132,7 +132,8 @@
             this.ParentNode = node;
 
             //this.id = PssgSchema.GetAttributeId(ParentNode.Name, xAttr.Name.LocalName);
-            this.AttributeInfo = PssgSchema.AddAttribute(this.ParentNode.Name, xAttr.Name.LocalName);// PssgSchema.GetAttribute(this.ParentNode.Name, xAttr.Name.LocalName);
+            string attrName = xAttr.Name.LocalName.StartsWith("___") ? xAttr.Name.LocalName.Substring(3) : xAttr.Name.LocalName;
+            this.AttributeInfo = PssgSchema.AddAttribute(this.ParentNode.Name, attrName);// PssgSchema.GetAttribute(this.ParentNode.Name, xAttr.Name.LocalName);
             this.data = this.FromString(xAttr.Value);
             PssgSchema.SetAttributeDataTypeIfNull(this.AttributeInfo, this.ValueType);
         }

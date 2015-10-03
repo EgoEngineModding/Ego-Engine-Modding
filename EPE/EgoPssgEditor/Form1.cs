@@ -24,6 +24,7 @@ namespace EgoPssgEditor
         // 10.0 -- Use EgoEngineLibrary, Added Dirt support, MainMenus, Export/Import Xml, Schema System, Move Nodes, Supports Compressed Pssg
         // 10.1 -- Added two texelTypes for Dirt Rally, Fixed bug when copying node (a new node info was created even if the same name already existed)
         // 10.2 -- Changed DDS saving to use linear size instead of pitch to make it work with Gimp 2.8
+        // 10.3 -- Properly closes the save stream, Changed byte data font to Consolas, Hex byte now always 2 chars and caps
         string schemaPath = Application.StartupPath + "\\schema.xml";
         PssgFile pssg;
         string filePath = @"C:\";
@@ -160,7 +161,7 @@ namespace EgoPssgEditor
                     }
                     else if (type == 1)
                     {
-                        pssg.WritePssg(fileStream, false); // Pssg
+                        pssg.WritePssg(fileStream, true); // Pssg
                     }
                     else if (type == 2)
                     {
