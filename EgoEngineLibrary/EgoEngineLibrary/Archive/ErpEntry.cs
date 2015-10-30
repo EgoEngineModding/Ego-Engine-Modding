@@ -18,7 +18,6 @@
 
         public byte[] Hash;
 
-
         public UInt64 Size
         {
             get
@@ -43,6 +42,8 @@
                 return size;
             }
         }
+
+        private UInt32 _entryInfoLength;
 
         public ErpEntry()
         {
@@ -77,6 +78,48 @@
             {
                 this.Hash = reader.ReadBytes(16);
             }
+        }
+
+        public void Write(ErpBinaryWriter writer)
+        {
+            writer.Write(this._entryInfoLength);
+            writer.Write((Int16)(this.FileName.Length + 1));
+            writer.Write(this.FileName);
+            writer.Write(this.EntryType, 16);
+            writer.Write(this.Unknown);
+            writer.Write((byte)this.Resources.Count);
+
+            foreach (ErpResource res in this.Resources)
+            {
+                res.Write(writer);
+            }
+
+            if (this.ParentFile.Version > 2)
+            {
+                writer.Write(this.Hash);
+            }
+        }
+
+        public UInt32 UpdateOffsets()
+        {
+            if (this.ParentFile.Version > 2)
+            {
+                this._entryInfoLength = 33;
+            }
+            else
+            {
+                this._entryInfoLength = 24;
+            }
+
+            this._entryInfoLength *= (UInt32)this.Resources.Count;
+            this._entryInfoLength += (UInt32)this.FileName.Length + 24;
+
+            if (this.ParentFile.Version > 2)
+            {
+                this._entryInfoLength += 16;
+            }
+
+            return this._entryInfoLength;
         }
 
         public void Export(string folder)

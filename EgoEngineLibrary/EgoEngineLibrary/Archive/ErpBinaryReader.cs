@@ -9,6 +9,11 @@
 
     public class ErpBinaryReader : EndianBinaryReader
     {
+        public ErpBinaryReader(System.IO.Stream stream)
+            : base(EndianBitConverter.Little, stream)
+        {
+
+        }
         public ErpBinaryReader(EndianBitConverter bitConverter, System.IO.Stream stream)
             : base(bitConverter, stream)
         {

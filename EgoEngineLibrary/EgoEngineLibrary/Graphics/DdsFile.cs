@@ -8,15 +8,22 @@
     public class DdsFile
     {
         uint magic;
-        DdsHeader header;
-        byte[] bdata;
+        public DdsHeader header;
+        public byte[] bdata { get; set; }
         Dictionary<int, byte[]> bdata2;
 
-        public DdsFile(PssgNode node, bool cubePreview)
+        public DdsFile()
         {
             magic = 0x20534444;
             header.size = 124;
             header.flags |= DdsHeader.Flags.DDSD_CAPS | DdsHeader.Flags.DDSD_HEIGHT | DdsHeader.Flags.DDSD_WIDTH | DdsHeader.Flags.DDSD_PIXELFORMAT;
+            header.reserved1 = new uint[11];
+            header.ddspf.size = 32;
+            header.caps |= DdsHeader.Caps.DDSCAPS_TEXTURE;
+        }
+        public DdsFile(PssgNode node, bool cubePreview)
+            : this()
+        {
             header.height = (uint)(node.Attributes["height"].Value);
             header.width = (uint)(node.Attributes["width"].Value);
             switch ((string)node.Attributes["texelFormat"].Value)
@@ -72,6 +79,8 @@
                     //header.ddspf.aBitMask = 0xFF;
                     break;
             }
+
+            // Mip Maps
             if (node.HasAttribute("automipmap") == true && node.HasAttribute("numberMipMapLevels") == true)
             {
                 if ((uint)node.Attributes["automipmap"].Value == 0 && (uint)node.Attributes["numberMipMapLevels"].Value > 0)
@@ -81,9 +90,8 @@
                     header.caps |= DdsHeader.Caps.DDSCAPS_MIPMAP | DdsHeader.Caps.DDSCAPS_COMPLEX;
                 }
             }
-            header.reserved1 = new uint[11];
-            header.ddspf.size = 32;
-            header.caps |= DdsHeader.Caps.DDSCAPS_TEXTURE;
+
+            // Byte Data
             List<PssgNode> textureImageBlocks = node.FindNodes("TEXTUREIMAGEBLOCK");
             if ((uint)node.Attributes["imageBlockCount"].Value > 1)
             {
@@ -398,5 +406,7 @@
                 textureImageBlocks[0].Attributes["size"].Value = (UInt32)bdata.Length;
             }
         }
+
+
     }
 }
