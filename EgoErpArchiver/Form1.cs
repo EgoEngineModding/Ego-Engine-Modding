@@ -19,9 +19,13 @@
     {
         ErpFile file = new ErpFile();
 
-        public Form1()
+        public Form1(string[] Args)
         {
             InitializeComponent();
+            exportToolStripMenuItem.Visible = false;
+            importToolStripMenuItem.Visible = false;
+            this.Icon = Properties.Resources.Ryder25;
+            this.Text = Properties.Resources.AppTitleLong;
             this.openFileDialog.Filter = "Erp files|*.erp";
             this.openFileDialog.FileName = "ferrari_paint.tga.erp";
             this.saveFileDialog.Filter = "Erp files|*.erp";
@@ -81,6 +85,15 @@
             pSizeCol.Width = 100;
             pSizeCol.IsEditable = false;
             this.TreeListView.Columns.Add(pSizeCol);
+
+            if (Args.Length > 0)
+            {
+                this.file = new ErpFile();
+                this.file.Read(File.Open(Args[0], FileMode.Open, FileAccess.Read, FileShare.Read));
+
+                this.TreeListView.SetObjects(this.file.Entries);
+                this.Text = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(Args[0]);
+            }
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -91,25 +104,59 @@
                 this.file.Read(File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
 
                 this.TreeListView.SetObjects(this.file.Entries);
-            }
-        }
-
-        private void exportToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
-            {
-                foreach (ErpEntry entry in this.file.Entries)
-                {
-                    entry.Export(folderBrowserDialog.SelectedPath);
-                }
+                this.Text = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(openFileDialog.FileName);
             }
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (file == null || file.Entries.Count == 0)
+            {
+                return;
+            }
+
             if (this.saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 this.file.Write(File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read));
+                this.Text = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(saveFileDialog.FileName);
+            }
+        }
+
+        private void exportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (file == null || file.Entries.Count == 0)
+            {
+                return;
+            }
+
+            folderBrowserDialog.Description = "Select a folder to export the files:";
+            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+            {
+                file.Export(folderBrowserDialog.SelectedPath);
+            }
+        }
+
+        private void importToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+            folderBrowserDialog.Description = "Select a folder to import the files from:";
+            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    // Import
+                    foreach (string f in Directory.GetFiles(folderBrowserDialog.SelectedPath))
+                    {
+                        //if (this.file.Contains(Path.GetFileName(f)) == true)
+                        //{
+                        //    this.file[Path.GetFileName(f)].Import(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
+                        //}
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Failed Importing!", "Fail", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -123,6 +170,7 @@
             ErpEntry entry = (ErpEntry)TreeListView.SelectedObject;
             if (Path.GetExtension(entry.FileName) != ".tga")
             {
+                MessageBox.Show("Please select a *.tga file!", "Select a tga file", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
 
@@ -134,6 +182,12 @@
             {
                 try
                 {
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Could not export texture!" + Environment.NewLine + Environment.NewLine +
+                        ex.Message, "Export Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
                     DdsFile dds = new DdsFile();
 
                     string fNameImage;
@@ -163,6 +217,7 @@
                     dds.header.height = height;
                     switch (imageType)
                     {
+                        case 52:
                         case 54:
                             dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                             dds.header.pitchOrLinearSize = (width * height) / 2;
@@ -174,7 +229,7 @@
                             dds.header.pitchOrLinearSize = (width * height);
                             dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                             dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT5"), 0);
-                        break;
+                            break;
                     }
                     if (mipmaps > 0)
                     {
@@ -189,12 +244,6 @@
                     dds.bdata = imageEntry.Resources[1].GetDataArray(true);
 
                     dds.Write(File.Open(dialog.FileName, FileMode.Create), -1);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Could not export texture!" + Environment.NewLine + Environment.NewLine +
-                        ex.Message, "Export Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
             }
         }
 
@@ -208,6 +257,7 @@
             ErpEntry entry = (ErpEntry)TreeListView.SelectedObject;
             if (Path.GetExtension(entry.FileName) != ".tga")
             {
+                MessageBox.Show("Please select a *.tga file!", "Select a tga file", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
 
@@ -266,6 +316,11 @@
                     imageEntry.Resources[0].SetData(imageData.ToArray());
                     imageEntry.Resources[1].SetData(dds.bdata);
             }
+        }
+
+        private void readMeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://modding.petartasev.com/Ego/EEA/ReadME.html");
         }
     }
 }

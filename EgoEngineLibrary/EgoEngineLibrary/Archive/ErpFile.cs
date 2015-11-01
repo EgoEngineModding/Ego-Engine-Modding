@@ -122,5 +122,13 @@
 
             return null;
         }
+
+        public void Export(string folderPath)
+        {
+            foreach (ErpEntry entry in this.Entries)
+            {
+                entry.Export(folderPath);
+            }
+        }
     }
 }

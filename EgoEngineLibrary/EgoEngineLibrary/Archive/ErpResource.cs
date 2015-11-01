@@ -7,7 +7,6 @@
     using System.IO.Compression;
     using System.Linq;
     using System.Text;
-    using zlib;
 
     public class ErpResource
     {
@@ -88,7 +87,7 @@
             byte[] data;
             if (decompress && this.Compression == 1)
             {
-                data = this.Decompress(this._data);
+                data = Ionic.Zlib.ZlibStream.UncompressBuffer(this._data);
             }
             else
             {
@@ -106,7 +105,7 @@
         {
             if (this.Compression == 1)
             {
-                this._data = this.CompressData(data);
+                this._data = Ionic.Zlib.ZlibStream.CompressBuffer(data);
             }
             else
             {
@@ -115,73 +114,6 @@
 
             this.Size = (UInt64)data.Length;
             this.PackedSize = (UInt64)this._data.Length;
-        }
-
-        private byte[] CompressData(byte[] inData)
-        {
-            using (MemoryStream outMemoryStream = new MemoryStream())
-            using (ZOutputStream outZStream = new ZOutputStream(outMemoryStream, zlibConst.Z_BEST_COMPRESSION))
-            using (Stream inMemoryStream = new MemoryStream(inData))
-            {
-                CopyStream(inMemoryStream, outZStream);
-                outZStream.finish();
-                return outMemoryStream.ToArray();
-            }
-        }
-        public static void CopyStream(System.IO.Stream input, System.IO.Stream output)
-        {
-            byte[] buffer = new byte[2000];
-            int len;
-            while ((len = input.Read(buffer, 0, 2000)) > 0)
-            {
-                output.Write(buffer, 0, len);
-            }
-            output.Flush();
-        }  
-        private byte[] Compress(byte[] data)
-        {
-            using (MemoryStream memory = new MemoryStream())
-            {
-                using (DeflateStream stream = new DeflateStream(memory, CompressionMode.Compress))
-                {
-                    using (MemoryStream dataStream = new MemoryStream(data))
-                    {
-                        memory.WriteByte(0x78);
-                        memory.WriteByte(0xDA);
-                        dataStream.CopyTo(stream);
-                        memory.Write(EndianBitConverter.Big.GetBytes(this.Adler32(data)), 0, 4);
-                        stream.Close();
-                        return memory.ToArray();
-                    }
-                }
-            }
-        }
-        private int Adler32(byte[] bytes)
-        {
-            const uint a32mod = 65521;
-            uint s1 = 1, s2 = 0;
-            foreach (byte b in bytes)
-            {
-                s1 = (s1 + b) % a32mod;
-                s2 = (s2 + s1) % a32mod;
-            }
-            return unchecked((int)((s2 << 16) + s1));
-        }
-        private byte[] Decompress(byte[] gzip)
-        {
-            // Deflate the raw zlib data
-            using (MemoryStream zlibStream = new MemoryStream(gzip))
-            {
-                zlibStream.Seek(2, SeekOrigin.Begin);
-                using (DeflateStream stream = new DeflateStream(zlibStream, CompressionMode.Decompress))
-                {
-                    using (MemoryStream memory = new MemoryStream())
-                    {
-                        stream.CopyTo(memory);
-                        return memory.ToArray();
-                    }
-                }
-            }
         }
     }
 }
