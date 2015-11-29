@@ -82,6 +82,14 @@
             }
         }
 
+        public void Import(Stream stream)
+        {
+            using (ErpBinaryReader reader = new ErpBinaryReader(EndianBitConverter.Little, stream))
+            {
+                this.SetData(reader.ReadBytes((int)reader.BaseStream.Length));
+            }
+        }
+
         public byte[] GetDataArray(bool decompress)
         {
             byte[] data;

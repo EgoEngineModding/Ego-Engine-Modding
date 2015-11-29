@@ -129,15 +129,18 @@
 
             for (int i = 0; i < this.Resources.Count; ++i)
             {
+                string name = this.FileName;
+                name = name.Replace("?", "^^");
+                name = Path.GetFileNameWithoutExtension(name) + "!!!" + this.Resources[i].Name + i.ToString("000") + Path.GetExtension(name);
                 this.Resources[i].Export(File.Open(
-                    Path.Combine(outputDir, i.ToString() + Path.GetFileName(this.FileName))
+                    Path.Combine(outputDir, name)
                     , FileMode.Create, FileAccess.Write, FileShare.Read));
             }
         }
 
-        public void Import(string folder)
+        public void Import(Stream stream, int resIndex)
         {
-
+            this.Resources[resIndex].Import(stream);
         }
     }
 }

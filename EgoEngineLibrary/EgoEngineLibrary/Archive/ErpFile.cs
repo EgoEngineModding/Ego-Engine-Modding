@@ -130,5 +130,30 @@
                 entry.Export(folderPath);
             }
         }
+
+        public void Import(string folderPath)
+        {
+            foreach (string f in Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories))
+            {
+                string extension = Path.GetExtension(f);
+                string name = Path.GetFileNameWithoutExtension(f);
+                int resTextIndex = name.LastIndexOf("!!!");
+                if (resTextIndex == -1)
+                {
+                    continue;
+                }
+
+                int resIndex = Int32.Parse(name.Substring(resTextIndex + 7, 3));
+                name = Path.GetDirectoryName(f) + "\\" + name.Remove(resTextIndex).Replace("^^", "?") + extension;
+                foreach (ErpEntry entry in this.Entries)
+                {
+                    if (name.EndsWith(entry.FileName.Substring(7).Replace('/', '\\')))
+                    {
+                        entry.Import(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read), resIndex);
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

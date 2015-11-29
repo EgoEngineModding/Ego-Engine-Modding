@@ -22,14 +22,12 @@
         public Form1(string[] Args)
         {
             InitializeComponent();
-            exportToolStripMenuItem.Visible = false;
-            importToolStripMenuItem.Visible = false;
             this.Icon = Properties.Resources.Ryder25;
             this.Text = Properties.Resources.AppTitleLong;
-            this.openFileDialog.Filter = "Erp files|*.erp";
-            this.openFileDialog.FileName = "ferrari_paint.tga.erp";
-            this.saveFileDialog.Filter = "Erp files|*.erp";
-            this.saveFileDialog.FileName = "ferrari_paint.tga.erp";
+            this.openFileDialog.Filter = "Erp files|*.erp|All files|*.*";
+            //this.openFileDialog.FileName = "ferrari_paint.tga.erp";
+            this.saveFileDialog.Filter = "Erp files|*.erp|All files|*.*";
+            //this.saveFileDialog.FileName = "ferrari_paint.tga.erp";
 
             this.TreeListView.ShowGroups = false;
             this.TreeListView.CellEditActivation = ObjectListView.CellEditActivateMode.DoubleClick;
@@ -86,6 +84,11 @@
             pSizeCol.IsEditable = false;
             this.TreeListView.Columns.Add(pSizeCol);
 
+            OLVColumn fullPathCol = new OLVColumn("Full Path", "FileName");
+            fullPathCol.Width = 500;
+            fullPathCol.IsEditable = false;
+            this.TreeListView.Columns.Add(fullPathCol);
+
             if (Args.Length > 0)
             {
                 this.file = new ErpFile();
@@ -132,30 +135,31 @@
             folderBrowserDialog.Description = "Select a folder to export the files:";
             if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
-                file.Export(folderBrowserDialog.SelectedPath);
+                try
+                {
+                    file.Export(folderBrowserDialog.SelectedPath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed Exporting!" + Environment.NewLine + Environment.NewLine +
+                        ex.Message, "Fail", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
             folderBrowserDialog.Description = "Select a folder to import the files from:";
             if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
-                    // Import
-                    foreach (string f in Directory.GetFiles(folderBrowserDialog.SelectedPath))
-                    {
-                        //if (this.file.Contains(Path.GetFileName(f)) == true)
-                        //{
-                        //    this.file[Path.GetFileName(f)].Import(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                        //}
-                    }
+                    file.Import(folderBrowserDialog.SelectedPath);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Failed Importing!", "Fail", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Failed Importing!" + Environment.NewLine + Environment.NewLine +
+                        ex.Message, "Fail", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -182,12 +186,6 @@
             {
                 try
                 {
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Could not export texture!" + Environment.NewLine + Environment.NewLine +
-                        ex.Message, "Export Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
                     DdsFile dds = new DdsFile();
 
                     string fNameImage;
@@ -244,6 +242,12 @@
                     dds.bdata = imageEntry.Resources[1].GetDataArray(true);
 
                     dds.Write(File.Open(dialog.FileName, FileMode.Create), -1);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Could not export texture!" + Environment.NewLine + Environment.NewLine +
+                        ex.Message, "Export Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -269,12 +273,6 @@
             {
                 try
                 {
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Could not import texture!" + Environment.NewLine + Environment.NewLine +
-                        ex.Message, "Import Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
                     DdsFile dds = new DdsFile(File.Open(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
 
                     int imageType = 0;
@@ -315,6 +313,12 @@
                     }
                     imageEntry.Resources[0].SetData(imageData.ToArray());
                     imageEntry.Resources[1].SetData(dds.bdata);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Could not import texture!" + Environment.NewLine + Environment.NewLine +
+                        ex.Message, "Import Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 

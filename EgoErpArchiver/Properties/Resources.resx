@@ -128,9 +128,9 @@
     <value>..\Resources\Ryder25.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="AppTitleShort" xml:space="preserve">
-    <value>EEA 1.0</value>
+    <value>EEA 2.0</value>
   </data>
   <data name="AppTitleLong" xml:space="preserve">
-    <value>Ego ERP Archiver 1.0</value>
+    <value>Ego ERP Archiver 2.0</value>
   </data>
 </root>
