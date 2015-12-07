@@ -49,15 +49,16 @@
             {
                 using (stream)
                 {
-                    MemoryStream mStream = new MemoryStream();
+                    //MemoryStream mStream = new MemoryStream((int)stream.Length * 10);
+                    FileStream fs = File.Open(Path.GetTempFileName(), FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 
                     using (GZipStream gZipStream = new GZipStream(stream, CompressionMode.Decompress))
                     {
-                        gZipStream.CopyTo(mStream);
+                        gZipStream.CopyTo(fs);
                     }
 
-                    mStream.Seek(0, SeekOrigin.Begin);
-                    return PssgFile.ReadPssg(mStream, fileType);
+                    fs.Seek(0, SeekOrigin.Begin);
+                    return PssgFile.ReadPssg(fs, fileType);
                 }
             }
         }
