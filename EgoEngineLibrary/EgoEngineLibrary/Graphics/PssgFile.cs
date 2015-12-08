@@ -49,8 +49,7 @@
             {
                 using (stream)
                 {
-                    //MemoryStream mStream = new MemoryStream((int)stream.Length * 10);
-                    FileStream fs = File.Open(Path.GetTempFileName(), FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+                    FileStream fs = File.Open(Path.Combine(Application.StartupPath, "temp.pssg"), FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 
                     using (GZipStream gZipStream = new GZipStream(stream, CompressionMode.Decompress))
                     {
@@ -143,12 +142,12 @@
             }
             else // CompressedPssg
             {
-                using (MemoryStream memory = new MemoryStream())
+                using (FileStream fs = File.Open(Path.Combine(Application.StartupPath, "temp.pssg"), FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                 {
-                    this.WritePssg(memory, false);
+                    this.WritePssg(fs, false);
                     using (GZipStream gzip = new GZipStream(stream, CompressionMode.Compress))
                     {
-                        gzip.Write(memory.ToArray(), 0, (int)memory.Length);
+                        fs.CopyTo(gzip);
                     }
                 }
             }

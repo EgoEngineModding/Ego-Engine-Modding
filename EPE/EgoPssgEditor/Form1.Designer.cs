@@ -70,7 +70,7 @@
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.texturesTabPage = new System.Windows.Forms.TabPage();
             this.textureSplitContainer = new System.Windows.Forms.SplitContainer();
-            this.textureTreeView = new System.Windows.Forms.TreeView();
+            this.textureObjectListView = new BrightIdeasSoftware.ObjectListView();
             this.texturesTextBox = new System.Windows.Forms.TextBox();
             this.textureImageLabel = new System.Windows.Forms.Label();
             this.texturePictureBox = new System.Windows.Forms.PictureBox();
@@ -95,6 +95,7 @@
             this.textureSplitContainer.Panel1.SuspendLayout();
             this.textureSplitContainer.Panel2.SuspendLayout();
             this.textureSplitContainer.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.textureObjectListView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.texturePictureBox)).BeginInit();
             this.cubeMapTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.cubeMapSplitContainer)).BeginInit();
@@ -299,55 +300,55 @@
             this.exportAllTexturesToolStripMenuItem,
             this.importAllTexturesToolStripMenuItem});
             this.texturesToolStripMenuItem.Name = "texturesToolStripMenuItem";
-            this.texturesToolStripMenuItem.Size = new System.Drawing.Size(63, 20);
+            this.texturesToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
             this.texturesToolStripMenuItem.Text = "Textures";
             // 
             // addTextureToolStripMenuItem
             // 
             this.addTextureToolStripMenuItem.Name = "addTextureToolStripMenuItem";
-            this.addTextureToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.addTextureToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.addTextureToolStripMenuItem.Text = "Add Texture";
             this.addTextureToolStripMenuItem.Click += new System.EventHandler(this.addTextureToolStripMenuItem_Click);
             // 
             // removeTextureToolStripMenuItem
             // 
             this.removeTextureToolStripMenuItem.Name = "removeTextureToolStripMenuItem";
-            this.removeTextureToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.removeTextureToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.removeTextureToolStripMenuItem.Text = "Remove Texture";
             this.removeTextureToolStripMenuItem.Click += new System.EventHandler(this.removeTextureToolStripMenuItem_Click);
             // 
             // exportTextureToolStripMenuItem
             // 
             this.exportTextureToolStripMenuItem.Name = "exportTextureToolStripMenuItem";
-            this.exportTextureToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.exportTextureToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.exportTextureToolStripMenuItem.Text = "Export Texture";
             this.exportTextureToolStripMenuItem.Click += new System.EventHandler(this.exportTextureToolStripMenuItem_Click);
             // 
             // importTextureToolStripMenuItem
             // 
             this.importTextureToolStripMenuItem.Name = "importTextureToolStripMenuItem";
-            this.importTextureToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.importTextureToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.importTextureToolStripMenuItem.Text = "Import Texture";
             this.importTextureToolStripMenuItem.Click += new System.EventHandler(this.importTextureToolStripMenuItem_Click);
             // 
             // exportAllTexturesToolStripMenuItem
             // 
             this.exportAllTexturesToolStripMenuItem.Name = "exportAllTexturesToolStripMenuItem";
-            this.exportAllTexturesToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.exportAllTexturesToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.exportAllTexturesToolStripMenuItem.Text = "Export All Textures";
             this.exportAllTexturesToolStripMenuItem.Click += new System.EventHandler(this.exportAllTexturesToolStripMenuItem_Click);
             // 
             // importAllTexturesToolStripMenuItem
             // 
             this.importAllTexturesToolStripMenuItem.Name = "importAllTexturesToolStripMenuItem";
-            this.importAllTexturesToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.importAllTexturesToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.importAllTexturesToolStripMenuItem.Text = "Import All Textures";
             this.importAllTexturesToolStripMenuItem.Click += new System.EventHandler(this.importAllTexturesToolStripMenuItem_Click);
             // 
             // termpToolStripMenuItem
             // 
             this.termpToolStripMenuItem.Name = "termpToolStripMenuItem";
-            this.termpToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
+            this.termpToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
             this.termpToolStripMenuItem.Text = "Termp";
             this.termpToolStripMenuItem.Click += new System.EventHandler(this.termpToolStripMenuItem_Click);
             // 
@@ -465,7 +466,7 @@
             // 
             // textureSplitContainer.Panel1
             // 
-            this.textureSplitContainer.Panel1.Controls.Add(this.textureTreeView);
+            this.textureSplitContainer.Panel1.Controls.Add(this.textureObjectListView);
             this.textureSplitContainer.Panel1.Controls.Add(this.texturesTextBox);
             // 
             // textureSplitContainer.Panel2
@@ -477,15 +478,20 @@
             this.textureSplitContainer.SplitterWidth = 1;
             this.textureSplitContainer.TabIndex = 6;
             // 
-            // textureTreeView
+            // textureObjectListView
             // 
-            this.textureTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textureTreeView.HideSelection = false;
-            this.textureTreeView.Location = new System.Drawing.Point(0, 20);
-            this.textureTreeView.Name = "textureTreeView";
-            this.textureTreeView.Size = new System.Drawing.Size(278, 490);
-            this.textureTreeView.TabIndex = 6;
-            this.textureTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.textureTreeView_AfterSelect);
+            this.textureObjectListView.CellEditUseWholeCell = false;
+            this.textureObjectListView.Cursor = System.Windows.Forms.Cursors.Default;
+            this.textureObjectListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textureObjectListView.HighlightBackgroundColor = System.Drawing.Color.Empty;
+            this.textureObjectListView.HighlightForegroundColor = System.Drawing.Color.Empty;
+            this.textureObjectListView.Location = new System.Drawing.Point(0, 20);
+            this.textureObjectListView.Name = "textureObjectListView";
+            this.textureObjectListView.Size = new System.Drawing.Size(278, 490);
+            this.textureObjectListView.TabIndex = 7;
+            this.textureObjectListView.UseCompatibleStateImageBehavior = false;
+            this.textureObjectListView.View = System.Windows.Forms.View.Details;
+            this.textureObjectListView.SelectionChanged += new System.EventHandler(this.textureObjectListView_SelectionChanged);
             // 
             // texturesTextBox
             // 
@@ -637,6 +643,7 @@
             this.textureSplitContainer.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.textureSplitContainer)).EndInit();
             this.textureSplitContainer.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.textureObjectListView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.texturePictureBox)).EndInit();
             this.cubeMapTabPage.ResumeLayout(false);
             this.cubeMapTabPage.PerformLayout();
@@ -663,8 +670,7 @@
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.TabControl mainTabControl;
         private System.Windows.Forms.TabPage texturesTabPage;
-		private System.Windows.Forms.PictureBox texturePictureBox;
-		private System.Windows.Forms.TreeView textureTreeView;
+        private System.Windows.Forms.PictureBox texturePictureBox;
         private System.Windows.Forms.TabPage allTabPage;
 		private System.Windows.Forms.TabPage cubeMapTabPage;
 		private System.Windows.Forms.PictureBox cubeMapPictureBox;
@@ -708,6 +714,7 @@
         private System.Windows.Forms.ToolStripMenuItem saveAsCompressedToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveAsXmlToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveAsOpenedToolStripMenuItem;
+        private BrightIdeasSoftware.ObjectListView textureObjectListView;
     }
 }
 

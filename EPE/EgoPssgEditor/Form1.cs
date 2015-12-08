@@ -11,6 +11,7 @@ using System.Xml.Linq;
 using System.Xml;
 using System.Text;
 using System.IO.Compression;
+using BrightIdeasSoftware;
 
 namespace EgoPssgEditor
 {
@@ -24,7 +25,7 @@ namespace EgoPssgEditor
         // 10.0 -- Use EgoEngineLibrary, Added Dirt support, MainMenus, Export/Import Xml, Schema System, Move Nodes, Supports Compressed Pssg
         // 10.1 -- Added two texelTypes for Dirt Rally, Fixed bug when copying node (a new node info was created even if the same name already existed)
         // 10.2 -- Changed DDS saving to use linear size instead of pitch to make it work with Gimp 2.8
-        // 10.3 -- Properly closes the save stream, Changed byte data font to Consolas, Hex byte now always 2 chars and caps, 64bit, opens really large files
+        // 10.3 -- Properly closes the save stream, Changed byte data font to Consolas, Hex byte now always 2 chars and caps, 64bit, opens/saves really large files, OLV textures
         string schemaPath = Application.StartupPath + "\\schema.xml";
         PssgFile pssg;
         string filePath = @"C:\";
@@ -55,6 +56,18 @@ namespace EgoPssgEditor
             treeView.DragEnter += treeView_DragEnter;
             treeView.DragDrop += treeView_DragDrop;
             treeView.AllowDrop = true;
+            //textureOLV
+            textureObjectListView.UseFiltering = true;
+            textureObjectListView.ShowGroups = false;
+            OLVColumn nameCol = new OLVColumn("Name", "");
+            nameCol.UseFiltering = true;
+            nameCol.FillsFreeSpace = true;
+            nameCol.AspectGetter = delegate(object x)
+            {
+                return ((PssgNode)x).GetAttribute("id").Value;
+            };
+            textureObjectListView.Columns.Add(nameCol);
+
             this.args = args;
         }
 
@@ -99,13 +112,13 @@ namespace EgoPssgEditor
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                filePath = openFileDialog.FileName;
-                openFileDialog.Dispose();
-                clearVars(true);
-                pssg = PssgFile.Open(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
-                setupEditor(MainTabs.Auto);
                 try
                 {
+                    filePath = openFileDialog.FileName;
+                    openFileDialog.Dispose();
+                    clearVars(true);
+                    pssg = PssgFile.Open(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+                    setupEditor(MainTabs.Auto);
                 }
                 catch (Exception excp)
                 {
@@ -161,23 +174,18 @@ namespace EgoPssgEditor
                     }
                     else if (type == 1)
                     {
-                        pssg.WritePssg(fileStream, true); // Pssg
+                        pssg.FileType = PssgFileType.Pssg;
+                        pssg.Save(fileStream); // Pssg
                     }
                     else if (type == 2)
                     {
-                        // Compressed
-                        using (MemoryStream memory = new MemoryStream())
-                        {
-                            pssg.WritePssg(memory, false);
-                            using (GZipStream gzip = new GZipStream(fileStream, CompressionMode.Compress))
-                            {
-                                gzip.Write(memory.ToArray(), 0, (int)memory.Length);
-                            }
-                        }
+                        pssg.FileType = PssgFileType.CompressedPssg;
+                        pssg.Save(fileStream);
                     }
                     else
                     {
-                        pssg.WriteXml(fileStream); // Xml
+                        pssg.FileType = PssgFileType.Xml;
+                        pssg.Save(fileStream);
                     }
                     filePath = saveFileDialog.FileName;
                     this.Text = "Ego PSSG Editor - " + Path.GetFileName(filePath);
@@ -234,7 +242,7 @@ namespace EgoPssgEditor
 
             // Textures tab
             textureImageLabel.Text = "";
-            textureTreeView.Nodes.Clear();
+            textureObjectListView.ClearObjects();
             if (texturePictureBox.Image != null)
             {
                 texturePictureBox.Image.Dispose();
@@ -266,7 +274,7 @@ namespace EgoPssgEditor
             if (pssg.RootNode != null)
             {
                 treeView.Nodes.Add(pssg.CreateTreeViewNode(pssg.RootNode));
-                pssg.CreateSpecificTreeViewNode(textureTreeView, "TEXTURE");
+                textureObjectListView.SetObjects(pssg.FindNodes("TEXTURE", "id"));
                 pssg.CreateSpecificTreeViewNode(cubeMapTreeView, "CUBEMAPTEXTURE");
             }
             // Select Starting Tab
@@ -294,7 +302,7 @@ namespace EgoPssgEditor
         #region All
         private void treeView_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            if (treeView.SelectedNode == null && textureTreeView.SelectedNode == null)
+            if (treeView.SelectedNode == null && textureObjectListView.SelectedObject == null)
             {
                 MessageBox.Show("Tree node not selected!", "Select a Node", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 return;
@@ -660,12 +668,17 @@ namespace EgoPssgEditor
         #endregion
 
         #region Textures
-        private void textureTreeView_AfterSelect(object sender, TreeViewEventArgs e)
+        private void textureObjectListView_SelectionChanged(object sender, EventArgs e)
         {
-            treeView.SelectedNode = ((PssgNode)textureTreeView.SelectedNode.Tag).TreeNode;
+            if (textureObjectListView.SelectedObject == null)
+            {
+                return;
+            }
+
+            treeView.SelectedNode = ((PssgNode)textureObjectListView.SelectedObject).TreeNode;
             //SelectCorrespondingNode(treeView.Nodes[0], ((CNode)textureTreeView.SelectedNode.Tag).attributes["id"].ToString());
             // Create Preview
-            createPreview(((PssgNode)textureTreeView.SelectedNode.Tag));
+            createPreview(((PssgNode)textureObjectListView.SelectedObject));
         }
         private bool SelectCorrespondingNode(TreeNode tNode, string id)
         {
@@ -733,36 +746,24 @@ namespace EgoPssgEditor
         }
         private void texturesTextBox_TextChanged(object sender, EventArgs e)
         {
-            textureTreeView.Nodes.Clear();
-            pssg.CreateSpecificTreeViewNode(textureTreeView, "TEXTURE");
-            if (textureTreeView.Nodes.Count == 0)
+            textureObjectListView.BeginUpdate();
+            textureObjectListView.ModelFilter = new ModelFilter(delegate(object x)
             {
-                return;
-            }
+                string name = (string)((PssgNode)x).GetAttribute("id").ToString();
+                return name.StartsWith(texturesTextBox.Text, StringComparison.CurrentCultureIgnoreCase) ||
+                    name.Contains(texturesTextBox.Text.ToLower());
+            });
+            textureObjectListView.EndUpdate();
 
-            textureTreeView.BeginUpdate();
-            for (int i = 0; i < textureTreeView.Nodes.Count; i++)
+            if (textureObjectListView.GetItemCount() > 0)
             {
-                if (textureTreeView.Nodes[i].Text.StartsWith(texturesTextBox.Text, StringComparison.CurrentCultureIgnoreCase) ||
-                    textureTreeView.Nodes[i].Text.Contains(texturesTextBox.Text.ToLower()))
-                {
-                }
-                else
-                {
-                    textureTreeView.Nodes[i].Remove();
-                    i--;
-                }
-            }
-            textureTreeView.EndUpdate();
-            if (textureTreeView.Nodes.Count > 0)
-            {
-                textureTreeView.SelectedNode = textureTreeView.Nodes[0];
+                textureObjectListView.SelectedIndex = 0;
             }
         }
 
         private void addTextureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (textureTreeView.SelectedNode == null)
+            if (textureObjectListView.SelectedObject == null)
             {
                 MessageBox.Show("Select a texture to copy first!", "Select a Texture", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -772,7 +773,7 @@ namespace EgoPssgEditor
             if (ATForm.ShowDialog() == DialogResult.OK)
             {
                 // Copy and Edit Name
-                PssgNode nodeToCopy = (PssgNode)textureTreeView.SelectedNode.Tag;
+                PssgNode nodeToCopy = (PssgNode)textureObjectListView.SelectedObject;
                 PssgNode newTexture = new PssgNode(nodeToCopy);
                 newTexture.Attributes["id"].Value = ATForm.TName;
                 // Add to Library
@@ -787,18 +788,18 @@ namespace EgoPssgEditor
                 // Populate treeViews
                 clearVars(false);
                 setupEditor(MainTabs.Textures);
-                textureTreeView.SelectedNode = textureTreeView.Nodes[textureTreeView.Nodes.Count - 1];
+                textureObjectListView.SelectedIndex = textureObjectListView.GetItemCount() - 1;
             }
         }
         private void removeTextureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (textureTreeView.SelectedNode == null)
+            if (textureObjectListView.SelectedObject == null)
             {
                 return;
             }
 
             // Remove from Parent Node
-            PssgNode textureNode = (PssgNode)textureTreeView.SelectedNode.Tag;
+            PssgNode textureNode = (PssgNode)textureObjectListView.SelectedObject;
             PssgNode parentNode = textureNode.ParentNode;
             parentNode.RemoveChild(textureNode);
             textureNode = null;
@@ -807,12 +808,12 @@ namespace EgoPssgEditor
         }
         private void exportTextureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (textureTreeView.Nodes.Count == 0 || textureTreeView.SelectedNode.Index == -1)
+            if (textureObjectListView.SelectedObject == null)
             {
                 return;
             }
 
-            PssgNode node = ((PssgNode)textureTreeView.SelectedNode.Tag);
+            PssgNode node = ((PssgNode)textureObjectListView.SelectedObject);
             SaveFileDialog dialog = new SaveFileDialog();
             dialog.Filter = "Dds files|*.dds|All files|*.*";
             dialog.Title = "Select the dds save location and file name";
@@ -833,12 +834,12 @@ namespace EgoPssgEditor
         }
         private void importTextureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (textureTreeView.Nodes.Count == 0 || textureTreeView.SelectedNode.Index == -1)
+            if (textureObjectListView.SelectedObject == null)
             {
                 return;
             }
 
-            PssgNode node = ((PssgNode)textureTreeView.SelectedNode.Tag);
+            PssgNode node = ((PssgNode)textureObjectListView.SelectedObject);
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "Dds files|*.dds|All files|*.*";
             dialog.Title = "Select a dds file";
@@ -860,7 +861,7 @@ namespace EgoPssgEditor
         }
         private void exportAllTexturesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (textureTreeView.Nodes.Count == 0)
+            if (!this.HasTextures())
             {
                 return;
             }
@@ -869,10 +870,10 @@ namespace EgoPssgEditor
             {
                 Directory.CreateDirectory(filePath.Replace(".", "_") + "_textures");
                 DdsFile dds;
-                for (int i = 0; i < textureTreeView.Nodes.Count; i++)
+                foreach (PssgNode tex in textureObjectListView.Objects)
                 {
-                    dds = new DdsFile(((PssgNode)textureTreeView.Nodes[i].Tag), false);
-                    dds.Write(File.Open(filePath.Replace(".", "_") + "_textures" + "\\" + textureTreeView.Nodes[i].Text + ".dds", FileMode.Create), -1);
+                    dds = new DdsFile(tex, false);
+                    dds.Write(File.Open(filePath.Replace(".", "_") + "_textures" + "\\" + tex.GetAttribute("id").ToString() + ".dds", FileMode.Create), -1);
                 }
                 MessageBox.Show("Textures exported successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -883,7 +884,7 @@ namespace EgoPssgEditor
         }
         private void importAllTexturesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (textureTreeView.Nodes.Count == 0)
+            if (!this.HasTextures())
             {
                 return;
             }
@@ -896,19 +897,20 @@ namespace EgoPssgEditor
                     DdsFile dds;
                     foreach (string fileName in Directory.GetFiles(directory, "*.dds"))
                     {
-                        for (int i = 0; i < textureTreeView.Nodes.Count; i++)
+                        foreach (PssgNode tex in textureObjectListView.Objects)
                         {
-                            if (Path.GetFileNameWithoutExtension(fileName) == textureTreeView.Nodes[i].Text)
+                            if (Path.GetFileNameWithoutExtension(fileName) == tex.GetAttribute("id").ToString())
                             {
                                 dds = new DdsFile(File.Open(fileName, FileMode.Open));
-                                dds.Write(((PssgNode)textureTreeView.Nodes[i].Tag));
+                                dds.Write(tex);
                                 break;
                             }
                         }
                     }
-                    if (textureTreeView.SelectedNode != null)
+
+                    if (textureObjectListView.SelectedObject != null)
                     {
-                        createPreview(((PssgNode)textureTreeView.SelectedNode.Tag));
+                        createPreview(((PssgNode)textureObjectListView.SelectedObject));
                     }
                     MessageBox.Show("Textures imported successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -921,6 +923,13 @@ namespace EgoPssgEditor
             {
                 MessageBox.Show("There was an error, could not import all textures!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private bool HasTextures()
+        {
+            System.Collections.IEnumerator objects = textureObjectListView.Objects.GetEnumerator();
+            objects.MoveNext();
+            return objects.Current != null;
         }
         #endregion
 
@@ -1065,7 +1074,7 @@ namespace EgoPssgEditor
         {
             if (mainTabControl.SelectedTab.Name == "texturesTabPage")
             {
-                textureTreeView.Focus();
+                textureObjectListView.Focus();
             }
             else if (mainTabControl.SelectedTab.Name == "cubeMapTabPage")
             {
@@ -1082,22 +1091,22 @@ namespace EgoPssgEditor
             // If No Textures Don't Select
             if (e.TabPage.Name == "texturesTabPage")
             {
-                if (textureTreeView.Nodes.Count == 0)
+                if (!this.HasTextures())
                 {
                     texturesTextBox.Text = "";
                     e.Cancel = true;
                 }
                 else
                 {
-                    TreeNode selected = textureTreeView.SelectedNode;
-                    if (selected == null)
+                    int selected = textureObjectListView.SelectedIndex;
+                    if (selected < 0)
                     {
-                        textureTreeView.SelectedNode = textureTreeView.Nodes[0];
+                        textureObjectListView.SelectedIndex = 0;
                     }
                     else
                     {
-                        textureTreeView.SelectedNode = null;
-                        textureTreeView.SelectedNode = selected;
+                        textureObjectListView.SelectedIndex = -1;
+                        textureObjectListView.SelectedIndex = selected;
                     }
                 }
             }
