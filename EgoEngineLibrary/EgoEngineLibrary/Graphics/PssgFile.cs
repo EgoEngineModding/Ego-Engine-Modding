@@ -147,6 +147,7 @@
                     this.WritePssg(fs, false);
                     using (GZipStream gzip = new GZipStream(stream, CompressionMode.Compress))
                     {
+                        fs.Seek(0, SeekOrigin.Begin);
                         fs.CopyTo(gzip);
                     }
                 }

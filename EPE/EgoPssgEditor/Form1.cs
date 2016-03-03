@@ -67,6 +67,7 @@ namespace EgoPssgEditor
                 return ((PssgNode)x).GetAttribute("id").Value;
             };
             textureObjectListView.Columns.Add(nameCol);
+            textureObjectListView.SetObjects(new List<PssgNode>());
 
             this.args = args;
         }
@@ -928,8 +929,7 @@ namespace EgoPssgEditor
         private bool HasTextures()
         {
             System.Collections.IEnumerator objects = textureObjectListView.Objects.GetEnumerator();
-            objects.MoveNext();
-            return objects.Current != null;
+            return objects.MoveNext();
         }
         #endregion
 
