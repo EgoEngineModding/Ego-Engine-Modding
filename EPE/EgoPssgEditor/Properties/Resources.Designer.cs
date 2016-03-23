@@ -61,6 +61,24 @@ namespace EgoPssgEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ego PSSG Editor 10.3.
+        /// </summary>
+        internal static string AppTitleLong {
+            get {
+                return ResourceManager.GetString("AppTitleLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to EPE 10.3.
+        /// </summary>
+        internal static string AppTitleShort {
+            get {
+                return ResourceManager.GetString("AppTitleShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap disk {

@@ -35,6 +35,7 @@ namespace EgoPssgEditor
         {
             InitializeComponent();
             this.Icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            this.Text = Properties.Resources.AppTitleLong;
             texturePictureBox.BackColor = ColorTranslator.FromHtml("#BFBFBF");
             cubeMapPictureBox.BackColor = ColorTranslator.FromHtml("#BFBFBF");
             // DataGridSetup
@@ -88,11 +89,20 @@ namespace EgoPssgEditor
                 catch (Exception excp)
                 {
                     // Fail
-                    this.Text = "Ego PSSG Editor";
+                    this.Text = Properties.Resources.AppTitleLong;
                     MessageBox.Show("The program could not open this file!" + Environment.NewLine + Environment.NewLine + excp.Message, "Could Not Open", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             args = null;
+        }
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Silently delete the temp texture preview dds file
+            try
+            {
+                File.Delete(Application.StartupPath + "\\temp.dds");
+            }
+            catch { }
         }
 
         #region MainMenu
@@ -123,7 +133,7 @@ namespace EgoPssgEditor
                 catch (Exception excp)
                 {
                     // Fail
-                    this.Text = "Ego PSSG Editor";
+                    this.Text = Properties.Resources.AppTitleLong;
                     MessageBox.Show("The program could not open this file!" + Environment.NewLine + Environment.NewLine + excp.Message, "Could Not Open", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
@@ -188,7 +198,7 @@ namespace EgoPssgEditor
                         pssg.Save(fileStream);
                     }
                     filePath = saveFileDialog.FileName;
-                    this.Text = "Ego PSSG Editor - " + Path.GetFileName(filePath);
+                    this.Text = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
                 }
                 catch (Exception ex)
                 {
@@ -210,6 +220,11 @@ namespace EgoPssgEditor
             PssgSchema.ClearSchema();
         }
 
+        private void websiteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://www.petartasev.com/modding/ego-engine/pssg-editor/");
+        }
+
         private void tag()
         {
             PssgNode node;
@@ -224,7 +239,7 @@ namespace EgoPssgEditor
                 node = pssg.RootNode;
             }
 
-            PssgAttribute attribute = node.AddAttribute("creatorApplication", "EgoPSSGEditor 10.2");
+            PssgAttribute attribute = node.AddAttribute("creatorApplication", Properties.Resources.AppTitleLong);
         }
         private void clearVars(bool clearPSSG)
         {
@@ -261,7 +276,7 @@ namespace EgoPssgEditor
             // BackEnd Tab
             mainTabControl.BringToFront();
 
-            this.Text = "Ego PSSG Editor";
+            this.Text = Properties.Resources.AppTitleLong;
             if (clearPSSG == true)
             {
                 pssg = null;
@@ -288,7 +303,7 @@ namespace EgoPssgEditor
                 mainTabControl.SelectedTab = mainTabControl.TabPages["cubeMapTabPage"];
                 mainTabControl.SelectedTab = mainTabControl.TabPages["texturesTabPage"];
             }
-            this.Text = "Ego PSSG Editor - " + Path.GetFileName(filePath);
+            this.Text = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
         }
         public enum MainTabs
         {

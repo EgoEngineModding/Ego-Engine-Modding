@@ -47,18 +47,30 @@
             }
             else // CompressedPssg
             {
+                string tempPath = Path.Combine(Application.StartupPath, "temp.pssg");
+                FileStream fs = File.Open(tempPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+
+                // Decompress stream into temp file
                 using (stream)
                 {
-                    FileStream fs = File.Open(Path.Combine(Application.StartupPath, "temp.pssg"), FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-
                     using (GZipStream gZipStream = new GZipStream(stream, CompressionMode.Decompress))
                     {
                         gZipStream.CopyTo(fs);
                     }
-
-                    fs.Seek(0, SeekOrigin.Begin);
-                    return PssgFile.ReadPssg(fs, fileType);
                 }
+
+                // Read temp file, and close it
+                fs.Seek(0, SeekOrigin.Begin);
+                PssgFile pFile = PssgFile.ReadPssg(fs, fileType);
+
+                // Attempt to delete the temporary file
+                try
+                {
+                    File.Delete(tempPath);
+                }
+                catch { }
+
+                return pFile;
             }
         }
         private static PssgFileType GetPssgType(Stream stream)
@@ -142,7 +154,8 @@
             }
             else // CompressedPssg
             {
-                using (FileStream fs = File.Open(Path.Combine(Application.StartupPath, "temp.pssg"), FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+                string tempPath = Path.Combine(Application.StartupPath, "temp.pssg");
+                using (FileStream fs = File.Open(tempPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                 {
                     this.WritePssg(fs, false);
                     using (GZipStream gzip = new GZipStream(stream, CompressionMode.Compress))
@@ -151,6 +164,13 @@
                         fs.CopyTo(gzip);
                     }
                 }
+
+                // Attempt to delete the temporary file
+                try
+                {
+                    File.Delete(tempPath);
+                }
+                catch { }
             }
         }
         public void WritePssg(Stream fileStream, bool close)

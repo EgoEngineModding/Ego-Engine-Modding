@@ -82,6 +82,8 @@
             this.cubeMapToolStrip = new System.Windows.Forms.ToolStrip();
             this.cubeMapExportToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.cubeMapImportToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.websiteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip.SuspendLayout();
             this.mainTabControl.SuspendLayout();
             this.allTabPage.SuspendLayout();
@@ -113,7 +115,8 @@
             this.schemaToolStripMenuItem,
             this.nodesToolStripMenuItem,
             this.texturesToolStripMenuItem,
-            this.termpToolStripMenuItem});
+            this.termpToolStripMenuItem,
+            this.helpToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Size = new System.Drawing.Size(792, 24);
@@ -615,6 +618,21 @@
             this.cubeMapImportToolStripButton.Text = "Import";
             this.cubeMapImportToolStripButton.Click += new System.EventHandler(this.cubeMapImportToolStripButton_Click);
             // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.websiteToolStripMenuItem});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Text = "Help";
+            // 
+            // websiteToolStripMenuItem
+            // 
+            this.websiteToolStripMenuItem.Name = "websiteToolStripMenuItem";
+            this.websiteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.websiteToolStripMenuItem.Text = "Website";
+            this.websiteToolStripMenuItem.Click += new System.EventHandler(this.websiteToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -625,6 +643,7 @@
             this.MainMenuStrip = this.menuStrip;
             this.Name = "Form1";
             this.Text = "Ego PSSG Editor";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
@@ -715,6 +734,8 @@
         private System.Windows.Forms.ToolStripMenuItem saveAsXmlToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveAsOpenedToolStripMenuItem;
         private BrightIdeasSoftware.ObjectListView textureObjectListView;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem websiteToolStripMenuItem;
     }
 }
 
