@@ -1,0 +1,201 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: !pkg.bt
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+LittleEndian();
+
+typedef struct
+{
+    uint32 offset : 24;
+    uint32 type : 8;
+} OffsetData <read=dispDataAtOffset>;
+
+string dispOffsetData(OffsetData &data)
+{
+    string s;
+    SPrintf(s, "%u : %u", data.offset, data.type);
+    return s;
+}
+
+string dispDataAtOffset(OffsetData &data)
+{
+    string s;
+    
+    if (data.type == 128)
+    {
+        SPrintf(s, "%s", dispOffsetData(data));
+    }
+    else
+    {
+        SPrintf(s, "%s", dispData(ReadUInt(vca.offset + 8 + 4 * data.type) << 8 >> 8, data.offset));
+    }
+
+    return s;
+}
+
+string dispData(uint32 offset, uint32 index)
+{
+    string s;
+
+    string magic = ReadString(offset, 4);
+    if (magic == "!sbi")
+    {
+        SPrintf(s, "%s", ReadString(offset + index + 9));
+    }
+    else if (magic == "!vbi")
+    {
+        string type = ReadString(offset + 4, 4);
+        uint32 numData = ReadUInt(offset + 8);
+        uint32 bytePerData = ReadUInt(offset + 12);
+        uint32 dataOffset = offset + 16 + bytePerData * index;
+        if (type == "ui32")
+        {
+            SPrintf(s, "%u", ReadUInt(dataOffset));
+        }
+        else if (type == "ui64")
+        {
+            SPrintf(s, "%u", ReadUInt64(dataOffset));
+        }
+        else if (type == "fp32")
+        {
+            SPrintf(s, "%f", ReadFloat(dataOffset));
+        }
+        else if (type == "bool")
+        {
+            SPrintf(s, "%X", ReadByte(dataOffset));
+        }
+        else if (type == "rgba")
+        {
+            SPrintf(s, "%X", ReadUInt(dataOffset));
+        }
+        else if (type == "woid")
+        {
+            SPrintf(s, "%LX%LX", ReadUInt64(dataOffset), ReadUInt64(dataOffset + 8));
+        }
+        else if (type == "shnm")
+        {
+            SPrintf(s, "%s", ReadString(dataOffset, bytePerData));
+        }
+        else if (type == "vec3")
+        {
+            SPrintf(s, "%f %f %f", ReadFloat(dataOffset), ReadFloat(dataOffset + 4), ReadFloat(dataOffset + 8));
+        }
+        else if (type == "mat4")
+        {
+            SPrintf(s, "mat4 Data Type Not Implemented!");
+        }
+        else
+        {
+            SPrintf(s, "%s Data Type Not Implemented!", type);
+        }
+    }
+
+    return s;
+}
+
+string dispIliData(struct ili &data)
+{
+    return dispDataAtOffset(data.data);
+}
+
+char magic[4];
+char magic2[4];
+OffsetData firstElem;
+OffsetData vca;
+
+while (!FEof())
+{
+    struct {char magic3[4];} m;
+    if (m.magic3 == "!idi")
+    {
+        struct {
+        int numILI;
+        struct
+        {
+            OffsetData data1;
+            OffsetData data2;
+        } data[numILI] <optimize=false>;
+        } idi;
+    }
+    else if (m.magic3 == "!ili")
+    {
+        struct {
+            int numILI;
+            OffsetData data[numILI] <read=dispDataAtOffset>;
+        } ili;
+    }
+    else if (m.magic3 == "!iar")
+    {
+        uint64 iarUnk;
+    }
+    else if (m.magic3 == "!vca")
+    {
+        uint32 numVca;
+        OffsetData vcaDat[numVca];
+    }
+    else if (m.magic3 == "!sbi")
+    {
+        uint32 sbiLength;
+        local uint64 i = FTell() + sbiLength;
+        byte strData[sbiLength];
+        byte padding[-FTell() & 3];
+/*
+        while (FTell() < i)
+        {
+            struct {
+                byte strLen;
+                string str;
+            } strData;
+        }*/
+    }
+    else if (m.magic3 == "!vbi")
+    {
+        struct  {
+            char type[4];
+            uint32 numData;
+            uint32 bytePerData;
+            if (type == "ui32")
+            {
+                uint32 data[numData];
+                byte padding[-(numData*bytePerData) & 3];
+            }
+            else if (type == "fp32")
+            {
+                float data[numData];
+                byte padding[-(numData*bytePerData) & 3];
+            }
+            else if (type == "bool")
+            {
+                byte data[numData];
+                byte padding[-(numData*bytePerData) & 3];
+            }
+            else if (type == "rgba")
+            {
+                struct { ubyte rgba[4]; } data[numData];
+                byte padding[-(numData*bytePerData) & 15];
+            }
+            else if (type == "mat4")
+            {
+                struct { float mat4[16]; } data[numData];
+                byte padding[-(numData*bytePerData) & 3];
+            }
+            else
+            {
+                byte data[numData*bytePerData];
+                byte padding[-(numData*bytePerData) & 3];
+            }
+        } vbi;
+    }
+    else
+    {
+        break;
+    }
+}
