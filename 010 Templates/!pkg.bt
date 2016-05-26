@@ -21,7 +21,7 @@ typedef struct
 string dispOffsetData(OffsetData &data)
 {
     string s;
-    SPrintf(s, "%u : %u", data.offset, data.type);
+    SPrintf(s, "(%u, %u)", data.offset, data.type);
     return s;
 }
 
@@ -35,7 +35,8 @@ string dispDataAtOffset(OffsetData &data)
     }
     else
     {
-        SPrintf(s, "%s", dispData(ReadUInt(vca.offset + 8 + 4 * data.type) << 8 >> 8, data.offset));
+        // Get the offset to the type in vca table
+        SPrintf(s, "%s", dispData(main.children[1].elements[data.type].data.offset, data.offset));
     }
 
     return s;
@@ -101,101 +102,143 @@ string dispData(uint32 offset, uint32 index)
     return s;
 }
 
-string dispIliData(struct ili &data)
+string dispIdiElement(struct Idi &element)
 {
-    return dispDataAtOffset(data.data);
+    return dispDataAtOffset(element.data1) + " : " + dispDataAtOffset(element.data2);
 }
 
-char magic[4];
-char magic2[4];
-OffsetData firstElem;
-OffsetData vca;
-
-while (!FEof())
+string dispIliElement(struct Ili &element)
 {
-    struct {char magic3[4];} m;
-    if (m.magic3 == "!idi")
+    return dispDataAtOffset(element.data);
+}
+
+string dispVcaElement(struct Vca &element)
+{
+    if (element.children.magic == "!vbi")
     {
-        struct {
-        int numILI;
-        struct
-        {
-            OffsetData data1;
-            OffsetData data2;
-        } data[numILI] <optimize=false>;
-        } idi;
-    }
-    else if (m.magic3 == "!ili")
-    {
-        struct {
-            int numILI;
-            OffsetData data[numILI] <read=dispDataAtOffset>;
-        } ili;
-    }
-    else if (m.magic3 == "!iar")
-    {
-        uint64 iarUnk;
-    }
-    else if (m.magic3 == "!vca")
-    {
-        uint32 numVca;
-        OffsetData vcaDat[numVca];
-    }
-    else if (m.magic3 == "!sbi")
-    {
-        uint32 sbiLength;
-        local uint64 i = FTell() + sbiLength;
-        byte strData[sbiLength];
-        byte padding[-FTell() & 3];
-/*
-        while (FTell() < i)
-        {
-            struct {
-                byte strLen;
-                string str;
-            } strData;
-        }*/
-    }
-    else if (m.magic3 == "!vbi")
-    {
-        struct  {
-            char type[4];
-            uint32 numData;
-            uint32 bytePerData;
-            if (type == "ui32")
-            {
-                uint32 data[numData];
-                byte padding[-(numData*bytePerData) & 3];
-            }
-            else if (type == "fp32")
-            {
-                float data[numData];
-                byte padding[-(numData*bytePerData) & 3];
-            }
-            else if (type == "bool")
-            {
-                byte data[numData];
-                byte padding[-(numData*bytePerData) & 3];
-            }
-            else if (type == "rgba")
-            {
-                struct { ubyte rgba[4]; } data[numData];
-                byte padding[-(numData*bytePerData) & 15];
-            }
-            else if (type == "mat4")
-            {
-                struct { float mat4[16]; } data[numData];
-                byte padding[-(numData*bytePerData) & 3];
-            }
-            else
-            {
-                byte data[numData*bytePerData];
-                byte padding[-(numData*bytePerData) & 3];
-            }
-        } vbi;
+        return element.children.type;
     }
     else
     {
-        break;
+        return element.children.magic;
     }
 }
+
+string dispChunk(struct Chunk &chunk)
+{
+    return chunk.magic;
+}
+
+typedef struct
+{
+    char magic[4];
+
+    if (magic == "!pkg")
+    {
+        char type[4];
+        local int64 currOffset = FTell();
+        OffsetData firstElement;
+        OffsetData vcaElement;
+        FSeek(firstElement.offset);
+        struct Chunk children;
+        FSeek(vcaElement.offset);
+        struct Chunk children;
+    }
+    else if (magic == "!idi")
+    {
+        uint32 numElements;
+        struct Idi
+        {
+            OffsetData data1;
+            OffsetData data2;
+
+            local int64 currOffset = FTell();
+            if (data2.type == 128)
+            {
+                FSeek(data2.offset);
+                struct Chunk children;
+            }
+            FSeek(currOffset);
+        } elements[numElements] <optimize=false, read=dispIdiElement>;
+    }
+    else if (magic == "!ili")
+    {
+        uint32 numElements;
+        struct Ili
+        {
+            OffsetData data;
+
+            local int64 currOffset = FTell();
+            if (data.type == 128)
+            {
+                FSeek(data.offset);
+                struct Chunk children;
+            }
+            FSeek(currOffset);
+        } elements[numElements] <optimize=false, read=dispIliElement>;
+    }
+    else if (magic == "!iar")
+    {
+        uint64 iarUnk;
+    }
+    else if (magic == "!vca")
+    {
+        uint32 numElements;
+        struct Vca
+        {
+            OffsetData data;
+
+            local int64 currOffset = FTell();
+            if (data.type == 128)
+            {
+                FSeek(data.offset);
+                struct Chunk children;
+            }
+            FSeek(currOffset);
+        } elements[numElements] <optimize=false, read=dispVcaElement>;
+    }
+    else if (magic == "!sbi")
+    {
+        uint32 sbiLength;
+        byte strData[sbiLength];
+        byte padding[-FTell() & 3];
+    }
+    else if (magic == "!vbi")
+    {
+        char type[4];
+        uint32 numData;
+        uint32 bytePerData;
+        if (type == "ui32")
+        {
+            uint32 data[numData];
+            byte padding[-(numData*bytePerData) & 3];
+        }
+        else if (type == "fp32")
+        {
+            float data[numData];
+            byte padding[-(numData*bytePerData) & 3];
+        }
+        else if (type == "bool")
+        {
+            byte data[numData];
+            byte padding[-(numData*bytePerData) & 3];
+        }
+        else if (type == "rgba")
+        {
+            struct { ubyte rgba[4]; } data[numData];
+            byte padding[-(numData*bytePerData) & 15];
+        }
+        else if (type == "mat4")
+        {
+            struct { float mat4[16]; } data[numData];
+            byte padding[-(numData*bytePerData) & 3];
+        }
+        else
+        {
+            byte data[numData*bytePerData];
+            byte padding[-(numData*bytePerData) & 3];
+        }
+    }
+} Chunk <read=dispChunk>;
+
+struct Chunk main;
