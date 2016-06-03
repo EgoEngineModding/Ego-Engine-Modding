@@ -52,6 +52,18 @@
                 }
             }
         }
+
+        public string DisplayValue
+        {
+            get
+            {
+                return this.ToString();
+            }
+            set
+            {
+                this.Value = this.FromString(value);
+            }
+        }
         public bool IsDataNode
         {
             get
@@ -643,31 +655,7 @@
             }
             else
             {
-                string[] values = value.Split(new string[] { "\r", "\n", " " }, StringSplitOptions.RemoveEmptyEntries);
-                byte[] bytes = new byte[values.Length];
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    int hi;
-                    int lo;
-
-                    if (values[i].Length == 1)
-                    {
-                        lo = values[i][0] - 97;
-
-                        lo = lo + 10 + ((lo >> 31) & 7) & 0x0f;
-                        bytes[i] = (byte)lo;
-                    }
-                    else
-                    {
-                        hi = values[i][0] - 97;
-                        lo = values[i][1] - 97;
-
-                        hi = hi + 10 + ((hi >> 31) & 7);
-                        lo = lo + 10 + ((lo >> 31) & 7) & 0x0f;
-                        bytes[i] = (byte)(lo | hi << 4);
-                    }
-                }
-                return bytes;
+                return HexHelper.HexLineToByteUsingByteManipulation(value);
             }
         }
     }

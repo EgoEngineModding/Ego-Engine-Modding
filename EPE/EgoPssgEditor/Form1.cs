@@ -737,8 +737,7 @@ namespace EgoPssgEditor
                     texturePictureBox.Image = null;
                 }
                 // Setup New Image
-                FREE_IMAGE_FORMAT format = FREE_IMAGE_FORMAT.FIF_DDS;
-                System.Drawing.Bitmap image = FreeImage.LoadBitmap(Application.StartupPath + "\\temp.dds", FREE_IMAGE_LOAD_FLAGS.DEFAULT, ref format);
+                System.Drawing.Bitmap image = FreeImage.GetBitmap(FreeImage.Load(FREE_IMAGE_FORMAT.FIF_DDS, Application.StartupPath + "\\temp.dds", FREE_IMAGE_LOAD_FLAGS.DEFAULT));
                 if (image.Height <= height && image.Width <= width)
                 {
                     texturePictureBox.Dock = DockStyle.None;

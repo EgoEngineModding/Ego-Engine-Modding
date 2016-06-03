@@ -44,6 +44,18 @@
                 }
             }
         }
+
+        public string DisplayValue
+        {
+            get
+            {
+                return this.ToString();
+            }
+            set
+            {
+                this.Value = this.FromString(value);
+            }
+        }
         public override string ToString()
         {
             if (ValueType == typeof(byte[]))
@@ -57,7 +69,7 @@
         }
         public object FromString(string value)
         {
-            Type valueType = this.AttributeInfo.DataType;// PssgSchema.GetAttributeType(ParentNode.Name, this.Name);
+            Type valueType = this.AttributeInfo.DataType;
             if (valueType == typeof(string))
             {
                 return value;

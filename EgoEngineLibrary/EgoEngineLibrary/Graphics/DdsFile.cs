@@ -57,7 +57,7 @@
                     header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT5"), 0);
                     break;
                 case "ui8x4":
-                    header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    header.flags |= DdsHeader.Flags.DDSD_PITCH;
                     header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value); // is this right?
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_ALPHAPIXELS | DdsPixelFormat.Flags.DDPF_RGB;
                     header.ddspf.fourCC = 0;
@@ -68,7 +68,7 @@
                     header.ddspf.aBitMask = 0xFF000000;
                     break;
                 case "u8":
-                    header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    header.flags |= DdsHeader.Flags.DDSD_PITCH;
                     header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value); // is this right?
                     // Interchanging the commented values will both work, not sure which is better
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_LUMINANCE;
