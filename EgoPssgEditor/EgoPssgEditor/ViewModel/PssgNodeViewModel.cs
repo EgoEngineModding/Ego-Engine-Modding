@@ -23,7 +23,7 @@ namespace EgoPssgEditor.ViewModel
         }
         public override string DisplayName
         {
-            get { return node.Name; }
+            get { return node?.Name; }
         }
         public string DisplayValue
         {
@@ -78,12 +78,12 @@ namespace EgoPssgEditor.ViewModel
             {
                 if (value != isSelected)
                 {
-                    isSelected = value;
                     if (value)
                     {
                         if (parent != null) parent.IsExpanded = true;
                         GetAttributes();
                     }
+                    isSelected = value;
                     OnPropertyChanged("IsSelected");
                 }
             }
@@ -124,7 +124,7 @@ namespace EgoPssgEditor.ViewModel
             attributes.Clear();
             foreach (PssgAttribute attr in node.Attributes)
             {
-                attributes.Add(new PssgAttributeViewModel(attr));
+                attributes.Add(new PssgAttributeViewModel(attr, this));
             }
         }
     }

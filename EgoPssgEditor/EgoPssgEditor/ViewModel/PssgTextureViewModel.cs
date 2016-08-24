@@ -12,23 +12,27 @@ namespace EgoPssgEditor.ViewModel
 {
     public class PssgTextureViewModel : ViewModelBase
     {
-        PssgNode texture;
+        readonly PssgNodeViewModel nodeView;
 
         public PssgNode Texture
         {
-            get { return texture; }
+            get { return nodeView.Node; }
+        }
+        public PssgNodeViewModel NodeView
+        {
+            get { return nodeView; }
         }
         public override string DisplayName
         {
-            get { return texture.Attributes["id"].DisplayValue; }
+            get { return Texture.Attributes["id"].DisplayValue; }
         }
         public int Width
         {
-            get { return (int)(uint)texture.Attributes["width"].Value; }
+            get { return (int)(uint)Texture.Attributes["width"].Value; }
         }
         public int Height
         {
-            get { return (int)(uint)texture.Attributes["height"].Value; }
+            get { return (int)(uint)Texture.Attributes["height"].Value; }
         }
 
         #region Presentation Props
@@ -45,7 +49,12 @@ namespace EgoPssgEditor.ViewModel
                 if (value != isSelected)
                 {
                     isSelected = value;
-                    if (value) GetPreview(); else preview = null;
+                    if (value)
+                    {
+                        Task.Run(() => GetPreview()).Wait();
+                        NodeView.IsSelected = true;
+                    }
+                    else { preview = null; }
                     OnPropertyChanged("IsSelected");
                 }
             }
@@ -67,9 +76,9 @@ namespace EgoPssgEditor.ViewModel
         }
         #endregion
 
-        public PssgTextureViewModel(PssgNode texture)
+        public PssgTextureViewModel(PssgNodeViewModel nodeView)
         {
-            this.texture = texture;
+            this.nodeView = nodeView;
         }
 
         public void GetPreview()
@@ -77,7 +86,7 @@ namespace EgoPssgEditor.ViewModel
             try
             {
                 this.Preview = null;
-                DdsFile dds = new DdsFile(texture, false);
+                DdsFile dds = new DdsFile(Texture, false);
                 dds.Write(File.Open(System.AppDomain.CurrentDomain.BaseDirectory + "\\temp.dds", FileMode.Create, FileAccess.ReadWrite, FileShare.Read), -1);
                 int maxDimension = (int)Math.Max(dds.header.width, dds.header.height);
 

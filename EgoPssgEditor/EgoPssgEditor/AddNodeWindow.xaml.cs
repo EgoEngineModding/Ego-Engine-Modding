@@ -1,8 +1,6 @@
 ﻿using EgoEngineLibrary.Graphics;
-using EgoPssgEditor.ViewModel;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,26 +11,33 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace EgoPssgEditor
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for AddNodeWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class AddNodeWindow : Window
     {
-        readonly MainViewModel view;
-        public MainWindow()
+        public AddNodeWindow()
         {
             InitializeComponent();
-            view = this.DataContext as MainViewModel;
+
+            // NodeInfo Combo
+            nodeNameComboBox.ItemsSource = (PssgSchema.GetNodeNames());
+            // Select
+            nodeNameComboBox.SelectedIndex = 0;
         }
 
-        private void websiteMenuItem_Click(object sender, RoutedEventArgs e)
+        private void okButton_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://www.petartasev.com/modding/ego-engine/pssg-editor/");
+            this.DialogResult = true;
+        }
+        
+        public string NodeName
+        {
+            get { return nodeNameComboBox.Text; }
         }
     }
 }

@@ -7,11 +7,14 @@
         xmlns:eel_graphics="clr-namespace:EgoEngineLibrary.Graphics;assembly=EgoEngineLibrary"
         xmlns:vm="clr-namespace:EgoPssgEditor.ViewModel"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        xmlns:mvvm_light="http://www.galasoft.ch/mvvmlight"
         xmlns:imageLib="clr-namespace:CSharpImageLibrary;assembly=CSharpImageLibrary"
         mc:Ignorable="d"
         Title="{Binding DisplayName}" Height="600" Width="800"
         DataContext="{Binding Source={StaticResource MainVM}}">
+    <Window.InputBindings>
+        <KeyBinding Key="O" Modifiers="Control" Command="{Binding Path=OpenCommand}"></KeyBinding>
+        <KeyBinding Key="S" Modifiers="Control" Command="{Binding Path=SaveCommand}"></KeyBinding>
+    </Window.InputBindings>
 
     <DockPanel>
         <Menu x:Name="mainMenu" DockPanel.Dock="Top" IsMainMenu="True">
@@ -21,15 +24,19 @@
                         <Image Source="pack://application:,,,/Resources/image_add.png"></Image>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="_Open" Command="{Binding Path=OpenCommand}">
+                <MenuItem Header="_Open" Command="{Binding Path=OpenCommand}" InputGestureText="Ctrl+O">
                     <MenuItem.Icon>
                         <Image Source="pack://application:,,,/Resources/folder_image.png"></Image>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="_Save" Command="{Binding Path=SaveCommand}">
+                <MenuItem Header="_Save">
                     <MenuItem.Icon>
                         <Image Source="pack://application:,,,/Resources/disk.png"/>
                     </MenuItem.Icon>
+                    <MenuItem Header="Save As _Opened" Command="{Binding Path=SaveCommand}" InputGestureText="Ctrl+S"></MenuItem>
+                    <MenuItem Header="Save As _Pssg" Command="{Binding Path=SavePssgCommand}"></MenuItem>
+                    <MenuItem Header="Save As _Compressed" Command="{Binding Path=SaveCompressedCommand}"></MenuItem>
+                    <MenuItem Header="Save As _Xml" Command="{Binding Path=SaveXmlCommand}"></MenuItem>
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="_Nodes">
@@ -37,21 +44,32 @@
                 <MenuItem Header="_Import" Command="{Binding Path=NodesWorkspace.Import}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
                 <MenuItem Header="E_xport Data" Command="{Binding Path=NodesWorkspace.ExportData}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
                 <MenuItem Header="I_mport Data" Command="{Binding Path=NodesWorkspace.ImportData}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="Add _Node" Command="{Binding Path=NodesWorkspace.AddNode}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Remove Node" Command="{Binding Path=NodesWorkspace.RemoveNode}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="Add _Attribute" Command="{Binding Path=NodesWorkspace.AddAttribute}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="Rem_ove Attribute" Command="{Binding Path=NodesWorkspace.RemoveAttribute}" CommandParameter="{Binding ElementName=attributesDataGrid, Path=SelectedItem}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Textures">
                 <MenuItem Header="_Export" Command="{Binding Path=TexturesWorkspace.Export}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
                 <MenuItem Header="_Import" Command="{Binding Path=TexturesWorkspace.Import}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
                 <MenuItem Header="E_xport All" Command="{Binding Path=TexturesWorkspace.ExportTextures}"></MenuItem>
                 <MenuItem Header="I_mport All" Command="{Binding Path=TexturesWorkspace.ImportTextures}"></MenuItem>
+                <MenuItem Header="_Duplicate Texture" Command="{Binding Path=TexturesWorkspace.DuplicateTexture}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Remove Texture" Command="{Binding Path=TexturesWorkspace.RemoveTextureC}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Schema">
-                
+                <MenuItem Header="_Load" Command="{Binding Path=LoadSchema}"></MenuItem>
+                <MenuItem Header="_Save" Command="{Binding Path=SaveSchema}"></MenuItem>
+                <MenuItem Header="_Clear" Command="{Binding Path=ClearSchema}"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_Website" Name="websiteMenuItem" Click="websiteMenuItem_Click"></MenuItem>
             </MenuItem>
         </Menu>
 
 
-        <TabControl>
-            <TabItem Header="Nodes" DataContext="{Binding Path=NodesWorkspace}">
+        <TabControl SelectedIndex="{Binding SelectedTabIndex}">
+            <TabItem Header="{Binding DisplayName}" DataContext="{Binding Path=NodesWorkspace}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="240" />
@@ -110,7 +128,7 @@
                         </Grid.RowDefinitions>
 
                         <DockPanel>
-                            <DataGrid ItemsSource="{Binding ElementName=tvMain, Path=SelectedItem.Attributes}" AutoGenerateColumns="False" CanUserResizeRows="False" Background="Gray">
+                            <DataGrid Name="attributesDataGrid" ItemsSource="{Binding ElementName=tvMain, Path=SelectedItem.Attributes}" AutoGenerateColumns="False" CanUserResizeRows="False" CanUserDeleteRows="False" Background="Gray">
                                 <DataGrid.RowHeaderStyle>
                                     <Style TargetType="{x:Type DataGridRowHeader}">
                                         <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"></Setter>
@@ -138,7 +156,7 @@
                     </Grid>
                 </Grid>
             </TabItem>
-            <TabItem Header="Textures" DataContext="{Binding Path=TexturesWorkspace}">
+            <TabItem Header="{Binding DisplayName}" DataContext="{Binding Path=TexturesWorkspace}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="240" />
@@ -147,7 +165,7 @@
                     </Grid.ColumnDefinitions>
                     <DockPanel>
                         <TextBox DockPanel.Dock="Top" Name="texSearchBox" Text="{Binding Path=FilterText, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                        <ListView Name="texListView" ItemsSource="{Binding Path=Textures}" SelectionMode="Single" SelectionChanged="texListView_SelectionChanged">
+                        <ListView Name="texListView" ItemsSource="{Binding Path=Textures}" SelectionMode="Single">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="{x:Type ListViewItem}">
                                     <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />

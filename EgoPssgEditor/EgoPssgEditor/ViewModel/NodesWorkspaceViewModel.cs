@@ -22,10 +22,10 @@ namespace EgoPssgEditor.ViewModel
 
         public override string DisplayName
         {
-	        get 
-	        { 
-		         return "All Data";
-	        }
+            get
+            {
+                return "All Nodes";
+            }
         }
         public PssgNodeViewModel RootNode
         {
@@ -43,6 +43,9 @@ namespace EgoPssgEditor.ViewModel
         }
         #endregion
 
+        #region Presentation Props
+        #endregion
+
         public NodesWorkspaceViewModel(MainViewModel mainView)
             : base(mainView)
         {
@@ -52,11 +55,16 @@ namespace EgoPssgEditor.ViewModel
             import = new RelayCommand(Import_Execute, Import_CanExecute);
             exportData = new RelayCommand(ExportData_Execute, ExportData_CanExecute);
             importData = new RelayCommand(ImportData_Execute, ImportData_CanExecute);
+
+            addNode = new RelayCommand(AddNode_Execute, AddNode_CanExecute);
+            removeNode = new RelayCommand(RemoveNode_Execute, RemoveNode_CanExecute);
+            addAttribute = new RelayCommand(AddAttribute_Execute, AddAttribute_CanExecute);
+            removeAttribute = new RelayCommand(RemoveAttribute_Execute, RemoveAttribute_CanExecute);
         }
 
-        public override void LoadData(PssgFile file)
+        public override void LoadData(object data)
         {
-            RootNode = new PssgNodeViewModel(file.RootNode);
+            RootNode = new PssgNodeViewModel(((PssgFile)data).RootNode);
             RootNode.IsExpanded = true;
         }
 
@@ -71,6 +79,11 @@ namespace EgoPssgEditor.ViewModel
         readonly RelayCommand import;
         readonly RelayCommand exportData;
         readonly RelayCommand importData;
+
+        readonly RelayCommand addNode;
+        readonly RelayCommand removeNode;
+        readonly RelayCommand addAttribute;
+        readonly RelayCommand removeAttribute;
 
         public RelayCommand Export
         {
@@ -87,6 +100,23 @@ namespace EgoPssgEditor.ViewModel
         public RelayCommand ImportData
         {
             get { return importData; }
+        }
+
+        public RelayCommand AddNode
+        {
+            get { return addNode; }
+        }
+        public RelayCommand RemoveNode
+        {
+            get { return removeNode; }
+        }
+        public RelayCommand AddAttribute
+        {
+            get { return addAttribute; }
+        }
+        public RelayCommand RemoveAttribute
+        {
+            get { return removeAttribute; }
         }
 
         private bool Export_CanExecute(object parameter)
@@ -152,7 +182,6 @@ namespace EgoPssgEditor.ViewModel
                         PssgNode newNode = new PssgNode((XElement)((XElement)xDoc.FirstNode).FirstNode, node.File, node.ParentNode);
                         if (node.ParentNode != null)
                         {
-                            mainView.TexturesWorkspace.SetTexture(node, newNode);
                             node = node.ParentNode.SetChild(node, newNode);
                             int index = nodeView.Parent.Children.IndexOf(nodeView);
                             PssgNodeViewModel newNodeView = new PssgNodeViewModel(node, nodeView.Parent);
@@ -161,11 +190,13 @@ namespace EgoPssgEditor.ViewModel
                         }
                         else
                         {
-                            mainView.TexturesWorkspace.SetTexture(node, newNode);
                             node.File.RootNode = newNode;
                             LoadData(node.File);
                             rootNode.IsSelected = true;
                         }
+
+                        mainView.TexturesWorkspace.ClearData();
+                        mainView.TexturesWorkspace.LoadData(RootNode);
                     }
                 }
                 catch (Exception ex)
@@ -238,6 +269,75 @@ namespace EgoPssgEditor.ViewModel
                         ex.Message, "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
+
+        private bool AddNode_CanExecute(object parameter)
+        {
+            return parameter != null;
+        }
+        private void AddNode_Execute(object parameter)
+        {
+            PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
+            AddNodeWindow aaw = new AddNodeWindow();
+
+            if (aaw.ShowDialog() == true)
+            {
+                PssgNode newNode = nodeView.Node.AppendChild(aaw.NodeName);
+
+                if (newNode == null)
+                {
+                    return;
+                }
+
+                PssgNodeViewModel newNodeView = new PssgNodeViewModel(newNode, nodeView);
+                nodeView.Children.Add(newNodeView);
+            }
+        }
+        private bool RemoveNode_CanExecute(object parameter)
+        {
+            return parameter != null && parameter != RootNode;
+        }
+        private void RemoveNode_Execute(object parameter)
+        {
+            PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
+            nodeView.Node.ParentNode.RemoveChild(nodeView.Node);
+
+            nodeView.Parent.Children.Remove(nodeView);
+            mainView.TexturesWorkspace.RemoveTexture(nodeView);
+        }
+
+        private bool AddAttribute_CanExecute(object parameter)
+        {
+            return parameter != null;
+        }
+        private void AddAttribute_Execute(object parameter)
+        {
+            PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
+            AddAttributeWindow aaw = new AddAttributeWindow();
+
+            if (aaw.ShowDialog() == true)
+            {
+                PssgAttribute attr = nodeView.Node.AddAttribute(aaw.AttributeName, Convert.ChangeType(aaw.Value, aaw.AttributeValueType));
+                if (attr == null)
+                {
+                    return;
+                }
+
+                nodeView.IsSelected = false;
+                nodeView.IsSelected = true;
+            }
+        }
+        private bool RemoveAttribute_CanExecute(object parameter)
+        {
+            return parameter != null;
+        }
+        private void RemoveAttribute_Execute(object parameter)
+        {
+            PssgAttributeViewModel attrView = (PssgAttributeViewModel)parameter;
+
+            attrView.Attribute.ParentNode.RemoveAttribute(attrView.Attribute.Name);
+            attrView.Parent.IsSelected = false;
+            attrView.Parent.IsSelected = true;
         }
         #endregion
     }

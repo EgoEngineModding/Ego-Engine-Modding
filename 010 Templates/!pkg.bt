@@ -91,7 +91,11 @@ string dispData(uint32 offset, uint32 index)
         }
         else if (type == "mat4")
         {
-            SPrintf(s, "mat4 Data Type Not Implemented!");
+            SPrintf(s, "%f %f %f %f, %f %f %f %f, %f %f %f %f, %f %f %f %f", 
+ReadFloat(dataOffset), ReadFloat(dataOffset + 4), ReadFloat(dataOffset + 8), ReadFloat(dataOffset + 12), 
+ReadFloat(dataOffset + 16), ReadFloat(dataOffset + 20), ReadFloat(dataOffset + 24), ReadFloat(dataOffset + 28), 
+ReadFloat(dataOffset + 32), ReadFloat(dataOffset + 36), ReadFloat(dataOffset + 40), ReadFloat(dataOffset + 44), 
+ReadFloat(dataOffset + 48), ReadFloat(dataOffset + 52), ReadFloat(dataOffset + 56), ReadFloat(dataOffset + 60));
         }
         else
         {

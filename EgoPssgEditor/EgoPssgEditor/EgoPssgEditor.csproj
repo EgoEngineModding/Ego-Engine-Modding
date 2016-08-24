@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>EgoPssgEditor</RootNamespace>
-    <AssemblyName>EgoPssgEditor</AssemblyName>
+    <AssemblyName>Ego PSSG Editor</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -26,6 +26,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -35,6 +36,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Resources\Ryder25.ico</ApplicationIcon>
@@ -74,7 +76,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DuplicateTextureWindow.xaml.cs">
+      <DependentUpon>DuplicateTextureWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddNodeWindow.xaml.cs">
+      <DependentUpon>AddNodeWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AddAttributeWindow.xaml.cs">
+      <DependentUpon>AddAttributeWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RelayCommand.cs" />
+    <Compile Include="ViewModel\CubeMapWorkspaceViewModel.cs" />
     <Compile Include="ViewModel\NodesWorkspaceViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\PssgAttributeViewModel.cs" />
@@ -83,6 +95,18 @@
     <Compile Include="ViewModel\TexturesWorkspaceViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
     <Compile Include="ViewModel\WorkspaceViewModel.cs" />
+    <Page Include="DuplicateTextureWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddNodeWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="AddAttributeWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

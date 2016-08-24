@@ -7,12 +7,12 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("EgoPssgEditor")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Ego PSSG Editor")]
+[assembly: AssemblyDescription("Opens Ego Engine pssg files")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("EgoPssgEditor")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
+[assembly: AssemblyCompany("Petar Tasev")]
+[assembly: AssemblyProduct("Ego PSSG Editor")]
+[assembly: AssemblyCopyright("Copyright © Petar Tasev 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -1,0 +1,30 @@
+﻿<Window x:Class="EgoPssgEditor.DuplicateTextureWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EgoPssgEditor"
+        mc:Ignorable="d"
+        Title="Duplicate Texture" Height="150" Width="300" WindowStyle="ToolWindow" ResizeMode="NoResize">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Height="40" HorizontalAlignment="Right">
+            <Button Name="okButton" Margin="10" Width="50" Click="okButton_Click">Ok</Button>
+        </StackPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="10"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="10"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="1" Grid.Column="1">
+                <Label>Attribute Name</Label>
+                <TextBox Name="textureNameTextBox"></TextBox>
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</Window>

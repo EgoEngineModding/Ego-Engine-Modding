@@ -16,7 +16,7 @@ namespace EgoPssgEditor.ViewModel
             this.mainView = mainView;
         }
 
-        public abstract void LoadData(PssgFile file);
+        public abstract void LoadData(object data);
 
         public abstract void ClearData();
     }

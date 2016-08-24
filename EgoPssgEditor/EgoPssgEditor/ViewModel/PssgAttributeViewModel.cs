@@ -9,7 +9,17 @@ namespace EgoPssgEditor.ViewModel
 {
     public class PssgAttributeViewModel : ViewModelBase
     {
-        PssgAttribute attribute;
+        readonly PssgAttribute attribute;
+        readonly PssgNodeViewModel parent;
+
+        public PssgAttribute Attribute
+        {
+            get { return attribute; }
+        }
+        public PssgNodeViewModel Parent
+        {
+            get { return parent; }
+        }
 
         public override string DisplayName
         {
@@ -21,9 +31,10 @@ namespace EgoPssgEditor.ViewModel
             set { attribute.DisplayValue = value; }
         }
 
-        public PssgAttributeViewModel(PssgAttribute attribute)
+        public PssgAttributeViewModel(PssgAttribute attribute, PssgNodeViewModel parent)
         {
             this.attribute = attribute;
+            this.parent = parent;
         }
     }
 }
