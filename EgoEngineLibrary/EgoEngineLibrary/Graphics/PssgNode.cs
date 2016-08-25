@@ -98,11 +98,6 @@
             get;
             set;
         }
-        public TreeNode TreeNode
-        {
-            get;
-            set;
-        }
         // NodeInfo should never be null
         public PssgSchema.Node NodeInfo
         {

@@ -253,50 +253,6 @@
             }
         }
 
-        public TreeNode CreateTreeViewNode(PssgNode node)
-        {
-            TreeNode treeNode = new TreeNode();
-            treeNode.Text = node.Name;
-            treeNode.Tag = node;
-            if (node.ChildNodes != null)
-            {
-                foreach (PssgNode subNode in node.ChildNodes)
-                {
-                    treeNode.Nodes.Add(CreateTreeViewNode(subNode));
-                }
-            }
-            node.TreeNode = treeNode;
-            return treeNode;
-        }
-        public void CreateSpecificTreeViewNode(TreeView tv, string nodeName)
-        {
-            List<PssgNode> textureNodes = FindNodes(nodeName);
-            TreeNode treeNode = new TreeNode();
-            foreach (PssgNode texture in textureNodes)
-            {
-                if (texture.HasAttribute("id") == false)
-                {
-                    continue;
-                }
-                treeNode.Text = texture.GetAttribute("id").ToString();
-                treeNode.Tag = texture;
-                tv.Nodes.Add(treeNode);
-                treeNode = new TreeNode();
-            }
-        }
-        public void CreateSpecificTreeViewNode(TreeView tv, string nodeName, string attributeName, string attributeValue)
-        {
-            List<PssgNode> textureNodes = FindNodes(nodeName, attributeName, attributeValue);
-            TreeNode treeNode = new TreeNode();
-            foreach (PssgNode texture in textureNodes)
-            {
-                treeNode.Text = texture.Attributes["id"].ToString();
-                treeNode.Tag = texture;
-                tv.Nodes.Add(treeNode);
-                treeNode = new TreeNode();
-            }
-        }
-
         public List<PssgNode> FindNodes(string name, string attributeName = null, string attributeValue = null)
         {
             if (RootNode == null)

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoEngineLibrary", "EgoEngineLibrary\EgoEngineLibrary.csproj", "{F86348B9-87B8-445D-912E-A1732439E36A}"
 EndProject
@@ -14,8 +14,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoTngEditor", "..\ETE\EgoTngEditor\EgoTngEditor.csproj", "{E921040B-99FF-4423-A18B-A69EF5F097DA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoBxmlConverterConsole", "..\EBC\EgoBxmlConverterConsole\EgoBxmlConverterConsole.csproj", "{01EFFFA7-DC56-489C-9058-E99D89C40D44}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoPssgEditorOld", "..\EPE\EgoPssgEditor\EgoPssgEditorOld.csproj", "{1BCE5895-D6C0-48D6-B8D4-A3B59CFB4E49}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoErpArchiver", "..\EgoErpArchiver\EgoErpArchiver.csproj", "{806733B7-9C97-4D7F-A2FA-07855B2CC73F}"
 EndProject
@@ -93,16 +91,6 @@ Global
 		{01EFFFA7-DC56-489C-9058-E99D89C40D44}.Release|Mixed Platforms.Build.0 = Release|x86
 		{01EFFFA7-DC56-489C-9058-E99D89C40D44}.Release|x86.ActiveCfg = Release|x86
 		{01EFFFA7-DC56-489C-9058-E99D89C40D44}.Release|x86.Build.0 = Release|x86
-		{1BCE5895-D6C0-48D6-B8D4-A3B59CFB4E49}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{1BCE5895-D6C0-48D6-B8D4-A3B59CFB4E49}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{1BCE5895-D6C0-48D6-B8D4-A3B59CFB4E49}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{1BCE5895-D6C0-48D6-B8D4-A3B59CFB4E49}.Debug|x86.ActiveCfg = Debug|x86
-		{1BCE5895-D6C0-48D6-B8D4-A3B59CFB4E49}.Debug|x86.Build.0 = Debug|x86
-		{1BCE5895-D6C0-48D6-B8D4-A3B59CFB4E49}.Release|Any CPU.ActiveCfg = Release|x86
-		{1BCE5895-D6C0-48D6-B8D4-A3B59CFB4E49}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{1BCE5895-D6C0-48D6-B8D4-A3B59CFB4E49}.Release|Mixed Platforms.Build.0 = Release|x86
-		{1BCE5895-D6C0-48D6-B8D4-A3B59CFB4E49}.Release|x86.ActiveCfg = Release|x86
-		{1BCE5895-D6C0-48D6-B8D4-A3B59CFB4E49}.Release|x86.Build.0 = Release|x86
 		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
