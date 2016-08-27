@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>EgoEngineLibrary</RootNamespace>
     <AssemblyName>EgoEngineLibrary</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -56,11 +56,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Archive\ErpBinaryReader.cs" />
-    <Compile Include="Archive\ErpBinaryWriter.cs" />
-    <Compile Include="Archive\ErpEntry.cs" />
-    <Compile Include="Archive\ErpFile.cs" />
-    <Compile Include="Archive\ErpResource.cs" />
+    <Compile Include="Archive\Erp\ErpBinaryReader.cs" />
+    <Compile Include="Archive\Erp\ErpBinaryWriter.cs" />
+    <Compile Include="Archive\Erp\ErpEntry.cs" />
+    <Compile Include="Archive\Erp\ErpFile.cs" />
+    <Compile Include="Archive\Erp\ErpResource.cs" />
     <Compile Include="Archive\Jpk\JpkBinaryReader.cs" />
     <Compile Include="Archive\Jpk\JpkBinaryWriter.cs" />
     <Compile Include="Archive\Jpk\JpkEntry.cs" />

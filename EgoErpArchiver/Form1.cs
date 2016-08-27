@@ -1,7 +1,7 @@
 ﻿namespace EgoErpArchiver
 {
     using BrightIdeasSoftware;
-    using EgoEngineLibrary.Archive;
+    using EgoEngineLibrary.Archive.Erp;
     using EgoEngineLibrary.Graphics;
     using MiscUtil.Conversion;
     using System;
@@ -211,23 +211,82 @@
                         mipmaps = reader.ReadUInt32();
                     }
 
+                    string mipMapFileName = null;
+                    uint mipCount = 0;
+                    uint mipWidth = 0, mipHeight = 0;
+                    uint mipLinearSize = 0;
+                    if (imageEntry.Resources.Count >= 3 && imageEntry.Resources[2].Name == "mips")
+                    {
+                        using (ErpBinaryReader reader = new ErpBinaryReader(imageEntry.Resources[2].GetDataStream(true)))
+                        {
+                            byte strLength = reader.ReadByte();
+                            mipMapFileName = reader.ReadString(strLength);
+                            mipCount = reader.ReadUInt32();
+
+                            reader.Seek(9, SeekOrigin.Current);
+                            mipWidth = (uint)reader.ReadUInt64();
+                            mipHeight = (uint)reader.ReadUInt64();
+                            mipLinearSize = Math.Max(mipWidth, mipHeight);
+                        }
+                    }
+
                     dds.header.width = width;
                     dds.header.height = height;
                     switch (imageType)
                     {
-                        case 52:
-                        case 54:
+                        case 52: // ferrari_wheel_sfc
+                        case 54: // ferrari_wheel_df, ferrari_paint
                             dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                             dds.header.pitchOrLinearSize = (width * height) / 2;
                             dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                             dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT1"), 0);
+                            mipWidth = (uint)Math.Sqrt(mipWidth * 2);
+                            mipHeight = (uint)Math.Sqrt(mipHeight * 2);
                             break;
-                        case 57:
+                        case 55: // ferrari_sfc
+                        case 57: // ferrari_decal
                             dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                             dds.header.pitchOrLinearSize = (width * height);
                             dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                             dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT5"), 0);
+                            mipWidth = (uint)Math.Sqrt(mipWidth);
+                            mipHeight = (uint)Math.Sqrt(mipHeight);
                             break;
+                        case 65: // ferrari_wheel_nm
+                            dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                            dds.header.pitchOrLinearSize = (width * height);
+                            dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+                            dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("ATI2"), 0);
+                            mipWidth = (uint)Math.Sqrt(mipWidth);
+                            mipHeight = (uint)Math.Sqrt(mipHeight);
+                            break;
+                        //case 65: // ferrari_wheel_nm
+                        //    dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                        //    dds.header.pitchOrLinearSize = (width * height);
+                        //    dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_ALPHAPIXELS | DdsPixelFormat.Flags.DDPF_RGB;
+                        //    dds.header.ddspf.fourCC = 0;
+                        //    dds.header.ddspf.rGBBitCount = 32;
+                        //    dds.header.ddspf.rBitMask = 0xFF0000;
+                        //    dds.header.ddspf.gBitMask = 0xFF00;
+                        //    dds.header.ddspf.bBitMask = 0xFF;
+                        //    dds.header.ddspf.aBitMask = 0xFF000000;
+                        //    mipWidth = (uint)Math.Sqrt(mipWidth);
+                        //    mipHeight = (uint)Math.Sqrt(mipHeight);
+                        //    break;
+                        //case 65:
+                        //    dds.header.flags |= DdsHeader.Flags.DDSD_PITCH;
+                        //    dds.header.pitchOrLinearSize = (width * height);
+                        //    dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_LUMINANCE;
+                        //    //header.ddspf.flags |= DDS_PIXELFORMAT.Flags.DDPF_ALPHA;
+                        //    dds.header.ddspf.fourCC = 0;
+                        //    dds.header.ddspf.rGBBitCount = 8;
+                        //    dds.header.ddspf.rBitMask = 0xFF;
+                        //    //header.ddspf.aBitMask = 0xFF;
+                        //    mipWidth = (uint)Math.Sqrt(mipWidth);
+                        //    mipHeight = (uint)Math.Sqrt(mipHeight);
+                        //    break;
+                        default:
+                            throw new Exception("Image type not supported!");
                     }
                     if (mipmaps > 0)
                     {
@@ -239,9 +298,52 @@
                     dds.header.ddspf.size = 32;
                     dds.header.caps |= DdsHeader.Caps.DDSCAPS_TEXTURE;
 
-                    dds.bdata = imageEntry.Resources[1].GetDataArray(true);
+                    byte[] imageData = imageEntry.Resources[1].GetDataArray(true);
 
-                    dds.Write(File.Open(dialog.FileName, FileMode.Create), -1);
+                    if (!string.IsNullOrEmpty(mipMapFileName))
+                    {
+                        OpenFileDialog odialog = new OpenFileDialog();
+                        odialog.Filter = "Mipmaps files|*.mipmaps|All files|*.*";
+                        odialog.Title = "Select a mipmaps file";
+                        odialog.FileName = Path.GetFileName(mipMapFileName);
+
+                        if (odialog.ShowDialog() == DialogResult.OK)
+                        {
+                            byte[] mipImageData;
+                            using (ErpBinaryReader reader = new ErpBinaryReader(File.Open(odialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                            {
+                                mipImageData = reader.ReadBytes((int)reader.BaseStream.Length);
+                            }
+
+                            dds.header.width = mipWidth;
+                            dds.header.height = mipHeight;
+                            dds.header.pitchOrLinearSize = mipLinearSize;
+
+                            if (mipCount > 0)
+                            {
+                                dds.header.flags |= DdsHeader.Flags.DDSD_MIPMAPCOUNT;
+                                dds.header.mipMapCount += mipCount;
+                                dds.header.caps |= DdsHeader.Caps.DDSCAPS_MIPMAP | DdsHeader.Caps.DDSCAPS_COMPLEX;
+                            }
+                            else
+                            {
+                                //dds.header.flags &= ~DdsHeader.Flags.DDSD_MIPMAPCOUNT;
+                                //dds.header.mipMapCount = 0;
+                                //dds.header.caps &= ~(DdsHeader.Caps.DDSCAPS_MIPMAP | DdsHeader.Caps.DDSCAPS_COMPLEX);
+                            }
+
+                            //dds.Write(File.Open(Path.GetDirectoryName(dialog.FileName) + "\\" + Path.GetFileName(mipMapFileName) + ".dds", FileMode.Create, FileAccess.Write, FileShare.Read), -1);
+                            dds.bdata = new byte[mipImageData.Length + imageData.Length];
+                            Buffer.BlockCopy(mipImageData, 0, dds.bdata, 0, mipImageData.Length);
+                            Buffer.BlockCopy(imageData, 0, dds.bdata, mipImageData.Length, imageData.Length);
+                            dds.Write(File.Open(dialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read), -1);
+                        }
+                    }
+                    else
+                    {
+                        dds.bdata = imageData;
+                        dds.Write(File.Open(dialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read), -1);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -271,37 +373,114 @@
             dialog.FileName = Path.GetFileName(entry.FileName) + ".dds";
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                try
-                {
                     DdsFile dds = new DdsFile(File.Open(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
 
                     int imageType = 0;
-                    switch(dds.header.ddspf.fourCC)
-                    {
-                        case 827611204: // DXT1
-                            imageType = 54;
-                            break;
-                        case 894720068: // DXT5
-                            imageType = 57;
-                            break;
-                    }
+                    uint mipWidth, mipHeight;
+                switch (dds.header.ddspf.fourCC)
+                {
+                    case 827611204: // DXT1 aka DXGI_FORMAT_BC1_UNORM
+                        imageType = 54;
+                        mipWidth = (uint)Math.Pow(dds.header.width, 2) / 2;
+                        mipHeight = (uint)Math.Pow(dds.header.height, 2) / 2;
+                        break;
+                    case 894720068: // DXT5 aka DXGI_FORMAT_BC3_UNORM
+                        imageType = 57;
+                        mipWidth = (uint)Math.Pow(dds.header.width, 2);
+                        mipHeight = (uint)Math.Pow(dds.header.height, 2);
+                        break;
+                    case 843666497: // ATI2 aka DXGI_FORMAT_BC5_UNORM
+                        imageType = 65;
+                        mipWidth = (uint)Math.Pow(dds.header.width, 2);
+                        mipHeight = (uint)Math.Pow(dds.header.height, 2);
+                        break;
+                    default:
+                        throw new Exception("Image type not supported!");
+                }
 
                     MemoryStream tgaData = entry.Resources[0].GetDataStream(true);
                     string fNameImage;
                     ErpBinaryReader reader = new ErpBinaryReader(tgaData);
                     reader.Seek(24, SeekOrigin.Begin);
                     fNameImage = reader.ReadString();
-                    using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, tgaData))
-                    {
-                        writer.Seek(4, SeekOrigin.Begin);
-                        writer.Write(imageType);
-                        writer.Seek(4, SeekOrigin.Current);
-                        writer.Write(dds.header.mipMapCount);
-                    }
-                    entry.Resources[0].SetData(tgaData.ToArray());
-
                     ErpEntry imageEntry = this.file.FindEntry(fNameImage);
-                    MemoryStream imageData = imageEntry.Resources[0].GetDataStream(true);
+
+                    byte[] imageByteData;
+                    string mipMapFileName;
+                    uint mipCount = dds.header.mipMapCount / 4;
+                    if (imageEntry.Resources.Count >= 3 && imageEntry.Resources[2].Name == "mips")
+                    {
+                        MemoryStream mipsData = imageEntry.Resources[2].GetDataStream(true);
+                        reader = new ErpBinaryReader(mipsData);
+                        mipMapFileName = reader.ReadString(reader.ReadByte());
+                        mipsData.Dispose();
+
+                        SaveFileDialog sdialog = new SaveFileDialog();
+                        sdialog.Filter = "Mipmaps files|*.mipmaps|All files|*.*";
+                        sdialog.Title = "Select the mipmaps save location and file name";
+                        sdialog.FileName = Path.GetFileName(mipMapFileName);
+
+                        if (sdialog.ShowDialog() == DialogResult.OK)
+                        {
+                            dds.header.mipMapCount -= mipCount;
+                            uint div = (uint)Math.Pow(2.0, mipCount);
+                            dds.header.width /= div;
+                            dds.header.height /= div;
+
+                            MemoryStream newMipsData = new MemoryStream();
+                            UInt64 offset = 0;
+                            using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, newMipsData))
+                            {
+                                writer.Write((byte)mipMapFileName.Length);
+                                writer.Write(mipMapFileName, mipMapFileName.Length);
+                                writer.Write(mipCount);
+                                for (int i = 0; i < mipCount; ++i)
+                                {
+                                    writer.Write((byte)0);
+                                    writer.Write((UInt64)offset);
+                                    writer.Write((UInt64)mipWidth);
+                                    writer.Write((UInt64)mipHeight);
+
+                                    offset += mipWidth;
+                                    mipWidth /= 4;
+                                    mipHeight /= 4;
+                                }
+
+                                imageEntry.Resources[2].SetData(newMipsData.ToArray());
+                            }
+
+                            using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, File.Open(sdialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read)))
+                            {
+                                byte[] mipImageData = new byte[offset];
+                                Buffer.BlockCopy(dds.bdata, 0, mipImageData, 0, (int)offset);
+                                writer.Write(mipImageData);
+                            }
+
+                            int remainingBytes = dds.bdata.Length - (int)offset;
+                            imageByteData = new byte[remainingBytes];
+                            Buffer.BlockCopy(dds.bdata, (int)offset, imageByteData, 0, remainingBytes);
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        imageByteData = dds.bdata;
+                    }
+
+
+                using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, tgaData))
+                {
+                    writer.Seek(4, SeekOrigin.Begin);
+                    writer.Write(imageType);
+                    writer.Seek(4, SeekOrigin.Current);
+                    writer.Write(dds.header.mipMapCount);
+                }
+                entry.Resources[0].SetData(tgaData.ToArray());
+
+                MemoryStream imageData = imageEntry.Resources[0].GetDataStream(true);
                     using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, imageData))
                     {
                         writer.Seek(8, SeekOrigin.Begin);
@@ -311,8 +490,11 @@
                         writer.Seek(4, SeekOrigin.Current);
                         writer.Write(dds.header.mipMapCount);
                     }
+
                     imageEntry.Resources[0].SetData(imageData.ToArray());
-                    imageEntry.Resources[1].SetData(dds.bdata);
+                    imageEntry.Resources[1].SetData(imageByteData);
+                try
+                {
                 }
                 catch (Exception ex)
                 {

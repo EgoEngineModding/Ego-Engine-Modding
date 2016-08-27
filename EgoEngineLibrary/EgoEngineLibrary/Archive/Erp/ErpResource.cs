@@ -1,4 +1,4 @@
-﻿namespace EgoEngineLibrary.Archive
+﻿namespace EgoEngineLibrary.Archive.Erp
 {
     using MiscUtil.Conversion;
     using System;
@@ -106,7 +106,7 @@
         }
         public MemoryStream GetDataStream(bool decompress)
         {
-            return new MemoryStream(this.GetDataArray(decompress));
+            return new MemoryStream(this.GetDataArray(decompress), true);
         }
 
         public void SetData(byte[] data)

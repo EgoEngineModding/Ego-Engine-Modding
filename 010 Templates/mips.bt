@@ -1,0 +1,23 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+byte strLength;
+char path[strLength];
+uint32 mipCount;
+
+struct
+{
+    byte pad;
+    uint64 offset;
+    uint64 len1;
+    uint64 len2;
+} mips[mipCount];

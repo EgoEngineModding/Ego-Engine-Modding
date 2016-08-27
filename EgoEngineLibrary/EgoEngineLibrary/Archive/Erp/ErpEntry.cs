@@ -1,4 +1,4 @@
-﻿namespace EgoEngineLibrary.Archive
+﻿namespace EgoEngineLibrary.Archive.Erp
 {
     using System;
     using System.Collections.Generic;
