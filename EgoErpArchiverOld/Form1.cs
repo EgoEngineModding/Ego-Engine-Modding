@@ -33,18 +33,18 @@
             this.TreeListView.CellEditActivation = ObjectListView.CellEditActivateMode.DoubleClick;
             this.TreeListView.CanExpandGetter = delegate(object rowObject)
             {
-                if (rowObject is ErpEntry)
+                if (rowObject is ErpResource)
                 {
-                    return ((ErpEntry)rowObject).Resources.Count > 0;
+                    return ((ErpResource)rowObject).Fragments.Count > 0;
                 }
 
                 return false;
             };
             this.TreeListView.ChildrenGetter = delegate(object rowObject)
             {
-                if (rowObject is ErpEntry)
+                if (rowObject is ErpResource)
                 {
-                    return ((ErpEntry)rowObject).Resources;
+                    return ((ErpResource)rowObject).Fragments;
                 }
 
                 return null;
@@ -56,14 +56,14 @@
             nameCol.IsEditable = false;
             nameCol.AspectGetter = delegate(object rowObject)
             {
-                if (rowObject is ErpEntry)
+                if (rowObject is ErpResource)
                 {
-                    string str = ((ErpEntry)rowObject).FileName.Substring(7).Replace("/", "\\");
-                    return Path.GetFileName(((ErpEntry)rowObject).FileName);//.Substring(7));
+                    string str = ((ErpResource)rowObject).FileName.Substring(7).Replace("/", "\\");
+                    return Path.GetFileName(((ErpResource)rowObject).FileName);//.Substring(7));
                 }
-                else if (rowObject is ErpResource)
+                else if (rowObject is ErpFragment)
                 {
-                    return ((ErpResource)rowObject).Name;
+                    return ((ErpFragment)rowObject).Name;
                 }
 
                 return string.Empty;
@@ -94,7 +94,7 @@
                 this.file = new ErpFile();
                 this.file.Read(File.Open(Args[0], FileMode.Open, FileAccess.Read, FileShare.Read));
 
-                this.TreeListView.SetObjects(this.file.Entries);
+                this.TreeListView.SetObjects(this.file.Resources);
                 this.Text = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(Args[0]);
             }
         }
@@ -106,14 +106,14 @@
                 this.file = new ErpFile();
                 this.file.Read(File.Open(openFileDialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
 
-                this.TreeListView.SetObjects(this.file.Entries);
+                this.TreeListView.SetObjects(this.file.Resources);
                 this.Text = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(openFileDialog.FileName);
             }
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (file == null || file.Entries.Count == 0)
+            if (file == null || file.Resources.Count == 0)
             {
                 return;
             }
@@ -127,7 +127,7 @@
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (file == null || file.Entries.Count == 0)
+            if (file == null || file.Resources.Count == 0)
             {
                 return;
             }
@@ -166,12 +166,12 @@
 
         private void exportTextureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (this.file == null || !(TreeListView.SelectedObject is ErpEntry))
+            if (this.file == null || !(TreeListView.SelectedObject is ErpResource))
             {
                 return;
             }
 
-            ErpEntry entry = (ErpEntry)TreeListView.SelectedObject;
+            ErpResource entry = (ErpResource)TreeListView.SelectedObject;
             if (Path.GetExtension(entry.FileName) != ".tga")
             {
                 MessageBox.Show("Please select a *.tga file!", "Select a tga file", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -189,18 +189,18 @@
                     DdsFile dds = new DdsFile();
 
                     string fNameImage;
-                    using (ErpBinaryReader reader = new ErpBinaryReader(entry.Resources[0].GetDataStream(true)))
+                    using (ErpBinaryReader reader = new ErpBinaryReader(entry.Fragments[0].GetDataStream(true)))
                     {
                         reader.Seek(24, SeekOrigin.Begin);
                         fNameImage = reader.ReadString();
                     }
 
-                    ErpEntry imageEntry = this.file.FindEntry(fNameImage);
+                    ErpResource imageEntry = this.file.FindEntry(fNameImage);
                     int imageType;
                     uint width;
                     uint height;
                     uint mipmaps;
-                    using (ErpBinaryReader reader = new ErpBinaryReader(imageEntry.Resources[0].GetDataStream(true)))
+                    using (ErpBinaryReader reader = new ErpBinaryReader(imageEntry.Fragments[0].GetDataStream(true)))
                     {
                         reader.Seek(8, SeekOrigin.Begin);
                         imageType = reader.ReadInt32();
@@ -215,9 +215,9 @@
                     uint mipCount = 0;
                     uint mipWidth = 0, mipHeight = 0;
                     uint mipLinearSize = 0;
-                    if (imageEntry.Resources.Count >= 3 && imageEntry.Resources[2].Name == "mips")
+                    if (imageEntry.Fragments.Count >= 3 && imageEntry.Fragments[2].Name == "mips")
                     {
-                        using (ErpBinaryReader reader = new ErpBinaryReader(imageEntry.Resources[2].GetDataStream(true)))
+                        using (ErpBinaryReader reader = new ErpBinaryReader(imageEntry.Fragments[2].GetDataStream(true)))
                         {
                             byte strLength = reader.ReadByte();
                             mipMapFileName = reader.ReadString(strLength);
@@ -298,7 +298,7 @@
                     dds.header.ddspf.size = 32;
                     dds.header.caps |= DdsHeader.Caps.DDSCAPS_TEXTURE;
 
-                    byte[] imageData = imageEntry.Resources[1].GetDataArray(true);
+                    byte[] imageData = imageEntry.Fragments[1].GetDataArray(true);
 
                     if (!string.IsNullOrEmpty(mipMapFileName))
                     {
@@ -355,12 +355,12 @@
 
         private void importTextureToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (this.file == null || !(TreeListView.SelectedObject is ErpEntry))
+            if (this.file == null || !(TreeListView.SelectedObject is ErpResource))
             {
                 return;
             }
 
-            ErpEntry entry = (ErpEntry)TreeListView.SelectedObject;
+            ErpResource entry = (ErpResource)TreeListView.SelectedObject;
             if (Path.GetExtension(entry.FileName) != ".tga")
             {
                 MessageBox.Show("Please select a *.tga file!", "Select a tga file", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -398,19 +398,19 @@
                         throw new Exception("Image type not supported!");
                 }
 
-                    MemoryStream tgaData = entry.Resources[0].GetDataStream(true);
+                    MemoryStream tgaData = entry.Fragments[0].GetDataStream(true);
                     string fNameImage;
                     ErpBinaryReader reader = new ErpBinaryReader(tgaData);
                     reader.Seek(24, SeekOrigin.Begin);
                     fNameImage = reader.ReadString();
-                    ErpEntry imageEntry = this.file.FindEntry(fNameImage);
+                    ErpResource imageEntry = this.file.FindEntry(fNameImage);
 
                     byte[] imageByteData;
                     string mipMapFileName;
                     uint mipCount = dds.header.mipMapCount / 4;
-                    if (imageEntry.Resources.Count >= 3 && imageEntry.Resources[2].Name == "mips")
+                    if (imageEntry.Fragments.Count >= 3 && imageEntry.Fragments[2].Name == "mips")
                     {
-                        MemoryStream mipsData = imageEntry.Resources[2].GetDataStream(true);
+                        MemoryStream mipsData = imageEntry.Fragments[2].GetDataStream(true);
                         reader = new ErpBinaryReader(mipsData);
                         mipMapFileName = reader.ReadString(reader.ReadByte());
                         mipsData.Dispose();
@@ -446,7 +446,7 @@
                                     mipHeight /= 4;
                                 }
 
-                                imageEntry.Resources[2].SetData(newMipsData.ToArray());
+                                imageEntry.Fragments[2].SetData(newMipsData.ToArray());
                             }
 
                             using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, File.Open(sdialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read)))
@@ -478,9 +478,9 @@
                     writer.Seek(4, SeekOrigin.Current);
                     writer.Write(dds.header.mipMapCount);
                 }
-                entry.Resources[0].SetData(tgaData.ToArray());
+                entry.Fragments[0].SetData(tgaData.ToArray());
 
-                MemoryStream imageData = imageEntry.Resources[0].GetDataStream(true);
+                MemoryStream imageData = imageEntry.Fragments[0].GetDataStream(true);
                     using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, imageData))
                     {
                         writer.Seek(8, SeekOrigin.Begin);
@@ -491,8 +491,8 @@
                         writer.Write(dds.header.mipMapCount);
                     }
 
-                    imageEntry.Resources[0].SetData(imageData.ToArray());
-                    imageEntry.Resources[1].SetData(imageByteData);
+                    imageEntry.Fragments[0].SetData(imageData.ToArray());
+                    imageEntry.Fragments[1].SetData(imageByteData);
                 try
                 {
                 }

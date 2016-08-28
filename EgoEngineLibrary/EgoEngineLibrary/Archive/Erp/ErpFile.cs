@@ -11,16 +11,16 @@
     {
         public Int32 Version { get; set; }
 
-        public UInt64 EntryOffset { get; set; }
+        public UInt64 ResourceOffset { get; set; }
 
-        public List<ErpEntry> Entries { get; set; }
+        public List<ErpResource> Resources { get; set; }
 
-        private UInt64 _entryInfoTotalLength;
+        private UInt64 _resourceInfoTotalLength;
 
         public ErpFile()
         {
             this.Version = 3;
-            this.Entries = new List<ErpEntry>();
+            this.Resources = new List<ErpResource>();
         }
 
         public void Read(Stream stream)
@@ -38,7 +38,7 @@
                 reader.ReadBytes(8); // info offset
                 reader.ReadBytes(8); // info size
 
-                this.EntryOffset = reader.ReadUInt64();
+                this.ResourceOffset = reader.ReadUInt64();
                 reader.ReadBytes(8); // padding
 
                 Int32 numFiles = reader.ReadInt32();
@@ -46,9 +46,9 @@
 
                 for (int i = 0; i < numFiles; ++i)
                 {
-                    ErpEntry entry = new ErpEntry(this);
+                    ErpResource entry = new ErpResource(this);
                     entry.Read(reader);
-                    this.Entries.Add(entry);
+                    this.Resources.Add(entry);
                 }
             }
         }
@@ -64,22 +64,22 @@
                 writer.Write(this.Version);
                 writer.Write((Int64)0);
                 writer.Write((Int64)48);
-                writer.Write(this._entryInfoTotalLength);
+                writer.Write(this._resourceInfoTotalLength);
 
-                writer.Write(this.EntryOffset);
+                writer.Write(this.ResourceOffset);
                 writer.Write((Int64)0);
 
-                writer.Write(this.Entries.Count);
+                writer.Write(this.Resources.Count);
                 writer.Write(numTempFiles);
 
-                foreach (ErpEntry entry in this.Entries)
+                foreach (ErpResource entry in this.Resources)
                 {
                     entry.Write(writer);
                 }
 
-                foreach (ErpEntry entry in this.Entries)
+                foreach (ErpResource entry in this.Resources)
                 {
-                    foreach (ErpResource res in entry.Resources)
+                    foreach (ErpFragment res in entry.Fragments)
                     {
                         //writer.Write((UInt16)0xDA78);
                         writer.Write(res._data);
@@ -93,12 +93,12 @@
             UInt64 resourceDataOffset = 0;
             Int32 numTempFiles = 0;
 
-            this._entryInfoTotalLength = (UInt64)this.Entries.Count * 4 + 8;
-            foreach (ErpEntry entry in this.Entries)
+            this._resourceInfoTotalLength = (UInt64)this.Resources.Count * 4 + 8;
+            foreach (ErpResource entry in this.Resources)
             {
-                this._entryInfoTotalLength += (UInt64)entry.UpdateOffsets();
+                this._resourceInfoTotalLength += (UInt64)entry.UpdateOffsets();
 
-                foreach (ErpResource res in entry.Resources)
+                foreach (ErpFragment res in entry.Fragments)
                 {
                     ++numTempFiles;
                     res.Offset = resourceDataOffset;
@@ -106,13 +106,13 @@
                 }
             }
 
-            this.EntryOffset = 48 + this._entryInfoTotalLength;
+            this.ResourceOffset = 48 + this._resourceInfoTotalLength;
             return numTempFiles;
         }
 
-        public ErpEntry FindEntry(string fileName)
+        public ErpResource FindEntry(string fileName)
         {
-            foreach (ErpEntry entry in this.Entries)
+            foreach (ErpResource entry in this.Resources)
             {
                 if (entry.FileName == fileName)
                 {
@@ -125,7 +125,7 @@
 
         public void Export(string folderPath)
         {
-            foreach (ErpEntry entry in this.Entries)
+            foreach (ErpResource entry in this.Resources)
             {
                 entry.Export(folderPath);
             }
@@ -145,7 +145,7 @@
 
                 int resIndex = Int32.Parse(name.Substring(resTextIndex + 7, 3));
                 name = Path.GetDirectoryName(f) + "\\" + name.Remove(resTextIndex).Replace("^^", "?") + extension;
-                foreach (ErpEntry entry in this.Entries)
+                foreach (ErpResource entry in this.Resources)
                 {
                     if (name.EndsWith(entry.FileName.Substring(7).Replace('/', '\\')))
                     {

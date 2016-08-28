@@ -6,15 +6,15 @@
     using System.Linq;
     using System.Text;
 
-    public class ErpEntry
+    public class ErpResource
     {
         public ErpFile ParentFile { get; set; }
         public string FileName { get; set; }
-        public string EntryType { get; set; }
+        public string ResourceType { get; set; }
 
         public Int32 Unknown { get; set; }
 
-        public List<ErpResource> Resources { get; set; }
+        public List<ErpFragment> Fragments { get; set; }
 
         public byte[] Hash;
 
@@ -23,7 +23,7 @@
             get
             {
                 UInt64 size = 0;
-                foreach (ErpResource res in this.Resources)
+                foreach (ErpFragment res in this.Fragments)
                 {
                     size += res.Size;
                 }
@@ -35,7 +35,7 @@
             get
             {
                 UInt64 size = 0;
-                foreach (ErpResource res in this.Resources)
+                foreach (ErpFragment res in this.Fragments)
                 {
                     size += res.PackedSize;
                 }
@@ -43,15 +43,15 @@
             }
         }
 
-        private UInt32 _entryInfoLength;
+        private UInt32 _resourceInfoLength;
 
-        public ErpEntry()
+        public ErpResource()
         {
             this.Unknown = 1;
-            this.Resources = new List<ErpResource>();
+            this.Fragments = new List<ErpFragment>();
             this.Hash = new byte[16];
         }
-        public ErpEntry(ErpFile parentFile)
+        public ErpResource(ErpFile parentFile)
             : this()
         {
             this.ParentFile = parentFile;
@@ -61,7 +61,7 @@
         {
             reader.ReadBytes(4); // entry info length
             this.FileName = reader.ReadString(reader.ReadInt16());
-            this.EntryType = reader.ReadString(16);
+            this.ResourceType = reader.ReadString(16);
 
             this.Unknown = reader.ReadInt32();
 
@@ -69,9 +69,9 @@
 
             while (numResources-- > 0)
             {
-                ErpResource res = new ErpResource(this.ParentFile);
+                ErpFragment res = new ErpFragment(this.ParentFile);
                 res.Read(reader);
-                this.Resources.Add(res);
+                this.Fragments.Add(res);
             }
 
             if (this.ParentFile.Version > 2)
@@ -82,14 +82,14 @@
 
         public void Write(ErpBinaryWriter writer)
         {
-            writer.Write(this._entryInfoLength);
+            writer.Write(this._resourceInfoLength);
             writer.Write((Int16)(this.FileName.Length + 1));
             writer.Write(this.FileName);
-            writer.Write(this.EntryType, 16);
+            writer.Write(this.ResourceType, 16);
             writer.Write(this.Unknown);
-            writer.Write((byte)this.Resources.Count);
+            writer.Write((byte)this.Fragments.Count);
 
-            foreach (ErpResource res in this.Resources)
+            foreach (ErpFragment res in this.Fragments)
             {
                 res.Write(writer);
             }
@@ -104,22 +104,22 @@
         {
             if (this.ParentFile.Version > 2)
             {
-                this._entryInfoLength = 33;
+                this._resourceInfoLength = 33;
             }
             else
             {
-                this._entryInfoLength = 24;
+                this._resourceInfoLength = 24;
             }
 
-            this._entryInfoLength *= (UInt32)this.Resources.Count;
-            this._entryInfoLength += (UInt32)this.FileName.Length + 24;
+            this._resourceInfoLength *= (UInt32)this.Fragments.Count;
+            this._resourceInfoLength += (UInt32)this.FileName.Length + 24;
 
             if (this.ParentFile.Version > 2)
             {
-                this._entryInfoLength += 16;
+                this._resourceInfoLength += 16;
             }
 
-            return this._entryInfoLength;
+            return this._resourceInfoLength;
         }
 
         public void Export(string folder)
@@ -127,12 +127,12 @@
             string outputDir = Path.Combine(folder, Path.GetDirectoryName(this.FileName.Substring(7)));
             Directory.CreateDirectory(outputDir);
 
-            for (int i = 0; i < this.Resources.Count; ++i)
+            for (int i = 0; i < this.Fragments.Count; ++i)
             {
                 string name = this.FileName;
                 name = name.Replace("?", "^^");
-                name = Path.GetFileNameWithoutExtension(name) + "!!!" + this.Resources[i].Name + i.ToString("000") + Path.GetExtension(name);
-                this.Resources[i].Export(File.Open(
+                name = Path.GetFileNameWithoutExtension(name) + "!!!" + this.Fragments[i].Name + i.ToString("000") + Path.GetExtension(name);
+                this.Fragments[i].Export(File.Open(
                     Path.Combine(outputDir, name)
                     , FileMode.Create, FileAccess.Write, FileShare.Read));
             }
@@ -140,7 +140,7 @@
 
         public void Import(Stream stream, int resIndex)
         {
-            this.Resources[resIndex].Import(stream);
+            this.Fragments[resIndex].Import(stream);
         }
     }
 }

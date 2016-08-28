@@ -8,7 +8,7 @@
     using System.Linq;
     using System.Text;
 
-    public class ErpResource
+    public class ErpFragment
     {
         public ErpFile ParentFile { get; set; }
 
@@ -23,13 +23,13 @@
 
         internal byte[] _data;
 
-        public ErpResource()
+        public ErpFragment()
         {
             this.Name = "temp";
             this.Flags = 16;
             this.Compression = 1;
         }
-        public ErpResource(ErpFile parentFile)
+        public ErpFragment(ErpFile parentFile)
             : this()
         {
             this.ParentFile = parentFile;
@@ -54,7 +54,7 @@
             }
 
             int pos = (int)reader.BaseStream.Position;
-            reader.Seek((int)(this.ParentFile.EntryOffset + this.Offset), SeekOrigin.Begin);
+            reader.Seek((int)(this.ParentFile.ResourceOffset + this.Offset), SeekOrigin.Begin);
             this._data = reader.ReadBytes((int)this.PackedSize);
             reader.Seek(pos, SeekOrigin.Begin);
         }
