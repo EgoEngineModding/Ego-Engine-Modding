@@ -7,7 +7,7 @@
 
     public class DdsFile
     {
-        uint magic;
+        UInt32 magic;
         public DdsHeader header;
         public byte[] bdata { get; set; }
         Dictionary<int, byte[]> bdata2;

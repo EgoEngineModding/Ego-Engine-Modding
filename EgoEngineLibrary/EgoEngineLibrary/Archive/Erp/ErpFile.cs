@@ -125,34 +125,18 @@
 
         public void Export(string folderPath)
         {
-            foreach (ErpResource entry in this.Resources)
+            foreach (ErpResource res in this.Resources)
             {
-                entry.Export(folderPath);
+                res.Export(folderPath);
             }
         }
 
         public void Import(string folderPath)
         {
-            foreach (string f in Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories))
+            string[] files = Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories);
+            foreach (ErpResource res in this.Resources)
             {
-                string extension = Path.GetExtension(f);
-                string name = Path.GetFileNameWithoutExtension(f);
-                int resTextIndex = name.LastIndexOf("!!!");
-                if (resTextIndex == -1)
-                {
-                    continue;
-                }
-
-                int resIndex = Int32.Parse(name.Substring(resTextIndex + 7, 3));
-                name = Path.GetDirectoryName(f) + "\\" + name.Remove(resTextIndex).Replace("^^", "?") + extension;
-                foreach (ErpResource entry in this.Resources)
-                {
-                    if (name.EndsWith(entry.FileName.Substring(7).Replace('/', '\\')))
-                    {
-                        entry.Import(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read), resIndex);
-                        break;
-                    }
-                }
+                res.Import(files);
             }
         }
     }

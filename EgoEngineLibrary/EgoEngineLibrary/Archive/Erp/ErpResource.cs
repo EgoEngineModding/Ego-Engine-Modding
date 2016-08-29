@@ -138,9 +138,26 @@
             }
         }
 
-        public void Import(Stream stream, int resIndex)
+        public void Import(string[] files)
         {
-            this.Fragments[resIndex].Import(stream);
+            foreach (string f in files)
+            {
+                string extension = Path.GetExtension(f);
+                string name = Path.GetFileNameWithoutExtension(f);
+                int resTextIndex = name.LastIndexOf("!!!");
+                if (resTextIndex == -1)
+                {
+                    continue;
+                }
+
+                int resIndex = Int32.Parse(name.Substring(resTextIndex + 7, 3));
+                name = Path.GetDirectoryName(f) + "\\" + name.Remove(resTextIndex).Replace("^^", "?") + extension;
+                if (name.EndsWith(FileName.Substring(7).Replace('/', '\\')))
+                {
+                    Fragments[resIndex].Import(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
+                    break;
+                }
+            }
         }
     }
 }

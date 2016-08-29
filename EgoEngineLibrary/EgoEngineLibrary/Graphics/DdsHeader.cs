@@ -7,22 +7,22 @@
 
     public struct DdsHeader
     {
-        public uint size;
+        public UInt32 size;
         public Flags flags;
-        public uint height;
-        public uint width;
-        public uint pitchOrLinearSize;
-        public uint depth;
-        public uint mipMapCount;
-        public uint[] reserved1; //  = new uint[11]
+        public UInt32 height;
+        public UInt32 width;
+        public UInt32 pitchOrLinearSize;
+        public UInt32 depth;
+        public UInt32 mipMapCount;
+        public UInt32[] reserved1; //  = new uint[11]
         public DdsPixelFormat ddspf;
         public Caps caps;
         public Caps2 caps2;
-        public uint caps3;
-        public uint caps4;
-        public uint reserved2;
+        public UInt32 caps3;
+        public UInt32 caps4;
+        public UInt32 reserved2;
 
-        public enum Flags
+        public enum Flags : UInt32
         {
             DDSD_CAPS = 0x1,
             DDSD_HEIGHT = 0x2,
@@ -34,14 +34,14 @@
             DDSD_DEPTH = 0x800000
         }
 
-        public enum Caps
+        public enum Caps : UInt32
         {
             DDSCAPS_COMPLEX = 0x8,
             DDSCAPS_MIPMAP = 0x400000,
             DDSCAPS_TEXTURE = 0x1000
         }
 
-        public enum Caps2
+        public enum Caps2 : UInt32
         {
             DDSCAPS2_CUBEMAP = 0x200,
             DDSCAPS2_CUBEMAP_POSITIVEX = 0x400,

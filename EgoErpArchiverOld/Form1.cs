@@ -373,30 +373,32 @@
             dialog.FileName = Path.GetFileName(entry.FileName) + ".dds";
             if (dialog.ShowDialog() == DialogResult.OK)
             {
+                try
+                {
                     DdsFile dds = new DdsFile(File.Open(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
 
                     int imageType = 0;
                     uint mipWidth, mipHeight;
-                switch (dds.header.ddspf.fourCC)
-                {
-                    case 827611204: // DXT1 aka DXGI_FORMAT_BC1_UNORM
-                        imageType = 54;
-                        mipWidth = (uint)Math.Pow(dds.header.width, 2) / 2;
-                        mipHeight = (uint)Math.Pow(dds.header.height, 2) / 2;
-                        break;
-                    case 894720068: // DXT5 aka DXGI_FORMAT_BC3_UNORM
-                        imageType = 57;
-                        mipWidth = (uint)Math.Pow(dds.header.width, 2);
-                        mipHeight = (uint)Math.Pow(dds.header.height, 2);
-                        break;
-                    case 843666497: // ATI2 aka DXGI_FORMAT_BC5_UNORM
-                        imageType = 65;
-                        mipWidth = (uint)Math.Pow(dds.header.width, 2);
-                        mipHeight = (uint)Math.Pow(dds.header.height, 2);
-                        break;
-                    default:
-                        throw new Exception("Image type not supported!");
-                }
+                    switch (dds.header.ddspf.fourCC)
+                    {
+                        case 827611204: // DXT1 aka DXGI_FORMAT_BC1_UNORM
+                            imageType = 54;
+                            mipWidth = (uint)Math.Pow(dds.header.width, 2) / 2;
+                            mipHeight = (uint)Math.Pow(dds.header.height, 2) / 2;
+                            break;
+                        case 894720068: // DXT5 aka DXGI_FORMAT_BC3_UNORM
+                            imageType = 57;
+                            mipWidth = (uint)Math.Pow(dds.header.width, 2);
+                            mipHeight = (uint)Math.Pow(dds.header.height, 2);
+                            break;
+                        case 843666497: // ATI2 aka DXGI_FORMAT_BC5_UNORM
+                            imageType = 65;
+                            mipWidth = (uint)Math.Pow(dds.header.width, 2);
+                            mipHeight = (uint)Math.Pow(dds.header.height, 2);
+                            break;
+                        default:
+                            throw new Exception("Image type not supported!");
+                    }
 
                     MemoryStream tgaData = entry.Fragments[0].GetDataStream(true);
                     string fNameImage;
@@ -471,16 +473,16 @@
                     }
 
 
-                using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, tgaData))
-                {
-                    writer.Seek(4, SeekOrigin.Begin);
-                    writer.Write(imageType);
-                    writer.Seek(4, SeekOrigin.Current);
-                    writer.Write(dds.header.mipMapCount);
-                }
-                entry.Fragments[0].SetData(tgaData.ToArray());
+                    using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, tgaData))
+                    {
+                        writer.Seek(4, SeekOrigin.Begin);
+                        writer.Write(imageType);
+                        writer.Seek(4, SeekOrigin.Current);
+                        writer.Write(dds.header.mipMapCount);
+                    }
+                    entry.Fragments[0].SetData(tgaData.ToArray());
 
-                MemoryStream imageData = imageEntry.Fragments[0].GetDataStream(true);
+                    MemoryStream imageData = imageEntry.Fragments[0].GetDataStream(true);
                     using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, imageData))
                     {
                         writer.Seek(8, SeekOrigin.Begin);
@@ -493,8 +495,6 @@
 
                     imageEntry.Fragments[0].SetData(imageData.ToArray());
                     imageEntry.Fragments[1].SetData(imageByteData);
-                try
-                {
                 }
                 catch (Exception ex)
                 {

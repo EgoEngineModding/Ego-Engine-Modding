@@ -7,16 +7,16 @@
 
     public struct DdsPixelFormat
     {
-        public uint size;
+        public UInt32 size;
         public Flags flags;
-        public uint fourCC;
-        public uint rGBBitCount;
-        public uint rBitMask;
-        public uint gBitMask;
-        public uint bBitMask;
-        public uint aBitMask;
+        public UInt32 fourCC;
+        public UInt32 rGBBitCount;
+        public UInt32 rBitMask;
+        public UInt32 gBitMask;
+        public UInt32 bBitMask;
+        public UInt32 aBitMask;
 
-        public enum Flags
+        public enum Flags : UInt32
         {
             DDPF_ALPHAPIXELS = 0x1,
             DDPF_ALPHA = 0x2,
