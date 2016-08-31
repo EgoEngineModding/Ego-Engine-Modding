@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAPICodePack.Dialogs;
+﻿using ICSharpCode.AvalonEdit.Folding;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,6 +61,38 @@ namespace EgoErpArchiver
         private void issuesMenuItem_Click(object sender, RoutedEventArgs e)
         {
             System.Diagnostics.Process.Start("https://github.com/Ryder25/Ego-Engine-Modding/issues");
+        }
+        
+        private void packagesListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count == 0)
+            {
+                packagePreviewTextEditor.Text = string.Empty;
+                return;
+            }
+            
+            packagePreviewTextEditor.Text = ((ViewModel.ErpPackageViewModel)e.AddedItems[0]).Preview;
+        }
+
+        FoldingManager foldingManager;
+        XmlFoldingStrategy foldingStrategy = new XmlFoldingStrategy();
+        private void xmlFilesListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (foldingManager != null)
+            {
+                FoldingManager.Uninstall(foldingManager);
+                foldingManager = null;
+            }
+
+            if (e.AddedItems.Count == 0)
+            {
+                xmlFilePreviewTextEditor.Text = string.Empty;
+                return;
+            }
+
+            xmlFilePreviewTextEditor.Text = ((ViewModel.ErpXmlFileViewModel)e.AddedItems[0]).Preview;
+            foldingManager = FoldingManager.Install(xmlFilePreviewTextEditor.TextArea);
+            foldingStrategy.UpdateFoldings(foldingManager, xmlFilePreviewTextEditor.Document);
         }
     }
 }

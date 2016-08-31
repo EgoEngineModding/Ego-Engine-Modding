@@ -31,10 +31,15 @@ namespace EgoEngineLibrary.Data.Pkg
                 case "si32":
                     padding = (-offset) & 3;
                     break;
+                case "ui64":
+                case "si64":
+                    padding = (-offset) & 7;
+                    break;
                 case "woid":
                 case "shnm":
                 case "vec3":
                 case "vec4":
+                case "quat":
                     padding = (-offset) & 15;
                     break;
                 case "mat4":

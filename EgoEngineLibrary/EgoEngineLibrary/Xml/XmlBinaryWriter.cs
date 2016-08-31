@@ -47,9 +47,30 @@
             this.Write((Int16)elemLength);
             this.Seek(elemLength, System.IO.SeekOrigin.Current);
 
-            foreach (XmlElement childElem in elem.ChildNodes)
+            foreach (XmlNode childNode in elem.ChildNodes)
             {
-                WriteBxmlElement(childElem);
+                if (childNode is XmlText)
+                {
+                    elemLength = 4;
+
+                    // Element Length, Place Holder for Now
+                    this.Write((Int16)0);
+                    // Pad/Special Case byte for signaling end of element or file
+                    this.Write((Int16)1);
+                    // Attribute Count
+                    this.Write((Int16)0);
+
+                    elemLength += this.WriteTerminatedString(childNode.Value) + 1;
+
+                    // Go back, Update Element Length, and Come Back to Continue Writing
+                    this.Seek(-2 - elemLength, System.IO.SeekOrigin.Current);
+                    this.Write((Int16)elemLength);
+                    this.Seek(elemLength, System.IO.SeekOrigin.Current);
+                }
+                else if (childNode is XmlElement)
+                {
+                    WriteBxmlElement((XmlElement)childNode);
+                }
             }
 
             // Closing Tag of the Element (</XX>) 00BXML: "0004 05000000" 01BXML: "0400 05000000"

@@ -1,0 +1,62 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+byte endianness;
+if (endianness == 0x00)
+{
+    BigEndian();
+}
+else if (endianness == 0x01)
+{
+    LittleEndian();
+}
+
+char magic[4];
+    struct XmlElementInfo
+    {
+        int16 elemLength;
+        int16 unk;
+        int16 attribCount;
+    };
+struct XmlData
+{
+    string value;
+};
+
+struct XmlElementInfo info;
+struct XmlElement(struct XmlElementInfo& info)
+{
+    string name;
+
+    struct XmlAttributes
+    {
+        string name;
+        string value;
+    } attributes[info.attribCount] <optimize=false>;
+
+    while (1)
+    {
+        struct XmlElementInfo childInfo <hidden=true>;
+        if (childInfo.unk == 0)
+        {
+            struct XmlElement children(childInfo);
+        }
+        else if (childInfo.unk == 5)
+        {
+            break;
+        }
+        else if (childInfo.unk == 1)
+        {
+            string value;
+        }
+    }
+} root(info);

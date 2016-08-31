@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EgoErpArchiver"
         xmlns:sd="http://icsharpcode.net/sharpdevelop/treeview"
+        xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         mc:Ignorable="d"
         DataContext="{Binding Source={StaticResource MainVM}}"
         Closing="Window_Closing"
@@ -34,11 +35,17 @@
                 <MenuItem Header="E_xport All" Command="{Binding Path=ResourcesWorkspace.ExportAll}"></MenuItem>
                 <MenuItem Header="I_mport All" Command="{Binding Path=ResourcesWorkspace.ImportAll}"></MenuItem>
             </MenuItem>
+            <MenuItem Header="_Packages">
+
+            </MenuItem>
             <MenuItem Header="_Textures">
                 <MenuItem Header="_Export" Command="{Binding Path=TexturesWorkspace.Export}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
                 <MenuItem Header="_Import" Command="{Binding Path=TexturesWorkspace.Import}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
                 <MenuItem Header="E_xport All" Command="{Binding Path=TexturesWorkspace.ExportTextures}"></MenuItem>
                 <MenuItem Header="I_mport All" Command="{Binding Path=TexturesWorkspace.ImportTextures}"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Xml Files">
+                
             </MenuItem>
             <MenuItem Header="_Settings">
                 <MenuItem Header="F1 2016 _Directory">
@@ -51,7 +58,6 @@
                 <MenuItem Header="_Issues" Name="issuesMenuItem" Click="issuesMenuItem_Click"></MenuItem>
             </MenuItem>
         </Menu>
-
 
         <TabControl SelectedIndex="{Binding SelectedTabIndex}">
             <TabItem Header="{Binding DisplayName}" DataContext="{Binding Path=ResourcesWorkspace}">
@@ -114,6 +120,45 @@
                     </sd:SharpTreeView>
                 </DockPanel>
             </TabItem>
+            <TabItem Header="{Binding DisplayName}" DataContext="{Binding Path=PackagesWorkspace}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="240" />
+                        <ColumnDefinition Width="5" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <DockPanel>
+                        <TextBox DockPanel.Dock="Top" Name="packagesSearchBox" Text="{Binding Path=FilterText, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                        <ListView Name="packagesListView" ItemsSource="{Binding Path=Packages}" SelectionMode="Single" SelectionChanged="packagesListView_SelectionChanged">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListViewItem}">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                    <Setter Property="FontWeight" Value="Normal" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="FontWeight" Value="Bold" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=DisplayName}"></TextBlock>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </DockPanel>
+                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+                    <DockPanel Grid.Column="2">
+                        <avalonEdit:TextEditor Name="packagePreviewTextEditor" 
+                                               SyntaxHighlighting="JavaScript" 
+                                               FontFamily="Consolas"
+                                               IsReadOnly="True">
+                        </avalonEdit:TextEditor>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
             <TabItem Header="{Binding DisplayName}" DataContext="{Binding Path=TexturesWorkspace}">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -144,7 +189,7 @@
                         </ListView>
                     </DockPanel>
                     <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
-                    <DockPanel Grid.Column="2" Background="Gray">
+                    <DockPanel Grid.Column="2" Background="LightGray">
                         <TextBlock Panel.ZIndex="2" 
                                    Text="{Binding ElementName=texListView, Path=SelectedItem.PreviewError}" 
                                    Visibility="{Binding ElementName=texListView, Path=SelectedItem.PreviewErrorVisibility}"/>
@@ -152,6 +197,45 @@
                                Source="{Binding ElementName=texListView, Path=SelectedItem.Preview}" 
                                MaxWidth="{Binding ElementName=texListView, Path=SelectedItem.Width}" 
                                MaxHeight="{Binding ElementName=texListView, Path=SelectedItem.Height}"></Image>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="{Binding DisplayName}" DataContext="{Binding Path=XmlFilesWorkspace}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="240" />
+                        <ColumnDefinition Width="5" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <DockPanel>
+                        <TextBox DockPanel.Dock="Top" Name="xmlFilesSearchBox" Text="{Binding Path=FilterText, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                        <ListView Name="xmlFilesListView" ItemsSource="{Binding Path=XmlFiles}" SelectionMode="Single" SelectionChanged="xmlFilesListView_SelectionChanged">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListViewItem}">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                    <Setter Property="FontWeight" Value="Normal" />
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="FontWeight" Value="Bold" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=DisplayName}"></TextBlock>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </DockPanel>
+                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+                    <DockPanel Grid.Column="2">
+                        <avalonEdit:TextEditor Name="xmlFilePreviewTextEditor" 
+                                               SyntaxHighlighting="XML" 
+                                               FontFamily="Consolas"
+                                               IsReadOnly="True">
+                        </avalonEdit:TextEditor>
                     </DockPanel>
                 </Grid>
             </TabItem>

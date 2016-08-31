@@ -50,7 +50,6 @@ namespace EgoEngineLibrary.Data.Pkg
         public void SetData(string data, PkgOffsetType offsetType)
         {
             string type = data.Remove(4);
-            data = data.Substring(5);
 
             offsetType.Type = (byte)AddData(type);
 

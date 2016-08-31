@@ -66,6 +66,9 @@ namespace EgoEngineLibrary.Data.Pkg
         }
         public override void SetData(string data, PkgOffsetType offsetType)
         {
+            string type = data.Remove(4);
+            data = data.Substring(5);
+
             int index;
             if (strgOffset.TryGetValue(data, out index))
             {

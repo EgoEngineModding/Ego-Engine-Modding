@@ -26,32 +26,39 @@
             return Encoding.UTF8.GetString(strBytes.ToArray());
         }
 
-        public XmlElement ReadBxmlElement(XmlDocument doc)
+        public XmlNode ReadBxmlElement(XmlDocument doc)
         {
-            int elemLength = this.ReadInt16();
-            this.ReadBytes(2); // pad
+            int nodeLength = this.ReadInt16();
+            int nodeType = this.ReadInt16(); // pad
             int attribCount = this.ReadInt16();
-            if (elemLength == 4)
+
+            if (nodeType == 0)
+            {
+                // Read Element
+                XmlElement element = doc.CreateElement(this.ReadTerminatedString());
+                for (int i = 0; i < attribCount; i++)
+                {
+                    XmlAttribute attr = doc.CreateAttribute(this.ReadTerminatedString());
+                    attr.Value = this.ReadTerminatedString();
+                    element.Attributes.Append(attr);
+                }
+
+                // Keep Reading Child Elements until the current element ends
+                XmlNode childNode;
+                while ((childNode = ReadBxmlElement(doc)) != null)
+                {
+                    element.AppendChild(childNode);
+                }
+                return element;
+            }
+            else if (nodeType == 1)
+            {
+                return doc.CreateTextNode(ReadTerminatedString());
+            }
+            else
             {
                 return null;
             }
-            long endLength = this.BaseStream.Position + elemLength - 4;
-            // Read Element
-            XmlElement element = doc.CreateElement(this.ReadTerminatedString());
-            for (int i = 0; i < attribCount; i++)
-            {
-                XmlAttribute attr = doc.CreateAttribute(this.ReadTerminatedString());
-                attr.Value = this.ReadTerminatedString();
-                element.Attributes.Append(attr);
-            }
-            // Keep Reading Child Elements until the current element ends
-            XmlElement nextElement = ReadBxmlElement(doc);
-            while (nextElement != null)
-            {
-                element.AppendChild(nextElement);
-                nextElement = ReadBxmlElement(doc);
-            }
-            return element;
         }
     }
 }

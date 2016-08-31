@@ -11,6 +11,11 @@ using System.Threading.Tasks;
 
 namespace EgoEngineLibrary.Data.Pkg
 {
+    public enum PkgFileType
+    {
+        Pkg, Json
+    }
+
     public class PkgFile
     {
         PkgRootObject rootItem;
@@ -65,6 +70,40 @@ namespace EgoEngineLibrary.Data.Pkg
                 file.RootItem.FromJson(reader);
             }
             return file;
+        }
+
+        public void Save(Stream stream, PkgFileType type)
+        {
+            switch (type)
+            {
+                case PkgFileType.Pkg:
+                    WritePkg(stream);
+                    break;
+                case PkgFileType.Json:
+                    WriteJson(stream);
+                    break;
+                default:
+                    throw new Exception("Invalid Pkg file save type!");
+            }
+        }
+        public void WritePkg(Stream stream)
+        {
+            using (PkgBinaryWriter writer = new PkgBinaryWriter(stream))
+            {
+                rootItem.Write(writer);
+            }
+        }
+        public void WriteJson(Stream stream)
+        {
+            WriteJson(new StreamWriter(stream));
+        }
+        public void WriteJson(TextWriter textWriter)
+        {
+            using (JsonTextWriter writer = new JsonTextWriter(textWriter))
+            {
+                writer.Formatting = Formatting.Indented;
+                rootItem.ToJson(writer);
+            }
         }
 
         public void Read(Stream stream)

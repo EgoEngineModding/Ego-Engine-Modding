@@ -21,7 +21,10 @@ namespace EgoEngineLibrary.Data.Pkg
         readonly List<Vector3> vec3Data;
         readonly List<UInt32> ui32Data;
         readonly List<Int32> si32Data;
+        readonly List<UInt64> ui64Data;
+        readonly List<Int64> si64Data;
         readonly List<Vector4> vec4Data;
+        readonly List<Quaternion> quatData;
 
         protected override string ChunkType
         {
@@ -48,7 +51,10 @@ namespace EgoEngineLibrary.Data.Pkg
             vec3Data = new List<Vector3>();
             ui32Data = new List<uint>();
             si32Data = new List<int>();
+            ui64Data = new List<ulong>();
+            si64Data = new List<long>();
             vec4Data = new List<Vector4>();
+            quatData = new List<Quaternion>();
         }
         public PkgByteData(PkgFile parentFile, string type)
            : this(parentFile)
@@ -140,6 +146,18 @@ namespace EgoEngineLibrary.Data.Pkg
                         si32Data.Add(reader.ReadInt32());
                     }
                     break;
+                case "ui64":
+                    for (int i = 0; i < numData; ++i)
+                    {
+                        ui64Data.Add(reader.ReadUInt64());
+                    }
+                    break;
+                case "si64":
+                    for (int i = 0; i < numData; ++i)
+                    {
+                        si64Data.Add(reader.ReadInt64());
+                    }
+                    break;
                 case "vec4":
                     for (int i = 0; i < numData; ++i)
                     {
@@ -149,6 +167,17 @@ namespace EgoEngineLibrary.Data.Pkg
                         vec4.Z = reader.ReadSingle();
                         vec4.W = reader.ReadSingle();
                         vec4Data.Add(vec4);
+                    }
+                    break;
+                case "quat":
+                    for (int i = 0; i < numData; ++i)
+                    {
+                        Quaternion vec4 = new Quaternion();
+                        vec4.X = reader.ReadSingle();
+                        vec4.Y = reader.ReadSingle();
+                        vec4.Z = reader.ReadSingle();
+                        vec4.W = reader.ReadSingle();
+                        quatData.Add(vec4);
                     }
                     break;
                 default:
@@ -242,10 +271,37 @@ namespace EgoEngineLibrary.Data.Pkg
                         writer.Write(s);
                     }
                     break;
+                case "ui64":
+                    writer.Write((UInt32)ui64Data.Count);
+                    writer.Write((UInt32)8);
+                    foreach (UInt64 u in ui64Data)
+                    {
+                        writer.Write(u);
+                    }
+                    break;
+                case "si64":
+                    writer.Write((UInt32)si64Data.Count);
+                    writer.Write((UInt32)8);
+                    foreach (Int64 u in si64Data)
+                    {
+                        writer.Write(u);
+                    }
+                    break;
                 case "vec4":
                     writer.Write((UInt32)vec4Data.Count);
                     writer.Write((UInt32)16);
                     foreach (Vector4 v in vec4Data)
+                    {
+                        writer.Write(v.X);
+                        writer.Write(v.Y);
+                        writer.Write(v.Z);
+                        writer.Write(v.W);
+                    }
+                    break;
+                case "quat":
+                    writer.Write((UInt32)quatData.Count);
+                    writer.Write((UInt32)16);
+                    foreach (Quaternion v in quatData)
                     {
                         writer.Write(v.X);
                         writer.Write(v.Y);
@@ -291,8 +347,17 @@ namespace EgoEngineLibrary.Data.Pkg
                 case "si32":
                     offsetAdjust += (Int32)si32Data.Count * 4;
                     break;
+                case "ui64":
+                    offsetAdjust += (Int32)ui32Data.Count * 8;
+                    break;
+                case "si64":
+                    offsetAdjust += (Int32)si32Data.Count * 8;
+                    break;
                 case "vec4":
                     offsetAdjust += (Int32)vec4Data.Count * 16;
+                    break;
+                case "quat":
+                    offsetAdjust += (Int32)quatData.Count * 16;
                     break;
                 default:
                     throw new Exception("Data type not supported! " + type);
@@ -309,10 +374,10 @@ namespace EgoEngineLibrary.Data.Pkg
                     return type + " " + woidData[offsetType.Offset];
                 case "mat4":
                     Matrix4x4 m = mat4Data[offsetType.Offset];
-                    return type + " " + string.Format("{0},{1},{2},{3};{4},{5},{6},{7};{8},{9},{10},{11};{12},{13},{14},{15}",
+                    return type + " " + string.Format("{0:F},{1:F},{2:F},{3:F};{4:F},{5:F},{6:F},{7:F};{8:F},{9:F},{10:F},{11:F};{12:F},{13:F},{14:F},{15:F}",
                         m.M11, m.M12, m.M13, m.M14, m.M21, m.M22, m.M23, m.M24, m.M31, m.M32, m.M33, m.M34, m.M41, m.M42, m.M43, m.M44);
                 case "fp32":
-                    return type + " " + fp32Data[offsetType.Offset];
+                    return type + " " + fp32Data[offsetType.Offset].ToString("F");
                 case "bool":
                     return type + " " + boolData[offsetType.Offset];
                 case "rgba":
@@ -321,14 +386,21 @@ namespace EgoEngineLibrary.Data.Pkg
                     return type + " " + shnmData[offsetType.Offset];
                 case "vec3":
                     Vector3 vec3 = vec3Data[offsetType.Offset];
-                    return type + " " + string.Format("{0},{1},{2}", vec3.X, vec3.Y, vec3.Z);
+                    return type + " " + string.Format("{0:F},{1:F},{2:F}", vec3.X, vec3.Y, vec3.Z);
                 case "ui32":
                     return type + " " + ui32Data[offsetType.Offset];
                 case "si32":
                     return type + " " + si32Data[offsetType.Offset];
+                case "ui64":
+                    return type + " " + ui64Data[offsetType.Offset];
+                case "si64":
+                    return type + " " + si64Data[offsetType.Offset];
                 case "vec4":
                     Vector4 vec4 = vec4Data[offsetType.Offset];
-                    return type + " " + string.Format("{0},{1},{2},{3}", vec4.X, vec4.Y, vec4.Z, vec4.W);
+                    return type + " " + string.Format("{0:F},{1:F},{2:F},{3:F}", vec4.X, vec4.Y, vec4.Z, vec4.W);
+                case "quat":
+                    Quaternion quat = quatData[offsetType.Offset];
+                    return type + " " + string.Format("{0:F},{1:F},{2:F},{3:F}", quat.X, quat.Y, quat.Z, quat.W);
                 default:
                     throw new Exception("Data type not supported! " + type);
             }
@@ -462,6 +534,32 @@ namespace EgoEngineLibrary.Data.Pkg
                         si32Data.Add(si32);
                     }
                     break;
+                case "ui64":
+                    UInt64 ui64 = UInt64.Parse(data);
+                    index = ui64Data.IndexOf(ui64);
+                    if (index >= 0)
+                    {
+                        offsetType.Offset = index;
+                    }
+                    else
+                    {
+                        offsetType.Offset = ui64Data.Count;
+                        ui64Data.Add(ui64);
+                    }
+                    break;
+                case "si64":
+                    Int64 si64 = Int64.Parse(data);
+                    index = si64Data.IndexOf(si64);
+                    if (index >= 0)
+                    {
+                        offsetType.Offset = index;
+                    }
+                    else
+                    {
+                        offsetType.Offset = si64Data.Count;
+                        si64Data.Add(si64);
+                    }
+                    break;
                 case "vec4":
                     string[] vec4s = data.Split(',');
                     Vector4 vec4 = new Vector4(float.Parse(vec4s[0]), float.Parse(vec4s[1]), float.Parse(vec4s[2]), float.Parse(vec4s[3]));
@@ -474,6 +572,20 @@ namespace EgoEngineLibrary.Data.Pkg
                     {
                         offsetType.Offset = vec4Data.Count;
                         vec4Data.Add(vec4);
+                    }
+                    break;
+                case "quat":
+                    string[] quats = data.Split(',');
+                    Quaternion quat = new Quaternion(float.Parse(quats[0]), float.Parse(quats[1]), float.Parse(quats[2]), float.Parse(quats[3]));
+                    index = quatData.IndexOf(quat);
+                    if (index >= 0)
+                    {
+                        offsetType.Offset = index;
+                    }
+                    else
+                    {
+                        offsetType.Offset = quatData.Count;
+                        quatData.Add(quat);
                     }
                     break;
                 default:

@@ -22,7 +22,9 @@ namespace EgoErpArchiver.ViewModel
         string filePath;
         ErpFile file;
         readonly ResourcesWorkspaceViewModel resourcesWorkspace;
+        readonly PackagesWorkspaceViewModel packagesWorkspace;
         readonly TexturesWorkspaceViewModel texturesWorkspace;
+        readonly XmlFilesWorkspaceViewModel xmlFilesWorkspace;
 
         public override string DisplayName
         {
@@ -46,9 +48,17 @@ namespace EgoErpArchiver.ViewModel
         {
             get { return resourcesWorkspace; }
         }
+        public PackagesWorkspaceViewModel PackagesWorkspace
+        {
+            get { return packagesWorkspace; }
+        }
         public TexturesWorkspaceViewModel TexturesWorkspace
         {
             get { return texturesWorkspace; }
+        }
+        public XmlFilesWorkspaceViewModel XmlFilesWorkspace
+        {
+            get { return xmlFilesWorkspace; }
         }
         #endregion
 
@@ -73,6 +83,8 @@ namespace EgoErpArchiver.ViewModel
 
             resourcesWorkspace = new ResourcesWorkspaceViewModel(this);
             texturesWorkspace = new TexturesWorkspaceViewModel(this);
+            packagesWorkspace = new PackagesWorkspaceViewModel(this);
+            xmlFilesWorkspace = new XmlFilesWorkspaceViewModel(this);
 
             // Commands
             openCommand = new RelayCommand(OpenCommand_Execute);
@@ -134,8 +146,13 @@ namespace EgoErpArchiver.ViewModel
                 this.file = new ErpFile();
                 Task.Run(() => this.file.Read(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))).Wait();
                 resourcesWorkspace.LoadData(file);
+                packagesWorkspace.LoadData(resourcesWorkspace.RootNode);
                 texturesWorkspace.LoadData(resourcesWorkspace.RootNode);
-                if (texturesWorkspace.Textures.Count > 0) SelectedTabIndex = 1;
+                xmlFilesWorkspace.LoadData(resourcesWorkspace.RootNode);
+                if (texturesWorkspace.Textures.Count > 0) SelectedTabIndex = 2;
+                else if (xmlFilesWorkspace.XmlFiles.Count > 0) SelectedTabIndex = 3;
+                else if (packagesWorkspace.Packages.Count > 0) SelectedTabIndex = 1;
+                else SelectedTabIndex = 0;
                 DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
             }
             catch (Exception excp)

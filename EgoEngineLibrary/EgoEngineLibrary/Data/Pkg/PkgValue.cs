@@ -94,6 +94,7 @@ namespace EgoEngineLibrary.Data.Pkg
                         break;
                     case "!iar":
                         reader.ReadBytes(8);
+                        goto default;
                         break;
                     case "!vca":
                         complexValueData = new PkgDataArray(ParentFile);

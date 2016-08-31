@@ -120,11 +120,11 @@ string dispVcaElement(struct Vca &element)
 {
     if (element.children.magic == "!vbi")
     {
-        return element.children.type;
+        return element.children.type + " " + dispDataAtOffset(element.data);
     }
     else
     {
-        return element.children.magic;
+        return element.children.magic + " " + dispDataAtOffset(element.data);
     }
 }
 
@@ -230,37 +230,41 @@ typedef struct
         if (type == "ui32")
         {
             uint32 data[numData];
-            byte padding[-(numData*bytePerData) & 3];
+            //byte padding[-(numData*bytePerData) & 3];
         }
         else if (type == "si32")
         {
             int32 data[numData];
-            byte padding[-(numData*bytePerData) & 3];
+            //byte padding[-(numData*bytePerData) & 3];
         }
         else if (type == "fp32")
         {
             float data[numData];
-            byte padding[-(numData*bytePerData) & 3];
+            //byte padding[-(numData*bytePerData) & 3];
         }
         else if (type == "bool")
         {
             byte data[numData];
-            byte padding[-(numData*bytePerData) & 3];
+            //byte padding[-(numData*bytePerData) & 3];
         }
         else if (type == "rgba")
         {
             struct { ubyte rgba[4]; } data[numData];
-            byte padding[-(numData*bytePerData) & 15];
+            //byte padding[-(numData*bytePerData) & 15];
         }
         else if (type == "mat4")
         {
             struct { float mat4[16]; } data[numData];
-            byte padding[-(numData*bytePerData) & 3];
+            //byte padding[-(numData*bytePerData) & 3];
+        }
+        else if (type == "quat")
+        {
+            struct { float x; float y; float z; float w; } data[numData];
         }
         else
         {
             byte data[numData*bytePerData];
-            byte padding[-(numData*bytePerData) & 3];
+            //byte padding[-(numData*bytePerData) & 3];
         }
     }
 } Chunk <read=dispChunk>;

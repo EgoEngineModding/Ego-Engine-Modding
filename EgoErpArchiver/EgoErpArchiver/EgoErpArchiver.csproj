@@ -45,6 +45,10 @@
       <HintPath>..\..\EgoEngineLibrary\packages\CSharpImageLibrary.3.2.0.0\lib\net462\CSharpImageLibrary.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="ICSharpCode.AvalonEdit, Version=5.0.3.0, Culture=neutral, PublicKeyToken=9cc39be672370310, processorArchitecture=MSIL">
+      <HintPath>..\..\EgoEngineLibrary\packages\AvalonEdit.5.0.3\lib\Net40\ICSharpCode.AvalonEdit.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="ICSharpCode.TreeView">
       <HintPath>.\ICSharpCode.TreeView.dll</HintPath>
     </Reference>
@@ -91,11 +95,15 @@
     </ApplicationDefinition>
     <Compile Include="GridViewSort.cs" />
     <Compile Include="ViewModel\ErpFragmentViewModel.cs" />
+    <Compile Include="ViewModel\ErpXmlFileViewModel.cs" />
     <Compile Include="ViewModel\ErpResourceViewModel.cs" />
+    <Compile Include="ViewModel\ErpPackageViewModel.cs" />
     <Compile Include="ViewModel\ErpTextureViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
+    <Compile Include="ViewModel\XmlFilesWorkspaceViewModel.cs" />
     <Compile Include="ViewModel\ResourcesWorkspaceViewModel.cs" />
     <Compile Include="ViewModel\RelayCommand.cs" />
+    <Compile Include="ViewModel\PackagesWorkspaceViewModel.cs" />
     <Compile Include="ViewModel\TexturesWorkspaceViewModel.cs" />
     <Compile Include="ViewModel\TreeNodeViewModel.cs" />
     <Compile Include="ViewModel\TreeRootViewModel.cs" />
