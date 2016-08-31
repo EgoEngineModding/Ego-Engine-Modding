@@ -58,8 +58,8 @@
             {
                 if (rowObject is ErpResource)
                 {
-                    string str = ((ErpResource)rowObject).FileName.Substring(7).Replace("/", "\\");
-                    return Path.GetFileName(((ErpResource)rowObject).FileName);//.Substring(7));
+                    string str = ((ErpResource)rowObject).Identifier.Substring(7).Replace("/", "\\");
+                    return Path.GetFileName(((ErpResource)rowObject).Identifier);//.Substring(7));
                 }
                 else if (rowObject is ErpFragment)
                 {
@@ -172,7 +172,7 @@
             }
 
             ErpResource entry = (ErpResource)TreeListView.SelectedObject;
-            if (Path.GetExtension(entry.FileName) != ".tga")
+            if (Path.GetExtension(entry.Identifier) != ".tga")
             {
                 MessageBox.Show("Please select a *.tga file!", "Select a tga file", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
@@ -181,7 +181,7 @@
             SaveFileDialog dialog = new SaveFileDialog();
             dialog.Filter = "Dds files|*.dds|All files|*.*";
             dialog.Title = "Select the dds save location and file name";
-            dialog.FileName = Path.GetFileName(entry.FileName) + ".dds";
+            dialog.FileName = Path.GetFileName(entry.Identifier) + ".dds";
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -361,7 +361,7 @@
             }
 
             ErpResource entry = (ErpResource)TreeListView.SelectedObject;
-            if (Path.GetExtension(entry.FileName) != ".tga")
+            if (Path.GetExtension(entry.Identifier) != ".tga")
             {
                 MessageBox.Show("Please select a *.tga file!", "Select a tga file", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
@@ -370,7 +370,7 @@
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "Dds files|*.dds|All files|*.*";
             dialog.Title = "Select a dds file";
-            dialog.FileName = Path.GetFileName(entry.FileName) + ".dds";
+            dialog.FileName = Path.GetFileName(entry.Identifier) + ".dds";
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 try

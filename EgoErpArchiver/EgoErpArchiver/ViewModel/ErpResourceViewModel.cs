@@ -22,8 +22,8 @@ namespace EgoErpArchiver.ViewModel
         {
             get
             {
-                Uri uri = new Uri(resource.FileName);
-                return Path.GetFileName(uri.LocalPath) + uri.Query;
+                //Uri uri = new Uri(resource.Identifier);
+                return resource.FileName;//Path.GetFileName(uri.LocalPath) + uri.Query;
             }
         }
 
@@ -68,7 +68,7 @@ namespace EgoErpArchiver.ViewModel
         {
             get
             {
-                return resource.FileName;
+                return resource.Identifier;
             }
         }
         #endregion

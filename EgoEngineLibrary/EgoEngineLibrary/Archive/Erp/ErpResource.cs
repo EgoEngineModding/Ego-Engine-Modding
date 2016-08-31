@@ -9,7 +9,7 @@
     public class ErpResource
     {
         public ErpFile ParentFile { get; set; }
-        public string FileName { get; set; }
+        public string Identifier { get; private set; }
         public string ResourceType { get; set; }
 
         public Int32 Unknown { get; set; }
@@ -17,6 +17,45 @@
         public List<ErpFragment> Fragments { get; set; }
 
         public byte[] Hash;
+
+        public string FileName
+        {
+            get
+            {
+                Uri uri = new Uri(Identifier, UriKind.RelativeOrAbsolute);
+                if (uri.IsAbsoluteUri)
+                {
+                    return Path.GetFileName(uri.PathAndQuery);
+                }
+                else
+                {
+                    return Path.GetFileName(uri.ToString());
+                }
+            }
+        }
+        public string Folder
+        {
+            get
+            {
+                Uri uri = new Uri(Identifier, UriKind.RelativeOrAbsolute);
+                if (uri.IsAbsoluteUri)
+                {
+                    return Path.GetDirectoryName(uri.Host + uri.PathAndQuery).Replace("/", "\\");
+                }
+                else
+                {
+                    string temp = uri.ToString();
+                    if (temp.Contains("/") || temp.Contains("\\"))
+                    {
+                        return Path.GetDirectoryName(temp).Replace("/", "\\");
+                    }
+                    else
+                    {
+                        return string.Empty;
+                    }
+                }
+            }
+        }
 
         public UInt64 Size
         {
@@ -60,7 +99,7 @@
         public void Read(ErpBinaryReader reader)
         {
             reader.ReadBytes(4); // entry info length
-            this.FileName = reader.ReadString(reader.ReadInt16());
+            this.Identifier = reader.ReadString(reader.ReadInt16());
             this.ResourceType = reader.ReadString(16);
 
             this.Unknown = reader.ReadInt32();
@@ -83,8 +122,8 @@
         public void Write(ErpBinaryWriter writer)
         {
             writer.Write(this._resourceInfoLength);
-            writer.Write((Int16)(this.FileName.Length + 1));
-            writer.Write(this.FileName);
+            writer.Write((Int16)(this.Identifier.Length + 1));
+            writer.Write(this.Identifier);
             writer.Write(this.ResourceType, 16);
             writer.Write(this.Unknown);
             writer.Write((byte)this.Fragments.Count);
@@ -112,7 +151,7 @@
             }
 
             this._resourceInfoLength *= (UInt32)this.Fragments.Count;
-            this._resourceInfoLength += (UInt32)this.FileName.Length + 24;
+            this._resourceInfoLength += (UInt32)this.Identifier.Length + 24;
 
             if (this.ParentFile.Version > 2)
             {
@@ -124,7 +163,7 @@
 
         public void Export(string folder)
         {
-            string outputDir = Path.Combine(folder, Path.GetDirectoryName(this.FileName.Substring(7)));
+            string outputDir = Path.Combine(folder, this.Folder);
             Directory.CreateDirectory(outputDir);
 
             for (int i = 0; i < this.Fragments.Count; ++i)
@@ -152,7 +191,7 @@
 
                 int resIndex = Int32.Parse(name.Substring(resTextIndex + 7, 3));
                 name = Path.GetDirectoryName(f) + "\\" + name.Remove(resTextIndex).Replace("^^", "?") + extension;
-                if (name.EndsWith(FileName.Substring(7).Replace('/', '\\')))
+                if (name.EndsWith(Path.Combine(this.Folder, this.FileName)))
                 {
                     Fragments[resIndex].Import(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
                     break;

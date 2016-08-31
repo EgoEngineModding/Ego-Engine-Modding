@@ -180,8 +180,7 @@ namespace EgoErpArchiver.ViewModel
                 Directory.CreateDirectory(mainView.FilePath.Replace(".", "_") + "_textures");
                 foreach (ErpTextureViewModel texView in Textures)
                 {
-                    Uri uri = new Uri(texView.Texture.FileName);
-                    string fileName = mainView.FilePath.Replace(".", "_") + "_textures" + "\\" + uri.Host + uri.PathAndQuery.Replace("?", "%3F") + ".dds";
+                    string fileName = mainView.FilePath.Replace(".", "_") + "_textures" + "\\" + Path.Combine(texView.Texture.Folder, texView.Texture.FileName).Replace("?", "%3F") + ".dds";
                     string directoryPath = Path.GetDirectoryName(fileName);
                     if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
                     texView.ExportDDS(fileName, true);
@@ -209,9 +208,8 @@ namespace EgoErpArchiver.ViewModel
                     {
                         foreach (ErpTextureViewModel texView in Textures)
                         {
-                            Uri uri = new Uri(texView.Texture.FileName);
-                            string fileName = mainView.FilePath.Replace(".", "_") + "_textures" + "\\" + uri.Host + uri.PathAndQuery.Replace("?", "%3F") + ".dds";
-                            if (Path.Equals(filePath, fileName.Replace("/", "\\")))
+                            string fileName = mainView.FilePath.Replace(".", "_") + "_textures" + "\\" + Path.Combine(texView.Texture.Folder, texView.Texture.FileName).Replace("?", "%3F") + ".dds";
+                            if (Path.Equals(filePath, fileName))
                             {
                                 string mipMapSaveLocation = filePath.Replace(directory, mipMapDirectory) + ".mipmaps";
                                 Directory.CreateDirectory(Path.GetDirectoryName(mipMapSaveLocation));

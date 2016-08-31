@@ -114,7 +114,7 @@
         {
             foreach (ErpResource entry in this.Resources)
             {
-                if (entry.FileName == fileName)
+                if (entry.Identifier == fileName)
                 {
                     return entry;
                 }

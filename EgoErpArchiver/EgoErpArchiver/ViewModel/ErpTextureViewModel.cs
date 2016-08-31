@@ -25,7 +25,7 @@ namespace EgoErpArchiver.ViewModel
         }
         public override string DisplayName
         {
-            get { return Path.GetFileName(new Uri(Texture.FileName).LocalPath); }
+            get { return Texture.FileName; }
         }
         public int Width
         {
@@ -274,6 +274,21 @@ namespace EgoErpArchiver.ViewModel
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("ATI2"), 0);
                     break;
+                case 70: // flow_boot splash_bg_image; tried just about everything, can't figure it out
+                    dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    dds.header.pitchOrLinearSize = (width * height) / 2;
+                    dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+                    dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT1"), 0);
+                    //dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    //dds.header.pitchOrLinearSize = (width * height);
+                    //dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_ALPHAPIXELS | DdsPixelFormat.Flags.DDPF_RGB;
+                    //dds.header.ddspf.fourCC = 0;
+                    //dds.header.ddspf.rGBBitCount = 16;
+                    //dds.header.ddspf.rBitMask = 0xF00;
+                    //dds.header.ddspf.gBitMask = 0xF0;
+                    //dds.header.ddspf.bBitMask = 0xF;
+                    //dds.header.ddspf.aBitMask = 0xF000;
+                    goto default;
                 default:
                     throw new Exception("Image type not supported!");
             }
