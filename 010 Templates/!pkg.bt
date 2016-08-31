@@ -36,7 +36,7 @@ string dispDataAtOffset(OffsetData &data)
     else
     {
         // Get the offset to the type in vca table
-        SPrintf(s, "%s", dispData(main.children[1].elements[data.type].data.offset, data.offset));
+        SPrintf(s, "%s", dispData(main.members[1].elements[data.type].data.offset, data.offset));
     }
 
     return s;
@@ -106,12 +106,12 @@ ReadFloat(dataOffset + 48), ReadFloat(dataOffset + 52), ReadFloat(dataOffset + 5
     return s;
 }
 
-string dispIdiElement(struct Idi &element)
+string dispIdiElement(struct PkgPair &element)
 {
     return dispDataAtOffset(element.data1) + " : " + dispDataAtOffset(element.data2);
 }
 
-string dispIliElement(struct Ili &element)
+string dispIliElement(struct PkgValue &element)
 {
     return dispDataAtOffset(element.data);
 }
@@ -130,31 +130,46 @@ string dispVcaElement(struct Vca &element)
 
 string dispChunk(struct Chunk &chunk)
 {
-    return chunk.magic;
+    if (chunk.magic == "!pkg")
+    {
+        return "PkgRootObject";
+    }
+    else if (chunk.magic == "!idi")
+    {
+        return "PkgObject";
+    }
+    else if (chunk.magic == "!ili")
+    {
+        return "PkgArray";
+    }
+    else
+    {
+        return chunk.magic;
+    }
 }
 
 typedef struct
 {
-    char magic[4];
+    char magic[4] <hidden=true>;
 
     if (magic == "!pkg")
     {
         char type[4];
         local int64 currOffset = FTell();
-        OffsetData firstElement;
-        OffsetData vcaElement;
+        OffsetData firstElement <hidden=true>;
+        OffsetData vcaElement <hidden=true>;
         FSeek(firstElement.offset);
-        struct Chunk children;
+        struct Chunk members;
         FSeek(vcaElement.offset);
-        struct Chunk children;
+        struct Chunk members;
     }
     else if (magic == "!idi")
     {
-        uint32 numElements;
-        struct Idi
+        uint32 numElements <hidden=true>;
+        struct PkgPair
         {
-            OffsetData data1;
-            OffsetData data2;
+            OffsetData data1 <hidden=true>;
+            OffsetData data2 <hidden=true>;
 
             local int64 currOffset = FTell();
             if (data2.type == 128)
@@ -163,14 +178,14 @@ typedef struct
                 struct Chunk children;
             }
             FSeek(currOffset);
-        } elements[numElements] <optimize=false, read=dispIdiElement>;
+        } members[numElements] <optimize=false, read=dispIdiElement>;
     }
     else if (magic == "!ili")
     {
-        uint32 numElements;
-        struct Ili
+        uint32 numElements <hidden=true>;
+        struct PkgValue
         {
-            OffsetData data;
+            OffsetData data <hidden=true>;
 
             local int64 currOffset = FTell();
             if (data.type == 128)
@@ -187,10 +202,10 @@ typedef struct
     }
     else if (magic == "!vca")
     {
-        uint32 numElements;
+        uint32 numElements <hidden=true>;
         struct Vca
         {
-            OffsetData data;
+            OffsetData data <hidden=true>;
 
             local int64 currOffset = FTell();
             if (data.type == 128)
@@ -215,6 +230,11 @@ typedef struct
         if (type == "ui32")
         {
             uint32 data[numData];
+            byte padding[-(numData*bytePerData) & 3];
+        }
+        else if (type == "si32")
+        {
+            int32 data[numData];
             byte padding[-(numData*bytePerData) & 3];
         }
         else if (type == "fp32")

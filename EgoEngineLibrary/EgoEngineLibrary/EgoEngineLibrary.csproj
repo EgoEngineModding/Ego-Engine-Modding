@@ -39,10 +39,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\JonSkeet.MiscUtil.0.1\lib\net35-Client\MiscUtil.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
@@ -70,6 +75,21 @@
     <Compile Include="Data\DatabaseFile.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Data\Pkg\PkgBinaryWriter.cs" />
+    <Compile Include="Data\Pkg\PkgByteData.cs" />
+    <Compile Include="Data\Pkg\PkgChunk.cs" />
+    <Compile Include="Data\Pkg\PkgArray.cs" />
+    <Compile Include="Data\Pkg\PkgComplexValue.cs" />
+    <Compile Include="Data\Pkg\PkgData.cs" />
+    <Compile Include="Data\Pkg\PkgStringData.cs" />
+    <Compile Include="Data\Pkg\PkgValue.cs" />
+    <Compile Include="Data\Pkg\PkgBinaryReader.cs" />
+    <Compile Include="Data\Pkg\PkgPair.cs" />
+    <Compile Include="Data\Pkg\PkgFile.cs" />
+    <Compile Include="Data\Pkg\PkgObject.cs" />
+    <Compile Include="Data\Pkg\PkgOffsetType.cs" />
+    <Compile Include="Data\Pkg\PkgRootObject.cs" />
+    <Compile Include="Data\Pkg\PkgDataArray.cs" />
     <Compile Include="Graphics\DdsFile.cs" />
     <Compile Include="Graphics\DdsHeader.cs" />
     <Compile Include="Graphics\DdsPixelFormat.cs" />
