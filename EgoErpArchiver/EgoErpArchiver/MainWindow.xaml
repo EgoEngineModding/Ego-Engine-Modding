@@ -28,8 +28,8 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="_Resources">
-                <MenuItem Header="_Export" Command="{Binding Path=ResourcesWorkspace.Export}" CommandParameter="{Binding ElementName=resourceTreeView, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="_Import" Command="{Binding Path=ResourcesWorkspace.Import}" CommandParameter="{Binding ElementName=resourceTreeView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Export" Command="{Binding Path=ResourcesWorkspace.Export}" CommandParameter="{Binding ElementName=resourcesDataGrid, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Import" Command="{Binding Path=ResourcesWorkspace.Import}" CommandParameter="{Binding ElementName=resourcesDataGrid, Path=SelectedItem}"></MenuItem>
                 <MenuItem Header="E_xport All" Command="{Binding Path=ResourcesWorkspace.ExportAll}"></MenuItem>
                 <MenuItem Header="I_mport All" Command="{Binding Path=ResourcesWorkspace.ImportAll}"></MenuItem>
             </MenuItem>
@@ -166,13 +166,19 @@
                     </DockPanel>
                     <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
                     <DockPanel Grid.Column="2" Background="LightGray">
-                        <TextBlock Panel.ZIndex="2" 
-                                   Text="{Binding ElementName=texListView, Path=SelectedItem.PreviewError}" 
-                                   Visibility="{Binding ElementName=texListView, Path=SelectedItem.PreviewErrorVisibility}"/>
-                        <Image Panel.ZIndex="1" 
+                        <Grid>
+                            <Image 
                                Source="{Binding ElementName=texListView, Path=SelectedItem.Preview}" 
                                MaxWidth="{Binding ElementName=texListView, Path=SelectedItem.Width}" 
                                MaxHeight="{Binding ElementName=texListView, Path=SelectedItem.Height}"></Image>
+                            <StackPanel>
+                                <TextBlock Text="{Binding ElementName=texListView, Path=SelectedItem.TextureInfo}"
+                                       Foreground="Yellow"></TextBlock>
+                                <TextBlock
+                                   Text="{Binding ElementName=texListView, Path=SelectedItem.PreviewError}" 
+                                   Visibility="{Binding ElementName=texListView, Path=SelectedItem.PreviewErrorVisibility}"/>
+                            </StackPanel>
+                        </Grid>
                     </DockPanel>
                 </Grid>
             </TabItem>

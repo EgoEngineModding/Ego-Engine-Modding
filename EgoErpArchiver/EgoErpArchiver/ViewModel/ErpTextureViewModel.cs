@@ -48,6 +48,7 @@ namespace EgoErpArchiver.ViewModel
 
         #region Presentation Props
         bool isSelected;
+        string textureInfo;
         BitmapSource preview;
         string previewError;
         Visibility previewErrorVisibility;
@@ -68,6 +69,15 @@ namespace EgoErpArchiver.ViewModel
                     else { preview = null; }
                     OnPropertyChanged("IsSelected");
                 }
+            }
+        }
+        public string TextureInfo
+        {
+            get { return textureInfo; }
+            set
+            {
+                textureInfo = value;
+                OnPropertyChanged("TextureInfo");
             }
         }
         public BitmapSource Preview
@@ -102,8 +112,6 @@ namespace EgoErpArchiver.ViewModel
             {
                 this.Preview = null;
                 dds = ExportDDS(System.AppDomain.CurrentDomain.BaseDirectory + "\\temp.dds", true);
-                //dds = GetPreviewDDS();
-                //dds.Write(File.Open(System.AppDomain.CurrentDomain.BaseDirectory + "\\temp.dds", FileMode.Create, FileAccess.ReadWrite, FileShare.Read), -1);
                 int maxDimension = (int)Math.Max(dds.header.width, dds.header.height);
                 Width = (int)dds.header.width;
                 Height = (int)dds.header.height;
@@ -203,7 +211,7 @@ namespace EgoErpArchiver.ViewModel
             DdsFile dds = new DdsFile();
 
             string fNameImage;
-            using (ErpBinaryReader reader = new ErpBinaryReader(Texture.Fragments[0].GetDataStream(true)))
+            using (ErpBinaryReader reader = new ErpBinaryReader(Texture.GetFragment("temp", 0).GetDataStream(true)))
             {
                 reader.Seek(24, SeekOrigin.Begin);
                 fNameImage = reader.ReadString();
@@ -214,7 +222,7 @@ namespace EgoErpArchiver.ViewModel
             uint width;
             uint height;
             uint mipmaps;
-            using (ErpBinaryReader reader = new ErpBinaryReader(imageEntry.Fragments[0].GetDataStream(true)))
+            using (ErpBinaryReader reader = new ErpBinaryReader(imageEntry.GetFragment("temp", 0).GetDataStream(true)))
             {
                 reader.Seek(8, SeekOrigin.Begin);
                 imageType = reader.ReadInt32();
@@ -229,9 +237,10 @@ namespace EgoErpArchiver.ViewModel
             uint mipCount = 0;
             uint mipWidth = 0, mipHeight = 0;
             uint mipLinearSize = 0;
-            if (imageEntry.Fragments.Count >= 3 && imageEntry.Fragments[2].Name == "mips")
+            ErpFragment mipsFragment = imageEntry.TryGetFragment("mips", 0);
+            if (mipsFragment != null)
             {
-                using (ErpBinaryReader reader = new ErpBinaryReader(imageEntry.Fragments[2].GetDataStream(true)))
+                using (ErpBinaryReader reader = new ErpBinaryReader(mipsFragment.GetDataStream(true)))
                 {
                     byte strLength = reader.ReadByte();
                     mipMapFileName = reader.ReadString(strLength);
@@ -250,6 +259,7 @@ namespace EgoErpArchiver.ViewModel
 
             dds.header.width = width;
             dds.header.height = height;
+            textureInfo = width + "x" + height + " Mips:" + (mipmaps) + " Format:" + imageType + ",";
             switch (imageType)
             {
                 case 52: // ferrari_wheel_sfc
@@ -258,6 +268,7 @@ namespace EgoErpArchiver.ViewModel
                     dds.header.pitchOrLinearSize = (width * height) / 2;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT1"), 0);
+                    TextureInfo += "DXT1";
                     break;
                 case 55: // ferrari_sfc
                 case 57: // ferrari_decal
@@ -265,12 +276,14 @@ namespace EgoErpArchiver.ViewModel
                     dds.header.pitchOrLinearSize = (width * height);
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT5"), 0);
+                    TextureInfo += "DXT5";
                     break;
                 case 65: // ferrari_wheel_nm
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (width * height);
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("ATI2"), 0);
+                    TextureInfo += "ATI2/3Dc";
                     break;
                 case 70: // flow_boot splash_bg_image; tried just about everything, can't figure it out
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
@@ -288,7 +301,8 @@ namespace EgoErpArchiver.ViewModel
                     //dds.header.ddspf.aBitMask = 0xF000;
                     goto default;
                 default:
-                    throw new Exception("Image type not supported!");
+                    TextureInfo += "Unknown";
+                    throw new Exception("Image format not supported!");
             }
             if (mipmaps > 0)
             {
@@ -300,7 +314,7 @@ namespace EgoErpArchiver.ViewModel
             dds.header.ddspf.size = 32;
             dds.header.caps |= DdsHeader.Caps.DDSCAPS_TEXTURE;
 
-            byte[] imageData = imageEntry.Fragments[1].GetDataArray(true);
+            byte[] imageData = imageEntry.GetFragment("temp", 1).GetDataArray(true);
 
             string mipMapFullFileName = Path.Combine(Properties.Settings.Default.F12016Dir, mipMapFileName);
             bool foundMipMapFile = File.Exists(mipMapFullFileName);
@@ -345,6 +359,7 @@ namespace EgoErpArchiver.ViewModel
                     Buffer.BlockCopy(mipImageData, 0, dds.bdata, 0, mipImageData.Length);
                     Buffer.BlockCopy(imageData, 0, dds.bdata, mipImageData.Length, imageData.Length);
                     dds.Write(File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read), -1);
+                    TextureInfo += Environment.NewLine + mipWidth + "x" + mipHeight + " Mips:" + (mipCount);
                 }
                 else
                 {
@@ -386,7 +401,7 @@ namespace EgoErpArchiver.ViewModel
                     throw new Exception("Image type not supported!");
             }
 
-            MemoryStream tgaData = Texture.Fragments[0].GetDataStream(true);
+            MemoryStream tgaData = Texture.GetFragment("temp", 0).GetDataStream(true);
             string fNameImage;
             ErpBinaryReader reader = new ErpBinaryReader(tgaData);
             reader.Seek(24, SeekOrigin.Begin);
@@ -394,11 +409,12 @@ namespace EgoErpArchiver.ViewModel
             ErpResource imageEntry = Texture.ParentFile.FindEntry(fNameImage);
 
             byte[] imageByteData;
-            if (imageEntry.Fragments.Count >= 3 && imageEntry.Fragments[2].Name == "mips")
+            ErpFragment mipsFragment = imageEntry.TryGetFragment("mips", 0);
+            if (mipsFragment != null)
             {
                 string mipMapFileName;
                 uint mipCount = dds.header.mipMapCount / 4;
-                MemoryStream mipsData = imageEntry.Fragments[2].GetDataStream(true);
+                MemoryStream mipsData = mipsFragment.GetDataStream(true);
                 reader = new ErpBinaryReader(mipsData);
                 mipMapFileName = reader.ReadString(reader.ReadByte());
                 uint oldMipCount = reader.ReadUInt32();
@@ -456,7 +472,7 @@ namespace EgoErpArchiver.ViewModel
                             //mipHeight /= 4;
                         }
 
-                        imageEntry.Fragments[2].SetData(newMipsData.ToArray());
+                        mipsFragment.SetData(newMipsData.ToArray());
                     }
 
                     using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, File.Open(mipMapSaveLocation, FileMode.Create, FileAccess.Write, FileShare.Read)))
@@ -490,7 +506,8 @@ namespace EgoErpArchiver.ViewModel
             }
             Texture.Fragments[0].SetData(tgaData.ToArray());
 
-            MemoryStream imageData = imageEntry.Fragments[0].GetDataStream(true);
+            ErpFragment imageFragment = imageEntry.GetFragment("temp", 0);
+            MemoryStream imageData = imageFragment.GetDataStream(true);
             using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, imageData))
             {
                 writer.Seek(8, SeekOrigin.Begin);
@@ -501,8 +518,8 @@ namespace EgoErpArchiver.ViewModel
                 writer.Write(dds.header.mipMapCount);
             }
 
-            imageEntry.Fragments[0].SetData(imageData.ToArray());
-            imageEntry.Fragments[1].SetData(imageByteData);
+            imageFragment.SetData(imageData.ToArray());
+            imageEntry.GetFragment("temp", 1).SetData(imageByteData);
         }
     }
 }

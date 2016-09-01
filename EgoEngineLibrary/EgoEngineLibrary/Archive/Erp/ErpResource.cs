@@ -198,5 +198,33 @@
                 }
             }
         }
+
+        public ErpFragment TryGetFragment(string name, int count)
+        {
+            try
+            {
+                return GetFragment(name, count);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        public ErpFragment GetFragment(string name, int count)
+        {
+            foreach (ErpFragment fragment in Fragments)
+            {
+                if (fragment.Name == name)
+                {
+                    if (count == 0)
+                    {
+                        return fragment;
+                    }
+                    --count;
+                }
+            }
+
+            throw new ArgumentOutOfRangeException("name", name);
+        }
     }
 }

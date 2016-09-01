@@ -65,7 +65,21 @@ namespace EgoErpArchiver.ViewModel
         {
             try
             {
-                PkgFile package = PkgFile.ReadPkg(Package.Fragments[0].GetDataStream(true));
+                PkgFile package;
+
+                switch (Package.ResourceType)
+                {
+                    case "AnimClip":
+                        package = PkgFile.ReadPkg(Package.GetFragment("temp", 0).GetDataStream(true));
+                        break;
+                    case "EventGraph":
+                        package = PkgFile.ReadPkg(Package.GetFragment("node", 0).GetDataStream(true));
+                        break;
+                    default:
+                        package = PkgFile.ReadPkg(Package.Fragments[0].GetDataStream(true));
+                        break;
+                }
+
                 StringBuilder sb = new StringBuilder();
                 using (StringWriter sw = new StringWriter(sb))
                 {
