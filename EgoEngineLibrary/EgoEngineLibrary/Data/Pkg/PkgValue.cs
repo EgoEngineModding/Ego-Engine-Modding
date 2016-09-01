@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using EgoEngineLibrary.Data.Pkg.Data;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -101,11 +102,11 @@ namespace EgoEngineLibrary.Data.Pkg
                         complexValueData.Read(reader);
                         break;
                     case "!sbi":
-                        complexValueData = new PkgStringData(ParentFile);
+                        complexValueData = PkgData.Create(ParentFile, "stri");
                         complexValueData.Read(reader);
                         break;
                     case "!vbi":
-                        complexValueData = new PkgByteData(ParentFile);
+                        complexValueData = PkgData.Create(reader, ParentFile);
                         complexValueData.Read(reader);
                         break;
                     default:

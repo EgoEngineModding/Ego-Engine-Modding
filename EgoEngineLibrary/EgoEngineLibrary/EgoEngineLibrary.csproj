@@ -75,13 +75,26 @@
     <Compile Include="Data\DatabaseFile.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Data\Pkg\Data\PkgBoolData.cs" />
+    <Compile Include="Data\Pkg\Data\PkgDataList.cs" />
+    <Compile Include="Data\Pkg\Data\PkgFp32Data.cs" />
+    <Compile Include="Data\Pkg\Data\PkgMat4Data.cs" />
+    <Compile Include="Data\Pkg\Data\PkgQuatData.cs" />
+    <Compile Include="Data\Pkg\Data\PkgRgbaData.cs" />
+    <Compile Include="Data\Pkg\Data\PkgShnmData.cs" />
+    <Compile Include="Data\Pkg\Data\PkgSi32Data.cs" />
+    <Compile Include="Data\Pkg\Data\PkgSi64Data.cs" />
+    <Compile Include="Data\Pkg\Data\PkgUi32Data.cs" />
+    <Compile Include="Data\Pkg\Data\PkgUi64Data.cs" />
+    <Compile Include="Data\Pkg\Data\PkgVec3Data.cs" />
+    <Compile Include="Data\Pkg\Data\PkgVec4Data.cs" />
+    <Compile Include="Data\Pkg\Data\PkgWoidData.cs" />
     <Compile Include="Data\Pkg\PkgBinaryWriter.cs" />
-    <Compile Include="Data\Pkg\PkgByteData.cs" />
     <Compile Include="Data\Pkg\PkgChunk.cs" />
     <Compile Include="Data\Pkg\PkgArray.cs" />
     <Compile Include="Data\Pkg\PkgComplexValue.cs" />
-    <Compile Include="Data\Pkg\PkgData.cs" />
-    <Compile Include="Data\Pkg\PkgStringData.cs" />
+    <Compile Include="Data\Pkg\Data\PkgData.cs" />
+    <Compile Include="Data\Pkg\Data\PkgStringData.cs" />
     <Compile Include="Data\Pkg\PkgValue.cs" />
     <Compile Include="Data\Pkg\PkgBinaryReader.cs" />
     <Compile Include="Data\Pkg\PkgPair.cs" />

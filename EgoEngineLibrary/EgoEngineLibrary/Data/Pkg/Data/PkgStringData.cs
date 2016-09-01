@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.IO;
 
-namespace EgoEngineLibrary.Data.Pkg
+namespace EgoEngineLibrary.Data.Pkg.Data
 {
     public class PkgStringData : PkgData
     {
@@ -26,6 +26,14 @@ namespace EgoEngineLibrary.Data.Pkg
             get
             {
                 return "stri";
+            }
+        }
+
+        public override int Align
+        {
+            get
+            {
+                return 4;
             }
         }
 
@@ -58,13 +66,13 @@ namespace EgoEngineLibrary.Data.Pkg
             PkgValue._offset += 8 + (Int32)strgData.Length;
         }
 
-        public override string GetData(PkgOffsetType offsetType)
+        public override string GetData(Int32 index)
         {
             PkgBinaryReader reader = new PkgBinaryReader(strgData);
-            reader.Seek(offsetType.Offset, SeekOrigin.Begin);
+            reader.Seek(index, SeekOrigin.Begin);
             return Type + " " + reader.ReadString();
         }
-        public override void SetData(string data, PkgOffsetType offsetType)
+        public override Int32 SetData(string data)
         {
             string type = data.Remove(4);
             data = data.Substring(5);
@@ -72,24 +80,16 @@ namespace EgoEngineLibrary.Data.Pkg
             int index;
             if (strgOffset.TryGetValue(data, out index))
             {
-                offsetType.Offset = index;
+                return index;
             }
             else
             {
                 PkgBinaryWriter writer = new PkgBinaryWriter(strgData);
-                offsetType.Offset = (int)strgData.Length;
+                index = (int)strgData.Length;
                 writer.Write(data);
-                strgOffset.Add(data, offsetType.Offset);
+                strgOffset.Add(data, index);
+                return index;
             }
-        }
-
-        public override void FromJson(JsonTextReader reader)
-        {
-            throw new NotImplementedException();
-        }
-        public override void ToJson(JsonTextWriter writer)
-        {
-            throw new NotImplementedException();
         }
     }
 }

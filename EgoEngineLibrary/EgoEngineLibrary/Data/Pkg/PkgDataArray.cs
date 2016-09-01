@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EgoEngineLibrary.Data.Pkg.Data;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -45,7 +46,7 @@ namespace EgoEngineLibrary.Data.Pkg
 
         public string GetData(PkgOffsetType offsetType)
         {
-            return ((PkgData)Elements[offsetType.Type].ComplexValueData).GetData(offsetType);
+            return ((PkgData)Elements[offsetType.Type].ComplexValueData).GetData(offsetType.Offset);
         }
         public void SetData(string data, PkgOffsetType offsetType)
         {
@@ -53,7 +54,7 @@ namespace EgoEngineLibrary.Data.Pkg
 
             offsetType.Type = (byte)AddData(type);
 
-            ((PkgData)Elements[offsetType.Type].ComplexValueData).SetData(data, offsetType);
+            offsetType.Offset = ((PkgData)Elements[offsetType.Type].ComplexValueData).SetData(data.Substring(5));
         }
         private int AddData(string type)
         {
@@ -62,19 +63,12 @@ namespace EgoEngineLibrary.Data.Pkg
             if (typeIndex < 0)
             {
                 typeIndex = (byte)Elements.Count;
+
                 PkgValue val = new PkgValue(ParentFile);
                 val.ValueOffsetType.Type = 128;
-                if (type == "stri")
-                {
-                    PkgStringData stringData = new PkgStringData(ParentFile);
-                    val.ComplexValueData = stringData;
-                }
-                else
-                {
-                    PkgByteData byteData = new PkgByteData(ParentFile, type);
-                    val.ComplexValueData = byteData;
-                }
+                val.ComplexValueData = PkgData.Create(ParentFile, type);
                 Elements.Add(val);
+
                 return typeIndex;
             }
             else
