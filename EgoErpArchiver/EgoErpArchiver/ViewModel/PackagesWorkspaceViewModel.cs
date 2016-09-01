@@ -63,9 +63,8 @@ namespace EgoErpArchiver.ViewModel
         public override void LoadData(object data)
         {
             ClearData();
-            foreach (var child in ((TreeRootViewModel)data).Children)
+            foreach (var resView in ((ResourcesWorkspaceViewModel)data).Resources)
             {
-                ErpResourceViewModel resView = (ErpResourceViewModel)child;
                 switch (resView.Resource.ResourceType)
                 {
                     case "AICorner":
@@ -82,7 +81,7 @@ namespace EgoErpArchiver.ViewModel
                     case "WOInstances":
                     case "World":
                     case "WOTypes":
-                        Packages.Add(new ErpPackageViewModel((ErpResourceViewModel)resView));
+                        Packages.Add(new ErpPackageViewModel(resView));
                         break;
                 }
             }

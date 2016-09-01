@@ -63,12 +63,11 @@ namespace EgoErpArchiver.ViewModel
         public override void LoadData(object data)
         {
             ClearData();
-            foreach (var child in ((TreeRootViewModel)data).Children)
+            foreach (var resView in ((ResourcesWorkspaceViewModel)data).Resources)
             {
-                ErpResourceViewModel resView = (ErpResourceViewModel)child;
                 if (resView.Resource.ResourceType == "GfxSRVResource")
                 {
-                    Textures.Add(new ErpTextureViewModel((ErpResourceViewModel)resView));
+                    Textures.Add(new ErpTextureViewModel(resView));
                 }
             }
         }

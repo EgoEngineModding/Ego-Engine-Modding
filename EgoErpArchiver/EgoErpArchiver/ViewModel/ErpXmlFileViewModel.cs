@@ -23,15 +23,15 @@ namespace EgoErpArchiver.ViewModel
         {
             get { return resView.Resource; }
         }
-        public override string DisplayName
-        {
-            get { return XmlFile.FileName; }
-        }
 
         #region Presentation Props
         bool isSelected;
         string preview;
 
+        public override string DisplayName
+        {
+            get { return XmlFile.FileName; }
+        }
         public bool IsSelected
         {
             get { return isSelected; }
@@ -43,6 +43,7 @@ namespace EgoErpArchiver.ViewModel
                     if (value)
                     {
                         Task.Run(() => GetPreview()).Wait();
+                        resView.Select();
                     }
                     else preview = string.Empty;
                     OnPropertyChanged("IsSelected");

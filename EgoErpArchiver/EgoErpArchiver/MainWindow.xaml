@@ -1,15 +1,13 @@
 ﻿<Window x:Class="EgoErpArchiver.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EgoErpArchiver"
-        xmlns:sd="http://icsharpcode.net/sharpdevelop/treeview"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
-        mc:Ignorable="d"
-        DataContext="{Binding Source={StaticResource MainVM}}"
-        Closing="Window_Closing"
+        xmlns:vm="clr-namespace:EgoErpArchiver.ViewModel"
+        xmlns:properties="clr-namespace:EgoErpArchiver.Properties"
         Title="{Binding DisplayName}" Height="600" Width="800">
+    <Window.DataContext>
+        <StaticResource ResourceKey="MainVM"></StaticResource>
+    </Window.DataContext>
     <Window.InputBindings>
         <KeyBinding Key="O" Modifiers="Control" Command="{Binding Path=OpenCommand}"></KeyBinding>
         <KeyBinding Key="S" Modifiers="Control" Command="{Binding Path=SaveCommand}"></KeyBinding>
@@ -45,11 +43,11 @@
                 <MenuItem Header="I_mport All" Command="{Binding Path=TexturesWorkspace.ImportTextures}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Xml Files">
-                
+
             </MenuItem>
             <MenuItem Header="_Settings">
                 <MenuItem Header="F1 2016 _Directory">
-                    <MenuItem Header="{Binding Source={StaticResource Settings}, Path=Default.F12016Dir}"></MenuItem>
+                    <MenuItem Header="{Binding Source={x:Static properties:Settings.Default}, Path=F12016Dir}"></MenuItem>
                     <MenuItem Name="setDirectoryF12016MenuItem" Header="_Set Directory" Click="setDirectoryF12016MenuItem_Click"></MenuItem>
                 </MenuItem>
             </MenuItem>
@@ -59,65 +57,43 @@
             </MenuItem>
         </Menu>
 
-        <TabControl SelectedIndex="{Binding SelectedTabIndex}">
+        <TabControl SelectedIndex="{Binding SelectedTabIndex}" Name="mainTabControl" SelectionChanged="mainTabControl_SelectionChanged">
             <TabItem Header="{Binding DisplayName}" DataContext="{Binding Path=ResourcesWorkspace}">
                 <DockPanel>
-                    <sd:SharpTreeView x:Name="resourceTreeView"
-                                      AllowDrop="False"
-                                      ShowAlternation="True"
-                                      Root="{Binding RootNode}"
-                                      ShowRoot="False"
-                                      SelectionMode="Single"
-                                      IsSynchronizedWithCurrentItem="True"
-                                      local:GridViewSort.AutoSort="True">
-                        <sd:SharpTreeView.ItemContainerStyle>
-                            <Style TargetType="{x:Type sd:SharpTreeViewItem}">
-                                <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                            </Style>
-                        </sd:SharpTreeView.ItemContainerStyle>
-                        <sd:SharpTreeView.View>
-                            <sd:SharpGridView>
-                                <GridView.Columns>
-                                    <GridViewColumn Header="Name">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <sd:SharpTreeNodeView></sd:SharpTreeNodeView>
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Header="File Type">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding ResourceType}" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Header="Size">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Size}" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Header="Packed Size">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding PackedSize}" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Header="Full Path">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding FullPath}" />
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                </GridView.Columns>
-                            </sd:SharpGridView>
-                        </sd:SharpTreeView.View>
-
-                    </sd:SharpTreeView>
+                    <DataGrid Name="resourcesDataGrid" 
+                              AutoGenerateColumns="False" 
+                              ItemsSource="{Binding Resources}" 
+                              SelectionMode="Single" 
+                              SelectionUnit="FullRow" 
+                              IsReadOnly="True"
+                              CanUserResizeRows="False"
+                              HorizontalGridLinesBrush="LightGray"
+                              VerticalGridLinesBrush="LightGray"
+                              AlternatingRowBackground="LightBlue"
+                              SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding DisplayName}" />
+                            <DataGridTextColumn Header="Resource Type" Binding="{Binding ResourceType}" />
+                            <DataGridTextColumn Header="Size" Binding="{Binding Size}" />
+                            <DataGridTextColumn Header="Packed Size" Binding="{Binding PackedSize}" />
+                            <DataGridTextColumn Header="Uniform Resource Identifier" Binding="{Binding FullPath}" />
+                        </DataGrid.Columns>
+                        <DataGrid.RowDetailsTemplate>
+                            <DataTemplate>
+                                <ListView Margin="10" ItemsSource="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DataGridRow}}, Path=Item.Fragments}">
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridView.Columns>
+                                                <GridViewColumn Header="Fragment Name" DisplayMemberBinding="{Binding DisplayName}"></GridViewColumn>
+                                                <GridViewColumn Header="Size" DisplayMemberBinding="{Binding Size}"></GridViewColumn>
+                                                <GridViewColumn Header="Packed Size" DisplayMemberBinding="{Binding PackedSize}"></GridViewColumn>
+                                            </GridView.Columns>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+                            </DataTemplate>
+                        </DataGrid.RowDetailsTemplate>
+                    </DataGrid>
                 </DockPanel>
             </TabItem>
             <TabItem Header="{Binding DisplayName}" DataContext="{Binding Path=PackagesWorkspace}">

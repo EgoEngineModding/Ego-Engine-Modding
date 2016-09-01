@@ -11,7 +11,7 @@ namespace EgoErpArchiver.ViewModel
     {
         readonly ErpFragment fragment;
 
-        public override object Text
+        public override string DisplayName
         {
             get
             {
@@ -25,10 +25,6 @@ namespace EgoErpArchiver.ViewModel
             {
                 return Fragment.Size;
             }
-            set
-            {
-                RaisePropertyChanged("Size");
-            }
         }
 
         public override ulong? PackedSize
@@ -36,10 +32,6 @@ namespace EgoErpArchiver.ViewModel
             get
             {
                 return Fragment.PackedSize;
-            }
-            set
-            {
-                RaisePropertyChanged("PackedSize");
             }
         }
 

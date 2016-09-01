@@ -105,31 +105,5 @@ namespace EgoEngineLibrary.Data.Pkg
                 rootItem.ToJson(writer);
             }
         }
-
-        public void Read(Stream stream)
-        {
-            rootItem = new PkgRootObject(this);
-            using (PkgBinaryReader reader = new PkgBinaryReader(stream))
-            {
-                rootItem.Read(reader);
-            }
-            using (JsonTextWriter writer = new JsonTextWriter(new StreamWriter(File.Open(@"C:\Users\Petar\Desktop\f1111111111ttttttttt\f1_2016_vehicle_package\teams\ferrari\wep\temp.json", FileMode.Create))))
-            {
-                writer.Formatting = Formatting.Indented;
-                rootItem.ToJson(writer);
-            }
-        }
-        public void Write(Stream stream)
-        {
-            using (JsonTextReader reader = new JsonTextReader(new StreamReader(File.Open(@"C:\Users\Petar\Desktop\f1111111111ttttttttt\f1_2016_vehicle_package\teams\ferrari\wep\temp.json", FileMode.Open, FileAccess.Read, FileShare.Read))))
-            {
-                rootItem.FromJson(reader);
-            }
-            using (PkgBinaryWriter writer = new PkgBinaryWriter(File.Open(@"C:\Users\Petar\Desktop\f1111111111ttttttttt\f1_2016_vehicle_package\teams\ferrari\wep\temp.pkg", FileMode.Create)))
-            {
-                rootItem.Write(writer);
-            }
-            int temp = 5;
-        }
     }
 }

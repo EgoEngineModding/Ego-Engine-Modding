@@ -1,6 +1,7 @@
 ﻿using EgoEngineLibrary.Archive.Erp;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,18 +13,26 @@ namespace EgoErpArchiver.ViewModel
     {
         #region Data Props
         readonly ErpResource resource;
+        readonly ResourcesWorkspaceViewModel resourceWorkspace;
+        readonly ObservableCollection<ErpFragmentViewModel> fragments;
 
         public ErpResource Resource
         {
             get { return resource; }
         }
+        public ObservableCollection<ErpFragmentViewModel> Fragments
+        {
+            get { return fragments; }
+        }
+        #endregion
 
-        public override object Text
+
+        #region Presentation Props
+        public override string DisplayName
         {
             get
             {
-                //Uri uri = new Uri(resource.Identifier);
-                return resource.FileName;//Path.GetFileName(uri.LocalPath) + uri.Query;
+                return resource.FileName;;
             }
         }
 
@@ -41,15 +50,6 @@ namespace EgoErpArchiver.ViewModel
             {
                 return resource.Size;
             }
-            set
-            {
-                foreach (ErpFragmentViewModel child in Children)
-                {
-                    child.Size = child.Size;
-                    child.PackedSize = child.PackedSize;
-                }
-                RaisePropertyChanged("Size");
-            }
         }
 
         public override ulong? PackedSize
@@ -57,10 +57,6 @@ namespace EgoErpArchiver.ViewModel
             get
             {
                 return resource.PackedSize;
-            }
-            set
-            {
-                RaisePropertyChanged("PackedSize");
             }
         }
 
@@ -71,20 +67,37 @@ namespace EgoErpArchiver.ViewModel
                 return resource.Identifier;
             }
         }
+        
+        public bool IsSelected
+        {
+            get { return object.ReferenceEquals(this, resourceWorkspace.SelectedItem); }
+        }
+        public void Select()
+        {
+            resourceWorkspace.SelectedItem = this;
+        }
         #endregion
 
-        public ErpResourceViewModel(ErpResource resource)
+        public ErpResourceViewModel(ErpResource resource, ResourcesWorkspaceViewModel resourceWorkspace)
         {
             this.resource = resource;
-            LazyLoading = true;
+            this.resourceWorkspace = resourceWorkspace;
+            fragments = new ObservableCollection<ErpFragmentViewModel>();
+
+            foreach (ErpFragment fragment in resource.Fragments)
+            {
+                fragments.Add(new ErpFragmentViewModel(fragment));
+            }
         }
 
-        protected override void LoadChildren()
+        public override void UpdateSize()
         {
-            foreach (ErpFragment fragment in Resource.Fragments)
+            foreach (ErpFragmentViewModel child in fragments)
             {
-                Children.Add(new ErpFragmentViewModel(fragment));
+                child.UpdateSize();
             }
+
+            base.UpdateSize();
         }
     }
 }

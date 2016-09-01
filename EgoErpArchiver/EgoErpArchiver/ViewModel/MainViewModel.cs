@@ -94,8 +94,6 @@ namespace EgoErpArchiver.ViewModel
             {
                 Properties.Settings.Default["F12016Dir"] = string.Empty;
             }
-            
-            ParseCommandLineArguments();
         }
 
         #region MainMenu
@@ -113,11 +111,11 @@ namespace EgoErpArchiver.ViewModel
 
         public void ParseCommandLineArguments()
         {
-            string[] args = Environment.GetCommandLineArgs();
+            string[] args = (string[])Application.Current.Resources["CommandLineArgs"];
 
-            if (args.Length > 1)
+            if (args.Length > 0)
             {
-                Open(args[1]);
+                Open(args[0]);
             }
         }
 
@@ -146,9 +144,9 @@ namespace EgoErpArchiver.ViewModel
                 this.file = new ErpFile();
                 Task.Run(() => this.file.Read(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))).Wait();
                 resourcesWorkspace.LoadData(file);
-                packagesWorkspace.LoadData(resourcesWorkspace.RootNode);
-                texturesWorkspace.LoadData(resourcesWorkspace.RootNode);
-                xmlFilesWorkspace.LoadData(resourcesWorkspace.RootNode);
+                packagesWorkspace.LoadData(resourcesWorkspace);
+                texturesWorkspace.LoadData(resourcesWorkspace);
+                xmlFilesWorkspace.LoadData(resourcesWorkspace);
                 if (texturesWorkspace.Textures.Count > 0) SelectedTabIndex = 2;
                 else if (xmlFilesWorkspace.XmlFiles.Count > 0) SelectedTabIndex = 3;
                 else if (packagesWorkspace.Packages.Count > 0) SelectedTabIndex = 1;

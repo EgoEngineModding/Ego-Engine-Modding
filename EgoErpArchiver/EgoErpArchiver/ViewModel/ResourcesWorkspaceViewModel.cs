@@ -17,7 +17,7 @@ namespace EgoErpArchiver.ViewModel
     public class ResourcesWorkspaceViewModel : WorkspaceViewModel
     {
         #region Data
-        TreeRootViewModel rootNode;
+        readonly ObservableCollection<ErpResourceViewModel> resources;
 
         public override string DisplayName
         {
@@ -26,25 +26,34 @@ namespace EgoErpArchiver.ViewModel
                 return "All Resources";
             }
         }
-        public TreeRootViewModel RootNode
+        public ObservableCollection<ErpResourceViewModel> Resources
         {
-            get { return rootNode; }
-            private set
-            {
-                ClearData();
-                rootNode = value;
-                OnPropertyChanged("RootNode");
-            }
+            get { return resources; }
         }
         #endregion
 
         #region Presentation Props
-
+        ErpResourceViewModel selectedItem;
+        
+        public ErpResourceViewModel SelectedItem
+        {
+            get { return selectedItem; }
+            set
+            {
+                if (!object.ReferenceEquals(value, selectedItem))
+                {
+                    selectedItem = value;
+                    OnPropertyChanged("SelectedItem");
+                }
+            }
+        }
         #endregion
 
         public ResourcesWorkspaceViewModel(MainViewModel mainView)
             : base(mainView)
         {
+            resources = new ObservableCollection<ErpResourceViewModel>();
+
             export = new RelayCommand(Export_Execute, Export_CanExecute);
             import = new RelayCommand(Import_Execute, Import_CanExecute);
             exportAll = new RelayCommand(ExportAll_Execute, ExportAll_CanExecute);
@@ -53,12 +62,15 @@ namespace EgoErpArchiver.ViewModel
 
         public override void LoadData(object data)
         {
-            RootNode = new TreeRootViewModel(((ErpFile)data));
+            foreach (ErpResource resource in ((ErpFile)data).Resources)
+            {
+                resources.Add(new ErpResourceViewModel(resource, this));
+            }
         }
 
         public override void ClearData()
         {
-            rootNode = null;
+            resources.Clear();
         }
 
         #region Menu
@@ -143,8 +155,7 @@ namespace EgoErpArchiver.ViewModel
                 {
                     string[] files = Directory.GetFiles(dlg.FileName, "*", SearchOption.AllDirectories);
                     resView.Resource.Import(files);
-                    resView.Size = resView.Size;
-                    resView.PackedSize = resView.PackedSize;
+                    resView.UpdateSize();
                 }
                 catch (Exception ex)
                 {
@@ -156,10 +167,7 @@ namespace EgoErpArchiver.ViewModel
 
         private bool ExportAll_CanExecute(object parameter)
         {
-            //if (parameter == null) return false;
-
-            //return ((PssgNodeViewModel)parameter).IsDataNode;
-            return RootNode != null;
+            return resources.Count > 0;
         }
         private void ExportAll_Execute(object parameter)
         {
@@ -191,7 +199,7 @@ namespace EgoErpArchiver.ViewModel
         }
         private bool ImportAll_CanExecute(object parameter)
         {
-            return RootNode != null;
+            return resources.Count > 0;
         }
         private void ImportAll_Execute(object parameter)
         {
@@ -213,10 +221,9 @@ namespace EgoErpArchiver.ViewModel
                 try
                 {
                     mainView.ErpFile.Import(dlg.FileName);
-                    foreach (ErpResourceViewModel child in RootNode.Children)
+                    foreach (ErpResourceViewModel child in resources)
                     {
-                        child.Size = child.Size;
-                        child.PackedSize = child.PackedSize;
+                        child.UpdateSize();
                     }
                 }
                 catch (Exception ex)

@@ -63,9 +63,8 @@ namespace EgoErpArchiver.ViewModel
         public override void LoadData(object data)
         {
             ClearData();
-            foreach (var child in ((TreeRootViewModel)data).Children)
+            foreach (var resView in ((ResourcesWorkspaceViewModel)data).Resources)
             {
-                ErpResourceViewModel resView = (ErpResourceViewModel)child;
                 switch (resView.Resource.ResourceType)
                 {
                     case "AISplineData":

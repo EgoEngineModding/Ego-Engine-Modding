@@ -63,9 +63,7 @@ namespace EgoErpArchiver.ViewModel
                     if (value)
                     {
                         Task.Run(() => GetPreview()).Wait();
-                        //resView.IsExpanded = !resView.IsExpanded;
-                        //resView.IsExpanded = !resView.IsExpanded;
-                        //resView.IsSelected = true;
+                        resView.Select();
                     }
                     else { preview = null; }
                     OnPropertyChanged("IsSelected");

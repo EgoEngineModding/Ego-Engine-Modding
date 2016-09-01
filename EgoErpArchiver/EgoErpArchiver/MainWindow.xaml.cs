@@ -1,4 +1,5 @@
-﻿using ICSharpCode.AvalonEdit.Folding;
+﻿using EgoErpArchiver.ViewModel;
+using ICSharpCode.AvalonEdit.Folding;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
@@ -49,10 +50,6 @@ namespace EgoErpArchiver
             }
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-        }
-
         private void websiteMenuItem_Click(object sender, RoutedEventArgs e)
         {
             System.Diagnostics.Process.Start("http://www.petartasev.com/modding/ego-engine/erp-archiver/");
@@ -62,7 +59,16 @@ namespace EgoErpArchiver
         {
             System.Diagnostics.Process.Start("https://github.com/Ryder25/Ego-Engine-Modding/issues");
         }
-        
+
+        private void mainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (mainTabControl.SelectedIndex == 0 && resourcesDataGrid.SelectedItem != null)
+            {
+                resourcesDataGrid.Focus();
+                resourcesDataGrid.ScrollIntoView(resourcesDataGrid.SelectedItem);
+            }
+        }
+
         private void packagesListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count == 0)
