@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -69,12 +70,14 @@ namespace EgoEngineLibrary.Data.Pkg.Data
         public override string GetData(Int32 index)
         {
             Vector3 vec3 = values[index];
-            return Type + " " + string.Format("{0:F},{1:F},{2:F}", vec3.X, vec3.Y, vec3.Z);
+            return Type + " " + string.Format(
+                CultureInfo.InvariantCulture, "{0:0.##################},{1:0.##################},{2:0.##################}", vec3.X, vec3.Y, vec3.Z);
         }
         public override Int32 SetData(string data)
         {
             string[] vec3s = data.Split(',');
-            Vector3 res = new Vector3(float.Parse(vec3s[0]), float.Parse(vec3s[1]), float.Parse(vec3s[2]));
+            Vector3 res = new Vector3(
+                float.Parse(vec3s[0], CultureInfo.InvariantCulture), float.Parse(vec3s[1], CultureInfo.InvariantCulture), float.Parse(vec3s[2], CultureInfo.InvariantCulture));
             int index = values.IndexOf(res);
 
             if (index >= 0)

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace EgoEngineLibrary.Data.Pkg.Data
 {
@@ -59,11 +60,11 @@ namespace EgoEngineLibrary.Data.Pkg.Data
 
         public override string GetData(Int32 index)
         {
-            return Type + " " + values[index].ToString("F");
+            return Type + " " + values[index].ToString("0.##################", CultureInfo.InvariantCulture);
         }
         public override Int32 SetData(string data)
         {
-            float res = Single.Parse(data);
+            float res = Single.Parse(data, CultureInfo.InvariantCulture);
             int index = values.IndexOf(res);
 
             if (index >= 0)

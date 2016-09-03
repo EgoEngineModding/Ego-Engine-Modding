@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -80,17 +81,18 @@ namespace EgoEngineLibrary.Data.Pkg.Data
         public override string GetData(Int32 index)
         {
             Matrix4x4 m = values[index];
-            return Type + " " + string.Format("{0:F},{1:F},{2:F},{3:F};{4:F},{5:F},{6:F},{7:F};{8:F},{9:F},{10:F},{11:F};{12:F},{13:F},{14:F},{15:F}",
+            return Type + " " + string.Format(CultureInfo.InvariantCulture, 
+                "{0:0.##################},{1:0.##################},{2:0.##################},{3:0.##################};{4:0.##################},{5:0.##################},{6:0.##################},{7:0.##################};{8:0.##################},{9:0.##################},{10:0.##################},{11:0.##################};{12:0.##################},{13:0.##################},{14:0.##################},{15:0.##################}",
                 m.M11, m.M12, m.M13, m.M14, m.M21, m.M22, m.M23, m.M24, m.M31, m.M32, m.M33, m.M34, m.M41, m.M42, m.M43, m.M44);
         }
         public override Int32 SetData(string data)
         {
             string[] s = data.Split(',', ';');
             Matrix4x4 m = new Matrix4x4(
-                float.Parse(s[0]), float.Parse(s[1]), float.Parse(s[2]), float.Parse(s[3]),
-                float.Parse(s[4]), float.Parse(s[5]), float.Parse(s[6]), float.Parse(s[7]),
-                float.Parse(s[8]), float.Parse(s[9]), float.Parse(s[10]), float.Parse(s[11]),
-                float.Parse(s[12]), float.Parse(s[13]), float.Parse(s[14]), float.Parse(s[15]));
+                float.Parse(s[0], CultureInfo.InvariantCulture), float.Parse(s[1], CultureInfo.InvariantCulture), float.Parse(s[2], CultureInfo.InvariantCulture), float.Parse(s[3], CultureInfo.InvariantCulture),
+                float.Parse(s[4], CultureInfo.InvariantCulture), float.Parse(s[5], CultureInfo.InvariantCulture), float.Parse(s[6], CultureInfo.InvariantCulture), float.Parse(s[7], CultureInfo.InvariantCulture),
+                float.Parse(s[8], CultureInfo.InvariantCulture), float.Parse(s[9], CultureInfo.InvariantCulture), float.Parse(s[10], CultureInfo.InvariantCulture), float.Parse(s[11], CultureInfo.InvariantCulture),
+                float.Parse(s[12], CultureInfo.InvariantCulture), float.Parse(s[13], CultureInfo.InvariantCulture), float.Parse(s[14], CultureInfo.InvariantCulture), float.Parse(s[15], CultureInfo.InvariantCulture));
             int index = values.IndexOf(m);
 
             if (index >= 0)

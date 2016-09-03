@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -68,12 +69,15 @@ namespace EgoEngineLibrary.Data.Pkg.Data
         public override string GetData(Int32 index)
         {
             Quaternion vec3 = values[index];
-            return Type + " " + string.Format("{0:F},{1:F},{2:F},{3:F}", vec3.X, vec3.Y, vec3.Z, vec3.W);
+            return Type + " " + string.Format(
+                CultureInfo.InvariantCulture, "{0:0.##################},{1:0.##################},{2:0.##################},{3:0.##################}", vec3.X, vec3.Y, vec3.Z, vec3.W);
         }
         public override Int32 SetData(string data)
         {
             string[] vec3s = data.Split(',');
-            Quaternion res = new Quaternion(float.Parse(vec3s[0]), float.Parse(vec3s[1]), float.Parse(vec3s[2]), float.Parse(vec3s[3]));
+            Quaternion res = new Quaternion(
+                float.Parse(vec3s[0], CultureInfo.InvariantCulture), float.Parse(vec3s[1], CultureInfo.InvariantCulture),
+                float.Parse(vec3s[2], CultureInfo.InvariantCulture), float.Parse(vec3s[3], CultureInfo.InvariantCulture));
             int index = values.IndexOf(res);
 
             if (index >= 0)
