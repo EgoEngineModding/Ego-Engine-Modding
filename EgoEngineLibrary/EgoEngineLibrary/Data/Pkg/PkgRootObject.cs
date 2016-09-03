@@ -81,6 +81,7 @@ namespace EgoEngineLibrary.Data.Pkg
 
             reader.Read();
             Elements[0].FromJson(reader);
+            Elements[1].ValueOffsetType.Type = 128;
         }
 
         public override void ToJson(JsonTextWriter writer)

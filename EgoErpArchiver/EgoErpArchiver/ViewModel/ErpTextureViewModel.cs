@@ -379,23 +379,20 @@ namespace EgoErpArchiver.ViewModel
             DdsFile dds = new DdsFile(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read));
 
             int imageType = 0;
-            uint mipWidth, mipHeight;
+            uint mipLinearSize;
             switch (dds.header.ddspf.fourCC)
             {
                 case 827611204: // DXT1 aka DXGI_FORMAT_BC1_UNORM
                     imageType = 54;
-                    mipWidth = dds.header.width / 2;
-                    mipHeight = dds.header.height / 2;
+                    mipLinearSize = (dds.header.width * dds.header.height) / 2;
                     break;
                 case 894720068: // DXT5 aka DXGI_FORMAT_BC3_UNORM
                     imageType = 57;
-                    mipWidth = dds.header.width;
-                    mipHeight = dds.header.height;
+                    mipLinearSize = (dds.header.width * dds.header.height);
                     break;
                 case 843666497: // ATI2 aka DXGI_FORMAT_BC5_UNORM
                     imageType = 65;
-                    mipWidth = dds.header.width;
-                    mipHeight = dds.header.height;
+                    mipLinearSize = (dds.header.width * dds.header.height);
                     break;
                 default:
                     throw new Exception("Image type not supported!");
@@ -456,8 +453,6 @@ namespace EgoErpArchiver.ViewModel
                         writer.Write((byte)mipMapFileName.Length);
                         writer.Write(mipMapFileName, mipMapFileName.Length);
                         writer.Write(mipCount);
-
-                        uint mipLinearSize = mipWidth * mipHeight;//Math.Max(mipWidth, mipHeight);
 
                         for (int i = 0; i < mipCount; ++i)
                         {

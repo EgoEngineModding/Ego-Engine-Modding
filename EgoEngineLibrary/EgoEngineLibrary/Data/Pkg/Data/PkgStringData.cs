@@ -74,9 +74,6 @@ namespace EgoEngineLibrary.Data.Pkg.Data
         }
         public override Int32 SetData(string data)
         {
-            string type = data.Remove(4);
-            data = data.Substring(5);
-
             int index;
             if (strgOffset.TryGetValue(data, out index))
             {
