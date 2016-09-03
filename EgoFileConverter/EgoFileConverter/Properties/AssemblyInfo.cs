@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Ego Engine Library")]
+[assembly: AssemblyTitle("Ego File Converter")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Petar Tasev")]
-[assembly: AssemblyProduct("Ego Engine Library")]
+[assembly: AssemblyProduct("Ego File Converter")]
 [assembly: AssemblyCopyright("Copyright © Petar Tasev 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("75667649-c09c-49b1-8e2f-517a5bb463b1")]
+[assembly: Guid("a0b471b4-42c7-4912-91a8-4182cec2044b")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("11.1.2016.0902")]
-[assembly: AssemblyFileVersion("11.1.2016.0902")]
+[assembly: AssemblyVersion("1.0.2016.0902")]
+[assembly: AssemblyFileVersion("1.0.2016.0902")]
