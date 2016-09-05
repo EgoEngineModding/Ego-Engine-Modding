@@ -81,6 +81,7 @@ namespace EgoErpArchiver.ViewModel
             switch (Package.ResourceType)
             {
                 case "AnimClip":
+                case "AnimClipCrowd":
                     package = PkgFile.ReadPkg(Package.GetFragment("temp", 0).GetDataStream(true));
                     break;
                 case "EventGraph":
@@ -102,6 +103,7 @@ namespace EgoErpArchiver.ViewModel
             switch (Package.ResourceType)
             {
                 case "AnimClip":
+                case "AnimClipCrowd":
                     Package.GetFragment("temp", 0).SetData(pkgData.ToArray());
                     break;
                 case "EventGraph":

@@ -67,13 +67,31 @@ namespace EgoErpArchiver.ViewModel
             {
                 switch (resView.Resource.ResourceType)
                 {
+                    // TRN~ abu_dhabi.erp is JPK file
+                    case "ActorSceneData":
                     case "AISplineData":
                     case "AIBrakeSettings":
+                    case "CrowdAnimation":
+                    case "CrowdConfig":
+                    case "CrowdLODs":
+                    case "CrowdPalette":
+                    case "CrowdPrpPalette":
+                    case "ECA~":
                     case "FFBD":
+                    case "IBLConfig":
+                    case "PPRP":
                     case "PracticeTA":
+                    case "RainfallData":
+                    case "Sequence":
+                    case "SkidmarksData":
                     case "Spline":
+                    case "SURF":
+                    case "TimeOfDayConfig":
                     case "TM":
+                    case "TrackInfoData":
+                    case "TrackSpace":
                     case "TS":
+                    case "VCMPD":
                     case "VTF":
                         XmlFiles.Add(new ErpXmlFileViewModel((ErpResourceViewModel)resView));
                         break;

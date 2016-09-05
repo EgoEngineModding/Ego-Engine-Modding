@@ -71,13 +71,20 @@ namespace EgoErpArchiver.ViewModel
                     case "AIGrip":
                     case "AIThrottle":
                     case "AnimClip": // temp
+                    case "AnimClipCrowd": // temp
+                    case "AnimSet":
                     case "CrowdPlacement":
                     case "EventGraph": // node
                     case "TyreWearData":
                     case "TyreWearGran":
+                    case "UICV":
                     case "UIDB":
                     case "UIDF":
                     case "UILayout":
+                    case "UIMD":
+                    case "UIRT":
+                    case "UITS":
+                    case "UIXA":
                     case "WOInstances":
                     case "World":
                     case "WOTypes":
