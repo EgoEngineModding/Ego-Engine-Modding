@@ -94,8 +94,8 @@ namespace EgoEngineLibrary.Data.Pkg
                         complexValueData.Read(reader);
                         break;
                     case "!iar":
-                        reader.ReadBytes(8);
-                        goto default;
+                        complexValueData = new PkgDataArrayReference(ParentFile);
+                        complexValueData.Read(reader);
                         break;
                     case "!vca":
                         complexValueData = new PkgDataArray(ParentFile);
@@ -145,7 +145,17 @@ namespace EgoEngineLibrary.Data.Pkg
             switch (reader.TokenType)
             {
                 case JsonToken.String:
-                    ValueData = (string)reader.Value;
+                    string val = (string)reader.Value;
+                    if (val.StartsWith("!iar "))
+                    {
+                        valueOffsetType.Type = 128;
+                        complexValueData = new PkgDataArrayReference(ParentFile);
+                        complexValueData.FromJson(reader);
+                    }
+                    else
+                    {
+                        ValueData = val;
+                    }
                     break;
                 case JsonToken.StartObject:
                     valueOffsetType.Type = 128;

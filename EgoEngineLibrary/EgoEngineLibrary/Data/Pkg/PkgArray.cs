@@ -72,7 +72,7 @@ namespace EgoEngineLibrary.Data.Pkg
         }
 
         public PkgArray(PkgFile parentFile)
-            : base(parentFile, x => new PkgValue(parentFile) )
+            : base(parentFile, x => new PkgValue(x) )
         {
         }
 

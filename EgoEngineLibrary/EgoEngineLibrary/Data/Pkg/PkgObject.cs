@@ -18,7 +18,7 @@ namespace EgoEngineLibrary.Data.Pkg
         }
 
         public PkgObject(PkgFile parentFile)
-            : base(parentFile, x => new PkgPair(parentFile))
+            : base(parentFile, x => new PkgPair(x))
         {
         }
 

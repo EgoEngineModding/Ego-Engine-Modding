@@ -95,6 +95,7 @@
     <Compile Include="Data\Pkg\PkgComplexValue.cs" />
     <Compile Include="Data\Pkg\Data\PkgData.cs" />
     <Compile Include="Data\Pkg\Data\PkgStringData.cs" />
+    <Compile Include="Data\Pkg\PkgDataArrayReference.cs" />
     <Compile Include="Data\Pkg\PkgValue.cs" />
     <Compile Include="Data\Pkg\PkgBinaryReader.cs" />
     <Compile Include="Data\Pkg\PkgPair.cs" />
