@@ -33,8 +33,11 @@
                 <MenuItem Header="E_xport All" Command="{Binding Path=ResourcesWorkspace.ExportAll}"></MenuItem>
                 <MenuItem Header="I_mport All" Command="{Binding Path=ResourcesWorkspace.ImportAll}"></MenuItem>
             </MenuItem>
-            <MenuItem Header="_Packages">
-
+            <MenuItem Header="_Pkg Files">
+                <MenuItem Header="_Export" Command="{Binding Path=PackagesWorkspace.Export}" CommandParameter="{Binding ElementName=packagesListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Import" Command="{Binding Path=PackagesWorkspace.Import}" CommandParameter="{Binding ElementName=packagesListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="E_xport All" Command="{Binding Path=PackagesWorkspace.ExportAll}"></MenuItem>
+                <MenuItem Header="I_mport All" Command="{Binding Path=PackagesWorkspace.ImportAll}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Textures">
                 <MenuItem Header="_Export" Command="{Binding Path=TexturesWorkspace.Export}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
@@ -43,7 +46,10 @@
                 <MenuItem Header="I_mport All" Command="{Binding Path=TexturesWorkspace.ImportTextures}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Xml Files">
-
+                <MenuItem Header="_Export" Command="{Binding Path=XmlFilesWorkspace.Export}" CommandParameter="{Binding ElementName=xmlFilesListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Import" Command="{Binding Path=XmlFilesWorkspace.Import}" CommandParameter="{Binding ElementName=xmlFilesListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="E_xport All" Command="{Binding Path=XmlFilesWorkspace.ExportAll}"></MenuItem>
+                <MenuItem Header="I_mport All" Command="{Binding Path=XmlFilesWorkspace.ImportAll}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Settings">
                 <MenuItem Header="F1 2016 _Directory">

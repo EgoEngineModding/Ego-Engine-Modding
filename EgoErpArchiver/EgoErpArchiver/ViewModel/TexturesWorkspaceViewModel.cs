@@ -176,15 +176,44 @@ namespace EgoErpArchiver.ViewModel
         {
             try
             {
-                Directory.CreateDirectory(mainView.FilePath.Replace(".", "_") + "_textures");
-                foreach (ErpTextureViewModel texView in Textures)
+                int success = 0;
+                int fail = 0;
+                ProgressDialogViewModel progDialogVM = new ProgressDialogViewModel(out mainView.ErpFile.ProgressPercentage, out mainView.ErpFile.ProgressStatus);
+                progDialogVM.PercentageMax = Textures.Count;
+                View.ProgressDialog progDialog = new View.ProgressDialog();
+                progDialog.DataContext = progDialogVM;
+
+                var task = Task.Run(() =>
                 {
-                    string fileName = mainView.FilePath.Replace(".", "_") + "_textures" + "\\" + Path.Combine(texView.Texture.Folder, texView.Texture.FileName).Replace("?", "%3F") + ".dds";
-                    string directoryPath = Path.GetDirectoryName(fileName);
-                    if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
-                    texView.ExportDDS(fileName, true);
-                }
-                MessageBox.Show("Textures exported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Directory.CreateDirectory(mainView.FilePath.Replace(".", "_") + "_textures");
+
+                    for (int i = 0; i < textures.Count;)
+                    {
+                        string fileName = mainView.FilePath.Replace(".", "_") + "_textures" + "\\" + Path.Combine(textures[i].Texture.Folder, textures[i].Texture.FileName).Replace("?", "%3F") + ".dds";
+                        ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report("Exporting " + Path.GetFileName(fileName) + "... ");
+
+                        try
+                        {
+                            string directoryPath = Path.GetDirectoryName(fileName);
+                            if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
+                            textures[i].ExportDDS(fileName, true);
+                            ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report("SUCCESS" + Environment.NewLine);
+                            ++success;
+                        }
+                        catch
+                        {
+                            ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report("FAIL" + Environment.NewLine);
+                            ++fail;
+                        }
+
+                        ((IProgress<int>)mainView.ErpFile.ProgressPercentage).Report(++i);
+                    }
+
+                    ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report(string.Format("{0} Succeeded, {1} Failed", success, fail));
+                });
+
+                progDialog.ShowDialog();
+                task.Wait();
             }
             catch
             {
@@ -203,26 +232,66 @@ namespace EgoErpArchiver.ViewModel
                 string mipMapDirectory = mainView.FilePath.Replace(".", "_") + "_mipmaps";
                 if (Directory.Exists(directory) == true)
                 {
-                    foreach (string filePath in Directory.GetFiles(directory, "*.dds", SearchOption.AllDirectories))
-                    {
-                        foreach (ErpTextureViewModel texView in Textures)
-                        {
-                            string fileName = mainView.FilePath.Replace(".", "_") + "_textures" + "\\" + Path.Combine(texView.Texture.Folder, texView.Texture.FileName).Replace("?", "%3F") + ".dds";
-                            if (Path.Equals(filePath, fileName))
-                            {
-                                string mipMapSaveLocation = filePath.Replace(directory, mipMapDirectory) + ".mipmaps";
-                                Directory.CreateDirectory(Path.GetDirectoryName(mipMapSaveLocation));
-                                texView.ImportDDS(filePath, mipMapSaveLocation);
-                                if (texView.IsSelected)
-                                {
-                                    texView.GetPreview();
-                                }
-                                break;
-                            }
-                        }
-                    }
+                    int success = 0;
+                    int fail = 0;
+                    int skip = 0;
+                    bool found = false;
 
-                    MessageBox.Show("Textures imported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    ProgressDialogViewModel progDialogVM = new ProgressDialogViewModel(out mainView.ErpFile.ProgressPercentage, out mainView.ErpFile.ProgressStatus);
+                    progDialogVM.PercentageMax = Textures.Count;
+                    View.ProgressDialog progDialog = new View.ProgressDialog();
+                    progDialog.DataContext = progDialogVM;
+
+                    var task = Task.Run(() =>
+                    {
+                        for (int i = 0; i < textures.Count;)
+                        {
+                            string fileName = mainView.FilePath.Replace(".", "_") + "_textures" + "\\" + Path.Combine(textures[i].Texture.Folder, textures[i].Texture.FileName).Replace("?", "%3F") + ".dds";
+                            ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report("Exporting " + Path.GetFileName(fileName) + "... ");
+
+                            try
+                            {
+                                foreach (string filePath in Directory.GetFiles(directory, "*.dds", SearchOption.AllDirectories))
+                                {
+                                    if (Path.Equals(filePath, fileName))
+                                    {
+                                        string mipMapSaveLocation = filePath.Replace(directory, mipMapDirectory) + ".mipmaps";
+                                        Directory.CreateDirectory(Path.GetDirectoryName(mipMapSaveLocation));
+                                        textures[i].ImportDDS(filePath, mipMapSaveLocation);
+                                        if (textures[i].IsSelected)
+                                        {
+                                            textures[i].GetPreview();
+                                        }
+                                        found = true;
+                                        break;
+                                    }
+                                }
+
+                                if (found)
+                                {
+                                    ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report("SUCCESS" + Environment.NewLine);
+                                    ++success;
+                                }
+                                else
+                                {
+                                    ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report("SKIP" + Environment.NewLine);
+                                    ++skip;
+                                }
+                            }
+                            catch
+                            {
+                                ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report("FAIL" + Environment.NewLine);
+                                ++fail;
+                            }
+
+                            ((IProgress<int>)mainView.ErpFile.ProgressPercentage).Report(++i);
+                        }
+                        
+                        ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report(string.Format("{0} Succeeded, {1} Skipped, {2} Failed", success, skip, fail));
+                    });
+
+                    progDialog.ShowDialog();
+                    task.Wait();
                 }
                 else
                 {

@@ -97,6 +97,7 @@
     <Compile Include="ViewModel\ErpPackageViewModel.cs" />
     <Compile Include="ViewModel\ErpTextureViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
+    <Compile Include="ViewModel\ProgressDialogViewModel.cs" />
     <Compile Include="ViewModel\XmlFilesWorkspaceViewModel.cs" />
     <Compile Include="ViewModel\ResourcesWorkspaceViewModel.cs" />
     <Compile Include="ViewModel\RelayCommand.cs" />
@@ -105,6 +106,9 @@
     <Compile Include="ViewModel\TreeNodeViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
     <Compile Include="ViewModel\WorkspaceViewModel.cs" />
+    <Compile Include="View\ProgressDialog.xaml.cs">
+      <DependentUpon>ProgressDialog.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -117,6 +121,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="View\ProgressDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

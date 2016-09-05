@@ -246,10 +246,13 @@ namespace EgoErpArchiver.ViewModel
                     mipMapFileName = reader.ReadString(strLength);
                     mipCount = reader.ReadUInt32();
 
-                    reader.Seek(9, SeekOrigin.Current);
-                    mipWidth = (uint)reader.ReadUInt64();
-                    mipHeight = (uint)reader.ReadUInt64();
-                    mipLinearSize = Math.Max(mipWidth, mipHeight);
+                    if (mipCount > 0)
+                    {
+                        reader.Seek(9, SeekOrigin.Current);
+                        mipWidth = (uint)reader.ReadUInt64();
+                        mipHeight = (uint)reader.ReadUInt64();
+                        mipLinearSize = Math.Max(mipWidth, mipHeight);
+                    }
 
                     uint mipPower = (uint)Math.Pow(2.0, mipCount);
                     mipWidth = width * mipPower;
@@ -266,6 +269,7 @@ namespace EgoErpArchiver.ViewModel
                 case 54: // ferrari_wheel_df, ferrari_paint
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (width * height) / 2;
+                    if (mipLinearSize == 0) mipLinearSize = (mipWidth * mipHeight) / 2;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT1"), 0);
                     TextureInfo += "DXT1";
@@ -274,6 +278,7 @@ namespace EgoErpArchiver.ViewModel
                 case 57: // ferrari_decal
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (width * height);
+                    if (mipLinearSize == 0) mipLinearSize = (mipWidth * mipHeight);
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT5"), 0);
                     TextureInfo += "DXT5";
@@ -281,6 +286,7 @@ namespace EgoErpArchiver.ViewModel
                 case 65: // ferrari_wheel_nm
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (width * height);
+                    if (mipLinearSize == 0) mipLinearSize = (mipWidth * mipHeight);
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("ATI2"), 0);
                     TextureInfo += "ATI2/3Dc";
@@ -288,6 +294,7 @@ namespace EgoErpArchiver.ViewModel
                 case 70: // flow_boot splash_bg_image; tried just about everything, can't figure it out
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (width * height) / 2;
+                    if (mipLinearSize == 0) mipLinearSize = (mipWidth * mipHeight) / 2;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT1"), 0);
                     //dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;

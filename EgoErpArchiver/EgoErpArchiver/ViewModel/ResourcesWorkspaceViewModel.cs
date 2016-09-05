@@ -188,7 +188,13 @@ namespace EgoErpArchiver.ViewModel
             {
                 try
                 {
-                    mainView.ErpFile.Export(dlg.FileName);
+                    ProgressDialogViewModel progDialogVM = new ProgressDialogViewModel(out mainView.ErpFile.ProgressPercentage, out mainView.ErpFile.ProgressStatus);
+                    progDialogVM.PercentageMax = mainView.ErpFile.Resources.Count;
+                    View.ProgressDialog progDialog = new View.ProgressDialog();
+                    progDialog.DataContext = progDialogVM;
+                    var task = Task.Run(() => mainView.ErpFile.Export(dlg.FileName));
+                    progDialog.ShowDialog();
+                    task.Wait();
                 }
                 catch (Exception ex)
                 {
@@ -220,7 +226,14 @@ namespace EgoErpArchiver.ViewModel
             {
                 try
                 {
-                    mainView.ErpFile.Import(dlg.FileName);
+                    ProgressDialogViewModel progDialogVM = new ProgressDialogViewModel(out mainView.ErpFile.ProgressPercentage, out mainView.ErpFile.ProgressStatus);
+                    progDialogVM.PercentageMax = mainView.ErpFile.Resources.Count;
+                    View.ProgressDialog progDialog = new View.ProgressDialog();
+                    progDialog.DataContext = progDialogVM;
+                    var task = Task.Run(() => mainView.ErpFile.Import(Directory.GetFiles(dlg.FileName, "*", SearchOption.AllDirectories)));
+                    progDialog.ShowDialog();
+                    task.Wait();
+
                     foreach (ErpResourceViewModel child in resources)
                     {
                         child.UpdateSize();

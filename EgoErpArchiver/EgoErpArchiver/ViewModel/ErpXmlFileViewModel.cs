@@ -83,5 +83,16 @@ namespace EgoErpArchiver.ViewModel
                 this.Preview = "Could not create preview!" + Environment.NewLine + Environment.NewLine + ex.Message;
             }
         }
+        public void ExportXML(Stream stream)
+        {
+            XmlFile xml = new XmlFile(XmlFile.Fragments[0].GetDataStream(true));
+            xml.Write(stream, XMLType.Text);
+        }
+        public void ImportXML(Stream stream)
+        {
+            XmlFile xml = new XmlFile(stream);
+            MemoryStream xmlData = new MemoryStream();
+            xml.Write(xmlData);
+        }
     }
 }
