@@ -16,6 +16,8 @@
         public List<ErpResource> Resources { get; set; }
 
         private UInt64 _resourceInfoTotalLength;
+        public Progress<int> ProgressPercentage;
+        public Progress<string> ProgressStatus;
 
         public ErpFile()
         {
@@ -125,19 +127,64 @@
 
         public void Export(string folderPath)
         {
-            foreach (ErpResource res in this.Resources)
+            int success = 0;
+            int fail = 0;
+
+            for (int i = 0; i < Resources.Count;)
             {
-                res.Export(folderPath);
+                ((IProgress<string>)ProgressStatus).Report("Exporting " + Path.Combine(Resources[i].Folder, Resources[i].FileName) + "... ");
+
+                try
+                {
+                    Resources[i].Export(folderPath);
+                    ((IProgress<string>)ProgressStatus).Report("SUCCESS" + Environment.NewLine);
+                    ++success;
+                }
+                catch
+                {
+                    ((IProgress<string>)ProgressStatus).Report("FAIL" + Environment.NewLine);
+                    ++fail;
+                }
+
+                ((IProgress<int>)ProgressPercentage).Report(++i);
             }
+            
+            ((IProgress<string>)ProgressStatus).Report(string.Format("{0} Succeeded, {1} Failed", success, fail));
         }
 
-        public void Import(string folderPath)
+        public void Import(string[] files)
         {
-            string[] files = Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories);
-            foreach (ErpResource res in this.Resources)
+            int success = 0;
+            int fail = 0;
+            int skip = 0;
+
+            for (int i = 0; i < Resources.Count;)
             {
-                res.Import(files);
+                ((IProgress<string>)ProgressStatus).Report("Importing " + Path.Combine(Resources[i].Folder, Resources[i].FileName) + "... ");
+
+                try
+                {
+                    if (Resources[i].Import(files))
+                    {
+                        ((IProgress<string>)ProgressStatus).Report("SUCCESS" + Environment.NewLine);
+                        ++success;
+                    }
+                    else
+                    {
+                        ((IProgress<string>)ProgressStatus).Report("SKIP" + Environment.NewLine);
+                        ++skip;
+                    }
+                }
+                catch
+                {
+                    ((IProgress<string>)ProgressStatus).Report("FAIL" + Environment.NewLine);
+                    ++fail;
+                }
+
+                ((IProgress<int>)ProgressPercentage).Report(++i);
             }
+
+            ((IProgress<string>)ProgressStatus).Report(string.Format("{0} Succeeded, {1} Skipped, {2} Failed", success, skip, fail));
         }
     }
 }

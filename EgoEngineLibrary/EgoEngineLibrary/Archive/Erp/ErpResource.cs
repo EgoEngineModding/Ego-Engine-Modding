@@ -177,8 +177,10 @@
             }
         }
 
-        public void Import(string[] files)
+        public bool Import(string[] files)
         {
+            int fragmentsImported = 0;
+
             foreach (string f in files)
             {
                 string extension = Path.GetExtension(f);
@@ -190,13 +192,18 @@
                 }
 
                 int resIndex = Int32.Parse(name.Substring(resTextIndex + 7, 3));
-                name = Path.GetDirectoryName(f) + "\\" + name.Remove(resTextIndex).Replace("^^", "?") + extension;
+                name = Path.GetDirectoryName(f) + "\\" + (name.Remove(resTextIndex) + extension).Replace("^^", "?");
                 if (name.EndsWith(Path.Combine(this.Folder, this.FileName)))
                 {
                     Fragments[resIndex].Import(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    break;
+                    ++fragmentsImported;
+                    continue;
                 }
             }
+
+            if (fragmentsImported == Fragments.Count)
+                return true;
+            return false;
         }
 
         public ErpFragment TryGetFragment(string name, int count)

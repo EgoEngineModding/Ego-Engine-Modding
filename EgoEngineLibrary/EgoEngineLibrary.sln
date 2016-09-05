@@ -17,8 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoBxmlConverterConsole", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoJpkArchiver", "..\EJA\EgoJpkArchiver\EgoJpkArchiver.csproj", "{F437FCE3-6708-4E82-9603-9C63316AA13A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoErpArchiverOld", "..\EgoErpArchiverOld\EgoErpArchiverOld.csproj", "{806733B7-9C97-4D7F-A2FA-07855B2CC73F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoErpArchiver", "..\EgoErpArchiver\EgoErpArchiver\EgoErpArchiver.csproj", "{CB03B116-3A4C-47CE-88B3-B10955657D65}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoPssgEditor", "..\EgoPssgEditor\EgoPssgEditor\EgoPssgEditor.csproj", "{B47E7D07-220B-4124-A084-AF255A80BE94}"
@@ -105,18 +103,6 @@ Global
 		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Release|Mixed Platforms.Build.0 = Release|x86
 		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Release|x86.ActiveCfg = Release|x86
 		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Release|x86.Build.0 = Release|x86
-		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Debug|x86.Build.0 = Debug|Any CPU
-		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Release|x86.ActiveCfg = Release|Any CPU
-		{806733B7-9C97-4D7F-A2FA-07855B2CC73F}.Release|x86.Build.0 = Release|Any CPU
 		{CB03B116-3A4C-47CE-88B3-B10955657D65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CB03B116-3A4C-47CE-88B3-B10955657D65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CB03B116-3A4C-47CE-88B3-B10955657D65}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

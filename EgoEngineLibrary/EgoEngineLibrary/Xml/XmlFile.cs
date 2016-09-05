@@ -31,6 +31,20 @@
                 doc = new XmlDocument();
                 doc.Load(fileStream);
                 type = XMLType.Text;
+                foreach (XmlNode child in doc.ChildNodes)
+                {
+                    if (child.NodeType == XmlNodeType.Comment)
+                    {
+                        try
+                        {
+                            type = (XMLType)Enum.Parse(typeof(XMLType), child.Value);
+                            break;
+                        }
+                        catch
+                        {
+                        }
+                    }
+                }
                 return;
             }
             catch { doc = null; }
@@ -98,6 +112,7 @@
                     // Build XML
                     doc = new XmlDocument();
                     doc.AppendChild(doc.CreateXmlDeclaration("1.0", "UTF-8", "yes"));
+                    doc.AppendChild(doc.CreateComment(type.ToString()));
                     doc.AppendChild(xmlElements[0].CreateElement(doc, this));
                 }
             }
@@ -108,6 +123,7 @@
                     reader.ReadBytes(5);
                     doc = new XmlDocument();
                     doc.AppendChild(doc.CreateXmlDeclaration("1.0", "UTF-8", "yes"));
+                    doc.AppendChild(doc.CreateComment(type.ToString()));
                     doc.AppendChild(reader.ReadBxmlElement(doc));
                 }
             }
@@ -118,9 +134,14 @@
                     reader.ReadBytes(5);
                     doc = new XmlDocument();
                     doc.AppendChild(doc.CreateXmlDeclaration("1.0", "UTF-8", "yes"));
+                    doc.AppendChild(doc.CreateComment(type.ToString()));
                     doc.AppendChild(reader.ReadBxmlElement(doc));
                 }
             }
+        }
+        public void Write(System.IO.Stream stream)
+        {
+            Write(stream, type);
         }
         public void Write(System.IO.Stream fileStream, XMLType convertType)
         {

@@ -62,7 +62,7 @@ namespace EgoEngineLibrary.Data.Pkg.Data
         }
         public override Int32 SetData(string data)
         {
-            UInt32 res = UInt32.Parse(data);
+            UInt32 res = UInt32.Parse(data, System.Globalization.NumberStyles.HexNumber);
             int index = values.IndexOf(res);
 
             if (index >= 0)
