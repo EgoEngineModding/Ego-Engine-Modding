@@ -56,6 +56,13 @@
                     <MenuItem Header="{Binding Source={x:Static properties:Settings.Default}, Path=F12016Dir}"></MenuItem>
                     <MenuItem Name="setDirectoryF12016MenuItem" Header="_Set Directory" Click="setDirectoryF12016MenuItem_Click"></MenuItem>
                 </MenuItem>
+                <MenuItem Header="Starting _Tab">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="startingTabTextBox" x:FieldModifier="private" Margin="0,1,0,0" Width="17" Text="{Binding Source={x:Static properties:Settings.Default}, Path=StartingTab}" />
+                        <Button x:Name="cmdUp" x:FieldModifier="private" Margin="0,0,0,0" Content="˄" Width="20" Click="cmdUp_Click" />
+                        <Button x:Name="cmdDown" x:FieldModifier="private" Margin="0,0,0,0"  Content="˅" Width="20" Click="cmdDown_Click" />
+                    </StackPanel>
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_Website" Name="websiteMenuItem" Click="websiteMenuItem_Click"></MenuItem>

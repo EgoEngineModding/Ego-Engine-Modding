@@ -92,7 +92,7 @@ namespace EgoErpArchiver.ViewModel
 
             if (string.IsNullOrEmpty(Properties.Settings.Default.F12016Dir))
             {
-                Properties.Settings.Default["F12016Dir"] = string.Empty;
+                Properties.Settings.Default.F12016Dir = string.Empty;
             }
         }
 
@@ -147,17 +147,41 @@ namespace EgoErpArchiver.ViewModel
                 packagesWorkspace.LoadData(resourcesWorkspace);
                 texturesWorkspace.LoadData(resourcesWorkspace);
                 xmlFilesWorkspace.LoadData(resourcesWorkspace);
-                if (texturesWorkspace.Textures.Count > 0) SelectedTabIndex = 2;
-                else if (xmlFilesWorkspace.XmlFiles.Count > 0) SelectedTabIndex = 3;
-                else if (packagesWorkspace.Packages.Count > 0) SelectedTabIndex = 1;
-                else SelectedTabIndex = 0;
+                SelectTab(Properties.Settings.Default.StartingTab);
                 DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
             }
             catch (Exception excp)
             {
                 // Fail
                 DisplayName = Properties.Resources.AppTitleLong;
-                MessageBox.Show("The program could not open this file!" + Environment.NewLine + Environment.NewLine + excp.Message, "Could Not Open", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("The program could not open this file!" + Environment.NewLine + Environment.NewLine + excp.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private void SelectTab(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    SelectedTabIndex = 0;
+                    break;
+                case 1:
+                    if (packagesWorkspace.Packages.Count > 0) SelectedTabIndex = 1;
+                    else SelectTab(-1);
+                    break;
+                case 2:
+                    if (texturesWorkspace.Textures.Count > 0) SelectedTabIndex = 2;
+                    else SelectTab(-1);
+                    break;
+                case 3:
+                    if (xmlFilesWorkspace.XmlFiles.Count > 0) SelectedTabIndex = 3;
+                    else SelectTab(-1);
+                    break;
+                default:
+                    if (texturesWorkspace.Textures.Count > 0) SelectedTabIndex = 2;
+                    else if (packagesWorkspace.Packages.Count > 0) SelectedTabIndex = 1;
+                    else if (xmlFilesWorkspace.XmlFiles.Count > 0) SelectedTabIndex = 3;
+                    else SelectedTabIndex = 0;
+                    break;
             }
         }
         private bool SaveCommand_CanExecute(object parameter)
@@ -182,7 +206,7 @@ namespace EgoErpArchiver.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("The program could not save this file! The error is displayed below:" + Environment.NewLine + Environment.NewLine + ex.Message, "Could Not Save", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("The program could not save this file! The error is displayed below:" + Environment.NewLine + Environment.NewLine + ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

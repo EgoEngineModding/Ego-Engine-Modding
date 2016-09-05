@@ -45,9 +45,27 @@ namespace EgoErpArchiver
 
             if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                Properties.Settings.Default["F12016Dir"] = dlg.FileName + "\\";
+                Properties.Settings.Default.F12016Dir = dlg.FileName + "\\";
                 Properties.Settings.Default.Save();
             }
+        }
+
+        private void cmdUp_Click(object sender, RoutedEventArgs e)
+        {
+            if (Properties.Settings.Default.StartingTab == mainTabControl.Items.Count - 1)
+                return;
+
+            ++Properties.Settings.Default.StartingTab;
+            Properties.Settings.Default.Save();
+        }
+
+        private void cmdDown_Click(object sender, RoutedEventArgs e)
+        {
+            if (((int)Properties.Settings.Default["StartingTab"]) == 0)
+                return;
+
+            --Properties.Settings.Default.StartingTab;
+            Properties.Settings.Default.Save();
         }
 
         private void websiteMenuItem_Click(object sender, RoutedEventArgs e)
