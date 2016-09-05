@@ -28,9 +28,9 @@ namespace EgoEngineLibrary.Data.Pkg
 
         public new void Write(string str)
         {
-            base.Write(str);
-            //byte[] data = Encoding.UTF8.GetBytes(str);
-            //this.Write(data);
+            byte[] data = Encoding.GetBytes(str);
+            Write((Byte)data.Length);
+            this.Write(data);
             this.Write((byte)0x0);
         }
         public void Write(string str, int length)

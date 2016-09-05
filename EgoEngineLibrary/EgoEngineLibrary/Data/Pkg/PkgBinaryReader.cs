@@ -31,7 +31,8 @@ namespace EgoEngineLibrary.Data.Pkg
 
         public new string ReadString()
         {
-            string s = base.ReadString();
+            Byte strLength = ReadByte();
+            string s = Encoding.GetString(ReadBytes(strLength));
             ReadByte();
 
             return s;
