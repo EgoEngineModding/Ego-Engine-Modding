@@ -1,11 +1,15 @@
 ﻿using EgoEngineLibrary.Data.Pkg;
+using EgoEngineLibrary.Language;
 using EgoEngineLibrary.Xml;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace EgoFileConverter
 {
@@ -19,7 +23,7 @@ namespace EgoFileConverter
                 if (args.Length == 0)
                 {
                     Console.WriteLine("No input arguments were found!");
-                    Console.WriteLine("Drag and drop a a file on the EXE to convert.");
+                    Console.WriteLine("Drag and drop one or more files on the EXE to convert.");
                 }
 
                 foreach (string f in args)
@@ -28,31 +32,17 @@ namespace EgoFileConverter
                     {
                         Console.WriteLine("Processing " + Path.GetFileName(f) + "...");
 
-                        if (Path.GetExtension(f) == ".xml")
-                        {
-                            convert(f, f + ".xml");
-                        }
-                        else if (Path.GetExtension(f) == ".json")
-                        {
-                            PkgFile file = PkgFile.ReadJson(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                            file.WritePkg(File.Open(f + ".pkg", FileMode.Create, FileAccess.Write, FileShare.Read));
-                            Console.WriteLine("Success! Pkg created.");
-                        }
-                        else
-                        {
-
-                            PkgFile file = PkgFile.ReadPkg(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                            file.WriteJson(File.Open(f + ".json", FileMode.Create, FileAccess.Write, FileShare.Read));
-                            Console.WriteLine("Success! Json created.");
-                            continue;
-                            Console.WriteLine("Invalid file extension!");
-                            Console.WriteLine("Drag and drop a pkg or json file on the EXE to convert.");
-                        }
+                        Convert(f);
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine("Failed to convert the file!");
                         Console.WriteLine(ex.ToString());
+                    }
+                    finally
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine();
                     }
                 }
             }
@@ -63,49 +53,79 @@ namespace EgoFileConverter
             }
         }
 
-
-        private static void convert(string path, string path2, int conversionType = 0)
+        private static void Convert(string f)
         {
-            // Get ConvertType
-            XMLType convertType = (XMLType)conversionType;
-            if (!Enum.IsDefined(typeof(XMLType), conversionType))
+            string magic;
+            string xmlMagic;
+            using (FileStream fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                Console.WriteLine("ERROR: Could not figure out the conversion type!");
-                return;
+                PkgBinaryReader reader = new PkgBinaryReader(fs);
+                magic = reader.ReadString(4);
+                xmlMagic = magic.Substring(1);
             }
-
-            // Load File
-            XmlFile file = new XmlFile(File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read));
-            Console.WriteLine("INFO: Converting file {0} from {1} to {2} format.", Path.GetFileName(path), file.type, convertType);
-
-            // Make sure File Type and Conversion Type are different
-            if (file.type == convertType)
+            
+            if (xmlMagic == "\"Rr" || xmlMagic == "BXM")
             {
-                while (true)
+                XmlFile file = new XmlFile(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
+                file.Write(File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read), XMLType.Text);
+                Console.WriteLine("Success! XML converted.");
+            }
+            else if (magic == "LNGT")
+            {
+                LngFile file = new LngFile(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
+                file.WriteXml(File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read));
+                Console.WriteLine("Success! Lng converted.");
+            }
+            else if (magic == "!pkg")
+            {
+                PkgFile file = PkgFile.ReadPkg(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
+                file.WriteJson(File.Open(f + ".json", FileMode.Create, FileAccess.Write, FileShare.Read));
+                Console.WriteLine("Success! Pkg converted.");
+            }
+            else
+            {
+                bool isJSON = false;
+                JsonException jsonEx = null;
+                try
                 {
-                    Console.WriteLine("WARNING: Invalid conversion type entered because the file is already in this format!");
-                    Console.WriteLine("0 -- Text, 1 -- Bin Xml, 2 -- BXML Big, 3 -- BXML Little");
-                    Console.WriteLine("Please enter the conversion type (excluding {0}), or type 'Exit' to quit: ", (int)file.type);
+                    PkgFile pkgFile = PkgFile.ReadJson(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
+                    pkgFile.WritePkg(File.Open(f + ".pkg", FileMode.Create, FileAccess.Write, FileShare.Read));
+                    Console.WriteLine("Success! JSON converted.");
+                    isJSON = true;
+                }
+                catch (JsonException e)
+                {
+                    jsonEx = e;
+                }
 
-                    string cType = Console.ReadLine();
-                    if (cType == "Exit")
+                if (!isJSON)
+                {
+                    XmlDocument xmlDoc = new XmlDocument();
+                    try
                     {
-                        return;
+                        xmlDoc.Load(f);
+                    }
+                    catch (XmlException e)
+                    {
+                        throw new AggregateException("Could not determine the file type! Showing json, and xml errors: ", jsonEx, e);
                     }
 
-                    if (Int32.TryParse(cType, out conversionType) &&
-                        conversionType != (int)file.type &&
-                        Enum.IsDefined(typeof(XMLType), conversionType))
+                    if (xmlDoc.DocumentElement.Name == "language")
                     {
-                        convertType = (XMLType)conversionType;
-                        break;
+                        DataSet dataSet = new DataSet("language");
+                        dataSet.ReadXml(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read), XmlReadMode.ReadSchema);
+                        LngFile file = new LngFile(dataSet);
+                        file.Write(File.Open(f + ".lng", FileMode.Create, FileAccess.Write, FileShare.Read));
+                        Console.WriteLine("Success! XML converted.");
+                    }
+                    else
+                    {
+                        XmlFile file = new XmlFile(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
+                        file.Write(File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read));
+                        Console.WriteLine("Success! XML converted.");
                     }
                 }
             }
-
-            // Convert
-            file.Write(File.Open(path2, FileMode.Create, FileAccess.Write, FileShare.Read), convertType);
-            Console.WriteLine("Success!");
         }
     }
 }
