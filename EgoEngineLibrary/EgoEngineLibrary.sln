@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoLngEditor", "..\ELE\EgoL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoTngEditor", "..\ETE\EgoTngEditor\EgoTngEditor.csproj", "{E921040B-99FF-4423-A18B-A69EF5F097DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoBxmlConverterConsole", "..\EBC\EgoBxmlConverterConsole\EgoBxmlConverterConsole.csproj", "{01EFFFA7-DC56-489C-9058-E99D89C40D44}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoJpkArchiver", "..\EJA\EgoJpkArchiver\EgoJpkArchiver.csproj", "{F437FCE3-6708-4E82-9603-9C63316AA13A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoErpArchiver", "..\EgoErpArchiver\EgoErpArchiver\EgoErpArchiver.csproj", "{CB03B116-3A4C-47CE-88B3-B10955657D65}"
@@ -83,16 +81,6 @@ Global
 		{E921040B-99FF-4423-A18B-A69EF5F097DA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{E921040B-99FF-4423-A18B-A69EF5F097DA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{E921040B-99FF-4423-A18B-A69EF5F097DA}.Release|x86.ActiveCfg = Release|Any CPU
-		{01EFFFA7-DC56-489C-9058-E99D89C40D44}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{01EFFFA7-DC56-489C-9058-E99D89C40D44}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{01EFFFA7-DC56-489C-9058-E99D89C40D44}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{01EFFFA7-DC56-489C-9058-E99D89C40D44}.Debug|x86.ActiveCfg = Debug|x86
-		{01EFFFA7-DC56-489C-9058-E99D89C40D44}.Debug|x86.Build.0 = Debug|x86
-		{01EFFFA7-DC56-489C-9058-E99D89C40D44}.Release|Any CPU.ActiveCfg = Release|x86
-		{01EFFFA7-DC56-489C-9058-E99D89C40D44}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{01EFFFA7-DC56-489C-9058-E99D89C40D44}.Release|Mixed Platforms.Build.0 = Release|x86
-		{01EFFFA7-DC56-489C-9058-E99D89C40D44}.Release|x86.ActiveCfg = Release|x86
-		{01EFFFA7-DC56-489C-9058-E99D89C40D44}.Release|x86.Build.0 = Release|x86
 		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{F437FCE3-6708-4E82-9603-9C63316AA13A}.Debug|Mixed Platforms.Build.0 = Debug|x86

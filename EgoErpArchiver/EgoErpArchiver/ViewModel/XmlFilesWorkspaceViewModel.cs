@@ -175,7 +175,8 @@ namespace EgoErpArchiver.ViewModel
                 try
                 {
                     xmlView.ImportXML(File.Open(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    xmlView.GetPreview();
+                    xmlView.IsSelected = false;
+                    xmlView.IsSelected = true;
                 }
                 catch (Exception ex)
                 {
@@ -275,7 +276,8 @@ namespace EgoErpArchiver.ViewModel
                                         xmlFiles[i].ImportXML(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
                                         if (xmlFiles[i].IsSelected)
                                         {
-                                            xmlFiles[i].GetPreview();
+                                            xmlFiles[i].IsSelected = false;
+                                            xmlFiles[i].IsSelected = true;
                                         }
                                         found = true;
                                         break;

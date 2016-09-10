@@ -97,21 +97,23 @@ namespace EgoErpArchiver.ViewModel
         public void ImportPkg(Stream stream)
         {
             PkgFile pkg = PkgFile.ReadJson(stream);
-            MemoryStream pkgData = new MemoryStream();
-            pkg.WritePkg(pkgData);
-
-            switch (Package.ResourceType)
+            using (MemoryStream pkgData = new MemoryStream())
             {
-                case "AnimClip":
-                case "AnimClipCrowd":
-                    Package.GetFragment("temp", 0).SetData(pkgData.ToArray());
-                    break;
-                case "EventGraph":
-                    Package.GetFragment("node", 0).SetData(pkgData.ToArray());
-                    break;
-                default:
-                    Package.Fragments[0].SetData(pkgData.ToArray());
-                    break;
+                pkg.WritePkg(pkgData);
+
+                switch (Package.ResourceType)
+                {
+                    case "AnimClip":
+                    case "AnimClipCrowd":
+                        Package.GetFragment("temp", 0).SetData(pkgData.ToArray());
+                        break;
+                    case "EventGraph":
+                        Package.GetFragment("node", 0).SetData(pkgData.ToArray());
+                        break;
+                    default:
+                        Package.Fragments[0].SetData(pkgData.ToArray());
+                        break;
+                }
             }
         }
     }

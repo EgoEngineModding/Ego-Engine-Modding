@@ -53,7 +53,7 @@ namespace EgoErpArchiver.ViewModel
         public string Preview
         {
             get { return preview; }
-            set { preview = value; OnPropertyChanged("Preview"); }
+            set { preview = value; OnPropertyChanged(nameof(Preview)); }
         }
         #endregion
 
@@ -91,8 +91,12 @@ namespace EgoErpArchiver.ViewModel
         public void ImportXML(Stream stream)
         {
             XmlFile xml = new XmlFile(stream);
-            MemoryStream xmlData = new MemoryStream();
-            xml.Write(xmlData);
+            using (MemoryStream xmlData = new MemoryStream())
+            {
+                xml.Write(xmlData);
+
+                XmlFile.Fragments[0].SetData(xmlData.ToArray());
+            }
         }
     }
 }

@@ -170,7 +170,8 @@ namespace EgoErpArchiver.ViewModel
                 try
                 {
                     pkgView.ImportPkg(File.Open(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    pkgView.GetPreview();
+                    pkgView.IsSelected = false;
+                    pkgView.IsSelected = true;
                 }
                 catch (Exception ex)
                 {
@@ -270,7 +271,8 @@ namespace EgoErpArchiver.ViewModel
                                         packages[i].ImportPkg(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
                                         if (packages[i].IsSelected)
                                         {
-                                            packages[i].GetPreview();
+                                            packages[i].IsSelected = false;
+                                            packages[i].IsSelected = true;
                                         }
                                         found = true;
                                         break;
