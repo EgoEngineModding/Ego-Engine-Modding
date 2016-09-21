@@ -47,6 +47,7 @@ Global
 		{9780FFCA-15B7-4779-A702-F610ECD13EBB}.Debug|x86.ActiveCfg = Debug|x86
 		{9780FFCA-15B7-4779-A702-F610ECD13EBB}.Debug|x86.Build.0 = Debug|x86
 		{9780FFCA-15B7-4779-A702-F610ECD13EBB}.Release|Any CPU.ActiveCfg = Release|x86
+		{9780FFCA-15B7-4779-A702-F610ECD13EBB}.Release|Any CPU.Build.0 = Release|x86
 		{9780FFCA-15B7-4779-A702-F610ECD13EBB}.Release|Mixed Platforms.ActiveCfg = Release|x86
 		{9780FFCA-15B7-4779-A702-F610ECD13EBB}.Release|Mixed Platforms.Build.0 = Release|x86
 		{9780FFCA-15B7-4779-A702-F610ECD13EBB}.Release|x86.ActiveCfg = Release|x86

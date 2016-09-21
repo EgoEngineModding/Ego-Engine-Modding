@@ -51,7 +51,8 @@ namespace EgoCtfEditor
         {
             InitializeComponent();
             this.Icon = System.Drawing.Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
-            this.Text = "Ego CTF Editor 4.1";
+            this.Text = Properties.Resources.AppTitleLong;
+            Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             // Select Latest Supported Game
             mainTabControl.SelectedIndex = (int)CtfEditorMainTabs.Other;
             this.args = args;
@@ -82,7 +83,7 @@ namespace EgoCtfEditor
                 foreach (PerformanceFile file in ((CtfEditorGamePage)mainTabControl.TabPages[tab].Tag).files)
                 {
                     if (file.hasChanges && MessageBox.Show("The data in one of the CTF files has changed." + Environment.NewLine + Environment.NewLine +
-                        "Are you sure you want to close the editor without saving?", "CTF Editor", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel)
+                        "Are you sure you want to close the editor without saving?", Properties.Resources.AppTitleLong, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel)
                     {
                         e.Cancel = true;
                         return;
@@ -132,7 +133,7 @@ namespace EgoCtfEditor
         {
             if (currentFile == null)
             {
-                MessageBox.Show("A file column is not selected to be saved!", "CTF Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("A file column is not selected to be saved!", Properties.Resources.AppTitleLong, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             SaveFileDialog dialog = new SaveFileDialog();
@@ -152,7 +153,7 @@ namespace EgoCtfEditor
                 catch (Exception ex)
                 {
                     MessageBox.Show("The file could not be saved!" + Environment.NewLine + Environment.NewLine +
-                    ex.Message, "CTF Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ex.Message, Properties.Resources.AppTitleLong, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 currentDgv.SelectedColumns[0].HeaderText = currentFile.name;
             }
@@ -173,13 +174,13 @@ namespace EgoCtfEditor
         {
             if (currentFile == null)
             {
-                MessageBox.Show("A file column is not selected to be closed!", "CTF Editor", MessageBoxButtons.OK, 
+                MessageBox.Show("A file column is not selected to be closed!", Properties.Resources.AppTitleLong, MessageBoxButtons.OK, 
                     MessageBoxIcon.Warning);
                 return;
             }
             if (currentFile.hasChanges && 
                 MessageBox.Show("The data in this CTF file has changed." + Environment.NewLine + Environment.NewLine + 
-                "Are you sure you want to close it without saving?", "CTF Editor", MessageBoxButtons.OKCancel, 
+                "Are you sure you want to close it without saving?", Properties.Resources.AppTitleLong, MessageBoxButtons.OKCancel, 
                 MessageBoxIcon.Warning) == DialogResult.Cancel)
             {
                 return;
@@ -280,7 +281,7 @@ namespace EgoCtfEditor
             {
                 clearPage();
                 MessageBox.Show("An error occured while creating the page!" + Environment.NewLine + Environment.NewLine +
-                    ex.Message, "CTF Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ex.Message, Properties.Resources.AppTitleLong, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
@@ -386,7 +387,7 @@ namespace EgoCtfEditor
             {
                 MessageBox.Show("The file could not be opened!" + Environment.NewLine + Environment.NewLine +
                     fileNames[i] + Environment.NewLine + Environment.NewLine +
-                    ex.Message, "CTF Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ex.Message, Properties.Resources.AppTitleLong, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 List<string> fNames = fileNames.ToList<string>();
                 fNames.RemoveRange(0, i + 1);
                 loadFile(fNames.ToArray());
@@ -404,7 +405,7 @@ namespace EgoCtfEditor
             if (currentPage.ContainsFile(fileName))
             {
                 MessageBox.Show("This file has already been opened!" + Environment.NewLine + Environment.NewLine +
-                    fileName, "CTF Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    fileName, Properties.Resources.AppTitleLong, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             PerformanceFile ctfFile;
@@ -538,7 +539,7 @@ namespace EgoCtfEditor
         private void dgv_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
             MessageBox.Show("Input data was not in the correct format!" + Environment.NewLine + Environment.NewLine +
-                "Press Esc to restore the original value or type in data of the proper format.", "CTF Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                "Press Esc to restore the original value or type in data of the proper format.", Properties.Resources.AppTitleLong, MessageBoxButtons.OK, MessageBoxIcon.Error);
             //((DataGridView)sender).CancelEdit();
         }
         private void dgv_CellEnter(object sender, DataGridViewCellEventArgs e)
@@ -646,7 +647,7 @@ namespace EgoCtfEditor
                 DataGridView dgv = (DataGridView)sender;
                 PerformanceFile ctfFile = (PerformanceFile)dgv.Columns[e.ColumnIndex].Tag;
                 if (ctfFile.hasChanges && MessageBox.Show("The data in this CTF file has changed." + Environment.NewLine + Environment.NewLine +
-                    "Are you sure you want to close it without saving?", "CTF Editor", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel)
+                    "Are you sure you want to close it without saving?", Properties.Resources.AppTitleLong, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel)
                 {
                     return;
                 }
@@ -661,7 +662,7 @@ namespace EgoCtfEditor
             if (e.TabPageIndex == (int)CtfEditorMainTabs.Dirt)
             {
                 //e.Cancel = true;
-                //MessageBox.Show("This operation is not implemented!", "CTF Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                //MessageBox.Show("This operation is not implemented!", Properties.Resources.AppTitleLong, MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
         private void mainTabControl_Selected(object sender, TabControlEventArgs e)

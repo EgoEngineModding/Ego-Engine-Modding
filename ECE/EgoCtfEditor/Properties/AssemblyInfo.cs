@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Petar Tasev")]
 [assembly: AssemblyProduct("Ego CTF Editor")]
-[assembly: AssemblyCopyright("Copyright © Petar Tasev 2013")]
+[assembly: AssemblyCopyright("Copyright © Petar Tasev 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("4.1.2013.1106")]
-[assembly: AssemblyFileVersion("4.1.2013.1106")]
+[assembly: AssemblyVersion("4.2.2016.0920")]
+[assembly: AssemblyFileVersion("4.2.2016.0920")]
