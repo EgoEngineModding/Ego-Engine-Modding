@@ -145,7 +145,7 @@ namespace EgoErpArchiver.ViewModel
             SaveFileDialog dialog = new SaveFileDialog();
             dialog.Filter = "Xml files|*.xml|All files|*.*";
             dialog.Title = "Select the xml save location and file name";
-            dialog.FileName = xmlView.DisplayName + ".xml";
+            dialog.FileName = xmlView.DisplayName.Replace("?", "%3F") + ".xml";
             if (dialog.ShowDialog() == true)
             {
                 try
@@ -169,7 +169,7 @@ namespace EgoErpArchiver.ViewModel
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "Xml files|*.xml|All files|*.*";
             dialog.Title = "Select a xml file";
-            dialog.FileName = xmlView.DisplayName + ".xml";
+            dialog.FileName = xmlView.DisplayName.Replace("?", "%3F") + ".xml";
             if (dialog.ShowDialog() == true)
             {
                 try

@@ -140,7 +140,7 @@ namespace EgoErpArchiver.ViewModel
             SaveFileDialog dialog = new SaveFileDialog();
             dialog.Filter = "Json files|*.json|All files|*.*";
             dialog.Title = "Select the pkg save location and file name";
-            dialog.FileName = pkgView.DisplayName + ".json";
+            dialog.FileName = pkgView.DisplayName.Replace("?", "%3F") + ".json";
             if (dialog.ShowDialog() == true)
             {
                 try
@@ -164,7 +164,7 @@ namespace EgoErpArchiver.ViewModel
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "Json files|*.json|All files|*.*";
             dialog.Title = "Select a pkg file";
-            dialog.FileName = pkgView.DisplayName + ".json";
+            dialog.FileName = pkgView.DisplayName.Replace("?", "%3F") + ".json";
             if (dialog.ShowDialog() == true)
             {
                 try
@@ -214,7 +214,7 @@ namespace EgoErpArchiver.ViewModel
                             ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report("SUCCESS" + Environment.NewLine);
                             ++success;
                         }
-                        catch
+                        catch when (!System.Diagnostics.Debugger.IsAttached)
                         {
                             ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report("FAIL" + Environment.NewLine);
                             ++fail;

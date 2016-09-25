@@ -61,6 +61,7 @@ namespace EgoEngineLibrary.Data.Pkg
         }
         public override void Write(PkgBinaryWriter writer)
         {
+            PkgValue._offset = 0;
             UpdateOffsets();
             writer.Write("!pkg", 4);
             writer.Write(name, 4);

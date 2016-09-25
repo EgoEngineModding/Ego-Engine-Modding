@@ -69,7 +69,7 @@ namespace EgoErpArchiver.ViewModel
                 ExportPkg(new StringWriter(sb));
                 this.Preview = sb.ToString();
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!System.Diagnostics.Debugger.IsAttached)
             {
                 this.Preview = "Could not create preview!" + Environment.NewLine + Environment.NewLine + ex.Message;
             }

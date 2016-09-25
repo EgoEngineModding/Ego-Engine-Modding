@@ -128,7 +128,7 @@ namespace EgoErpArchiver.ViewModel
             SaveFileDialog dialog = new SaveFileDialog();
             dialog.Filter = "Dds files|*.dds|All files|*.*";
             dialog.Title = "Select the dds save location and file name";
-            dialog.FileName = texView.DisplayName + ".dds";
+            dialog.FileName = texView.DisplayName.Replace("?", "%3F") + ".dds";
             if (dialog.ShowDialog() == true)
             {
                 try
@@ -152,7 +152,7 @@ namespace EgoErpArchiver.ViewModel
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "Dds files|*.dds|All files|*.*";
             dialog.Title = "Select a dds file";
-            dialog.FileName = texView.DisplayName + ".dds";
+            dialog.FileName = texView.DisplayName.Replace("?", "%3F") + ".dds";
             if (dialog.ShowDialog() == true)
             {
                 try
