@@ -146,7 +146,8 @@
                     ++fail;
                 }
 
-                (ProgressPercentage as IProgress<int>)?.Report(++i);
+                ++i;
+                (ProgressPercentage as IProgress<int>)?.Report(i);
             }
 
             (ProgressStatus as IProgress<string>)?.Report(string.Format("{0} Succeeded, {1} Failed", success, fail));
@@ -181,7 +182,8 @@
                     ++fail;
                 }
 
-                (ProgressPercentage as IProgress<int>)?.Report(++i);
+                ++i;
+                (ProgressPercentage as IProgress<int>)?.Report(i);
             }
 
             (ProgressStatus as IProgress<string>)?.Report(string.Format("{0} Succeeded, {1} Skipped, {2} Failed", success, skip, fail));

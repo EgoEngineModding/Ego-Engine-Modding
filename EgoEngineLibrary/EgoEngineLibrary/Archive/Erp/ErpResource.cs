@@ -197,7 +197,6 @@
                 {
                     Fragments[resIndex].Import(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
                     ++fragmentsImported;
-                    continue;
                 }
             }
 

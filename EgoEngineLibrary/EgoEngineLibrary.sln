@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoPssgEditor", "..\EgoPssg
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoFileConverter", "..\EgoFileConverter\EgoFileConverter\EgoFileConverter.csproj", "{A0B471B4-42C7-4912-91A8-4182CEC2044B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoErpArchiverConsole", "..\EgoErpArchiverConsole\EgoErpArchiverConsole\EgoErpArchiverConsole.csproj", "{B8C89F96-CB92-4214-957A-42148EE94C1F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -128,6 +130,18 @@ Global
 		{A0B471B4-42C7-4912-91A8-4182CEC2044B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A0B471B4-42C7-4912-91A8-4182CEC2044B}.Release|x86.ActiveCfg = Release|Any CPU
 		{A0B471B4-42C7-4912-91A8-4182CEC2044B}.Release|x86.Build.0 = Release|Any CPU
+		{B8C89F96-CB92-4214-957A-42148EE94C1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8C89F96-CB92-4214-957A-42148EE94C1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8C89F96-CB92-4214-957A-42148EE94C1F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B8C89F96-CB92-4214-957A-42148EE94C1F}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B8C89F96-CB92-4214-957A-42148EE94C1F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B8C89F96-CB92-4214-957A-42148EE94C1F}.Debug|x86.Build.0 = Debug|Any CPU
+		{B8C89F96-CB92-4214-957A-42148EE94C1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8C89F96-CB92-4214-957A-42148EE94C1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8C89F96-CB92-4214-957A-42148EE94C1F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B8C89F96-CB92-4214-957A-42148EE94C1F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B8C89F96-CB92-4214-957A-42148EE94C1F}.Release|x86.ActiveCfg = Release|Any CPU
+		{B8C89F96-CB92-4214-957A-42148EE94C1F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
