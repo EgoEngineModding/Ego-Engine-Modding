@@ -18,20 +18,26 @@ namespace EgoErpArchiver.ViewModel
         #region Data
         readonly ObservableCollection<ErpPackageViewModel> packages;
 
-        public override string DisplayName
-        {
-            get { return "Pkg Files"; }
-        }
-
         public ObservableCollection<ErpPackageViewModel> Packages
         {
             get { return packages; }
         }
         #endregion
 
-        #region Presentation Data
+        #region Presentation Data        
+        string _displayName;
         readonly CollectionView packagesViewSource;
         string filterText;
+
+        public override string DisplayName
+        {
+            get { return _displayName; }
+            protected set
+            {
+                _displayName = value;
+                OnPropertyChanged(nameof(DisplayName));
+            }
+        }
 
         public string FilterText
         {
@@ -51,6 +57,7 @@ namespace EgoErpArchiver.ViewModel
             : base(mainView)
         {
             packages = new ObservableCollection<ErpPackageViewModel>();
+            _displayName = "Pkg Files";
             packagesViewSource = (CollectionView)CollectionViewSource.GetDefaultView(Packages);
             packagesViewSource.Filter += PackagesFilter;
 
@@ -92,6 +99,7 @@ namespace EgoErpArchiver.ViewModel
                         break;
                 }
             }
+            DisplayName = "Pkg Files " + packages.Count;
         }
 
         public override void ClearData()

@@ -1,0 +1,54 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+uint32 numMeshes;
+
+uint32 numVBs;
+uint32 numIBs;
+uint32 numMeshNames;
+uint32 numNodeLinks;
+
+uint32 vertexBufferOffset;
+uint32 indexBufferOffset;
+uint32 meshNameOffset;
+uint32 nodeLinkOffset;
+
+struct
+{
+    uint32 numVBs;
+    uint32 unk2;
+    uint32 unk3;
+    uint32 ibIndex;
+    uint32 ibCount;
+    uint32 unk6;
+    float unk7[4];
+    uint32 nodeLinkOffset;
+    uint32 unk9;
+    uint32 nameOffset;
+    uint32 unk11;
+    uint32 vertexFileOffset;
+    uint32 unk13;
+    uint32 unk14;
+    uint32 unk15;
+    uint32 unk16;
+    uint32 unk17;
+    uint32 unk18;
+    uint32 unk19;
+} meshes[numMeshes];
+
+FSeek(nodeLinkOffset+36);
+
+struct
+{
+    uint32 nodeIndex;
+    uint32 meshIndex;
+} nodeLinks[numNodeLinks];

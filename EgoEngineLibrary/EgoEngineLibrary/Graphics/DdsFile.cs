@@ -9,6 +9,7 @@
     {
         UInt32 magic;
         public DdsHeader header;
+        public DDSHeaderDXT10 header10;
         public byte[] bdata { get; set; }
         Dictionary<int, byte[]> bdata2;
 
@@ -20,6 +21,8 @@
             header.reserved1 = new uint[11];
             header.ddspf.size = 32;
             header.caps |= DdsHeader.Caps.DDSCAPS_TEXTURE;
+            header10.resourceDimension = D3D10_Resource_Dimension.D3D10_RESOURCE_DIMENSION_TEXTURE2D;
+            header10.arraySize = 1;
         }
         public DdsFile(PssgNode node, bool cubePreview)
             : this()
@@ -162,6 +165,14 @@
                 b.BaseStream.Position += 20;
                 header.caps2 = (DdsHeader.Caps2)b.ReadUInt32();
                 b.BaseStream.Position += 12;
+                if (header.ddspf.flags.HasFlag(DdsPixelFormat.Flags.DDPF_FOURCC) && header.ddspf.fourCC == 808540228) // DX10
+                {
+                    header10.dxgiFormat = (DXGI_Format)b.ReadUInt32();
+                    header10.resourceDimension = (D3D10_Resource_Dimension)b.ReadUInt32();
+                    header10.miscFlag = b.ReadUInt32();
+                    header10.arraySize = b.ReadUInt32();
+                    header10.miscFlags2 = b.ReadUInt32();
+                }
                 int count = 0;
                 if ((uint)header.caps2 != 0)
                 {
@@ -273,6 +284,14 @@
                 b.Write(header.caps3);
                 b.Write(header.caps4);
                 b.Write(header.reserved2);
+                if (header.ddspf.flags.HasFlag(DdsPixelFormat.Flags.DDPF_FOURCC) && header.ddspf.fourCC == 808540228) // DX10
+                {
+                    b.Write((uint)header10.dxgiFormat);
+                    b.Write((uint)header10.resourceDimension);
+                    b.Write(header10.miscFlag);
+                    b.Write(header10.arraySize);
+                    b.Write(header10.miscFlags2);
+                }
                 if (cubeIndex != -1)
                 {
                     b.Write(bdata2[cubeIndex]);

@@ -19,21 +19,25 @@ namespace EgoErpArchiver.ViewModel
         #region Data
         readonly ObservableCollection<ErpResourceViewModel> resources;
 
-        public override string DisplayName
-        {
-            get
-            {
-                return "All Resources";
-            }
-        }
         public ObservableCollection<ErpResourceViewModel> Resources
         {
             get { return resources; }
         }
         #endregion
 
-        #region Presentation Props
+        #region Presentation Props        
+        string _displayName;
         ErpResourceViewModel selectedItem;
+
+        public override string DisplayName
+        {
+            get { return _displayName; }
+            protected set
+            {
+                _displayName = value;
+                OnPropertyChanged(nameof(DisplayName));
+            }
+        }
         
         public ErpResourceViewModel SelectedItem
         {
@@ -53,6 +57,7 @@ namespace EgoErpArchiver.ViewModel
             : base(mainView)
         {
             resources = new ObservableCollection<ErpResourceViewModel>();
+            _displayName = "All Resources";
 
             export = new RelayCommand(Export_Execute, Export_CanExecute);
             import = new RelayCommand(Import_Execute, Import_CanExecute);
@@ -66,6 +71,7 @@ namespace EgoErpArchiver.ViewModel
             {
                 resources.Add(new ErpResourceViewModel(resource, this));
             }
+            DisplayName = "All Resources " + resources.Count;
         }
 
         public override void ClearData()

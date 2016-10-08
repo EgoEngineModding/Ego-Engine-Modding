@@ -1,0 +1,55 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+LittleEndian();
+
+string bytearrtohex(struct Dat& data)
+{
+    string s;
+    string temp;
+    int i;
+    for (i = 0; i < data.strLen; i++)
+    {
+        SPrintf(temp, "%.2X", data.str[i]);
+        s += temp;//SubStr(temp, 6, 2);
+    }
+    return s;
+}
+
+string ReadDat(struct Dat& data)
+{
+    string ret = bytearrtohex(data) + " ";
+    string s;
+    SPrintf(s, "%X", data.bb);
+    //return data.str + " " + s;
+SPrintf(s, "%-30s %30s %8s", data.str, ret, s);
+        return s;
+    if (data.strLen > 0)
+    {
+    }
+    else
+    {
+        return " " + ret + s;
+    }
+}
+
+char magic[4];
+int32 numEntries;
+
+struct Dat
+{
+    uint32 bb <bgcolor=cLtBlue>; // not sure what this is, but seems to be unique for each value
+    byte dataType;
+    uint32 strLen;
+    byte str[strLen+1];
+    //string str <bgcolor=cLtRed>;
+} strs[numEntries] <optimize=false, read=ReadDat>;

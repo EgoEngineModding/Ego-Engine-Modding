@@ -1,0 +1,56 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+typedef struct
+{
+    float minDist;
+    float maxDist;
+} LOD;
+
+uint32 numLODDistances;
+uint16 numNodes;
+uint16 numBoneNodeIndices;
+uint32 numNames;
+uint32 numFiles;
+float unk[4];
+uint32 num6;
+LOD lodDistances[numLODDistances];
+uint32 num7;
+
+typedef struct
+{
+    uint32 stringOffset;
+    uint32 parentIndex;
+    float pos[3];
+    float rot[4];
+    float scale[3];
+    float transform[16];
+    uint32 unk6;
+    uint32 unk7;
+} Node;
+
+local uint64 strDataOffset;
+string readDat(Node& node)
+{
+    FSeek(72 + numNodes * 120 + numBoneNodeIndices * 2 + node.stringOffset);
+    return ReadString(strDataOffset + node.stringOffset);
+}
+
+Node nodes[numNodes] <read=readDat>;
+
+int16 boneNodeIndices[numBoneNodeIndices];
+
+struct { string meshfile; } files[numFiles];
+
+strDataOffset = FTell();
+
+struct { string name; } names[numNames];

@@ -1,0 +1,60 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EgoEngineLibrary.Archive.Erp.Data
+{
+    public class ErpGfxSRVResource0 : ErpFragmentData
+    {
+        public Int32 Unknown { get; set; }
+        public ErpGfxSurfaceFormat ImageType { get; set; }
+        public Int32 Unknown2 { get; set; }
+        public UInt32 MipMapCount { get; set; }
+        public Int32 Unknown3 { get; set; }
+        public Int32 Unknown4 { get; set; }
+        public string SurfaceResourceName { get; set; }
+
+        public ErpGfxSRVResource0()
+        {
+            Unknown = 5;
+            ImageType = ErpGfxSurfaceFormat.DXT5_2;
+            Unknown2 = 0;
+            MipMapCount = 1;
+            Unknown3 = 0;
+            Unknown4 = 0;
+        }
+
+        public override void FromFragment(ErpFragment fragment)
+        {
+            using (var memData = fragment.GetDataStream(true))
+            using (ErpBinaryReader reader = new ErpBinaryReader(memData))
+            {
+                Unknown = reader.ReadInt32();
+                ImageType = (ErpGfxSurfaceFormat)reader.ReadInt32();
+                Unknown2 = reader.ReadInt32();
+                MipMapCount = reader.ReadUInt32();
+                Unknown3 = reader.ReadInt32();
+                Unknown4 = reader.ReadInt32();
+                SurfaceResourceName = reader.ReadString();
+            }
+        }
+
+        public override void ToFragment(ErpFragment fragment)
+        {
+            using (var newData = new MemoryStream())
+            using (ErpBinaryWriter writer = new ErpBinaryWriter(MiscUtil.Conversion.EndianBitConverter.Little, newData))
+            {
+                writer.Write(Unknown);
+                writer.Write((Int32)ImageType);
+                writer.Write(Unknown2);
+                writer.Write(MipMapCount);
+                writer.Write(Unknown3);
+                writer.Write(Unknown4);
+                writer.Write(SurfaceResourceName);
+            }
+        }
+    }
+}

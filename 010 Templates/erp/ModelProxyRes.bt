@@ -1,0 +1,39 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+int16 num;
+int16 num2;
+int32 sLen;
+int32 unk2;
+
+typedef struct
+{
+    uint32 stringOffset;
+    uint32 parentIndex;
+    float unk2[3];
+    float unk3[4];
+    float unk4[3];
+    float unk5[16];
+    uint32 unk6;
+    uint32 unk7;
+} Dat;
+
+string readDat(Dat& data)
+{
+    FSeek(12 + num * 120 + num2 * 2 + data.stringOffset);
+    return ReadString(FTell());
+}
+
+Dat ddd[num] <read=readDat>;
+
+int16 unk[num2];
+char strDat[sLen];

@@ -61,11 +61,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Archive\Erp\Data\ErpGfxSurfaceFormat.cs" />
+    <Compile Include="Archive\Erp\Data\ErpGfxSurfaceRes2.cs" />
+    <Compile Include="Archive\Erp\Data\ErpGfxSurfaceRes1.cs" />
+    <Compile Include="Archive\Erp\Data\ErpGfxSurfaceRes0.cs" />
+    <Compile Include="Archive\Erp\Data\ErpGfxSurfaceRes.cs" />
     <Compile Include="Archive\Erp\ErpBinaryReader.cs" />
     <Compile Include="Archive\Erp\ErpBinaryWriter.cs" />
     <Compile Include="Archive\Erp\ErpResource.cs" />
     <Compile Include="Archive\Erp\ErpFile.cs" />
     <Compile Include="Archive\Erp\ErpFragment.cs" />
+    <Compile Include="Archive\Erp\Data\ErpFragmentData.cs" />
+    <Compile Include="Archive\Erp\Data\ErpGfxSRVResource.cs" />
+    <Compile Include="Archive\Erp\Data\ErpGfxSRVResource0.cs" />
+    <Compile Include="Archive\Erp\Data\ErpResourceData.cs" />
     <Compile Include="Archive\Jpk\JpkBinaryReader.cs" />
     <Compile Include="Archive\Jpk\JpkBinaryWriter.cs" />
     <Compile Include="Archive\Jpk\JpkEntry.cs" />
@@ -104,9 +113,12 @@
     <Compile Include="Data\Pkg\PkgOffsetType.cs" />
     <Compile Include="Data\Pkg\PkgRootObject.cs" />
     <Compile Include="Data\Pkg\PkgDataArray.cs" />
+    <Compile Include="Graphics\D3D10_Resource_Dimension.cs" />
     <Compile Include="Graphics\DdsFile.cs" />
     <Compile Include="Graphics\DdsHeader.cs" />
+    <Compile Include="Graphics\DDSHeaderDXT10.cs" />
     <Compile Include="Graphics\DdsPixelFormat.cs" />
+    <Compile Include="Graphics\DXGI_Format.cs" />
     <Compile Include="Graphics\PssgAttribute.cs" />
     <Compile Include="Graphics\PssgAttributeCollection.cs" />
     <Compile Include="Graphics\PssgBinaryReader.cs" />

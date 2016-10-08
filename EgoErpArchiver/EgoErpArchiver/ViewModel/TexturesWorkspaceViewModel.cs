@@ -18,11 +18,6 @@ namespace EgoErpArchiver.ViewModel
         #region Data
         readonly ObservableCollection<ErpTextureViewModel> textures;
 
-        public override string DisplayName
-        {
-            get { return "Textures"; }
-        }
-
         public ObservableCollection<ErpTextureViewModel> Textures
         {
             get { return textures; }
@@ -30,8 +25,19 @@ namespace EgoErpArchiver.ViewModel
         #endregion
 
         #region Presentation Data
+        string _displayName;
         readonly CollectionView texturesViewSource;
         string filterText;
+
+        public override string DisplayName
+        {
+            get { return _displayName; }
+            protected set
+            {
+                _displayName = value;
+                OnPropertyChanged(nameof(DisplayName));
+            }
+        }
 
         public string FilterText
         {
@@ -51,6 +57,7 @@ namespace EgoErpArchiver.ViewModel
             : base(mainView)
         {
             textures = new ObservableCollection<ErpTextureViewModel>();
+            _displayName = "Textures";
             texturesViewSource = (CollectionView)CollectionViewSource.GetDefaultView(Textures);
             texturesViewSource.Filter += TextureFilter;
 
@@ -70,6 +77,7 @@ namespace EgoErpArchiver.ViewModel
                     Textures.Add(new ErpTextureViewModel(resView));
                 }
             }
+            DisplayName = "Textures " + textures.Count;
         }
 
         public override void ClearData()
@@ -133,7 +141,7 @@ namespace EgoErpArchiver.ViewModel
             {
                 try
                 {
-                    texView.ExportDDS(dialog.FileName, false);
+                    texView.ExportDDS(dialog.FileName, false, false);
                 }
                 catch (Exception ex)
                 {
@@ -157,7 +165,7 @@ namespace EgoErpArchiver.ViewModel
             {
                 try
                 {
-                    texView.ImportDDS(dialog.FileName, null);
+                    texView.ImportDDS(dialog.FileName, null, false);
                     texView.GetPreview();
                 }
                 catch (Exception ex)
@@ -196,7 +204,7 @@ namespace EgoErpArchiver.ViewModel
                         {
                             string directoryPath = Path.GetDirectoryName(fileName);
                             if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
-                            textures[i].ExportDDS(fileName, true);
+                            textures[i].ExportDDS(fileName, true, true);
                             ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report("SUCCESS" + Environment.NewLine);
                             ++success;
                         }
@@ -257,7 +265,7 @@ namespace EgoErpArchiver.ViewModel
                                     {
                                         string mipMapSaveLocation = filePath.Replace(directory, mipMapDirectory) + ".mipmaps";
                                         Directory.CreateDirectory(Path.GetDirectoryName(mipMapSaveLocation));
-                                        textures[i].ImportDDS(filePath, mipMapSaveLocation);
+                                        textures[i].ImportDDS(filePath, mipMapSaveLocation, true);
                                         if (textures[i].IsSelected)
                                         {
                                             textures[i].GetPreview();

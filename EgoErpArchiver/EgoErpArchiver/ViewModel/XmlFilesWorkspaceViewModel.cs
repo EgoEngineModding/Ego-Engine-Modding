@@ -18,11 +18,6 @@ namespace EgoErpArchiver.ViewModel
         #region Data
         readonly ObservableCollection<ErpXmlFileViewModel> xmlFiles;
 
-        public override string DisplayName
-        {
-            get { return "Xml Files"; }
-        }
-
         public ObservableCollection<ErpXmlFileViewModel> XmlFiles
         {
             get { return xmlFiles; }
@@ -30,8 +25,19 @@ namespace EgoErpArchiver.ViewModel
         #endregion
 
         #region Presentation Data
+        string _displayName;
         readonly CollectionView xmlFilesViewSource;
         string filterText;
+
+        public override string DisplayName
+        {
+            get { return _displayName; }
+            protected set
+            {
+                _displayName = value;
+                OnPropertyChanged(nameof(DisplayName));
+            }
+        }
 
         public string FilterText
         {
@@ -51,6 +57,7 @@ namespace EgoErpArchiver.ViewModel
             : base(mainView)
         {
             xmlFiles = new ObservableCollection<ErpXmlFileViewModel>();
+            _displayName = "XML Files";
             xmlFilesViewSource = (CollectionView)CollectionViewSource.GetDefaultView(XmlFiles);
             xmlFilesViewSource.Filter += XmlFilesFilter;
 
@@ -97,6 +104,7 @@ namespace EgoErpArchiver.ViewModel
                         break;
                 }
             }
+            DisplayName = "XML Files " + xmlFiles.Count;
         }
 
         public override void ClearData()

@@ -185,6 +185,15 @@
                                MaxWidth="{Binding ElementName=texListView, Path=SelectedItem.Width}" 
                                MaxHeight="{Binding ElementName=texListView, Path=SelectedItem.Height}"></Image>
                             <StackPanel>
+                                <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=texListView, Path=SelectedItem, TargetNullValue=Hidden}">
+                                    <Button x:Name="texArrayIndexDown" x:FieldModifier="private" Margin="0,0,0,0"  Content="˅" Width="20" Command="{Binding ElementName=texListView, Path=SelectedItem.TexArrayIndexDownCommand}" />
+                                    <Button x:Name="texArrayIndexUp" x:FieldModifier="private" Margin="0,0,0,0" Content="˄" Width="20" Command="{Binding ElementName=texListView, Path=SelectedItem.TexArrayIndexUpCommand}" />
+                                    <TextBlock Foreground="Yellow" Text=" TexArrayIndex: "></TextBlock>
+                                    <TextBlock Foreground="Yellow" Text="{Binding ElementName=texListView, Path=SelectedItem.TexArrayIndex}"></TextBlock>
+                                    <TextBlock Foreground="Yellow" Text=" ("></TextBlock>
+                                    <TextBlock Foreground="Yellow" Text="{Binding ElementName=texListView, Path=SelectedItem.TexArraySize}"></TextBlock>
+                                    <TextBlock Foreground="Yellow" Text=")"></TextBlock>
+                                </StackPanel>
                                 <TextBlock Text="{Binding ElementName=texListView, Path=SelectedItem.TextureInfo}"
                                        Foreground="Yellow"></TextBlock>
                                 <TextBlock
