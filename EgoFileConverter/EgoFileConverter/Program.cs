@@ -34,7 +34,7 @@ namespace EgoFileConverter
 
                         Convert(f);
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (!System.Diagnostics.Debugger.IsAttached)
                     {
                         Console.WriteLine("Failed to convert the file!");
                         Console.WriteLine(ex.ToString());
@@ -61,7 +61,10 @@ namespace EgoFileConverter
             {
                 PkgBinaryReader reader = new PkgBinaryReader(fs);
                 magic = reader.ReadString(4);
-                xmlMagic = magic.Substring(1);
+
+                // Skip first byte since BXMLBig starts with \0 causing empty string
+                reader.Seek(1, SeekOrigin.Begin);
+                xmlMagic = reader.ReadString(3);
             }
             
             if (xmlMagic == "\"Rr" || xmlMagic == "BXM")
