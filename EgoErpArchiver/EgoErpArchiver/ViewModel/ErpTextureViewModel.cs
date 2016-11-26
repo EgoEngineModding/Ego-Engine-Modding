@@ -57,7 +57,7 @@ namespace EgoErpArchiver.ViewModel
 
         #region Presentation Props
         bool isSelected;
-        string textureInfo;
+        string _textureInfo;
         uint _texArrayIndex;
         BitmapSource preview;
         string previewError;
@@ -101,10 +101,10 @@ namespace EgoErpArchiver.ViewModel
         }
         public string TextureInfo
         {
-            get { return textureInfo; }
+            get { return _textureInfo; }
             set
             {
-                textureInfo = value;
+                _textureInfo = value;
                 OnPropertyChanged("TextureInfo");
             }
         }
@@ -146,7 +146,7 @@ namespace EgoErpArchiver.ViewModel
                 int maxDimension = (int)Math.Max(dds.header.width, dds.header.height);
                 Width = (int)dds.header.width;
                 Height = (int)dds.header.height;
-
+                
                 image = new CSharpImageLibrary.ImageEngineImage(System.AppDomain.CurrentDomain.BaseDirectory + "\\temp.dds", maxDimension, false);
                 Preview = null;
                 this.Preview = image.GetWPFBitmap();
@@ -173,16 +173,18 @@ namespace EgoErpArchiver.ViewModel
             ErpGfxSRVResource srvRes = new ErpGfxSRVResource();
             srvRes.FromResource(Texture);
 
+            uint mipPower = (uint)Math.Pow(2.0, srvRes.SurfaceRes.Frag2.Mips.Count);
             uint mipWidth = 0, mipHeight = 0;
             ulong mipLinearSize = 0;
+            ulong mipTotalSize = 0;
             if (srvRes.SurfaceRes.HasMips)
             {
-                if (srvRes.SurfaceRes.Frag2.Mips.Count > 0)
+                mipLinearSize = Math.Max(srvRes.SurfaceRes.Frag2.Mips[0].Width, srvRes.SurfaceRes.Frag2.Mips[0].Height);
+                for (int i = 0; i < srvRes.SurfaceRes.Frag2.Mips.Count; ++i)
                 {
-                    mipLinearSize = Math.Max(srvRes.SurfaceRes.Frag2.Mips[0].Width, srvRes.SurfaceRes.Frag2.Mips[0].Height);
+                    mipTotalSize += Math.Max(srvRes.SurfaceRes.Frag2.Mips[i].Width, srvRes.SurfaceRes.Frag2.Mips[i].Height);
                 }
 
-                uint mipPower = (uint)Math.Pow(2.0, srvRes.SurfaceRes.Frag2.Mips.Count);
                 mipWidth = srvRes.SurfaceRes.Fragment0.Width * mipPower;
                 mipHeight = srvRes.SurfaceRes.Fragment0.Height * mipPower;
             }
@@ -191,56 +193,91 @@ namespace EgoErpArchiver.ViewModel
             dds.header.height = srvRes.SurfaceRes.Fragment0.Height;
             dds.header10.arraySize = srvRes.SurfaceRes.Fragment0.ArraySize;
             _texArraySize = srvRes.SurfaceRes.Fragment0.ArraySize;
-            textureInfo = srvRes.SurfaceRes.Fragment0.Width + "x" + srvRes.SurfaceRes.Fragment0.Height + " Mips:" + (srvRes.SurfaceRes.Fragment0.MipMapCount) + " Format:" + srvRes.SurfaceRes.Fragment0.ImageType + ",";
+            _textureInfo = srvRes.SurfaceRes.Fragment0.Width + "x" + srvRes.SurfaceRes.Fragment0.Height + " Mips:" + (srvRes.SurfaceRes.Fragment0.MipMapCount) + " Format:" + srvRes.SurfaceRes.Fragment0.ImageType + ",";
             switch (srvRes.SurfaceRes.Fragment0.ImageType)
             {
                 case ErpGfxSurfaceFormat.ABGR8:
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height) * 4;
-                    if (mipLinearSize == 0) mipLinearSize = (mipWidth * mipHeight) * 4;
 
-                    dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_ALPHAPIXELS | DdsPixelFormat.Flags.DDPF_RGB;
-                    dds.header.ddspf.fourCC = 0;
-                    dds.header.ddspf.rGBBitCount = 32;
-                    dds.header.ddspf.rBitMask = 0xFF;
-                    dds.header.ddspf.gBitMask = 0xFF00;
-                    dds.header.ddspf.bBitMask = 0xFF0000;
-                    dds.header.ddspf.aBitMask = 0xFF000000;
-                    TextureInfo += "ABGR8";
+                    if (srvRes.SurfaceRes.Fragment0.ArraySize > 1 && exportTexArray)
+                    {
+                        dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+                        dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                        dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_R8G8B8A8_UNORM;
+                        TextureInfo += "RGBA8";
+                    }
+                    else
+                    {
+                        dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_ALPHAPIXELS | DdsPixelFormat.Flags.DDPF_RGB;
+                        dds.header.ddspf.fourCC = 0;
+                        dds.header.ddspf.rGBBitCount = 32;
+                        dds.header.ddspf.rBitMask = 0xFF;
+                        dds.header.ddspf.gBitMask = 0xFF00;
+                        dds.header.ddspf.bBitMask = 0xFF0000;
+                        dds.header.ddspf.aBitMask = 0xFF000000;
+                        TextureInfo += "ABGR8";
+                    }
                     break;
                 case ErpGfxSurfaceFormat.DXT1_1: // ferrari_wheel_sfc
                 case ErpGfxSurfaceFormat.DXT1_2: // ferrari_wheel_df, ferrari_paint
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height) / 2;
-                    if (mipLinearSize == 0) mipLinearSize = (mipWidth * mipHeight) / 2;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
-                    dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT1"), 0);
+
+                    if (srvRes.SurfaceRes.Fragment0.ArraySize > 1 && exportTexArray)
+                    {
+                        dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                        dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC1_UNORM;
+                    }
+                    else
+                    {
+                        dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT1"), 0);
+                    }
+
                     TextureInfo += "DXT1";
                     break;
                 case ErpGfxSurfaceFormat.DXT5_1: // ferrari_sfc
                 case ErpGfxSurfaceFormat.DXT5_2: // ferrari_decal; DXT5 linear
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height);
-                    if (mipLinearSize == 0) mipLinearSize = (mipWidth * mipHeight);
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
-                    dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT5"), 0);
+
+                    if (srvRes.SurfaceRes.Fragment0.ArraySize > 1 && exportTexArray)
+                    {
+                        dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                        dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC3_UNORM;
+                    }
+                    else
+                    {
+                        dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT5"), 0);
+                    }
+
                     TextureInfo += "DXT5";
                     break;
                 case ErpGfxSurfaceFormat.ATI2: // ferrari_wheel_nm
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height);
-                    if (mipLinearSize == 0) mipLinearSize = (mipWidth * mipHeight);
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
-                    dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("ATI2"), 0);
+
+                    if (srvRes.SurfaceRes.Fragment0.ArraySize > 1 && exportTexArray)
+                    {
+                        dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                        dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC5_UNORM;
+                    }
+                    else
+                    {
+                        dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("ATI2"), 0);
+                    }
+
                     TextureInfo += "ATI2/3Dc";
                     break;
                 case ErpGfxSurfaceFormat.BC7: // flow_boot splash_bg_image
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height);
-                    if (mipLinearSize == 0) mipLinearSize = (mipWidth * mipHeight);
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
-                    dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC7_TYPELESS;
+                    dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC7_UNORM;
                     TextureInfo += "BC7";
                     break;
                 default:
@@ -255,10 +292,11 @@ namespace EgoErpArchiver.ViewModel
             }
 
             byte[] imageData = srvRes.SurfaceRes.Fragment1.Data;
-
+            
             string mipMapFullFileName = Path.Combine(Properties.Settings.Default.F12016Dir, srvRes.SurfaceRes.Frag2.MipMapFileName);
             bool foundMipMapFile = File.Exists(mipMapFullFileName);
-            if (srvRes.SurfaceRes.HasMips && (!isPreview || foundMipMapFile))
+            bool hasValidMipMaps = dds.header.pitchOrLinearSize < mipLinearSize && dds.header.pitchOrLinearSize * mipPower * mipPower == mipLinearSize;
+            if (srvRes.SurfaceRes.HasMips && hasValidMipMaps && (!isPreview || foundMipMapFile))
             {
                 if (!isPreview)
                 {
@@ -275,7 +313,7 @@ namespace EgoErpArchiver.ViewModel
                     foundMipMapFile = odialog.ShowDialog() == true;
                     mipMapFullFileName = odialog.FileName;
                 }
-
+                
                 if (foundMipMapFile)
                 {
                     byte[] mipImageData;
@@ -283,10 +321,16 @@ namespace EgoErpArchiver.ViewModel
                     {
                         mipImageData = reader.ReadBytes((int)reader.BaseStream.Length);
                     }
-
+                    
                     dds.header.width = mipWidth;
                     dds.header.height = mipHeight;
                     dds.header.pitchOrLinearSize = (uint)mipLinearSize;
+
+                    if (mipTotalSize != (ulong)mipImageData.Length)
+                    {
+                        throw new Exception($"There is a mismatch with the mipmaps file.{Environment.NewLine}It is either incorrectly modded, or in the wrong folder.");
+                    }
+
 
                     if (srvRes.SurfaceRes.Frag2.Mips.Count > 0)
                     {
@@ -308,6 +352,24 @@ namespace EgoErpArchiver.ViewModel
             }
             else
             {
+                if (srvRes.SurfaceRes.HasMips)
+                {
+                    if (!hasValidMipMaps)
+                    {
+                        // This usually happens when the mips fragment was never updated with the new offsets/width/height/linearsize
+                        TextureInfo += Environment.NewLine + "Mipmaps are incorrectly modded! Try exporting, then importing to fix the issue.";
+                    }
+                    else if (!foundMipMapFile)
+                    {
+                        TextureInfo += Environment.NewLine + "Mipmaps not found! Make sure they are in the correct F1 game folder!";
+                    }
+                    else
+                    {
+                        // Not found during preview
+                        TextureInfo += Environment.NewLine + "Mipmaps not loaded! Make sure they are in the correct F1 game folder!";
+                    }
+                }
+
                 if (srvRes.SurfaceRes.Fragment0.ArraySize > 1)
                 {
                     uint bytesPerArrayImage = (uint)imageData.Length / srvRes.SurfaceRes.Fragment0.ArraySize;
@@ -315,19 +377,24 @@ namespace EgoErpArchiver.ViewModel
 
                     if (!exportTexArray)
                     {
+                        dds.header10.arraySize = 1;
                         Buffer.BlockCopy(imageData, (int)(bytesPerArrayImage * _texArrayIndex), data, 0, (int)bytesPerArrayImage);
                         dds.bdata = data;
                         dds.Write(File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read), -1);
                     }
                     else
                     {
-                        string output = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName));
-                        for (int i = 0; i < srvRes.SurfaceRes.Fragment0.ArraySize; ++i)
-                        {
-                            Buffer.BlockCopy(imageData, (int)(bytesPerArrayImage * i), data, 0, (int)bytesPerArrayImage);
-                            dds.bdata = data;
-                            dds.Write(File.Open(output + "!!!" + i.ToString("000") + ".dds", FileMode.Create, FileAccess.Write, FileShare.Read), -1);
-                        }
+                        dds.bdata = imageData;
+                        dds.Write(File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read), -1);
+
+                        // TODO: Add support for exporting individual tex array slices
+                        //string output = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName));
+                        //for (int i = 0; i < srvRes.SurfaceRes.Fragment0.ArraySize; ++i)
+                        //{
+                        //    Buffer.BlockCopy(imageData, (int)(bytesPerArrayImage * i), data, 0, (int)bytesPerArrayImage);
+                        //    dds.bdata = data;
+                        //    dds.Write(File.Open(output + "!!!" + i.ToString("000") + ".dds", FileMode.Create, FileAccess.Write, FileShare.Read), -1);
+                        //}
                     }
                 }
                 else
@@ -373,6 +440,33 @@ namespace EgoErpArchiver.ViewModel
                     {
                         imageType = ErpGfxSurfaceFormat.BC7;
                         mipLinearSize = (dds.header.width * dds.header.height);
+                    }
+                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_TYPELESS ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_UNORM ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_UNORM_SRGB ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_SNORM ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_UINT ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_SINT)
+                    {
+                        goto case 0;
+                    }
+                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_TYPELESS ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM_SRGB)
+                    {
+                        goto case 827611204;
+                    }
+                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_TYPELESS ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB)
+                    {
+                        goto case 894720068;
+                    }
+                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC5_TYPELESS ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC5_UNORM ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC5_SNORM)
+                    {
+                        goto case 843666497;
                     }
                     else
                     {
@@ -444,6 +538,7 @@ namespace EgoErpArchiver.ViewModel
                     int remainingBytes = dds.bdata.Length - (int)offset;
                     imageByteData = new byte[remainingBytes];
                     Buffer.BlockCopy(dds.bdata, (int)offset, imageByteData, 0, remainingBytes);
+                    srvRes.SurfaceRes.Fragment1.Data = imageByteData;
                 }
                 else
                 {
@@ -462,6 +557,16 @@ namespace EgoErpArchiver.ViewModel
                     }
                     else
                     {
+                        if (dds.header10.arraySize <= 1)
+                        {
+                            throw new Exception("The texture array size must be greater than 1.");
+                        }
+
+                        imageByteData = dds.bdata;
+                        srvRes.SurfaceRes.Fragment1.Data = imageByteData;
+                        srvRes.SurfaceRes.Fragment0.ArraySize = dds.header10.arraySize;
+
+                        // TODO: Add support for importing individual tex array slices
                         //imageByteData = new byte[bytesPerArrayImage];
                         //string input = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName));
                         //for (int i = 0; i < srvRes.SurfaceRes.Fragment0.ArraySize; ++i)

@@ -8,9 +8,14 @@
     <Window.DataContext>
         <StaticResource ResourceKey="MainVM"></StaticResource>
     </Window.DataContext>
+    <Window.Resources>
+        <SolidColorBrush x:Key="imageTextBg" Color="White" Opacity="0.5"/>
+    </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Key="O" Modifiers="Control" Command="{Binding Path=OpenCommand}"></KeyBinding>
         <KeyBinding Key="S" Modifiers="Control" Command="{Binding Path=SaveCommand}"></KeyBinding>
+        <KeyBinding Key="Right" Modifiers="Alt" Command="{Binding ElementName=texListView, Path=SelectedItem.TexArrayIndexUpCommand}"></KeyBinding>
+        <KeyBinding Key="Left" Modifiers="Alt" Command="{Binding ElementName=texListView, Path=SelectedItem.TexArrayIndexDownCommand}"></KeyBinding>
     </Window.InputBindings>
 
     <DockPanel>
@@ -178,27 +183,40 @@
                         </ListView>
                     </DockPanel>
                     <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
-                    <DockPanel Grid.Column="2" Background="LightGray">
+                    <DockPanel Grid.Column="2">
+                        <DockPanel.Background>
+                            <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,128,128" ViewportUnits="Absolute">
+                                            <DrawingBrush.Drawing>
+                                                <DrawingGroup>
+                                                    <GeometryDrawing Geometry="M0,0 L128,0 128,128, 0,128Z" Brush="DarkGray"/>
+                                                    <GeometryDrawing Geometry="M0,64 L128,64 128,128, 64,128 64,0 0,0Z" Brush="LightGray"/>
+                                                </DrawingGroup>
+                                            </DrawingBrush.Drawing>
+                                        </DrawingBrush>
+                        </DockPanel.Background>
                         <Grid>
                             <Image 
                                Source="{Binding ElementName=texListView, Path=SelectedItem.Preview}" 
                                MaxWidth="{Binding ElementName=texListView, Path=SelectedItem.Width}" 
-                               MaxHeight="{Binding ElementName=texListView, Path=SelectedItem.Height}"></Image>
+                               MaxHeight="{Binding ElementName=texListView, Path=SelectedItem.Height}"
+                                HorizontalAlignment="Left" VerticalAlignment="Top"></Image>
                             <StackPanel>
-                                <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=texListView, Path=SelectedItem, TargetNullValue=Hidden}">
-                                    <Button x:Name="texArrayIndexDown" x:FieldModifier="private" Margin="0,0,0,0"  Content="˅" Width="20" Command="{Binding ElementName=texListView, Path=SelectedItem.TexArrayIndexDownCommand}" />
-                                    <Button x:Name="texArrayIndexUp" x:FieldModifier="private" Margin="0,0,0,0" Content="˄" Width="20" Command="{Binding ElementName=texListView, Path=SelectedItem.TexArrayIndexUpCommand}" />
-                                    <TextBlock Foreground="Yellow" Text=" TexArrayIndex: "></TextBlock>
-                                    <TextBlock Foreground="Yellow" Text="{Binding ElementName=texListView, Path=SelectedItem.TexArrayIndex}"></TextBlock>
-                                    <TextBlock Foreground="Yellow" Text=" ("></TextBlock>
-                                    <TextBlock Foreground="Yellow" Text="{Binding ElementName=texListView, Path=SelectedItem.TexArraySize}"></TextBlock>
-                                    <TextBlock Foreground="Yellow" Text=")"></TextBlock>
-                                </StackPanel>
-                                <TextBlock Text="{Binding ElementName=texListView, Path=SelectedItem.TextureInfo}"
-                                       Foreground="Yellow"></TextBlock>
                                 <TextBlock
                                    Text="{Binding ElementName=texListView, Path=SelectedItem.PreviewError}" 
                                    Visibility="{Binding ElementName=texListView, Path=SelectedItem.PreviewErrorVisibility}"/>
+                            </StackPanel>
+                            <StackPanel VerticalAlignment="Bottom" Background="{StaticResource imageTextBg}">
+                                <TextBlock Text="{Binding ElementName=texListView, Path=SelectedItem.TextureInfo}"
+                                       Foreground="Black"></TextBlock>
+                                <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=texListView, Path=SelectedItem, TargetNullValue=Hidden}">
+                                    <Button x:Name="texArrayIndexDown" x:FieldModifier="private" Margin="0,0,0,0"  Content="&lt;" Width="20" Command="{Binding ElementName=texListView, Path=SelectedItem.TexArrayIndexDownCommand}" />
+                                    <Button x:Name="texArrayIndexUp" x:FieldModifier="private" Margin="0,0,0,0" Content="&gt;" Width="20" Command="{Binding ElementName=texListView, Path=SelectedItem.TexArrayIndexUpCommand}" />
+                                    <TextBlock Foreground="Black" Text=" TexArrayIndex: "></TextBlock>
+                                    <TextBlock Foreground="Black" Text="{Binding ElementName=texListView, Path=SelectedItem.TexArrayIndex}"></TextBlock>
+                                    <TextBlock Foreground="Black" Text=" ("></TextBlock>
+                                    <TextBlock Foreground="Black" Text="{Binding ElementName=texListView, Path=SelectedItem.TexArraySize}"></TextBlock>
+                                    <TextBlock Foreground="Black" Text=")"></TextBlock>
+                                </StackPanel>
                             </StackPanel>
                         </Grid>
                     </DockPanel>

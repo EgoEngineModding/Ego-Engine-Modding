@@ -154,15 +154,22 @@
         {
             using (System.IO.BinaryReader b = new System.IO.BinaryReader(fileStream))
             {
-                b.BaseStream.Position = 12;
+                b.BaseStream.Position = 8;
+                header.flags = (DdsHeader.Flags)b.ReadUInt32();
                 header.height = b.ReadUInt32();
                 header.width = b.ReadUInt32();
-                b.BaseStream.Position += 8;
+                header.pitchOrLinearSize = b.ReadUInt32();
+                header.depth = b.ReadUInt32();
                 header.mipMapCount = b.ReadUInt32();
-                b.BaseStream.Position += 52;
+                b.BaseStream.Position += 48;
+                header.ddspf.flags = (DdsPixelFormat.Flags)b.ReadUInt32();
                 header.ddspf.fourCC = b.ReadUInt32();
                 header.ddspf.rGBBitCount = b.ReadUInt32();
-                b.BaseStream.Position += 20;
+                header.ddspf.rBitMask = b.ReadUInt32();
+                header.ddspf.gBitMask = b.ReadUInt32();
+                header.ddspf.bBitMask = b.ReadUInt32();
+                header.ddspf.aBitMask = b.ReadUInt32();
+                header.caps = (DdsHeader.Caps)b.ReadUInt32();
                 header.caps2 = (DdsHeader.Caps2)b.ReadUInt32();
                 b.BaseStream.Position += 12;
                 if (header.ddspf.flags.HasFlag(DdsPixelFormat.Flags.DDPF_FOURCC) && header.ddspf.fourCC == 808540228) // DX10

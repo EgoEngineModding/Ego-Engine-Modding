@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -143,7 +144,7 @@ namespace EgoErpArchiver.ViewModel
                 {
                     texView.ExportDDS(dialog.FileName, false, false);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when(!Debugger.IsAttached)
                 {
                     MessageBox.Show("Could not export texture!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -168,7 +169,7 @@ namespace EgoErpArchiver.ViewModel
                     texView.ImportDDS(dialog.FileName, null, false);
                     texView.GetPreview();
                 }
-                catch (Exception ex)
+                catch (Exception ex) when(!Debugger.IsAttached)
                 {
                     MessageBox.Show("Could not import texture!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);

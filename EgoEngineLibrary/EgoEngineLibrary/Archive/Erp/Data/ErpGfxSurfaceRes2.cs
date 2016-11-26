@@ -63,6 +63,8 @@ namespace EgoEngineLibrary.Archive.Erp.Data
                     writer.Write(Mips[i].Width);
                     writer.Write(Mips[i].Height);
                 }
+
+                fragment.SetData(newData.ToArray());
             }
         }
     }
