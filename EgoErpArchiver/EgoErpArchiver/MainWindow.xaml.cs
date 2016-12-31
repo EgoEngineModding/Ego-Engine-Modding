@@ -70,7 +70,7 @@ namespace EgoErpArchiver
 
         private void websiteMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://www.petartasev.com/modding/ego-engine/erp-archiver/");
+            System.Diagnostics.Process.Start("http://www.ryder25.com/modding/ego-engine/#EgoERPArchiver");
         }
 
         private void issuesMenuItem_Click(object sender, RoutedEventArgs e)

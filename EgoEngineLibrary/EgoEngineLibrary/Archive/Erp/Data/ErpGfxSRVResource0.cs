@@ -54,6 +54,8 @@ namespace EgoEngineLibrary.Archive.Erp.Data
                 writer.Write(Unknown3);
                 writer.Write(Unknown4);
                 writer.Write(SurfaceResourceName);
+
+                fragment.SetData(newData.ToArray());
             }
         }
     }

@@ -147,9 +147,9 @@ namespace EgoErpArchiver.ViewModel
                 Width = (int)dds.header.width;
                 Height = (int)dds.header.height;
                 
-                image = new CSharpImageLibrary.ImageEngineImage(System.AppDomain.CurrentDomain.BaseDirectory + "\\temp.dds", maxDimension, false);
+                image = new CSharpImageLibrary.ImageEngineImage(System.AppDomain.CurrentDomain.BaseDirectory + "\\temp.dds", maxDimension);
                 Preview = null;
-                this.Preview = image.GetWPFBitmap();
+                this.Preview = image.GetWPFBitmap(maxDimension, true);
 
                 this.PreviewErrorVisibility = Visibility.Collapsed;
             }
