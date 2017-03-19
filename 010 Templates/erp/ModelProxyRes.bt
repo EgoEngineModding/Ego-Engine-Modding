@@ -10,6 +10,7 @@
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
+LittleEndian();
 int16 num;
 int16 num2;
 int32 sLen;

@@ -22,14 +22,13 @@
         {
             get
             {
-                Uri uri = new Uri(Identifier, UriKind.RelativeOrAbsolute);
-                if (uri.IsAbsoluteUri)
+                if (Identifier.StartsWith("eaid", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return Path.GetFileName(uri.PathAndQuery);
+                    return Path.GetFileName(Identifier.Substring(7));
                 }
                 else
                 {
-                    return Path.GetFileName(uri.ToString());
+                    return Path.GetFileName(Identifier);
                 }
             }
         }
@@ -37,17 +36,16 @@
         {
             get
             {
-                Uri uri = new Uri(Identifier, UriKind.RelativeOrAbsolute);
-                if (uri.IsAbsoluteUri)
+                if (Identifier.StartsWith("eaid", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return Path.GetDirectoryName(uri.Host + uri.PathAndQuery).Replace("/", "\\");
+                    return Path.GetDirectoryName(Identifier.Substring(7)).Replace('/', '\\');
                 }
                 else
                 {
-                    string temp = uri.ToString();
-                    if (temp.Contains("/") || temp.Contains("\\"))
+                    string temp = Identifier;
+                    if (temp.Contains('/') || temp.Contains('\\'))
                     {
-                        return Path.GetDirectoryName(temp).Replace("/", "\\");
+                        return Path.GetDirectoryName(temp).Replace('/', '\\');
                     }
                     else
                     {
@@ -193,7 +191,7 @@
 
                 int resIndex = Int32.Parse(name.Substring(resTextIndex + 7, 3));
                 name = Path.GetDirectoryName(f) + "\\" + (name.Remove(resTextIndex) + extension).Replace("^^", "?");
-                if (name.EndsWith(Path.Combine(this.Folder, this.FileName)))
+                if (name.EndsWith(Path.Combine(this.Folder, this.FileName), StringComparison.InvariantCultureIgnoreCase))
                 {
                     Fragments[resIndex].Import(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
                     ++fragmentsImported;

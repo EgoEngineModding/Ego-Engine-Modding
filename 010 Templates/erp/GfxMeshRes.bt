@@ -29,7 +29,7 @@ struct
     uint32 unk3;
     uint32 ibIndex;
     uint32 ibCount;
-    uint32 unk6;
+    uint32 ibOffset;
     float unk7[4];
     uint32 nodeLinkOffset;
     uint32 unk9;
