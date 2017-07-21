@@ -142,7 +142,7 @@ namespace EgoErpArchiver.ViewModel
             {
                 try
                 {
-                    texView.ExportDDS(dialog.FileName, false, true);
+                    texView.ExportDDS(dialog.FileName, false, false);
                 }
                 catch (Exception ex) when(!Debugger.IsAttached)
                 {

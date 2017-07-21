@@ -61,7 +61,7 @@ namespace EgoErpArchiver.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ego ERP Archiver 5.1.
+        ///   Looks up a localized string similar to Ego ERP Archiver vNext.
         /// </summary>
         internal static string AppTitleLong {
             get {
@@ -70,7 +70,7 @@ namespace EgoErpArchiver.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to EEA 5.1.
+        ///   Looks up a localized string similar to EEA vNext.
         /// </summary>
         internal static string AppTitleShort {
             get {

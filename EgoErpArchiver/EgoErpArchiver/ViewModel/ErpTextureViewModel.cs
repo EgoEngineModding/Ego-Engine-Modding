@@ -272,12 +272,28 @@ namespace EgoErpArchiver.ViewModel
 
                     TextureInfo += "ATI2/3Dc";
                     break;
-                case ErpGfxSurfaceFormat.BC7: // flow_boot splash_bg_image
+                case (ErpGfxSurfaceFormat)67:
+                    dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height);
+                    dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+                    dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                    dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC6H_UF16;
+                    TextureInfo += "BC6";
+                    break;
+                case (ErpGfxSurfaceFormat)69:
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height);
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
                     dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC7_UNORM;
+                    TextureInfo += "BC7";
+                    break;
+                case ErpGfxSurfaceFormat.BC7: // flow_boot splash_bg_image
+                    dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height);
+                    dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+                    dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                    dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC7_UNORM_SRGB;
                     TextureInfo += "BC7";
                     break;
                 default:
