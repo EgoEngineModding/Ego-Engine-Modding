@@ -92,23 +92,23 @@ namespace EgoPssgEditor.ViewModel
                 dds.Write(File.Open(System.AppDomain.CurrentDomain.BaseDirectory + "\\temp.dds", FileMode.Create, FileAccess.ReadWrite, FileShare.Read), -1);
                 int maxDimension = (int)Math.Max(dds.header.width, dds.header.height);
 
-                image = new CSharpImageLibrary.ImageEngineImage(System.AppDomain.CurrentDomain.BaseDirectory + "\\temp.dds", maxDimension, false);
+                image = new CSharpImageLibrary.ImageEngineImage(System.AppDomain.CurrentDomain.BaseDirectory + "\\temp.dds", maxDimension);
                 Preview = null;
-                this.Preview = image.GetWPFBitmap();
-
-                dds = null;
-                image.Dispose();
-                image = null;
+                this.Preview = image.GetWPFBitmap(maxDimension, true);
+                
                 this.PreviewErrorVisibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
                 Preview = null;
+                this.PreviewError = "Could not create preview! Export/Import may still work in certain circumstances." + Environment.NewLine + Environment.NewLine + ex.Message;
+                this.PreviewErrorVisibility = Visibility.Visible;
+            }
+            finally
+            {
                 dds = null;
                 image?.Dispose();
                 image = null;
-                this.PreviewError = "Could not create preview! Export/Import may still work in certain circumstances." + Environment.NewLine + Environment.NewLine + ex.Message;
-                this.PreviewErrorVisibility = Visibility.Visible;
             }
         }
     }

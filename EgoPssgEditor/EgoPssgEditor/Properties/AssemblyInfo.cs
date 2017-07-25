@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Petar Tasev")]
 [assembly: AssemblyProduct("Ego PSSG Editor")]
-[assembly: AssemblyCopyright("Copyright © Petar Tasev 2016")]
+[assembly: AssemblyCopyright("Copyright © Petar Tasev 2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -51,5 +51,5 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("11.0.2017.0720")]
+[assembly: AssemblyFileVersion("11.0.2017.0720")]

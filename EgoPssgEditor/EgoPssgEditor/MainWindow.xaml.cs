@@ -27,7 +27,7 @@ namespace EgoPssgEditor
     // 10.1 -- Added two texelTypes for Dirt Rally, Fixed bug when copying node (a new node info was created even if the same name already existed)
     // 10.2 -- Changed DDS saving to use linear size instead of pitch to make it work with Gimp 2.8
     // 10.3 -- Properly closes the save stream, Changed byte data font to Consolas, Hex byte now always 2 chars and caps, 64bit, opens/saves really large files, OLV textures
-    // 11.0 -- Preview for u8 textures, Rewrote UI in WPF, Dropped CubeMap support
+    // 11.0 -- Preview for u8 textures, Rewrote UI in WPF, Dropped CubeMap support, Added BC7 support
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -43,7 +43,7 @@ namespace EgoPssgEditor
 
         private void websiteMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://www.petartasev.com/modding/ego-engine/pssg-editor/");
+            System.Diagnostics.Process.Start("http://www.ryder25.com/");
         }
 
         //private void termpToolStripMenuItem_Click(object sender, EventArgs e)

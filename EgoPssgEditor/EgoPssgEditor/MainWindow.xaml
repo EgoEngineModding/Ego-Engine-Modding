@@ -164,8 +164,8 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <DockPanel>
-                        <TextBox DockPanel.Dock="Top" Name="texSearchBox" Text="{Binding Path=FilterText, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                        <ListView Name="texListView" ItemsSource="{Binding Path=Textures}" SelectionMode="Single">
+                        <TextBox DockPanel.Dock="Top" Name="texSearchBox" Text="{Binding Path=FilterText, UpdateSourceTrigger=PropertyChanged}" TabIndex="1"></TextBox>
+                        <ListView Name="texListView" ItemsSource="{Binding Path=Textures}" SelectionMode="Single" TabIndex="0">
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="{x:Type ListViewItem}">
                                     <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />

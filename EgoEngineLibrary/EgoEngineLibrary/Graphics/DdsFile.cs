@@ -59,6 +59,20 @@
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT5"), 0);
                     break;
+                case "BC7":
+                    header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value);
+                    header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+                    header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                    header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC7_UNORM;
+                    break;
+                case "BC7_srgb":
+                    header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value);
+                    header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+                    header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                    header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC7_UNORM_SRGB;
+                    break;
                 case "ui8x4":
                     header.flags |= DdsHeader.Flags.DDSD_PITCH;
                     header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value); // is this right?
@@ -341,6 +355,22 @@
             else if (header.ddspf.rGBBitCount == 8)
             {
                 node.Attributes["texelFormat"].Value = "u8";
+            }
+            else if (header.ddspf.fourCC == 808540228) //DX10
+            {
+                if (header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_TYPELESS ||
+                    header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_UNORM)
+                {
+                    node.Attributes["texelFormat"].Value = "BC7";
+                }
+                else if (header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_UNORM_SRGB)
+                {
+                    node.Attributes["texelFormat"].Value = "BC7_srgb";
+                }
+                else
+                {
+                    throw new FormatException("The dds has an invalid or unsupported format type!");
+                }
             }
             else
             {
