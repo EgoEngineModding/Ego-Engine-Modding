@@ -28,6 +28,7 @@ namespace EgoPssgEditor
     // 10.2 -- Changed DDS saving to use linear size instead of pitch to make it work with Gimp 2.8
     // 10.3 -- Properly closes the save stream, Changed byte data font to Consolas, Hex byte now always 2 chars and caps, 64bit, opens/saves really large files, OLV textures
     // 11.0 -- Preview for u8 textures, Rewrote UI in WPF, Dropped CubeMap support, Added BC7 support
+    // 11.1 -- Support for BC1, BC3, and srgb variants
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml

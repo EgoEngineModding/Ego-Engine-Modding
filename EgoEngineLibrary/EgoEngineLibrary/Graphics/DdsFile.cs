@@ -42,7 +42,8 @@
                     header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value) / 2;
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
-                    header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT1"), 0);
+                    header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                    header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC1_UNORM_SRGB;
                     break;
                 case "dxt2":
                 case "dxt3":
@@ -53,11 +54,19 @@
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes(((string)node.Attributes["texelFormat"].Value).ToUpper()), 0);
                     break;
+                case "dxt3_srgb":
+                    header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value);
+                    header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+                    header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                    header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC2_UNORM_SRGB;
+                    break;
                 case "dxt5_srgb":
                     header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value);
                     header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
-                    header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DXT5"), 0);
+                    header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                    header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB;
                     break;
                 case "BC7":
                     header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
@@ -366,6 +375,33 @@
                 else if (header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_UNORM_SRGB)
                 {
                     node.Attributes["texelFormat"].Value = "BC7_srgb";
+                }
+                else if (header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_TYPELESS ||
+                    header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM)
+                {
+                    node.Attributes["texelFormat"].Value = "dxt1";
+                }
+                else if (header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM_SRGB)
+                {
+                    node.Attributes["texelFormat"].Value = "dxt1_srgb";
+                }
+                else if (header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC2_TYPELESS ||
+                    header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC2_UNORM)
+                {
+                    node.Attributes["texelFormat"].Value = "dxt3";
+                }
+                else if (header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC2_UNORM_SRGB)
+                {
+                    node.Attributes["texelFormat"].Value = "dxt3_srgb";
+                }
+                else if (header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_TYPELESS ||
+                    header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM)
+                {
+                    node.Attributes["texelFormat"].Value = "dxt5";
+                }
+                else if (header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB)
+                {
+                    node.Attributes["texelFormat"].Value = "dxt5_srgb";
                 }
                 else
                 {

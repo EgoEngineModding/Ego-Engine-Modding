@@ -15,6 +15,9 @@
         <KeyBinding Key="O" Modifiers="Control" Command="{Binding Path=OpenCommand}"></KeyBinding>
         <KeyBinding Key="S" Modifiers="Control" Command="{Binding Path=SaveCommand}"></KeyBinding>
     </Window.InputBindings>
+    <Window.Resources>
+        <SolidColorBrush x:Key="imageTextBg" Color="White" Opacity="0.5"/>
+    </Window.Resources>
 
     <DockPanel>
         <Menu x:Name="mainMenu" DockPanel.Dock="Top" IsMainMenu="True">
@@ -186,14 +189,28 @@
                         </ListView>
                     </DockPanel>
                     <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
-                    <DockPanel Grid.Column="2" Background="Gray">
-                        <TextBlock Panel.ZIndex="2" 
-                                   Text="{Binding ElementName=texListView, Path=SelectedItem.PreviewError}" 
-                                   Visibility="{Binding ElementName=texListView, Path=SelectedItem.PreviewErrorVisibility}"/>
-                        <Image Panel.ZIndex="1" 
-                               Source="{Binding ElementName=texListView, Path=SelectedItem.Preview}" 
+                    <DockPanel Grid.Column="2">
+                        <DockPanel.Background>
+                            <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,128,128" ViewportUnits="Absolute">
+                                <DrawingBrush.Drawing>
+                                    <DrawingGroup>
+                                        <GeometryDrawing Geometry="M0,0 L128,0 128,128, 0,128Z" Brush="DarkGray"/>
+                                        <GeometryDrawing Geometry="M0,64 L128,64 128,128, 64,128 64,0 0,0Z" Brush="LightGray"/>
+                                    </DrawingGroup>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </DockPanel.Background>
+                        <Grid>
+                            <Image Source="{Binding ElementName=texListView, Path=SelectedItem.Preview}" 
                                MaxWidth="{Binding ElementName=texListView, Path=SelectedItem.Width}" 
                                MaxHeight="{Binding ElementName=texListView, Path=SelectedItem.Height}"></Image>
+                            <TextBlock Text="{Binding ElementName=texListView, Path=SelectedItem.PreviewError}" 
+                                   Visibility="{Binding ElementName=texListView, Path=SelectedItem.PreviewErrorVisibility}"/>
+                            <StackPanel VerticalAlignment="Bottom" Background="{StaticResource imageTextBg}">
+                                <TextBlock Text="{Binding ElementName=texListView, Path=SelectedItem.TextureInfo}"
+                                       Foreground="Black"></TextBlock>
+                            </StackPanel>
+                        </Grid>
                     </DockPanel>
                 </Grid>
             </TabItem>

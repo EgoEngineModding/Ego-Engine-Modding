@@ -34,6 +34,9 @@ namespace EgoPssgEditor.ViewModel
         {
             get { return (int)(uint)Texture.Attributes["height"].Value; }
         }
+        private string Format => (string)Texture.Attributes["texelFormat"].Value;
+        private uint MipMaps => (uint)Texture.Attributes["numberMipMapLevels"].Value;
+        public string TextureInfo => $"{Width}x{Height} MipMaps: {MipMaps} Format: {Format}";
 
         #region Presentation Props
         bool isSelected;
@@ -97,6 +100,9 @@ namespace EgoPssgEditor.ViewModel
                 this.Preview = image.GetWPFBitmap(maxDimension, true);
                 
                 this.PreviewErrorVisibility = Visibility.Collapsed;
+                OnPropertyChanged(nameof(Width));
+                OnPropertyChanged(nameof(Height));
+                OnPropertyChanged(nameof(TextureInfo));
             }
             catch (Exception ex)
             {

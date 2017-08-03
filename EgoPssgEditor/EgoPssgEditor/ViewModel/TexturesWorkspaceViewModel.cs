@@ -52,6 +52,7 @@ namespace EgoPssgEditor.ViewModel
             textures = new ObservableCollection<PssgTextureViewModel>();
             texturesViewSource = (CollectionView)CollectionViewSource.GetDefaultView(Textures);
             texturesViewSource.Filter += TextureFilter;
+            texturesViewSource.SortDescriptions.Add(new System.ComponentModel.SortDescription(nameof(DisplayName), System.ComponentModel.ListSortDirection.Ascending));
 
             export = new RelayCommand(Export_Execute, Export_CanExecute);
             import = new RelayCommand(Import_Execute, Import_CanExecute);
