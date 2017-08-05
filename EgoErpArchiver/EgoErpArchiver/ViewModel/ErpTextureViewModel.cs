@@ -196,6 +196,7 @@ namespace EgoErpArchiver.ViewModel
             _textureInfo = srvRes.SurfaceRes.Fragment0.Width + "x" + srvRes.SurfaceRes.Fragment0.Height + " Mips:" + (srvRes.SurfaceRes.Fragment0.MipMapCount) + " Format:" + srvRes.SurfaceRes.Fragment0.ImageType + ",";
             switch (srvRes.SurfaceRes.Fragment0.ImageType)
             {
+                //case (ErpGfxSurfaceFormat)14: // gameparticles k_smoke; application
                 case ErpGfxSurfaceFormat.ABGR8:
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height) * 4;
@@ -219,8 +220,7 @@ namespace EgoErpArchiver.ViewModel
                         TextureInfo += "ABGR8";
                     }
                     break;
-                case ErpGfxSurfaceFormat.DXT1_1: // ferrari_wheel_sfc
-                case ErpGfxSurfaceFormat.DXT1_2: // ferrari_wheel_df, ferrari_paint
+                case ErpGfxSurfaceFormat.DXT1: // ferrari_wheel_sfc
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height) / 2;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
@@ -237,8 +237,15 @@ namespace EgoErpArchiver.ViewModel
 
                     TextureInfo += "DXT1";
                     break;
-                case ErpGfxSurfaceFormat.DXT5_1: // ferrari_sfc
-                case ErpGfxSurfaceFormat.DXT5_2: // ferrari_decal; DXT5 linear
+                case ErpGfxSurfaceFormat.DXT1_SRGB: // ferrari_wheel_df, ferrari_paint
+                    dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height) / 2;
+                    dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+                    dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                    dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC1_UNORM_SRGB;
+                    TextureInfo += "BC1_SRGB";
+                    break;
+                case ErpGfxSurfaceFormat.DXT5: // ferrari_sfc
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height);
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
@@ -254,6 +261,31 @@ namespace EgoErpArchiver.ViewModel
                     }
 
                     TextureInfo += "DXT5";
+                    break;
+                case ErpGfxSurfaceFormat.DXT5_SRGB: // ferrari_decal
+                    dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height);
+                    dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+                    dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                    dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB;
+                    TextureInfo += "BC3_SRGB";
+                    break;
+                case ErpGfxSurfaceFormat.ATI1: // gameparticles k_smoke
+                    dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height) / 2;
+                    dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+
+                    if (srvRes.SurfaceRes.Fragment0.ArraySize > 1 && exportTexArray)
+                    {
+                        dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                        dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC4_UNORM;
+                    }
+                    else
+                    {
+                        dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("ATI1"), 0);
+                    }
+
+                    TextureInfo += "ATI1";
                     break;
                 case ErpGfxSurfaceFormat.ATI2: // ferrari_wheel_nm
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
@@ -272,15 +304,15 @@ namespace EgoErpArchiver.ViewModel
 
                     TextureInfo += "ATI2/3Dc";
                     break;
-                case (ErpGfxSurfaceFormat)67:
+                case ErpGfxSurfaceFormat.BC6: // key0_2016; environment abu_dhabi tree_palm_06
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height);
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
                     dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC6H_UF16;
-                    TextureInfo += "BC6";
+                    TextureInfo += "BC6H_UF16";
                     break;
-                case (ErpGfxSurfaceFormat)69:
+                case ErpGfxSurfaceFormat.BC7:
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height);
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
@@ -288,13 +320,13 @@ namespace EgoErpArchiver.ViewModel
                     dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC7_UNORM;
                     TextureInfo += "BC7";
                     break;
-                case ErpGfxSurfaceFormat.BC7: // flow_boot splash_bg_image
+                case ErpGfxSurfaceFormat.BC7_SRGB: // flow_boot splash_bg_image
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = (srvRes.SurfaceRes.Fragment0.Width * srvRes.SurfaceRes.Fragment0.Height);
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
                     dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC7_UNORM_SRGB;
-                    TextureInfo += "BC7";
+                    TextureInfo += "BC7_SRGB";
                     break;
                 default:
                     TextureInfo += "Unknown";
@@ -438,12 +470,16 @@ namespace EgoErpArchiver.ViewModel
                     mipLinearSize = (dds.header.width * dds.header.height);
                     break;
                 case 827611204: // DXT1 aka DXGI_FORMAT_BC1_UNORM
-                    imageType = ErpGfxSurfaceFormat.DXT1_2;
+                    imageType = ErpGfxSurfaceFormat.DXT1;
                     mipLinearSize = (dds.header.width * dds.header.height) / 2;
                     break;
                 case 894720068: // DXT5 aka DXGI_FORMAT_BC3_UNORM
-                    imageType = ErpGfxSurfaceFormat.DXT5_2;
+                    imageType = ErpGfxSurfaceFormat.DXT5;
                     mipLinearSize = (dds.header.width * dds.header.height);
+                    break;
+                case 826889281: // ATI1
+                    imageType = ErpGfxSurfaceFormat.ATI1;
+                    mipLinearSize = (dds.header.width * dds.header.height) / 2;
                     break;
                 case 843666497: // ATI2 aka DXGI_FORMAT_BC5_UNORM
                     imageType = ErpGfxSurfaceFormat.ATI2;
@@ -451,10 +487,14 @@ namespace EgoErpArchiver.ViewModel
                     break;
                 case 808540228: // DX10
                     if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_TYPELESS ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_UNORM ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_UNORM_SRGB)
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_UNORM)
                     {
                         imageType = ErpGfxSurfaceFormat.BC7;
+                        mipLinearSize = (dds.header.width * dds.header.height);
+                    }
+                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_UNORM_SRGB)
+                    {
+                        imageType = ErpGfxSurfaceFormat.BC7_SRGB;
                         mipLinearSize = (dds.header.width * dds.header.height);
                     }
                     else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_TYPELESS ||
@@ -467,22 +507,43 @@ namespace EgoErpArchiver.ViewModel
                         goto case 0;
                     }
                     else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_TYPELESS ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM_SRGB)
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM)
                     {
                         goto case 827611204;
                     }
+                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM_SRGB)
+                    {
+                        imageType = ErpGfxSurfaceFormat.DXT1_SRGB;
+                        mipLinearSize = (dds.header.width * dds.header.height) / 2;
+                    }
                     else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_TYPELESS ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB)
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM)
                     {
                         goto case 894720068;
+                    }
+                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB)
+                    {
+                        imageType = ErpGfxSurfaceFormat.DXT5_SRGB;
+                        mipLinearSize = (dds.header.width * dds.header.height);
+                    }
+                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC4_TYPELESS ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC4_UNORM ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC4_SNORM)
+                    {
+                        goto case 826889281;
                     }
                     else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC5_TYPELESS ||
                         dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC5_UNORM ||
                         dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC5_SNORM)
                     {
                         goto case 843666497;
+                    }
+                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC6H_TYPELESS ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC6H_UF16 ||
+                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC6H_SF16)
+                    {
+                        imageType = ErpGfxSurfaceFormat.BC6;
+                        mipLinearSize = (dds.header.width * dds.header.height);
                     }
                     else
                     {

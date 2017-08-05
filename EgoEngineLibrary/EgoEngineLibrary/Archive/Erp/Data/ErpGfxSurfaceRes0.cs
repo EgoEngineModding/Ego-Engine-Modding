@@ -23,7 +23,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
         {
             Unknown = 2;
             Unknown2 = 264;
-            ImageType = ErpGfxSurfaceFormat.DXT5_2;
+            ImageType = ErpGfxSurfaceFormat.DXT5_SRGB;
             Width = 16;
             Height = 16;
             Unknown3 = 1;

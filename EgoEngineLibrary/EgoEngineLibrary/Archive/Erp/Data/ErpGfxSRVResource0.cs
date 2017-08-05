@@ -20,7 +20,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
         public ErpGfxSRVResource0()
         {
             Unknown = 5;
-            ImageType = ErpGfxSurfaceFormat.DXT5_2;
+            ImageType = ErpGfxSurfaceFormat.DXT5_SRGB;
             Unknown2 = 0;
             MipMapCount = 1;
             Unknown3 = 0;
