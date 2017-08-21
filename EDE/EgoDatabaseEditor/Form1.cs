@@ -364,17 +364,18 @@ namespace EgoDatabaseEditor
 			openFileDialog.FilterIndex = 1;
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                DatabaseFile two = new DatabaseFile(openFileDialog.FileName, Path.Combine(Application.StartupPath, dbFile.Namespace));
-                openFileDialog.Dispose();
-                saveFileDialog.FilterIndex = 2;
-                saveFileDialog.FileName = fileName.Replace(".bin", "Differences.xml");
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+				try
                 {
-                    dbFile.GetDifferences(two).WriteXML(saveFileDialog.FileName);
-                    saveFileDialog.Dispose();
+                    DatabaseFile two = new DatabaseFile(openFileDialog.FileName, Path.Combine(Application.StartupPath, dbFile.Namespace));
+                    openFileDialog.Dispose();
+                    saveFileDialog.FilterIndex = 2;
+                    saveFileDialog.FileName = fileName.Replace(".bin", "Differences.xml");
+                    if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        dbFile.GetDifferences(two).WriteXML(saveFileDialog.FileName);
+                        saveFileDialog.Dispose();
+                    }
                 }
-				try {
-				}
 				catch (Exception ex) {
 					MessageBox.Show("The program failed to compare the files:" + Environment.NewLine + Environment.NewLine + ex.Message, "Ryder Database Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				}

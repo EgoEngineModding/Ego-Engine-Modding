@@ -7,7 +7,6 @@
     using System.IO.Compression;
     using System.Linq;
     using System.Text;
-    using System.Windows.Forms;
     using System.Xml;
     using System.Xml.Linq;
 
@@ -47,30 +46,36 @@
             }
             else // CompressedPssg
             {
-                string tempPath = Path.Combine(Application.StartupPath, "temp.pssg");
-                FileStream fs = File.Open(tempPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-
-                // Decompress stream into temp file
-                using (stream)
-                {
-                    using (GZipStream gZipStream = new GZipStream(stream, CompressionMode.Decompress))
-                    {
-                        gZipStream.CopyTo(fs);
-                    }
-                }
-
-                // Read temp file, and close it
-                fs.Seek(0, SeekOrigin.Begin);
-                PssgFile pFile = PssgFile.ReadPssg(fs, fileType);
-
-                // Attempt to delete the temporary file
+                string tempPath = "temp.pssg";
                 try
                 {
-                    File.Delete(tempPath);
-                }
-                catch { }
+                    FileStream fs = File.Open(tempPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 
-                return pFile;
+                    // Decompress stream into temp file
+                    using (stream)
+                    {
+                        using (GZipStream gZipStream = new GZipStream(stream, CompressionMode.Decompress))
+                        {
+                            gZipStream.CopyTo(fs);
+                        }
+                    }
+
+                    // Read temp file, and close it
+                    fs.Seek(0, SeekOrigin.Begin);
+                    PssgFile pFile = PssgFile.ReadPssg(fs, fileType);
+
+                    return pFile;
+                }
+                finally
+                {
+
+                    // Attempt to delete the temporary file
+                    try
+                    {
+                        File.Delete(tempPath);
+                    }
+                    catch { }
+                }
             }
         }
         private static PssgFileType GetPssgType(Stream stream)
@@ -154,23 +159,28 @@
             }
             else // CompressedPssg
             {
-                string tempPath = Path.Combine(Application.StartupPath, "temp.pssg");
-                using (FileStream fs = File.Open(tempPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
-                {
-                    this.WritePssg(fs, false);
-                    using (GZipStream gzip = new GZipStream(stream, CompressionMode.Compress))
-                    {
-                        fs.Seek(0, SeekOrigin.Begin);
-                        fs.CopyTo(gzip);
-                    }
-                }
-
-                // Attempt to delete the temporary file
+                string tempPath = "temp.pssg";
                 try
                 {
-                    File.Delete(tempPath);
+                    using (FileStream fs = File.Open(tempPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+                    {
+                        this.WritePssg(fs, false);
+                        using (GZipStream gzip = new GZipStream(stream, CompressionMode.Compress))
+                        {
+                            fs.Seek(0, SeekOrigin.Begin);
+                            fs.CopyTo(gzip);
+                        }
+                    }
                 }
-                catch { }
+                finally
+                {
+                    // Attempt to delete the temporary file
+                    try
+                    {
+                        File.Delete(tempPath);
+                    }
+                    catch { }
+                }
             }
         }
         public void WritePssg(Stream fileStream, bool close)

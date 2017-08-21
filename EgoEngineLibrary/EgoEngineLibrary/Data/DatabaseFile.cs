@@ -7,7 +7,6 @@
     using System.IO;
     using System.Linq;
     using System.Text;
-    using System.Windows.Forms;
     using System.Xml;
 
     [Serializable]
@@ -37,8 +36,7 @@
             {
                 if (!(exception is ConstraintException))
                 {
-                    MessageBox.Show("There is an error in the xml!", "Import Failed", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-                    return;
+                    throw new XmlException("There is an error in the xml!", exception);
                 }
                 HashSet<string> handledErrors = new HashSet<string>();
                 for (int i = 0; i < base.Tables.Count; i++)
@@ -478,7 +476,7 @@
                 str = str + list[i] + ", ";
             }
             str.Remove(str.Length - 2);
-            MessageBox.Show("NOTE: Deleted Rows and any rows from the following tables were not tested for:" + str, "Ryder Database Editor - Compare", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+            //MessageBox.Show("NOTE: Deleted Rows and any rows from the following tables were not tested for:" + str, "Ryder Database Editor - Compare", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
             file.AcceptChanges();
             return file;
         }

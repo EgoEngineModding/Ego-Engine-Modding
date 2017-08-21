@@ -278,8 +278,13 @@ namespace EgoPssgEditor.ViewModel
         private void AddNode_Execute(object parameter)
         {
             PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
-            AddNodeWindow aaw = new AddNodeWindow();
+            if (nodeView.Node.IsDataNode)
+            {
+                MessageBox.Show("Adding sub nodes to a node with data is not allowed!", Properties.Resources.AppTitleShort, MessageBoxButton.OK, MessageBoxImage.Stop);
+                return;
+            }
 
+            AddNodeWindow aaw = new AddNodeWindow();
             if (aaw.ShowDialog() == true)
             {
                 PssgNode newNode = nodeView.Node.AppendChild(aaw.NodeName);

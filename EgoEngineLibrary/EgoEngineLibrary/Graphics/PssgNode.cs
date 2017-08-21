@@ -5,7 +5,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using System.Windows.Forms;
     using System.Xml.Linq;
 
     public class PssgNode
@@ -451,7 +450,6 @@
         {
             if (this.IsDataNode == true)
             {
-                MessageBox.Show("Adding sub nodes to a node with data is not allowed!", "PSSG Editor", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 return null;
             }
 

@@ -1,177 +1,21 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F86348B9-87B8-445D-912E-A1732439E36A}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EgoEngineLibrary</RootNamespace>
-    <AssemblyName>EgoEngineLibrary</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Product>Ego Engine Library</Product>
+    <Authors>Petar Tasev</Authors>
+    <Company>Petar Tasev</Company>
+    <Version>13.2.1</Version>
+    <Description></Description>
+    <Copyright>Copyright © Petar Tasev 2016</Copyright>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="MiscUtil, Version=1.0.0.0, Culture=neutral, PublicKeyToken=d3c42c4bfacf7596, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\JonSkeet.MiscUtil.0.1\lib\net35-Client\MiscUtil.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
-    <Reference Include="Zlib.Portable">
-      <HintPath>..\packages\Zlib.Portable.1.11.0\lib\portable-net4+sl5+wp8+win8+wpa81+MonoTouch+MonoAndroid\Zlib.Portable.dll</HintPath>
-    </Reference>
+    <PackageReference Include="JonSkeet.MiscUtil" Version="0.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="System.IO.Packaging" Version="4.4.0" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
+    <PackageReference Include="Zlib.Portable" Version="1.11.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Archive\Erp\Data\ErpGfxSurfaceFormat.cs" />
-    <Compile Include="Archive\Erp\Data\ErpGfxSurfaceRes2.cs" />
-    <Compile Include="Archive\Erp\Data\ErpGfxSurfaceRes1.cs" />
-    <Compile Include="Archive\Erp\Data\ErpGfxSurfaceRes0.cs" />
-    <Compile Include="Archive\Erp\Data\ErpGfxSurfaceRes.cs" />
-    <Compile Include="Archive\Erp\ErpBinaryReader.cs" />
-    <Compile Include="Archive\Erp\ErpBinaryWriter.cs" />
-    <Compile Include="Archive\Erp\ErpResource.cs" />
-    <Compile Include="Archive\Erp\ErpFile.cs" />
-    <Compile Include="Archive\Erp\ErpFragment.cs" />
-    <Compile Include="Archive\Erp\Data\ErpFragmentData.cs" />
-    <Compile Include="Archive\Erp\Data\ErpGfxSRVResource.cs" />
-    <Compile Include="Archive\Erp\Data\ErpGfxSRVResource0.cs" />
-    <Compile Include="Archive\Erp\Data\ErpResourceData.cs" />
-    <Compile Include="Archive\Jpk\JpkBinaryReader.cs" />
-    <Compile Include="Archive\Jpk\JpkBinaryWriter.cs" />
-    <Compile Include="Archive\Jpk\JpkEntry.cs" />
-    <Compile Include="Archive\Jpk\JpkFile.cs" />
-    <Compile Include="Data\DatabaseBinaryReader.cs" />
-    <Compile Include="Data\DatabaseBinaryWriter.cs" />
-    <Compile Include="Data\DatabaseFile.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Data\Pkg\Data\PkgBoolData.cs" />
-    <Compile Include="Data\Pkg\Data\PkgDataList.cs" />
-    <Compile Include="Data\Pkg\Data\PkgFp32Data.cs" />
-    <Compile Include="Data\Pkg\Data\PkgMat4Data.cs" />
-    <Compile Include="Data\Pkg\Data\PkgQuatData.cs" />
-    <Compile Include="Data\Pkg\Data\PkgRgbaData.cs" />
-    <Compile Include="Data\Pkg\Data\PkgShnmData.cs" />
-    <Compile Include="Data\Pkg\Data\PkgSi32Data.cs" />
-    <Compile Include="Data\Pkg\Data\PkgSi64Data.cs" />
-    <Compile Include="Data\Pkg\Data\PkgUi32Data.cs" />
-    <Compile Include="Data\Pkg\Data\PkgUi64Data.cs" />
-    <Compile Include="Data\Pkg\Data\PkgVec3Data.cs" />
-    <Compile Include="Data\Pkg\Data\PkgVec4Data.cs" />
-    <Compile Include="Data\Pkg\Data\PkgWoidData.cs" />
-    <Compile Include="Data\Pkg\PkgBinaryWriter.cs" />
-    <Compile Include="Data\Pkg\PkgChunk.cs" />
-    <Compile Include="Data\Pkg\PkgArray.cs" />
-    <Compile Include="Data\Pkg\PkgComplexValue.cs" />
-    <Compile Include="Data\Pkg\Data\PkgData.cs" />
-    <Compile Include="Data\Pkg\Data\PkgStringData.cs" />
-    <Compile Include="Data\Pkg\PkgDataArrayReference.cs" />
-    <Compile Include="Data\Pkg\PkgValue.cs" />
-    <Compile Include="Data\Pkg\PkgBinaryReader.cs" />
-    <Compile Include="Data\Pkg\PkgPair.cs" />
-    <Compile Include="Data\Pkg\PkgFile.cs" />
-    <Compile Include="Data\Pkg\PkgObject.cs" />
-    <Compile Include="Data\Pkg\PkgOffsetType.cs" />
-    <Compile Include="Data\Pkg\PkgRootObject.cs" />
-    <Compile Include="Data\Pkg\PkgDataArray.cs" />
-    <Compile Include="Graphics\D3D10_Resource_Dimension.cs" />
-    <Compile Include="Graphics\DdsFile.cs" />
-    <Compile Include="Graphics\DdsHeader.cs" />
-    <Compile Include="Graphics\DDSHeaderDXT10.cs" />
-    <Compile Include="Graphics\DdsPixelFormat.cs" />
-    <Compile Include="Graphics\DXGI_Format.cs" />
-    <Compile Include="Graphics\PssgAttribute.cs" />
-    <Compile Include="Graphics\PssgAttributeCollection.cs" />
-    <Compile Include="Graphics\PssgBinaryReader.cs" />
-    <Compile Include="Graphics\PssgBinaryWriter.cs" />
-    <Compile Include="Graphics\PssgFile.cs" />
-    <Compile Include="Graphics\PssgNode.cs" />
-    <Compile Include="Graphics\PssgNodeCollection.cs" />
-    <Compile Include="Graphics\PssgSchema.cs" />
-    <Compile Include="Helper\HexHelper.cs" />
-    <Compile Include="Language\Bucket.cs" />
-    <Compile Include="Language\HashEntry.cs" />
-    <Compile Include="Language\HashTable.cs" />
-    <Compile Include="Language\Hshs.cs" />
-    <Compile Include="Language\Hsht.cs" />
-    <Compile Include="Language\LngB.cs" />
-    <Compile Include="Language\LngBinaryReader.cs" />
-    <Compile Include="Language\LngBinaryWriter.cs" />
-    <Compile Include="Language\LngFile.cs" />
-    <Compile Include="Language\SidA.cs" />
-    <Compile Include="Language\SidaEntry.cs" />
-    <Compile Include="Language\SidB.cs" />
-    <Compile Include="Vehicle\CsvFile.cs" />
-    <Compile Include="Vehicle\CsvStreamReader.cs" />
-    <Compile Include="Vehicle\CsvStreamWriter.cs" />
-    <Compile Include="Vehicle\CtfBinaryReader.cs" />
-    <Compile Include="Vehicle\CtfBinaryWriter.cs" />
-    <Compile Include="Vehicle\CtfEditorGamePage.cs" />
-    <Compile Include="Vehicle\CtfEntryInfo.cs" />
-    <Compile Include="Vehicle\CtfFile.cs" />
-    <Compile Include="Vehicle\FloatList.cs" />
-    <Compile Include="Vehicle\PerformanceFile.cs" />
-    <Compile Include="Vehicle\TngBinaryReader.cs" />
-    <Compile Include="Vehicle\TngBinaryWriter.cs" />
-    <Compile Include="Vehicle\TngEntry.cs" />
-    <Compile Include="Vehicle\TngFile.cs" />
-    <Compile Include="Vehicle\TngInfo.cs" />
-    <Compile Include="Xml\BinaryXmlAttribute.cs" />
-    <Compile Include="Xml\BinaryXmlElement.cs" />
-    <Compile Include="Xml\BinaryXmlString.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Xml\XmlBinaryReader.cs" />
-    <Compile Include="Xml\XmlBinaryWriter.cs" />
-    <Compile Include="Xml\XmlFile.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>
