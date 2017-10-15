@@ -19,7 +19,7 @@
         public Int32 Flags { get; set; }
         public UInt64 PackedSize { get; set; }
 
-        public byte Compression { get; set; }
+        public ErpCompressionAlgorithm Compression { get; set; }
 
         internal byte[] _data;
 
@@ -27,7 +27,7 @@
         {
             this.Name = "temp";
             this.Flags = 16;
-            this.Compression = 1;
+            this.Compression = ErpCompressionAlgorithm.Zlib;
         }
         public ErpFragment(ErpFile parentFile)
             : this()
@@ -45,7 +45,7 @@
 
             if (this.ParentFile.Version > 2)
             {
-                this.Compression = reader.ReadByte();
+                this.Compression = (ErpCompressionAlgorithm)reader.ReadByte();
                 this.PackedSize = reader.ReadUInt64();
             }
             else
@@ -69,7 +69,7 @@
 
             if (this.ParentFile.Version > 2)
             {
-                writer.Write(this.Compression);
+                writer.Write((byte)this.Compression);
                 writer.Write(this.PackedSize);
             }
         }
@@ -93,9 +93,21 @@
         public byte[] GetDataArray(bool decompress)
         {
             byte[] data;
-            if (decompress && this.Compression == 1)
+
+            if (decompress)
             {
-                data = Ionic.Zlib.ZlibStream.UncompressBuffer(this._data);
+                switch (Compression)
+                {
+                    case ErpCompressionAlgorithm.None:
+                        data = this._data;
+                        break;
+                    case ErpCompressionAlgorithm.Zlib:
+                        data = Ionic.Zlib.ZlibStream.UncompressBuffer(this._data);
+                        break;
+                    case ErpCompressionAlgorithm.LZ4:
+                    default:
+                        throw new NotSupportedException($"{nameof(ErpFragment)} compression type {Compression} is not supported!");
+                }
             }
             else
             {
@@ -109,11 +121,21 @@
             return new MemoryStream(this.GetDataArray(decompress), true);
         }
 
-        public void SetData(byte[] data)
+        public void SetData(byte[] data, bool compress = true)
         {
-            if (this.Compression == 1)
+            if (compress)
             {
-                this._data = Ionic.Zlib.ZlibStream.CompressBuffer(data);
+                switch (Compression)
+                {
+                    case ErpCompressionAlgorithm.None:
+                        this._data = data;
+                        break;
+                    case ErpCompressionAlgorithm.Zlib:
+                        this._data = Ionic.Zlib.ZlibStream.CompressBuffer(data);
+                        break;
+                    default:
+                        throw new NotSupportedException($"{nameof(ErpFragment)} compression type {Compression} is not supported!");
+                }
             }
             else
             {

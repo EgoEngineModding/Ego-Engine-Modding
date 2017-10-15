@@ -16,8 +16,8 @@ uint32 mipCount;
 
 struct
 {
-    byte pad;
+    byte compression;
     uint64 offset;
-    uint64 len1;
-    uint64 len2;
+    uint64 packedSize;
+    uint64 size;
 } mips[mipCount];

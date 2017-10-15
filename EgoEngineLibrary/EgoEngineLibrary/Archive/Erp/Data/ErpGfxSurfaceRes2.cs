@@ -9,10 +9,10 @@ namespace EgoEngineLibrary.Archive.Erp.Data
 {
     public struct ErpGfxSurfaceRes2Mips
     {
-        public byte Unknown { get; set; }
+        public ErpCompressionAlgorithm Compression { get; set; }
         public UInt64 Offset { get; set; }
-        public UInt64 Width { get; set; }
-        public UInt64 Height { get; set; }
+        public UInt64 PackedSize { get; set; }
+        public UInt64 Size { get; set; }
     }
 
     public class ErpGfxSurfaceRes2 : ErpFragmentData
@@ -38,10 +38,10 @@ namespace EgoEngineLibrary.Archive.Erp.Data
                 for (int i = 0; i < mipMapCount; ++i)
                 {
                     ErpGfxSurfaceRes2Mips mip = new ErpGfxSurfaceRes2Mips();
-                    mip.Unknown = reader.ReadByte();
+                    mip.Compression = (ErpCompressionAlgorithm)reader.ReadByte();
                     mip.Offset = reader.ReadUInt64();
-                    mip.Width = reader.ReadUInt64();
-                    mip.Height = reader.ReadUInt64();
+                    mip.PackedSize = reader.ReadUInt64();
+                    mip.Size = reader.ReadUInt64();
                     Mips.Add(mip);
                 }
             }
@@ -58,10 +58,10 @@ namespace EgoEngineLibrary.Archive.Erp.Data
 
                 for (int i = 0; i < Mips.Count; ++i)
                 {
-                    writer.Write(Mips[i].Unknown);
+                    writer.Write((byte)Mips[i].Compression);
                     writer.Write(Mips[i].Offset);
-                    writer.Write(Mips[i].Width);
-                    writer.Write(Mips[i].Height);
+                    writer.Write(Mips[i].PackedSize);
+                    writer.Write(Mips[i].Size);
                 }
 
                 fragment.SetData(newData.ToArray());

@@ -179,10 +179,10 @@ namespace EgoErpArchiver.ViewModel
             ulong mipTotalSize = 0;
             if (srvRes.SurfaceRes.HasMips)
             {
-                mipLinearSize = Math.Max(srvRes.SurfaceRes.Frag2.Mips[0].Width, srvRes.SurfaceRes.Frag2.Mips[0].Height);
+                mipLinearSize = Math.Max(srvRes.SurfaceRes.Frag2.Mips[0].PackedSize, srvRes.SurfaceRes.Frag2.Mips[0].Size);
                 for (int i = 0; i < srvRes.SurfaceRes.Frag2.Mips.Count; ++i)
                 {
-                    mipTotalSize += Math.Max(srvRes.SurfaceRes.Frag2.Mips[i].Width, srvRes.SurfaceRes.Frag2.Mips[i].Height);
+                    mipTotalSize += Math.Max(srvRes.SurfaceRes.Frag2.Mips[i].PackedSize, srvRes.SurfaceRes.Frag2.Mips[i].Size);
                 }
 
                 mipWidth = srvRes.SurfaceRes.Fragment0.Width * mipPower;
@@ -594,10 +594,10 @@ namespace EgoErpArchiver.ViewModel
                     {
                         ErpGfxSurfaceRes2Mips mip = new ErpGfxSurfaceRes2Mips();
 
-                        mip.Unknown = 0;
+                        mip.Compression = 0;
                         mip.Offset = offset;
-                        mip.Width = mipLinearSize;
-                        mip.Height = mipLinearSize;
+                        mip.PackedSize = mipLinearSize;
+                        mip.Size = mipLinearSize;
 
                         offset += mipLinearSize;
                         mipLinearSize /= 4;
