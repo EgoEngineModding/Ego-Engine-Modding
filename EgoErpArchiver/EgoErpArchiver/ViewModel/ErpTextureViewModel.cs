@@ -1,6 +1,7 @@
 ﻿using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Archive.Erp.Data;
 using EgoEngineLibrary.Graphics;
+using EgoEngineLibrary.Graphics.Dds;
 using Microsoft.Win32;
 using MiscUtil.Conversion;
 using System;

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EgoEngineLibrary.Graphics
+namespace EgoEngineLibrary.Graphics.Dds
 {
     public enum DXGI_Format : UInt32
     {

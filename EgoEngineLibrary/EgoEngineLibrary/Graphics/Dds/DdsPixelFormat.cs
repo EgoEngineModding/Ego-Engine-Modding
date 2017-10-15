@@ -1,4 +1,4 @@
-﻿namespace EgoEngineLibrary.Graphics
+﻿namespace EgoEngineLibrary.Graphics.Dds
 {
     using System;
     using System.Collections.Generic;
