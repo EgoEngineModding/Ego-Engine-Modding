@@ -126,12 +126,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\EgoEngineLibrary\EgoEngineLibrary\EgoEngineLibrary.csproj">
-      <Project>{f86348b9-87b8-445d-912e-a1732439e36a}</Project>
-      <Name>EgoEngineLibrary</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\disk.png" />
   </ItemGroup>
   <ItemGroup>
@@ -150,6 +144,12 @@
     <PackageReference Include="WindowsAPICodePack-Shell">
       <Version>1.1.1</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\EgoEngineLibrary\EgoEngineLibrary\EgoEngineLibrary.csproj">
+      <Project>{f86348b9-87b8-445d-912e-a1732439e36a}</Project>
+      <Name>EgoEngineLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

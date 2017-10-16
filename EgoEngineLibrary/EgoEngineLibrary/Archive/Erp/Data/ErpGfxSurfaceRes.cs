@@ -12,11 +12,22 @@ namespace EgoEngineLibrary.Archive.Erp.Data
         public ErpGfxSurfaceRes1 Fragment1 { get; set; }
         public ErpGfxSurfaceRes2 Frag2 { get; set; }
 
-        public bool HasMips
+        public UInt32 Width => Fragment0.Width;
+        public UInt32 Height => Fragment0.Height;
+        public UInt32 LinearSize => GetLinearSize(Width, Height);
+
+        public UInt32 MipWidth => Width * (UInt32)Math.Pow(2, Frag2.Mips.Count);
+        public UInt32 MipHeight => Height * (UInt32)Math.Pow(2, Frag2.Mips.Count);
+        public UInt64 MipLinearSize => HasMips ? Frag2.Mips[0].Size : 0;
+        public bool HasMips => Frag2.Mips.Count > 0;
+        public bool HasValidMips
         {
             get
             {
-                return Frag2.Mips.Count > 0;
+                UInt32 linSize = LinearSize;
+
+                return linSize < MipLinearSize
+                  && linSize * Math.Pow(2, Frag2.Mips.Count + Frag2.Mips.Count) == MipLinearSize;
             }
         }
 
@@ -58,6 +69,29 @@ namespace EgoEngineLibrary.Archive.Erp.Data
             if (mipsFragment != null)
             {
                 Frag2.ToFragment(mipsFragment);
+            }
+        }
+
+        private UInt32 GetLinearSize(UInt32 width, UInt32 height)
+        {
+            switch (Fragment0.ImageType)
+            {
+                //case (ErpGfxSurfaceFormat)14: // gameparticles k_smoke; application
+                case ErpGfxSurfaceFormat.ABGR8:
+                    return width * height * 4;
+                case ErpGfxSurfaceFormat.DXT1: // ferrari_wheel_sfc
+                case ErpGfxSurfaceFormat.DXT1_SRGB: // ferrari_wheel_df, ferrari_paint
+                case ErpGfxSurfaceFormat.ATI1: // gameparticles k_smoke
+                    return width * height / 2;
+                case ErpGfxSurfaceFormat.DXT5: // ferrari_sfc
+                case ErpGfxSurfaceFormat.DXT5_SRGB: // ferrari_decal
+                case ErpGfxSurfaceFormat.ATI2: // ferrari_wheel_nm
+                case ErpGfxSurfaceFormat.BC6: // key0_2016; environment abu_dhabi tree_palm_06
+                case ErpGfxSurfaceFormat.BC7:
+                case ErpGfxSurfaceFormat.BC7_SRGB: // flow_boot splash_bg_image
+                    return width * height;
+                default:
+                    return 0;
             }
         }
     }

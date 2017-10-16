@@ -8,6 +8,7 @@ namespace EgoEngineLibrary.Archive.Erp
     {
         None,
         Zlib,
-        LZ4 = 3
+        LZ4 = 3,
+        None2 = 0x81
     }
 }

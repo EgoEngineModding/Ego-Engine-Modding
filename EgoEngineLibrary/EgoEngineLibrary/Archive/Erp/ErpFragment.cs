@@ -99,6 +99,7 @@
                 switch (Compression)
                 {
                     case ErpCompressionAlgorithm.None:
+                    case ErpCompressionAlgorithm.None2:
                         data = this._data;
                         break;
                     case ErpCompressionAlgorithm.Zlib:
@@ -128,6 +129,7 @@
                 switch (Compression)
                 {
                     case ErpCompressionAlgorithm.None:
+                    case ErpCompressionAlgorithm.None2:
                         this._data = data;
                         break;
                     case ErpCompressionAlgorithm.Zlib:

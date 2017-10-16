@@ -41,7 +41,7 @@ struct
             }
             else
             {
-                byte flags2; // 0x01=zlib, 0x81=no, 0x00=no
+                byte compression; // 0x01=zlib, 0x81=no, 0x00=no
                 compressedSize = ReadInt64();
                 FSkip(8);
             }
