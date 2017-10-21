@@ -21,7 +21,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
         public override void FromResource(ErpResource resource)
         {
             Fragment0.FromFragment(resource.GetFragment("temp", 0));
-            SurfaceRes.FromResource(resource.ParentFile.FindEntry(Fragment0.SurfaceResourceName));
+            SurfaceRes.FromResource(resource.ParentFile.FindResource(Fragment0.SurfaceResourceName));
         }
 
         public override void Read(ErpBinaryReader reader)
@@ -37,7 +37,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
         public override void ToResource(ErpResource resource)
         {
             Fragment0.ToFragment(resource.GetFragment("temp", 0));
-            SurfaceRes.ToResource(resource.ParentFile.FindEntry(Fragment0.SurfaceResourceName));
+            SurfaceRes.ToResource(resource.ParentFile.FindResource(Fragment0.SurfaceResourceName));
         }
     }
 }

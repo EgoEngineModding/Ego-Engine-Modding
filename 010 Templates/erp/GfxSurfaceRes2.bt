@@ -21,3 +21,6 @@ struct
     uint64 packedSize;
     uint64 size;
 } mips[mipCount];
+
+float unknown;
+float unknown2;

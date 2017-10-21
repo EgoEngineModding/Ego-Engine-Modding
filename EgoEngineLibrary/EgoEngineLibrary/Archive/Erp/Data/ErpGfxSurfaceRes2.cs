@@ -17,8 +17,11 @@ namespace EgoEngineLibrary.Archive.Erp.Data
 
     public class ErpGfxSurfaceRes2 : ErpFragmentData
     {
+        private bool hasTwoUnknowns;
         public string MipMapFileName { get; set; }
         public List<ErpGfxSurfaceRes2Mips> Mips { get; set; }
+        public float Unknown { get; set; }
+        public float Unknown2 { get; set; }
 
         public ErpGfxSurfaceRes2()
         {
@@ -44,6 +47,14 @@ namespace EgoEngineLibrary.Archive.Erp.Data
                     mip.Size = reader.ReadUInt64();
                     Mips.Add(mip);
                 }
+
+                // This part was introduces in F1 2017
+                if (reader.BaseStream.Length - reader.BaseStream.Position == 8)
+                {
+                    hasTwoUnknowns = true;
+                    Unknown = reader.ReadSingle();
+                    Unknown2 = reader.ReadSingle();
+                }
             }
         }
 
@@ -62,6 +73,12 @@ namespace EgoEngineLibrary.Archive.Erp.Data
                     writer.Write(Mips[i].Offset);
                     writer.Write(Mips[i].PackedSize);
                     writer.Write(Mips[i].Size);
+                }
+
+                if (hasTwoUnknowns)
+                {
+                    writer.Write(Unknown);
+                    writer.Write(Unknown2);
                 }
 
                 fragment.SetData(newData.ToArray());

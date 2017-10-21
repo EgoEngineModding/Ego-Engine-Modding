@@ -499,6 +499,52 @@
             }
         }
 
+        public UInt32 GetLinearSize()
+        {
+            UInt32 linearSize;
 
+            switch (header.ddspf.fourCC)
+            {
+                case 0: // RGBA
+                case 808540228 when header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_TYPELESS ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_UNORM ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_UNORM_SRGB ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_SNORM ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_UINT ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_SINT:
+                    linearSize = (header.width * header.height) * 4;
+                    break;
+                case 894720068: // DXT5 aka DXGI_FORMAT_BC3_UNORM
+                case 843666497: // ATI2 aka DXGI_FORMAT_BC5_UNORM
+                case 808540228 when header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_TYPELESS ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC5_TYPELESS ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC5_UNORM ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC5_SNORM ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC6H_TYPELESS ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC6H_UF16 ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC6H_SF16 ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_TYPELESS ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_UNORM ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_UNORM_SRGB:
+                    linearSize = (header.width * header.height);
+                    break;
+                case 827611204: // DXT1 aka DXGI_FORMAT_BC1_UNORM
+                case 826889281: // ATI1
+                case 808540228 when header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_TYPELESS ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM_SRGB ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC4_TYPELESS ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC4_UNORM ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC4_SNORM:
+                    linearSize = (header.width * header.height) / 2;
+                    break;
+                default:
+                    throw new NotImplementedException($"{nameof(GetLinearSize)} has no handler for image format {this.header.ddspf.fourCC} {(this.header.ddspf.fourCC == 808540228 ? header10.dxgiFormat.ToString() : string.Empty)}");
+            }
+
+            return linearSize;
+        }
     }
 }

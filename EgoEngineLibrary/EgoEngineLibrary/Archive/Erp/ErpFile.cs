@@ -112,7 +112,18 @@
             return numTempFiles;
         }
 
-        public ErpResource FindEntry(string fileName)
+        public ErpResource FindResource(string fileName)
+        {
+            var res = TryFindResource(fileName);
+
+            if (res == null)
+            {
+                throw new InvalidOperationException($"Could not find resource: {fileName}");
+            }
+
+            return res;
+        }
+        public ErpResource TryFindResource(string fileName)
         {
             foreach (ErpResource entry in this.Resources)
             {

@@ -261,9 +261,14 @@ namespace EgoErpArchiver.ViewModel
                 }
             }
 
-            var dds = srvRes.ToDdsFile(mipMapFullFileName, exportTexArray, _texArrayIndex);
-            dds.Write(File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read), -1);
+            DdsFile dds;
+            Stream mipMapStream = foundMipMapFile ? File.Open(mipMapFullFileName, FileMode.Open, FileAccess.Read, FileShare.Read) : null;
+            using (mipMapStream)
+            {
+                dds = srvRes.ToDdsFile(mipMapStream, exportTexArray, _texArrayIndex);
+            }
 
+            dds.Write(File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read), -1);
             return dds;
         }
         public void ImportDDS(string fileName, string mipMapSaveLocation, bool importTexArray)
@@ -273,106 +278,9 @@ namespace EgoErpArchiver.ViewModel
             ErpGfxSRVResource srvRes = new ErpGfxSRVResource();
             srvRes.FromResource(Texture);
 
-            ErpGfxSurfaceFormat imageType = 0;
-            uint mipLinearSize;
-            switch (dds.header.ddspf.fourCC)
-            {
-                case 0:
-                    imageType = ErpGfxSurfaceFormat.ABGR8;
-                    mipLinearSize = (dds.header.width * dds.header.height);
-                    break;
-                case 827611204: // DXT1 aka DXGI_FORMAT_BC1_UNORM
-                    imageType = ErpGfxSurfaceFormat.DXT1;
-                    mipLinearSize = (dds.header.width * dds.header.height) / 2;
-                    break;
-                case 894720068: // DXT5 aka DXGI_FORMAT_BC3_UNORM
-                    imageType = ErpGfxSurfaceFormat.DXT5;
-                    mipLinearSize = (dds.header.width * dds.header.height);
-                    break;
-                case 826889281: // ATI1
-                    imageType = ErpGfxSurfaceFormat.ATI1;
-                    mipLinearSize = (dds.header.width * dds.header.height) / 2;
-                    break;
-                case 843666497: // ATI2 aka DXGI_FORMAT_BC5_UNORM
-                    imageType = ErpGfxSurfaceFormat.ATI2;
-                    mipLinearSize = (dds.header.width * dds.header.height);
-                    break;
-                case 808540228: // DX10
-                    if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_TYPELESS ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_UNORM)
-                    {
-                        imageType = ErpGfxSurfaceFormat.BC7;
-                        mipLinearSize = (dds.header.width * dds.header.height);
-                    }
-                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_UNORM_SRGB)
-                    {
-                        imageType = ErpGfxSurfaceFormat.BC7_SRGB;
-                        mipLinearSize = (dds.header.width * dds.header.height);
-                    }
-                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_TYPELESS ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_UNORM ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_UNORM_SRGB ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_SNORM ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_UINT ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_SINT)
-                    {
-                        goto case 0;
-                    }
-                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_TYPELESS ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM)
-                    {
-                        goto case 827611204;
-                    }
-                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM_SRGB)
-                    {
-                        imageType = ErpGfxSurfaceFormat.DXT1_SRGB;
-                        mipLinearSize = (dds.header.width * dds.header.height) / 2;
-                    }
-                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_TYPELESS ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM)
-                    {
-                        goto case 894720068;
-                    }
-                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB)
-                    {
-                        imageType = ErpGfxSurfaceFormat.DXT5_SRGB;
-                        mipLinearSize = (dds.header.width * dds.header.height);
-                    }
-                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC4_TYPELESS ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC4_UNORM ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC4_SNORM)
-                    {
-                        goto case 826889281;
-                    }
-                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC5_TYPELESS ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC5_UNORM ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC5_SNORM)
-                    {
-                        goto case 843666497;
-                    }
-                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC6H_TYPELESS ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC6H_UF16 ||
-                        dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC6H_SF16)
-                    {
-                        imageType = ErpGfxSurfaceFormat.BC6;
-                        mipLinearSize = (dds.header.width * dds.header.height);
-                    }
-                    else
-                    {
-                        goto default;
-                    }
-                    break;
-                default:
-                    throw new Exception("Image type not supported!");
-            }
-
-            byte[] imageByteData;
+            bool foundMipMapSaveLocation = false;
             if (srvRes.SurfaceRes.HasMips)
             {
-                int mipCount = (int)dds.header.mipMapCount / 4;
-                if (srvRes.SurfaceRes.Frag2.Mips.Count < dds.header.mipMapCount) mipCount = srvRes.SurfaceRes.Frag2.Mips.Count;
-
-                bool foundMipMapSaveLocation = false;
                 if (string.IsNullOrEmpty(mipMapSaveLocation))
                 {
                     SaveFileDialog sdialog = new SaveFileDialog();
@@ -393,93 +301,17 @@ namespace EgoErpArchiver.ViewModel
                     foundMipMapSaveLocation = true;
                 }
 
-                if (foundMipMapSaveLocation)
-                {
-                    dds.header.mipMapCount -= (uint)mipCount;
-                    uint div = (uint)Math.Pow(2.0, mipCount);
-                    dds.header.width /= div;
-                    dds.header.height /= div;
-
-                    srvRes.SurfaceRes.Frag2.Mips = new List<ErpGfxSurfaceRes2Mips>(mipCount);
-                    UInt64 offset = 0;
-                    for (int i = 0; i < mipCount; ++i)
-                    {
-                        ErpGfxSurfaceRes2Mips mip = new ErpGfxSurfaceRes2Mips();
-
-                        mip.Compression = 0;
-                        mip.Offset = offset;
-                        mip.PackedSize = mipLinearSize;
-                        mip.Size = mipLinearSize;
-
-                        offset += mipLinearSize;
-                        mipLinearSize /= 4;
-
-                        srvRes.SurfaceRes.Frag2.Mips.Add(mip);
-                    }
-
-                    using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, File.Open(mipMapSaveLocation, FileMode.Create, FileAccess.Write, FileShare.Read)))
-                    {
-                        byte[] mipImageData = new byte[offset];
-                        Buffer.BlockCopy(dds.bdata, 0, mipImageData, 0, (int)offset);
-                        writer.Write(mipImageData);
-                    }
-
-                    int remainingBytes = dds.bdata.Length - (int)offset;
-                    imageByteData = new byte[remainingBytes];
-                    Buffer.BlockCopy(dds.bdata, (int)offset, imageByteData, 0, remainingBytes);
-                    srvRes.SurfaceRes.Fragment1.Data = imageByteData;
-                }
-                else
+                if (!foundMipMapSaveLocation)
                 {
                     return;
                 }
             }
-            else
+            
+            Stream mipMapStream = foundMipMapSaveLocation ? File.Open(mipMapSaveLocation, FileMode.Create, FileAccess.Write, FileShare.Read) : null;
+            using (mipMapStream)
             {
-                if (srvRes.SurfaceRes.Fragment0.ArraySize > 1)
-                {
-                    uint bytesPerArrayImage = (uint)srvRes.SurfaceRes.Fragment1.Data.Length / srvRes.SurfaceRes.Fragment0.ArraySize;
-
-                    if (!importTexArray)
-                    {
-                        Buffer.BlockCopy(dds.bdata, 0, srvRes.SurfaceRes.Fragment1.Data, (int)(bytesPerArrayImage * _texArrayIndex), (int)bytesPerArrayImage);
-                    }
-                    else
-                    {
-                        if (dds.header10.arraySize <= 1)
-                        {
-                            throw new Exception("The texture array size must be greater than 1.");
-                        }
-
-                        imageByteData = dds.bdata;
-                        srvRes.SurfaceRes.Fragment1.Data = imageByteData;
-                        srvRes.SurfaceRes.Fragment0.ArraySize = dds.header10.arraySize;
-
-                        // TODO: Add support for importing individual tex array slices
-                        //imageByteData = new byte[bytesPerArrayImage];
-                        //string input = Path.Combine(Path.GetDirectoryName(fileName), Path.GetFileNameWithoutExtension(fileName));
-                        //for (int i = 0; i < srvRes.SurfaceRes.Fragment0.ArraySize; ++i)
-                        //{
-                        //    Buffer.BlockCopy(imageData, (int)(bytesPerArrayImage * i), data, 0, (int)bytesPerArrayImage);
-                        //    dds.bdata = data;
-                        //    dds.Write(File.Open(output + "!!!" + i.ToString("000") + ".dds", FileMode.Create, FileAccess.Write, FileShare.Read), -1);
-                        //}
-                    }
-                }
-                else
-                {
-                    imageByteData = dds.bdata;
-                    srvRes.SurfaceRes.Fragment1.Data = imageByteData;
-                }
+                dds.ToErpGfxSRVResource(srvRes, mipMapStream, importTexArray, _texArrayIndex);
             }
-
-            srvRes.Fragment0.ImageType = imageType;
-            srvRes.Fragment0.MipMapCount = dds.header.mipMapCount;
-
-            srvRes.SurfaceRes.Fragment0.ImageType = imageType;
-            srvRes.SurfaceRes.Fragment0.Width = dds.header.width;
-            srvRes.SurfaceRes.Fragment0.Height = dds.header.height;
-            srvRes.SurfaceRes.Fragment0.MipMapCount = dds.header.mipMapCount;
 
             srvRes.ToResource(Texture);
         }

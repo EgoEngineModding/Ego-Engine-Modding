@@ -201,13 +201,13 @@
                                MaxHeight="{Binding ElementName=texListView, Path=SelectedItem.Height}"
                                 HorizontalAlignment="Left" VerticalAlignment="Top"></Image>
                             <StackPanel>
-                                <TextBlock
+                                <TextBlock TextWrapping="Wrap"
                                    Text="{Binding ElementName=texListView, Path=SelectedItem.PreviewError}" 
                                    Visibility="{Binding ElementName=texListView, Path=SelectedItem.PreviewErrorVisibility}"/>
                             </StackPanel>
                             <StackPanel VerticalAlignment="Bottom" Background="{StaticResource imageTextBg}">
                                 <TextBlock Text="{Binding ElementName=texListView, Path=SelectedItem.TextureInfo}"
-                                       Foreground="Black"></TextBlock>
+                                       Foreground="Black" TextWrapping="Wrap"></TextBlock>
                                 <StackPanel Orientation="Horizontal" Visibility="{Binding ElementName=texListView, Path=SelectedItem, TargetNullValue=Hidden}">
                                     <Button x:Name="texArrayIndexDown" x:FieldModifier="private" Margin="0,0,0,0"  Content="&lt;" Width="20" Command="{Binding ElementName=texListView, Path=SelectedItem.TexArrayIndexDownCommand}" />
                                     <Button x:Name="texArrayIndexUp" x:FieldModifier="private" Margin="0,0,0,0" Content="&gt;" Width="20" Command="{Binding ElementName=texListView, Path=SelectedItem.TexArrayIndexUpCommand}" />

@@ -1,0 +1,21 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+int32 unknown;
+int32 unknown2;
+int32 imageType;
+uint32 width;
+uint32 height;
+int32 unknown3;
+uint32 mipMapCount;
+uint32 texArraySize;
+int32 unknown4;
