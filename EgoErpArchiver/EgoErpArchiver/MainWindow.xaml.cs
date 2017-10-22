@@ -31,7 +31,7 @@ namespace EgoErpArchiver
         private void setDirectoryF12016MenuItem_Click(object sender, RoutedEventArgs e)
         {
             var dlg = new CommonOpenFileDialog();
-            dlg.Title = "Select the location of your F1 2016 game:";
+            dlg.Title = "Select the location of your F1 game:";
             dlg.IsFolderPicker = true;
 
             dlg.AddToMostRecentlyUsedList = false;

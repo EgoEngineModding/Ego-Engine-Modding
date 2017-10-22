@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Petar Tasev")]
 [assembly: AssemblyProduct("Ego ERP Archiver")]
-[assembly: AssemblyCopyright("Copyright © Petar Tasev 2016")]
+[assembly: AssemblyCopyright("Copyright © Petar Tasev 2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -51,5 +51,5 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("5.2.2017.0805")]
-[assembly: AssemblyFileVersion("5.2.2017.0805")]
+[assembly: AssemblyVersion("6.0.2017.1022")]
+[assembly: AssemblyFileVersion("6.0.2017.1022")]

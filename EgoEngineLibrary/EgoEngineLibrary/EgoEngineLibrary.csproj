@@ -5,16 +5,17 @@
     <Product>Ego Engine Library</Product>
     <Authors>Petar Tasev</Authors>
     <Company>Petar Tasev</Company>
-    <Version>13.2.1</Version>
+    <Version>14.0.0</Version>
     <Description></Description>
-    <Copyright>Copyright © Petar Tasev 2016</Copyright>
+    <Copyright>Copyright © Petar Tasev 2017</Copyright>
+    <AssemblyVersion>14.0.0.0</AssemblyVersion>
+    <FileVersion>14.0.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="JonSkeet.MiscUtil" Version="0.2.0" />
     <PackageReference Include="lz4net" Version="1.0.10.93" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="System.IO.Packaging" Version="4.4.0" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
     <PackageReference Include="Zlib.Portable" Version="1.11.0" />
   </ItemGroup>
