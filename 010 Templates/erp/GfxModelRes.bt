@@ -22,7 +22,7 @@ uint16 numBoneNodeIndices;
 uint32 numNames;
 uint32 numFiles;
 float unk[4];
-uint32 num6;
+uint32 num6[numLODDistances];
 LOD lodDistances[numLODDistances];
 uint32 num7;
 

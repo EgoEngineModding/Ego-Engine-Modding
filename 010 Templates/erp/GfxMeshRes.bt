@@ -11,7 +11,6 @@
 //   History: 
 //------------------------------------------------
 uint32 numMeshes;
-
 uint32 numVBs;
 uint32 numIBs;
 uint32 numMeshNames;
@@ -45,7 +44,11 @@ struct
     uint32 unk19;
 } meshes[numMeshes];
 
-FSeek(nodeLinkOffset+36);
+struct {string s;} vbb[numVBs] <optimize=false>;
+
+struct {string s;} ibb[numIBs] <optimize=false>;
+
+struct {string meshName;} meshNames[numMeshNames] <optimize=false>;
 
 struct
 {
