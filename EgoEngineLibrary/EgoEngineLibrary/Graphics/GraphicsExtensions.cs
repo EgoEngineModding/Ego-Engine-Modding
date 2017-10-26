@@ -230,7 +230,6 @@ namespace EgoEngineLibrary.Graphics
             ErpGfxSurfaceFormat imageType = dds.GetErpGfxSurfaceFormat();
             uint mipLinearSize = dds.GetLinearSize();
 
-            byte[] imageByteData;
             if (srvRes.SurfaceRes.HasMips)
             {
                 int mipCount = (int)dds.header.mipMapCount / 4;
@@ -287,17 +286,15 @@ namespace EgoEngineLibrary.Graphics
 
                         newMips.Add(mip);
                     }
-                }
-                srvRes.SurfaceRes.Frag2.Mips = newMips;
 
-                long mipMapsLength = mipMapsStream.Length;
-                int remainingBytes = dds.bdata.Length - (int)mipMapsLength;
-                imageByteData = new byte[remainingBytes];
-                Buffer.BlockCopy(dds.bdata, (int)mipMapsLength, imageByteData, 0, remainingBytes);
-                srvRes.SurfaceRes.Fragment1.Data = imageByteData;
+                    srvRes.SurfaceRes.Fragment1.Data = reader.ReadBytes((int)(reader.BaseStream.Length - reader.BaseStream.Position));
+                }
+
+                srvRes.SurfaceRes.Frag2.Mips = newMips;
             }
             else
             {
+                byte[] imageByteData;
                 if (srvRes.SurfaceRes.Fragment0.ArraySize > 1)
                 {
                     uint bytesPerArrayImage = (uint)srvRes.SurfaceRes.Fragment1.Data.Length / srvRes.SurfaceRes.Fragment0.ArraySize;
