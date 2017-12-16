@@ -355,9 +355,11 @@ namespace EgoEngineLibrary.Graphics
                 case 894720068: // DXT5 aka DXGI_FORMAT_BC3_UNORM
                     imageType = ErpGfxSurfaceFormat.DXT5;
                     break;
+                case 1429488450: // BC4U from Intel® Texture Works Plugin for Photoshop
                 case 826889281: // ATI1
                     imageType = ErpGfxSurfaceFormat.ATI1;
                     break;
+                case 1429553986: // BC5U from Intel® Texture Works Plugin for Photoshop
                 case 843666497: // ATI2 aka DXGI_FORMAT_BC5_UNORM
                     imageType = ErpGfxSurfaceFormat.ATI2;
                     break;
