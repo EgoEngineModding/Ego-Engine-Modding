@@ -516,6 +516,7 @@
                     break;
                 case 894720068: // DXT5 aka DXGI_FORMAT_BC3_UNORM
                 case 843666497: // ATI2 aka DXGI_FORMAT_BC5_UNORM
+                case 1429553986: // BC5U from Intel® Texture Works Plugin for Photoshop
                 case 808540228 when header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_TYPELESS ||
                         header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM ||
                         header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB ||
@@ -532,6 +533,7 @@
                     break;
                 case 827611204: // DXT1 aka DXGI_FORMAT_BC1_UNORM
                 case 826889281: // ATI1
+                case 1429488450: // BC4U from Intel® Texture Works Plugin for Photoshop
                 case 808540228 when header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_TYPELESS ||
                         header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM ||
                         header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM_SRGB ||
