@@ -1,0 +1,3105 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--BinXML-->
+<schema>
+  <schemaVersion version="1407330540" />
+  <table name="accumulator_settings">
+    <field name="id" type="int" key="primary" />
+    <field name="points_timestep_end" type="float" />
+    <field name="points_timestep_start" type="float" />
+  </table>
+  <table name="achievement_event">
+    <field name="achievement" type="int" />
+    <field name="event" type="int" key="event.id" />
+    <field name="id" type="int" key="primary" />
+  </table>
+  <table name="achievement_vehicle">
+    <field name="achievement_id" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="vehicle_id" type="int" key="vehicle_model.id" />
+  </table>
+  <table name="achievements">
+    <field name="achievement_type_id" type="int" key="achievements_type.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="offline" type="bool" />
+    <field name="online" type="bool" />
+    <field name="order_index" type="int" />
+    <field name="ps3_id" type="int" />
+    <field name="required_string" type="string" />
+    <field name="required_value" type="int" />
+    <field name="screen_order_index" type="int" />
+    <field name="steam_id" type="int" />
+    <field name="steam_interval" type="int" />
+    <field name="steam_upload_progress" type="bool" />
+    <field name="trophy_desc_string_id" type="string" />
+    <field name="trophy_name_string_id" type="string" />
+    <field name="xbox_id" type="int" />
+  </table>
+  <table name="achievements_type">
+    <field name="id" type="int" key="primary" />
+    <field name="type_name" type="string" />
+  </table>
+  <table name="ai_choreographer_config">
+    <field name="id" type="int" key="primary" />
+    <field name="identifier" type="string" />
+  </table>
+  <table name="ai_choreographer_mistake_mods">
+    <field name="braking" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="jump" type="float" />
+    <field name="mechanical" type="float" />
+    <field name="spin" type="float" />
+    <field name="type_name" type="string" />
+  </table>
+  <table name="ai_difficulty">
+    <field name="ai_difficulty_value" type="int" />
+    <field name="career_xp_percentage" type="int" />
+    <field name="check_ai_allowed" type="bool" />
+    <field name="difficulty_value" type="int" />
+    <field name="game_difficulty" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+    <field name="single_race" type="bool" />
+  </table>
+  <table name="ai_driver">
+    <field name="Aggression" type="float" />
+    <field name="Bad_Day_Chance" type="float" />
+    <field name="Control" type="float" />
+    <field name="Drift_Ability" type="float" />
+    <field name="endurance_style" type="int" key="endurance_style.id" />
+    <field name="Good_Day_Chance" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="Mechanical_Failures" type="float" />
+    <field name="Mistakes" type="float" />
+    <field name="name" type="string" />
+    <field name="P2P_Modifier" type="float" />
+    <field name="Reaction" type="float" />
+    <field name="Speed_In" type="float" />
+    <field name="Speed_Out" type="float" />
+    <field name="Variance" type="float" />
+    <field name="Virtual_Gymkhana_Performance" type="float" />
+    <field name="Virtual_Performance" type="float" />
+    <field name="Weather_Ability" type="float" />
+  </table>
+  <table name="ai_driver_grid_override">
+    <field name="driver_id" type="int" key="driver.id" />
+    <field name="event_id" type="int" />
+    <field name="grid_slot" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="session_id" type="int" key="event_track_pool.id" />
+  </table>
+  <table name="ai_ratio">
+    <field name="ai_ratio" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="race_type_id" type="int" key="race_type.id" />
+    <field name="season_id" type="int" key="season.id" />
+    <field name="star_level" type="int" />
+  </table>
+  <table name="ai_ratio_career_type">
+    <field name="ai_ratio" type="float" />
+    <field name="career_type_id" type="int" key="career.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="race_type_id" type="int" />
+    <field name="star_level" type="int" />
+  </table>
+  <table name="ai_ratio_defaults">
+    <field name="ai_ratio" type="float" />
+    <field name="ai_ratio_live_route" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="star_level" type="int" />
+  </table>
+  <table name="ai_teammate_orders">
+    <field name="Aggression" type="float" />
+    <field name="Control" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="Mistakes" type="float" />
+    <field name="name" type="string" />
+    <field name="Reaction" type="float" />
+    <field name="Speed_In" type="float" />
+    <field name="Speed_Out" type="float" />
+    <field name="Variance" type="float" />
+  </table>
+  <table name="ai_vehicle_upgrades">
+    <field name="club" type="int" key="club.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="upgrade_package" type="int" key="vehicle_upgrade_packages.id" />
+    <field name="vehicle" type="int" key="vehicle.id" />
+  </table>
+  <table name="audio_beat_animator">
+    <field name="animation" type="string" />
+    <field name="bars_to_repeat" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="identifier" type="string" />
+    <field name="num_variations" type="int" />
+  </table>
+  <table name="audio_horn_sets">
+    <field name="id" type="int" key="primary" />
+    <field name="internal_name" type="string" />
+    <field name="license_package" type="int" key="packages.id" />
+    <field name="set_name_string_id" type="string" />
+    <field name="unlock_audio_speech" type="string" />
+    <field name="unlock_fanbase_tier" type="int" />
+    <field name="unlock_texture_name" type="string" />
+  </table>
+  <table name="audio_horns">
+    <field name="attack" type="bool" />
+    <field name="horn_set" type="int" key="audio_horn_sets.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="internal_name" type="string" />
+    <field name="is_default" type="bool" />
+    <field name="license_package" type="int" key="packages.id" />
+    <field name="looping" type="bool" />
+    <field name="sample_id_attack" type="string" />
+    <field name="sample_id_main" type="string" />
+    <field name="string_id" type="string" />
+  </table>
+  <table name="audio_mix_states">
+    <field name="camera_name" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="mix_state" type="string" />
+  </table>
+  <table name="audio_name">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+    <field name="sample_id" type="string" />
+  </table>
+  <table name="audio_name_category">
+    <field name="designer_aid" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+  </table>
+  <table name="audio_name_category_to_name">
+    <field name="audio_name_category_id" type="int" key="audio_name_category.id" />
+    <field name="audio_name_id" type="int" key="audio_name.id" />
+    <field name="id" type="int" key="primary" />
+  </table>
+  <table name="audio_name_event">
+    <field name="engineer" type="bool" />
+    <field name="event_name" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="manager" type="bool" />
+    <field name="name_string_id" type="string" />
+    <enum label="eng_name" value="3" />
+    <enum label="eng_ok" value="4" />
+    <enum label="eng_alright" value="5" />
+    <enum label="mn_welcome" value="6" />
+    <enum label="mn_ok" value="7" />
+  </table>
+  <table name="audio_speaker_ornaments">
+    <field name="height_override" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="ornament_name" type="string" />
+  </table>
+  <table name="audio_speaker_track_to_ornament">
+    <field name="id" type="int" key="primary" />
+    <field name="ornament_id" type="int" key="audio_speaker_ornaments.id" />
+    <field name="track_id" type="int" key="audio_speaker_tracks.id" />
+  </table>
+  <table name="audio_speaker_tracks">
+    <field name="id" type="int" key="primary" />
+    <field name="track_id" type="int" key="track.id" />
+  </table>
+  <table name="audio_speech_post_event">
+    <field name="all_avail_evts_in_grp_ent" type="int" key="event_group.id" />
+    <field name="all_clb_evts_in_seas_ent" type="int" key="season.id" />
+    <field name="all_evts_in_grp_ent" type="int" key="event_group.id" />
+    <field name="all_promo_evts_compl" type="bool" />
+    <field name="all_spons_obj_compl" type="bool" />
+    <field name="audio_event" type="string" />
+    <field name="clb_to_leag_new_avail" type="int" key="event_group.id" />
+    <field name="clb_to_leag_prev_avail" type="int" key="event_group.id" />
+    <field name="end_promo_evt_avail" type="bool" />
+    <field name="evt_avail" type="int" key="event.id" />
+    <field name="evt_new_avail" type="int" key="event.id" />
+    <field name="evt_not_avail" type="int" key="event.id" />
+    <field name="evt_not_ent" type="int" key="event.id" />
+    <field name="evt_pool_2_pod" type="int" key="event_pool.id" />
+    <field name="evt_pool_3_pod" type="int" key="event_pool.id" />
+    <field name="evt_prev" type="int" key="event.id" />
+    <field name="evt_prev_avail" type="int" key="event.id" />
+    <field name="evt_prev_grp" type="int" key="event_group.id" />
+    <field name="evt_prev_r_t" type="int" key="race_type.id" />
+    <field name="evt_prev_suc" type="bool" />
+    <field name="evt_prev_unsuc" type="bool" />
+    <field name="evt_suc" type="int" key="event.id" />
+    <field name="evt_unsuc" type="int" key="event.id" />
+    <field name="has_unusd_spon_slots" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="no_new_fans_cant_prog" type="bool" />
+    <field name="phase_fan_max" type="int" key="phase.id" />
+    <field name="phase_unavail" type="int" key="phase.id" />
+    <field name="poor_clb_perf" type="int" key="event_group.id" />
+    <field name="prefix_audio_name" type="bool" />
+    <field name="priority" type="int" key="audio_speech_priority.id" />
+    <field name="promo_evt_avail" type="bool" />
+    <field name="spons_obj_avail" type="bool" />
+    <field name="stall_fe" type="bool" />
+    <field name="unent_evts_in_evt_grp" type="int" key="event_group.id" />
+    <field name="veh_chlng_avail" type="bool" />
+    <field name="veh_chlng_avail_cur_phase" type="int" key="phase.id" />
+  </table>
+  <table name="audio_speech_priority">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="priority" type="int" />
+  </table>
+  <table name="avatar_reward_conditions">
+    <field name="condition_name" type="string" />
+    <field name="id" type="int" key="primary" />
+  </table>
+  <table name="avatar_rewards">
+    <field name="condition" type="int" key="avatar_reward_conditions.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="unlock_level" type="int" />
+    <field name="xbox_id" type="int" />
+  </table>
+  <table name="award">
+    <field name="championship_id" type="int" key="championship.id" />
+    <field name="cup_id" type="int" key="cup.id" />
+    <field name="discipline_id" type="int" key="racing_style.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="image_name" type="string" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+    <field name="type_id" type="int" key="award_type.id" />
+    <field name="xp_level" type="int" />
+  </table>
+  <table name="award_state">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <enum label="locked" value="1" />
+    <enum label="coming_soon" value="2" />
+    <enum label="available" value="3" />
+    <enum label="bronze" value="4" />
+    <enum label="silver" value="5" />
+    <enum label="gold" value="6" />
+    <enum label="platinum" value="7" />
+  </table>
+  <table name="award_string">
+    <field name="id" type="int" key="primary" />
+    <field name="secondary_info_string_id" type="string" />
+    <field name="state_id" type="int" key="award_state.id" />
+    <field name="type_id" type="int" key="award_type.id" />
+  </table>
+  <table name="award_type">
+    <field name="class_name" type="string" />
+    <field name="id" type="int" key="primary" />
+  </table>
+  <table name="axis">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string" type="string" />
+  </table>
+  <table name="camera_sets">
+    <field name="id" type="int" key="primary" />
+    <field name="identifier" type="string" />
+    <field name="set_id" type="int" />
+  </table>
+  <table name="career">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="career_global_settings">
+    <field name="ai_bad_day_driver_bonus" type="float" />
+    <field name="ai_good_day_driver_bonus" type="float" />
+    <field name="ai_speciality_difficulty_bonus" type="float" />
+    <field name="ai_speciality_driver_bonus" type="float" />
+    <field name="first_race_difficulty" type="float" />
+    <field name="first_race_difficulty_modifier" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="initial_career_livery_id" type="int" key="vehicle_livery.id" />
+    <field name="initial_fanbase" type="int" />
+    <field name="initial_livery_id" type="int" />
+    <field name="initial_money" type="int" />
+    <field name="initial_months" type="int" />
+    <field name="initial_online_livery_id" type="int" key="vehicle.id" />
+    <field name="initial_sponsor_id" type="int" key="sponsor.id" />
+    <field name="initial_track_model_id" type="int" key="track_model.id" />
+    <field name="initial_tyre_type_id" type="int" key="tyre_type.id" />
+    <field name="race_objective_max" type="int" />
+    <field name="race_objective_min" type="int" />
+    <field name="start_race_team" type="int" />
+  </table>
+  <table name="career_xp_flashbacks">
+    <field name="flashbacks_available" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="xp_bonus_percentage" type="int" />
+  </table>
+  <table name="career_xp_level">
+    <field name="id" type="int" key="primary" />
+    <field name="level" type="int" />
+    <field name="total_xp" type="int" />
+  </table>
+  <table name="career_xp_settings">
+    <field name="abs_bonus" type="int" />
+    <field name="auto_steer_bonus" type="int" />
+    <field name="best_lap" type="int" />
+    <field name="cornering_assist_bonus" type="int" />
+    <field name="forced_head_cam_bonus" type="int" />
+    <field name="full_damage_bonus" type="int" />
+    <field name="hud_bonus" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="manal_clutch_bonus" type="int" />
+    <field name="manual_transmission_bonus" type="int" />
+    <field name="one_to_watch" type="int" />
+    <field name="primary_target" type="int" />
+    <field name="primary_target_half" type="int" />
+    <field name="primary_target_mini" type="int" />
+    <field name="qualifying_flashbacks" type="int" />
+    <field name="race_flashbacks" type="int" />
+    <field name="racing_line_bonus" type="int" />
+    <field name="ravenwest_team_target_bonus" type="int" />
+    <field name="secondary_target" type="int" />
+    <field name="secondary_target_half" type="int" />
+    <field name="secondary_target_mini" type="int" />
+    <field name="stability_control_bonus" type="int" />
+    <field name="team_target_max_random_amount" type="int" />
+    <field name="traction_control_bonus" type="int" />
+    <field name="unlimited_flashback_bonus" type="int" />
+  </table>
+  <table name="career_xp_type">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="xp_list" type="string" />
+  </table>
+  <table name="challenge_medals">
+    <field name="award_achievement" type="bool" />
+    <field name="empty_texture_id" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="position_index" type="int" />
+    <field name="texture_id" type="string" />
+  </table>
+  <table name="challenge_reward">
+    <field name="cash_amount" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="per_friend" type="bool" />
+    <field name="threshold_percent" type="int" />
+  </table>
+  <table name="challenge_type">
+    <field name="event_select_image" type="string" />
+    <field name="file_string" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="info_string_id" type="string" />
+    <field name="medals_are_points_based" type="bool" />
+    <field name="show_player_points" type="bool" />
+    <field name="show_player_time" type="bool" />
+    <field name="title_string_id" type="string" />
+  </table>
+  <table name="championship">
+    <field name="championship_length_id" type="int" key="championship_length.id" />
+    <field name="event_details_image" type="string" />
+    <field name="event_select_image" type="string" />
+    <field name="fanbase_needed_to_unlock" type="int" />
+    <field name="icon_image_name" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="image_name" type="string" />
+    <field name="is_dc_tutorial" type="bool" />
+    <field name="is_final" type="bool" />
+    <field name="is_world_tour" type="bool" />
+    <field name="months" type="int" />
+    <field name="name_string_id" type="string" />
+    <field name="obj_name_string_id" type="string" />
+    <field name="order_index" type="int" />
+    <field name="qualifying_points_id" type="int" key="points.id" />
+    <field name="racing_style" type="int" key="racing_style.id" />
+    <field name="racing_style_tier_id" type="int" key="racing_style_tier.id" />
+    <field name="season_id" type="int" key="season.id" />
+    <field name="should_create_offers" type="bool" />
+    <field name="sponsor_logo_image_name" type="string" />
+    <field name="temp_player_livery_id" type="int" key="vehicle_livery.id" />
+    <field name="unfolded_logo_image_name" type="string" />
+    <field name="unlock_audio_speech" type="string" />
+    <field name="unlock_criteria_id" type="int" key="championship_unlock_criteria.id" />
+    <field name="unlock_on_event_completed" type="bool" />
+    <field name="unlock_on_event_id" type="int" key="event.id" />
+    <field name="unlock_on_xp_level" type="int" />
+    <field name="unlock_requires_podium" type="bool" />
+  </table>
+  <table name="championship_driver">
+    <field name="championship_id" type="int" key="championship.id" />
+    <field name="driver_id" type="int" key="driver.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="racing_style_tier_id" type="int" key="racing_style_tier.id" />
+    <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+    <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+  </table>
+  <table name="championship_length">
+    <field name="full" type="bool" />
+    <field name="half" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="mini" type="bool" />
+    <field name="months" type="int" />
+    <field name="name_string_id" type="string" />
+    <enum label="mini" value="1" />
+    <enum label="half" value="2" />
+    <enum label="full" value="3" />
+  </table>
+  <table name="championship_unlock_criteria">
+    <field name="id" type="int" key="primary" />
+    <field name="string_id" type="string" />
+    <field name="unlock_on_champ_win" type="int" key="championship.id" />
+    <field name="unlock_on_discipline_levels" type="int" />
+  </table>
+  <table name="checkpoint_variables">
+    <field name="ai_difficulty" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="max_percentage_each_checkpoint" type="float" />
+    <field name="max_time" type="float" />
+    <field name="min_time" type="float" />
+    <field name="percentage_at_start" type="float" />
+    <field name="percentage_each_checkpoint" type="float" />
+    <field name="track_model_id" type="int" key="track_model.id" />
+    <field name="vehicle_tier_id" type="int" key="vehicle_tier.id" />
+  </table>
+  <table name="class_to_race_type">
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" />
+    <field name="race_type_id" type="int" key="race_type.id" />
+    <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+  </table>
+  <table name="club">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="co_driver_enable_combinations">
+    <field name="discipline" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="race_type" type="int" />
+  </table>
+  <table name="co_drivers">
+    <field name="driver_head_id" type="int" key="driver_head.id" />
+    <field name="driver_voice" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="level_to_unlock" type="int" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+    <field name="unlock_on_level" type="bool" />
+    <field name="xp_to_unlock" type="int" />
+  </table>
+  <table name="competition_type">
+    <field name="award_medals" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_challenge" type="bool" />
+    <field name="type" type="string" />
+  </table>
+  <table name="component_checkpoint_instance">
+    <field name="id" type="int" key="primary" />
+    <field name="index" type="int" />
+    <field name="instance_id" type="int" />
+    <field name="instance_name" type="string" />
+  </table>
+  <table name="component_drag_trigger">
+    <field name="id" type="int" key="primary" />
+    <field name="index" type="int" />
+    <field name="instance_id" type="int" />
+    <field name="instance_name" type="string" />
+    <field name="speed_trap" type="bool" />
+  </table>
+  <table name="component_drift_marker_trigger">
+    <field name="id" type="int" key="primary" />
+    <field name="instance_id" type="int" />
+    <field name="instance_name" type="string" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="component_drift_zone_trigger">
+    <field name="enter_drift_zone" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="instance_id" type="int" />
+    <field name="instance_name" type="string" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="component_nearby_misses">
+    <field name="group" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="identifier" type="string" />
+  </table>
+  <table name="component_sector_trigger">
+    <field name="id" type="int" key="primary" />
+    <field name="instance_id" type="int" />
+    <field name="instance_number" type="string" />
+    <field name="sector_index" type="int" />
+  </table>
+  <table name="component_speed_trap_instance">
+    <field name="id" type="int" key="primary" />
+    <field name="index" type="int" />
+    <field name="instance_id" type="int" />
+    <field name="instance_name" type="string" />
+    <field name="primary_trigger" type="bool" />
+    <field name="secondary_trigger" type="bool" />
+  </table>
+  <table name="component_tut_drift_trigger">
+    <field name="enable_drift" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="instance_id" type="int" />
+    <field name="instance_name" type="string" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="component_tut_speech_trigger">
+    <field name="design_index" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="instance_id" type="int" />
+    <field name="instance_name" type="string" />
+    <field name="speech_index" type="int" />
+  </table>
+  <table name="components">
+    <field name="class_name" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="local_only" type="bool" />
+    <field name="settings_table" type="string" />
+  </table>
+  <table name="continent">
+    <field name="continent_name_string" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="corner_cut_settings">
+    <field name="air_resistance_z_scale_factor" type="float" />
+    <field name="default_ai_difficulty" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="penalty_throttle" type="float" />
+    <field name="penalty_time_min_threshold" type="float" />
+    <field name="penalty_time_multiplier" type="float" />
+    <field name="penalty_time_reduction" type="float" />
+    <field name="vo_time_lost" type="float" />
+    <field name="vo_time_off_track" type="float" />
+  </table>
+  <table name="crowd_tint_groups">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="crowd_type">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="cup">
+    <field name="championship_id" type="int" key="championship.id" />
+    <field name="icon_image_name" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="image_name" type="string" />
+    <field name="name_string_id" type="string" />
+    <field name="obj_string_id" type="string" />
+    <field name="order_index" type="int" />
+    <field name="qualifying_points_id" type="int" key="points.id" />
+    <field name="racing_style_tier_id" type="int" key="racing_style_tier.id" />
+    <field name="temp_player_livery_id" type="int" key="vehicle_livery.id" />
+  </table>
+  <table name="currency">
+    <field name="conversion_rate" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="separator_string_id" type="string" />
+    <field name="symbol_string_id" type="string" />
+  </table>
+  <table name="custom_event_default">
+    <field name="collisions" type="int" />
+    <field name="conditions" type="int" key="track_model_conditions.id" />
+    <field name="duration" type="int" key="custom_event_time_options.id" />
+    <field name="elimination_time" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="number_of_laps" type="int" />
+    <field name="race_type" type="int" key="race_type.id" />
+    <field name="round_index" type="int" />
+    <field name="staggered_starts" type="bool" />
+    <field name="track_model_id" type="int" key="track_model.id" />
+  </table>
+  <table name="custom_event_dressing">
+    <field name="id" type="int" key="primary" />
+    <field name="is_club" type="bool" />
+    <field name="is_league" type="bool" />
+    <field name="is_league_plus" type="bool" />
+    <field name="track_lighting_id" type="int" key="track_lighting_types.id" />
+  </table>
+  <table name="custom_event_duration_type">
+    <field name="id" type="int" key="primary" />
+    <field name="race_type" type="int" key="race_type.id" />
+    <field name="type" type="string" />
+  </table>
+  <table name="custom_event_tier_exclude">
+    <field name="id" type="int" key="primary" />
+    <field name="net_race_type" type="int" key="net_race_type.id" />
+    <field name="race_type_id" type="int" key="race_type.id" />
+    <field name="vehicle_tier_id" type="int" key="vehicle_tier.id" />
+  </table>
+  <table name="custom_event_time_options">
+    <field name="distance" type="int" />
+    <field name="distance_name_string_id" type="string" />
+    <field name="dragstrip_length" type="int" />
+    <field name="dragstrip_name_string_id" type="string" />
+    <field name="duration" type="int" />
+    <field name="duration_name_string_id" type="string" />
+    <field name="endurance_duration" type="int" />
+    <field name="endurance_name_string_id" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="order_index" type="int" />
+    <field name="practice_duration" type="int" />
+    <field name="practice_name_string_id" type="string" />
+    <field name="qualifying_duration" type="int" />
+    <field name="qualifying_name_string_id" type="string" />
+  </table>
+  <table name="dashboard_items">
+    <field name="end_day" type="int" />
+    <field name="end_month" type="int" />
+    <field name="file_string" type="string" />
+    <field name="hanging_item" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_avatar" type="bool" />
+    <field name="is_default" type="bool" />
+    <field name="level_to_unlock" type="int" />
+    <field name="name_string_id" type="string" />
+    <field name="only_present_on_x360" type="bool" />
+    <field name="reveal_object_name" type="string" />
+    <field name="save_title_id" type="int" key="save_identifier.id" />
+    <field name="start_day" type="int" />
+    <field name="start_month" type="int" />
+    <field name="unlock_by_date" type="bool" />
+    <field name="unlock_by_save_title" type="bool" />
+    <field name="unlock_by_xp" type="bool" />
+  </table>
+  <table name="data_types">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string" type="string" />
+  </table>
+  <table name="difficulty">
+    <field name="ai_ratio" type="float" />
+    <field name="ai_ratio_staggered_start" type="float" />
+    <field name="available_flashbacks" type="int" />
+    <field name="base_time_factor" type="float" />
+    <field name="flashback_bonus" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="mon_bonus_factor" type="float" />
+    <field name="performance_variance" type="float" />
+    <field name="season_id" type="int" key="season.id" />
+    <field name="staggered_start_base" type="float" />
+    <field name="staggered_start_gain" type="float" />
+    <field name="star_level" type="int" />
+    <field name="top_time_factor" type="float" />
+  </table>
+  <table name="difficulty_presets">
+    <field name="abs" type="bool" />
+    <field name="ai_skill" type="int" />
+    <field name="cornering" type="bool" />
+    <field name="entire_osd" type="int" />
+    <field name="flashbacks" type="int" />
+    <field name="force_camera" type="bool" />
+    <field name="game_difficulty" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="race_length_multiple" type="int" />
+    <field name="racing_line" type="bool" />
+    <field name="realistic_damage" type="bool" />
+    <field name="stability_control" type="bool" />
+    <field name="steering" type="bool" />
+    <field name="traction_control" type="bool" />
+    <field name="transmission" type="int" />
+  </table>
+  <table name="dlc_shop">
+    <field name="category_file_string" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="license" type="int" key="package_license_masks.id" />
+    <field name="scea_offer" type="string" />
+    <field name="scee_offer" type="string" />
+    <field name="scej_offer" type="string" />
+    <field name="season_pass_license" type="int" key="package_license_masks.id" />
+    <field name="win_offer" type="string" />
+    <field name="x360_offer" type="string" />
+    <field name="x360_season_pass_offer" type="string" />
+  </table>
+  <table name="drag_burnout_difficulty">
+    <field name="heat_increase_multiplier" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="vehicle_tier_id" type="string" />
+  </table>
+  <table name="drag_difficulty">
+    <field name="ai_difficulty" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="max_grip" type="float" />
+    <field name="max_reaction_time" type="float" />
+    <field name="min_grip" type="float" />
+    <field name="min_reaction_time" type="float" />
+  </table>
+  <table name="drag_settings">
+    <field name="burnout_max_increase" type="float" />
+    <field name="burnout_max_speed" type="float" />
+    <field name="burnout_min_wheel_rotation_rate" type="float" />
+    <field name="burnout_phase_duration" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="max_tree_start_delay" type="float" />
+    <field name="min_tree_start_delay" type="float" />
+    <field name="pro_tree" type="bool" />
+    <field name="staging_warning_timer" type="float" />
+  </table>
+  <table name="drift_ai_points">
+    <field name="ai_difficulty" type="int" key="ai_difficulty.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="score_mult" type="float" />
+    <field name="track_model" type="int" key="track_model.id" />
+  </table>
+  <table name="drift_setting_rule">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="drift_setting_speed">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="drift_settings_v2">
+    <field name="angle_threshold" type="float" />
+    <field name="disable_bonus_proximity_back" type="bool" />
+    <field name="disable_bonus_proximity_front" type="bool" />
+    <field name="disable_bonus_proximity_full" type="bool" />
+    <field name="disable_bonus_speed" type="bool" />
+    <field name="disable_bonus_trade_paint" type="bool" />
+    <field name="disable_time_limit" type="bool" />
+    <field name="drift_rule_collision" type="string" />
+    <field name="drift_rule_flag_collision" type="string" />
+    <field name="drift_rule_inner_flag_collision" type="string" />
+    <field name="drift_rule_max_progress" type="string" />
+    <field name="drift_rule_off_track" type="string" />
+    <field name="drift_rule_outer_flag_collision" type="string" />
+    <field name="drift_rule_spin" type="string" />
+    <field name="drift_rule_wrong_way" type="string" />
+    <field name="drift_zone_bonus" type="float" />
+    <field name="drift_zone_penalty" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="slide_angle_score_rate" type="float" />
+    <field name="speed_rule_collision" type="string" />
+    <field name="speed_rule_max_progress" type="string" />
+    <field name="speed_rule_off_track" type="string" />
+    <field name="speed_rule_spin" type="string" />
+    <field name="speed_rule_wrong_way" type="string" />
+    <field name="speed_score_rate" type="float" />
+    <field name="speed_threshold" type="float" />
+    <field name="speed_zone_bonus" type="float" />
+    <field name="speed_zone_penalty" type="float" />
+    <field name="speed_zone_threshold" type="float" />
+    <field name="static_proximity_bank_delay" type="float" />
+    <field name="static_proximity_bank_display" type="float" />
+    <field name="static_proximity_inner_bonus_back" type="float" />
+    <field name="static_proximity_inner_bonus_front" type="float" />
+    <field name="static_proximity_inner_bonus_full" type="float" />
+    <field name="static_proximity_inner_radius_back" type="float" />
+    <field name="static_proximity_inner_radius_front" type="float" />
+    <field name="static_proximity_inner_radius_full" type="float" />
+    <field name="static_proximity_outer_bonus_back" type="float" />
+    <field name="static_proximity_outer_bonus_front" type="float" />
+    <field name="static_proximity_outer_bonus_full" type="float" />
+    <field name="static_proximity_outer_radius_back" type="float" />
+    <field name="static_proximity_outer_radius_front" type="float" />
+    <field name="static_proximity_outer_radius_full" type="float" />
+    <field name="zone_ai_score_band_high" type="float" />
+    <field name="zone_ai_score_band_low" type="float" />
+    <field name="zone_bonus_max" type="float" />
+  </table>
+  <table name="drift_time_limit">
+    <field name="id" type="int" key="primary" />
+    <field name="time_limit" type="int" />
+    <field name="track_model" type="int" />
+  </table>
+  <table name="driver">
+    <field name="aggression" type="float" />
+    <field name="ai_choreographer_mistake_mod" type="int" key="ai_choreographer_mistake_mods.id" />
+    <field name="ai_difficulty" type="int" key="ai_difficulty.id" />
+    <field name="ai_driver_id" type="int" key="ai_driver.id" />
+    <field name="ai_driver0_id" type="int" key="ai_driver.id" />
+    <field name="awareness" type="float" />
+    <field name="capital_first_name_string_id" type="string" />
+    <field name="capital_surname_string_id" type="string" />
+    <field name="consistency" type="float" />
+    <field name="driver_profile_string_id" type="string" />
+    <field name="driver_type_id" type="int" />
+    <field name="female" type="bool" />
+    <field name="first_name_string_id" type="string" />
+    <field name="head" type="int" key="driver_head.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="level" type="int" />
+    <field name="livery_number" type="int" />
+    <field name="livery_number_digits" type="int" />
+    <field name="nationality_id" type="int" />
+    <field name="osd_drivertag_forename_string_id" type="string" />
+    <field name="osd_drivertag_surname_string_id" type="string" />
+    <field name="reactions" type="float" />
+    <field name="skill" type="float" />
+    <field name="surname_string_id" type="string" />
+  </table>
+  <table name="driver_default_vehicle">
+    <field name="driver_id" type="int" key="driver.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+    <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+  </table>
+  <table name="driver_head">
+    <field name="head_name" type="string" />
+    <field name="id" type="int" key="primary" />
+  </table>
+  <table name="driver_rep_to_level">
+    <field name="id" type="int" key="primary" />
+    <field name="level_index" type="int" />
+    <field name="rep_required" type="int" />
+  </table>
+  <table name="driving_view_group">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="views" type="string" />
+  </table>
+  <table name="dummy_tracks">
+    <field name="discipline_id" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="track_model_id" type="int" key="track_model.id" />
+  </table>
+  <table name="dummy_tracks_race_type">
+    <field name="id" type="int" key="primary" />
+    <field name="race_type_id" type="int" key="race_type.id" />
+    <field name="track_model_id" type="int" key="track_model.id" />
+  </table>
+  <table name="dynamic_routes">
+    <field name="id" type="int" key="primary" />
+    <field name="is_lap" type="bool" />
+    <field name="is_random" type="bool" />
+    <field name="predefined_route" type="string" />
+    <field name="track_model_id" type="int" key="track_model.id" />
+  </table>
+  <table name="endurance_style">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="endurance_tyre_wear">
+    <field name="custom_event_time_options_id" type="int" key="custom_event_time_options.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="tyre_wear_rate" type="float" />
+  </table>
+  <table name="entity_mode_layer_bitset">
+    <field name="bit" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="identifier" type="string" />
+  </table>
+  <table name="event">
+    <field name="card_string_id" type="string" />
+    <field name="career_xp_type" type="int" key="career_xp_type.id" />
+    <field name="championship_id" type="int" key="championship.id" />
+    <field name="competition_type" type="int" key="competition_type.id" />
+    <field name="cup_id" type="int" key="cup.id" />
+    <field name="currently_works" type="bool" />
+    <field name="event_group_id" type="int" key="event_group.id" />
+    <field name="event_image" type="string" />
+    <field name="event_logo" type="string" />
+    <field name="event_sponsor" type="int" key="sponsor.id" />
+    <field name="exclude_from_career_progress" type="bool" />
+    <field name="fanbase_needed_to_unlock" type="int" />
+    <field name="forced_qualifying" type="bool" />
+    <field name="game_mode" type="int" key="game_mode.id" />
+    <field name="garage_reveal_event" type="bool" />
+    <field name="garage_reveal_index" type="int" />
+    <field name="has_unique_intro" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_championship_final" type="bool" />
+    <field name="is_dlc" type="bool" />
+    <field name="is_final_event" type="bool" />
+    <field name="is_first_race_career" type="bool" />
+    <field name="is_league_plus" type="bool" />
+    <field name="is_promo_event" type="bool" />
+    <field name="is_season_final" type="bool" />
+    <field name="is_test_drive" type="bool" />
+    <field name="is_tutorial" type="bool" />
+    <field name="license_package" type="int" key="packages.id" />
+    <field name="location" type="int" key="location.id" />
+    <field name="logo_sponsor" type="int" key="sponsor.id" />
+    <field name="major_sponsor" type="int" key="sponsor.id" />
+    <field name="media_sting_event" type="bool" />
+    <field name="media_sting_index" type="int" />
+    <field name="money_string_id" type="int" key="event_money_reward.id" />
+    <field name="multi_podium_pool_id" type="int" key="event_pool.id" />
+    <field name="name_string_id" type="string" />
+    <field name="num_competitions" type="int" />
+    <field name="num_entrants" type="int" />
+    <field name="num_event_wins" type="int" />
+    <field name="one_to_watch_driver_id" type="int" key="driver.id" />
+    <field name="order_index" type="int" />
+    <field name="points_id" type="int" key="points.id" />
+    <field name="primary_minor_sponsor" type="int" key="sponsor.id" />
+    <field name="prize_money_for_first" type="int" key="event_money_reward.id" />
+    <field name="progression_points_id" type="int" key="points.id" />
+    <field name="race_type" type="int" key="race_type.id" />
+    <field name="racing_style_tier_id" type="int" key="racing_style_tier.id" />
+    <field name="reputation_pot" type="int" />
+    <field name="reputation_pot_min" type="int" />
+    <field name="reveal_group_id" type="int" />
+    <field name="secondary_minor_sponsor" type="int" key="sponsor.id" />
+    <field name="team_event" type="bool" />
+    <field name="tier_id" type="int" key="tier.id" />
+    <field name="unlock_audio_speech" type="string" />
+    <field name="unlock_on_event_completed" type="bool" />
+    <field name="unlock_on_event_id" type="int" key="event.id" />
+    <field name="unlock_requires_multi_podium" type="bool" />
+    <field name="unlock_requires_podium" type="bool" />
+    <field name="use_event_driver_group" type="bool" />
+    <field name="use_first_race_setting" type="bool" />
+    <field name="use_set_event_drivers" type="bool" />
+    <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+    <field name="vehicle_tier_id" type="int" />
+  </table>
+  <table name="event_challenge">
+    <field name="event_id" type="int" key="event.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="medal_id" type="int" key="challenge_medals.id" />
+    <field name="reputation" type="int" />
+    <field name="requirement" type="string" />
+  </table>
+  <table name="event_challenge_settings">
+    <field name="bg_texture_id" type="string" />
+    <field name="challenge_type" type="int" key="challenge_type.id" />
+    <field name="event_id" type="int" key="event.id" />
+    <field name="event_pass_string_id" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="logo_texture_id" type="string" />
+    <field name="objective_string_id" type="string" />
+    <field name="tutorial_id" type="string" />
+    <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+  </table>
+  <table name="event_driver">
+    <field name="driver_id" type="int" key="driver.id" />
+    <field name="event_id" type="int" key="event.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="livery_test_id" type="int" key="vehicle_livery.id" />
+    <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+  </table>
+  <table name="event_engineer_speech">
+    <field name="competition_index" type="int" />
+    <field name="event_id" type="int" />
+    <field name="grid_highlight" type="string" />
+    <field name="grid_highlight_first_time_only" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="location_reveal" type="string" />
+    <field name="location_reveal_first_time_only" type="bool" />
+    <field name="outside_top_three" type="string" />
+    <field name="outside_top_three_first_time_only" type="bool" />
+    <field name="silent_results_screen" type="bool" />
+    <field name="star_driver" type="string" />
+    <field name="star_driver_first_time_only" type="bool" />
+    <field name="strategy" type="string" />
+    <field name="strategy_first_time_only" type="bool" />
+    <field name="top_three" type="string" />
+    <field name="top_three_first_time_only" type="bool" />
+    <field name="top_three_once_only" type="bool" />
+    <field name="touge_full_round_data" type="bool" />
+    <field name="use_event_result" type="bool" />
+    <field name="win" type="string" />
+    <field name="win_first_time_only" type="bool" />
+    <field name="win_needs_player_prefix" type="bool" />
+    <field name="win_once_only" type="bool" />
+  </table>
+  <table name="event_grid_position_override">
+    <field name="event_id" type="int" key="event.id" />
+    <field name="grid_position" type="int" />
+    <field name="id" type="int" key="primary" />
+  </table>
+  <table name="event_group">
+    <field name="audio_intro" type="string" />
+    <field name="awards_fanbase" type="bool" />
+    <field name="club" type="int" key="club.id" />
+    <field name="comment_string_id" type="string" />
+    <field name="comments_wall_other_area" type="bool" />
+    <field name="count_towards_progress" type="bool" />
+    <field name="enters_league" type="bool" />
+    <field name="fanbase_needed_to_unlock" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_test_drive" type="bool" />
+    <field name="is_vehicle_challenge" type="bool" />
+    <field name="logo_name" type="string" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+    <field name="phase_id" type="int" key="phase.id" />
+    <field name="type" type="int" key="event_group_type.id" />
+    <field name="unlock_on_event_completed" type="bool" />
+    <field name="unlock_on_event_id" type="int" key="event.id" />
+    <field name="unlock_requires_podium" type="bool" />
+    <field name="video_name" type="string" />
+  </table>
+  <table name="event_group_type">
+    <field name="club_camera_name" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="league_camera_name" type="string" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="event_money_reward">
+    <field name="description" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="money_string" type="string" />
+  </table>
+  <table name="event_pool">
+    <field name="id" type="int" key="primary" />
+    <field name="number_required_podiums" type="int" />
+    <field name="pool_name" type="string" />
+  </table>
+  <table name="event_reputation_reward">
+    <field name="id" type="int" key="primary" />
+    <field name="percentage_string" type="string" />
+  </table>
+  <table name="event_result_screen_audio">
+    <field name="career_event_id_alternative" type="int" key="event.id" />
+    <field name="career_event_id_first" type="int" key="event.id" />
+    <field name="career_first_event" type="bool" />
+    <field name="championship_id" type="int" key="championship.id" />
+    <field name="discipline_first_event" type="bool" />
+    <field name="discipline_id" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_championship_final" type="bool" />
+    <field name="is_season_final" type="bool" />
+    <field name="negative_audio_sources_count" type="int" />
+    <field name="negative_audio_sources_prefix" type="string" />
+    <field name="play_once" type="bool" />
+    <field name="positive_audio_sources_count" type="int" />
+    <field name="positive_audio_sources_prefix" type="string" />
+    <field name="season_generic_line" type="bool" />
+    <field name="season_id" type="int" key="season.id" />
+    <field name="unlocked_final" type="bool" />
+    <field name="unlocked_next_championship" type="bool" />
+  </table>
+  <table name="event_track_pool">
+    <field name="ai_choreographer_config_id" type="int" key="ai_choreographer_config.id" />
+    <field name="ai_ratio_override_0" type="float" />
+    <field name="ai_ratio_override_1" type="float" />
+    <field name="ai_ratio_override_2" type="float" />
+    <field name="ai_ratio_override_3" type="float" />
+    <field name="ai_ratio_override_4" type="float" />
+    <field name="base_result_list" type="string" />
+    <field name="competition_override" type="int" key="competition_type.id" />
+    <field name="countdown_timer" type="int" />
+    <field name="discipline_override" type="int" />
+    <field name="distance_limit_km" type="int" />
+    <field name="event_id" type="int" key="event.id" />
+    <field name="grid_order" type="int" key="grid_order.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_practice" type="bool" />
+    <field name="is_qualifying" type="bool" />
+    <field name="music_type" type="string" />
+    <field name="net_laps_long" type="int" />
+    <field name="net_laps_med" type="int" />
+    <field name="net_laps_short" type="int" />
+    <field name="net_timed" type="bool" />
+    <field name="network_bias" type="float" />
+    <field name="num_laps" type="int" />
+    <field name="online_leaderboard_id" type="int" />
+    <field name="order_index" type="int" />
+    <field name="player_grid_override" type="bool" />
+    <field name="player_grid_position" type="int" />
+    <field name="player_grid_position_base" type="int" />
+    <field name="player_grid_position_range" type="int" />
+    <field name="racetype_override" type="int" />
+    <field name="start_type" type="int" key="start_type.id" />
+    <field name="start_type_override" type="int" key="start_type.id" />
+    <field name="time_limit_seconds" type="int" />
+    <field name="track_lighting_type_id" type="int" key="track_lighting_types.id" />
+    <field name="track_model_conditions_id" type="int" key="track_model_conditions.id" />
+    <field name="vehicle_class_1" type="int" />
+    <field name="vehicle_class_2" type="int" />
+    <field name="weather_type_id" type="int" key="weather_types.id" />
+  </table>
+  <table name="event_unlocks_override">
+    <field name="event_id" type="int" key="event.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="unlock_on_event_id" type="int" key="event.id" />
+  </table>
+  <table name="event_vehicle_class">
+    <field name="event_id" type="int" key="event.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="tier_id" type="int" key="vehicle_tier.id" />
+    <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+  </table>
+  <table name="fanbase_objective_override">
+    <field name="id" type="int" key="primary" />
+    <field name="objective" type="int" key="objective.id" />
+    <field name="reward" type="int" />
+  </table>
+  <table name="fanbase_objective_reward">
+    <field name="id" type="int" key="primary" />
+    <field name="is_promo_event" type="bool" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+    <field name="reward_percentage" type="int" />
+  </table>
+  <table name="fanbase_per_phase_event_max">
+    <field name="id" type="int" key="primary" />
+    <field name="max_reward" type="int" />
+    <field name="phase" type="int" key="phase.id" />
+  </table>
+  <table name="fanbase_position_percentages">
+    <field name="id" type="int" key="primary" />
+    <field name="position" type="int" />
+    <field name="reward_percentage" type="int" />
+  </table>
+  <table name="finish_condition">
+    <field name="id" type="int" key="primary" />
+    <field name="name" type="string" />
+  </table>
+  <table name="finish_message">
+    <field name="id" type="int" key="primary" />
+    <field name="race_type_id" type="int" key="race_type.id" />
+    <field name="show_points" type="bool" />
+    <field name="show_position_online" type="bool" />
+    <field name="show_time" type="bool" />
+  </table>
+  <table name="first_race_setup">
+    <field name="driver_surname" type="string" />
+    <field name="grid_slot" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_player" type="bool" />
+    <field name="team_name" type="string" />
+  </table>
+  <table name="flashback_hint_settings">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string" type="string" />
+    <field name="value_float" type="float" />
+    <field name="value_int" type="int" />
+  </table>
+  <table name="force_start_type">
+    <field name="id" type="int" key="primary" />
+    <field name="race_type_id" type="int" key="race_type.id" />
+    <field name="start_type_id" type="int" key="start_type.id" />
+  </table>
+  <table name="game_mode">
+    <field name="auto_steer_off" type="bool" />
+    <field name="characters_use_progress" type="bool" />
+    <field name="corner_braking_off" type="bool" />
+    <field name="counts_for_achievement" type="bool" />
+    <field name="early_virtual_results" type="bool" />
+    <field name="enable_damage_reset" type="bool" />
+    <field name="entity_layer_id" type="int" key="entity_mode_layer_bitset.id" />
+    <field name="force_visual_only_damage" type="bool" />
+    <field name="has_ghost_laps" type="bool" />
+    <field name="has_laps" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="include_in_ghost_name" type="bool" />
+    <field name="is_party_mode" type="bool" />
+    <field name="load_generic_trick_lines" type="bool" />
+    <field name="loading_token" type="string" />
+    <field name="manual_ghost_record_end" type="bool" />
+    <field name="mouse_weight_multiple" type="int" />
+    <field name="name_string_id" type="string" />
+    <field name="need_trick_lines" type="bool" />
+    <field name="no_ai" type="bool" />
+    <field name="only_virtual_ai" type="bool" />
+    <field name="post_race_ai" type="bool" />
+    <field name="race_line_off" type="bool" />
+    <field name="reset_settings_id" type="int" key="reset_settings.id" />
+    <field name="retirement_penalty_time" type="int" />
+    <field name="splitscreen_grid_slots" type="bool" />
+    <field name="stability_control_off" type="bool" />
+    <field name="throttle_management_off" type="bool" />
+    <field name="time_based_leaderboard" type="bool" />
+    <field name="use_retirement_penalty" type="bool" />
+    <field name="use_simple_race_line" type="bool" />
+    <field name="valid_metadata" type="bool" />
+    <enum label="standard" value="1" />
+    <enum label="time_attack" value="2" />
+    <enum label="drift" value="3" />
+    <enum label="time_trial" value="7" />
+    <enum label="eliminator" value="12" />
+    <enum label="overtake" value="15" />
+    <enum label="checkpoint" value="18" />
+    <enum label="last_man_standing" value="22" />
+    <enum label="power_lap" value="24" />
+    <enum label="tutorial" value="26" />
+    <enum label="drag" value="27" />
+    <enum label="demolition_derby" value="29" />
+    <enum label="intel_attract" value="30" />
+  </table>
+  <table name="game_settings">
+    <field name="difficulty_default_season" type="int" key="season.id" />
+    <field name="first_race_livery" type="int" />
+    <field name="flashback_bonus" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="single_race_max_grid_pos" type="int" />
+    <field name="single_race_min_grid_pos" type="int" />
+  </table>
+  <table name="global_domination_rewards">
+    <field name="cash_reward" type="int" />
+    <field name="challenge_target" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="location_domination" type="bool" />
+    <field name="name_string_id" type="string" />
+    <field name="overall_position" type="int" />
+    <field name="vxp_reward" type="int" />
+    <field name="xp_reward" type="int" />
+  </table>
+  <table name="global_domination_rewards_scale">
+    <field name="id" type="int" key="primary" />
+    <field name="num_players_competing" type="int" />
+    <field name="percentage_of_reward" type="float" />
+  </table>
+  <table name="global_domination_unlocks">
+    <field name="id" type="int" key="primary" />
+    <field name="sponsor_slot_b" type="int" key="sponsor.id" />
+    <field name="sponsor_slot_c" type="int" key="sponsor.id" />
+    <field name="sponsor_slot_d" type="int" key="sponsor.id" />
+    <field name="sponsor_slot_e" type="int" key="sponsor.id" />
+    <field name="unlock_on_sponsor" type="int" key="sponsor.id" />
+    <field name="vehicle" type="int" key="vehicle.id" />
+    <field name="vehicle_livery" type="int" key="vehicle_livery.id" />
+  </table>
+  <table name="grid_order">
+    <field name="id" type="int" key="primary" />
+    <field name="show_in_custom_event" type="bool" />
+    <field name="show_in_lan" type="bool" />
+    <field name="show_in_online" type="bool" />
+    <field name="show_in_splitscreen" type="bool" />
+    <field name="string_id" type="string" />
+    <field name="type" type="string" />
+  </table>
+  <table name="initial_skill_ranking">
+    <field name="difficulty_percentage" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="index" type="int" />
+    <field name="racing_style_id" type="int" key="racing_style.id" />
+    <field name="skill_ranking" type="int" />
+  </table>
+  <table name="invalid_sponsor_manufacturer">
+    <field name="id" type="int" key="primary" />
+    <field name="manufacturer_id" type="int" />
+    <field name="sponsor_id" type="int" />
+  </table>
+  <table name="leaderboards">
+    <field name="challenge_event_name" type="int" key="event.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="leaderboard_id" type="int" />
+    <field name="location_id" type="int" />
+    <field name="track_model_id" type="int" key="track_model.id" />
+    <field name="tt_discipline_id" type="int" />
+    <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+  </table>
+  <table name="location">
+    <field name="continent" type="int" key="continent.id" />
+    <field name="count_for_achievement" type="bool" />
+    <field name="file_string" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" key="packages.id" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+    <field name="texture_prefix" type="string" />
+    <field name="xlast_context_id" type="int" />
+  </table>
+  <table name="manufacturer">
+    <field name="file_string" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="minimap_configuration">
+    <field name="dist_above" type="float" />
+    <field name="dist_behind" type="float" />
+    <field name="draw_distance_behind" type="float" />
+    <field name="draw_distance_front" type="float" />
+    <field name="fade_end" type="float" />
+    <field name="fade_start" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_id" type="string" />
+    <field name="track_width" type="float" />
+    <field name="zoom" type="float" />
+  </table>
+  <table name="multi_podium_events">
+    <field name="id" type="int" key="primary" />
+    <field name="pool_id" type="int" key="event_pool.id" />
+    <field name="required_podium_event_id" type="int" key="event.id" />
+  </table>
+  <table name="narrative_fmv">
+    <field name="composite_path" type="string" />
+    <field name="event_name_string_id" type="string" />
+    <field name="event_texture_name" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="keyframe_index" type="int" />
+    <field name="keyframe_name" type="string" />
+    <field name="player_name_capitals" type="bool" />
+    <field name="podium" type="bool" />
+    <field name="triggered_end" type="bool" />
+    <field name="triggered_on_phase_id" type="int" key="phase.id" />
+    <field name="triggered_start" type="bool" />
+    <field name="unlock_on_event" type="bool" />
+    <field name="unlock_on_fanbase" type="int" />
+    <field name="unlock_on_podium_event_id" type="int" key="event.id" />
+    <field name="video_name" type="string" />
+    <field name="win" type="bool" />
+  </table>
+  <table name="nationality">
+    <field name="allow_german_tracks" type="bool" />
+    <field name="currency_id" type="int" key="currency.id" />
+    <field name="default_for_locale" type="bool" />
+    <field name="file_string" type="string" />
+    <field name="flag_id" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="iso_code" type="string" />
+    <field name="name_string_id" type="string" />
+    <field name="rest_of_world" type="bool" />
+    <field name="units_id" type="int" key="units.id" />
+  </table>
+  <table name="net_competition_type">
+    <field name="competition_type" type="string" />
+    <field name="competition_type_string_id" type="string" />
+    <field name="id" type="int" key="primary" />
+  </table>
+  <table name="net_driver_rep_rewards">
+    <field name="driver_rep" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="objective_id" type="int" key="unlock_objectives.id" />
+  </table>
+  <table name="net_fanbase">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="tier" type="int" />
+    <field name="title_id" type="int" key="net_fanbase_title.id" />
+    <field name="total_fanbase" type="int" />
+  </table>
+  <table name="net_fanbase_title">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="net_race_tracks">
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" />
+    <field name="net_race_type" type="int" key="net_race_type.id" />
+    <field name="track_model_id" type="int" key="track_model.id" />
+  </table>
+  <table name="net_race_type">
+    <field name="file_string_id" type="string" />
+    <field name="force_collisions" type="bool" />
+    <field name="game_mode_id" type="int" key="game_mode.id" />
+    <field name="has_ai_option" type="bool" />
+    <field name="has_catch_up" type="bool" />
+    <field name="has_end_race_timer" type="bool" />
+    <field name="has_flashbacks" type="bool" />
+    <field name="has_grid_options" type="bool" />
+    <field name="has_impact_ratings" type="bool" />
+    <field name="has_multiple_laps" type="bool" />
+    <field name="has_qualification" type="bool" />
+    <field name="has_score_limit" type="bool" />
+    <field name="has_staggerred_starts" type="bool" />
+    <field name="has_time_limit" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_in_splitscreen" type="bool" />
+    <field name="is_online" type="bool" />
+    <field name="name_string_id" type="string" />
+    <field name="no_splitscreen_ai" type="bool" />
+    <field name="order_index" type="int" />
+    <field name="race_rules_string_id" type="string" />
+    <field name="race_type" type="int" key="race_type.id" />
+    <field name="ResultType" type="int" key="result_types.id" />
+    <field name="session_list_string_id" type="string" />
+    <field name="typed_name_string_id" type="string" />
+  </table>
+  <table name="net_vehicle_class">
+    <field name="id" type="int" key="primary" />
+    <field name="net_type" type="string" />
+    <field name="order_index" type="int" />
+    <field name="session_list_string_id" type="string" />
+    <field name="type_string_id" type="string" />
+  </table>
+  <table name="net_vehicle_default">
+    <field name="id" type="int" key="primary" />
+    <field name="loan_vehicle_livery_id" type="int" key="vehicle_livery.id" />
+    <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+    <field name="vehicle_tier_id" type="int" key="vehicle_class.id" />
+  </table>
+  <table name="net_vehicle_xp">
+    <field name="id" type="int" key="primary" />
+    <field name="level" type="int" />
+    <field name="total_vxp" type="int" />
+  </table>
+  <table name="obj_distance">
+    <field name="distance" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="xp" type="int" />
+  </table>
+  <table name="obj_drift">
+    <field name="distance" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_clean" type="bool" />
+    <field name="num_drift_events" type="int" />
+    <field name="x_value" type="int" />
+    <field name="xp" type="int" />
+  </table>
+  <table name="obj_drift_score">
+    <field name="id" type="int" key="primary" />
+    <field name="score" type="int" />
+    <field name="x_value" type="int" />
+    <field name="x_value_xp" type="float" />
+    <field name="xp" type="int" />
+  </table>
+  <table name="obj_speed">
+    <field name="id" type="int" key="primary" />
+    <field name="is_x_value" type="bool" />
+    <field name="racing_style_tier_id" type="int" key="racing_style_tier.id" />
+    <field name="speed" type="int" />
+    <field name="x_value" type="int" />
+    <field name="xp" type="float" />
+  </table>
+  <table name="obj_xp_beat_driver">
+    <field name="id" type="int" key="primary" />
+    <field name="ranking_type_id" type="int" key="team_ranking_type.id" />
+    <field name="team_ranking_type_id" type="int" key="team_ranking_type.id" />
+    <field name="team_xp" type="float" />
+    <field name="teammate_xp" type="float" />
+    <field name="x_value" type="int" />
+    <field name="xp" type="float" />
+  </table>
+  <table name="obj_xp_clean">
+    <field name="id" type="int" key="primary" />
+    <field name="x_value" type="int" />
+    <field name="xp" type="int" />
+  </table>
+  <table name="obj_xp_fastest_lap">
+    <field name="fastest_x_value" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="improve_x_value" type="int" />
+    <field name="lead_x_value" type="int" />
+    <field name="xp" type="int" />
+  </table>
+  <table name="obj_xp_position">
+    <field name="id" type="int" key="primary" />
+    <field name="places_higher" type="int" />
+    <field name="places_higher_x_value" type="int" />
+    <field name="position" type="int" />
+    <field name="qualify_position" type="int" />
+    <field name="qualify_x_value" type="int" />
+    <field name="team_car_position" type="int" />
+    <field name="team_car_x_value" type="int" />
+    <field name="x_value" type="int" />
+    <field name="xp" type="float" />
+  </table>
+  <table name="object_base_templates">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="template_id" type="int" key="object_templates.id" />
+  </table>
+  <table name="object_spline_ambience">
+    <field name="id" type="int" key="primary" />
+    <field name="track_camera" type="bool" />
+  </table>
+  <table name="object_templates">
+    <field name="base_template_id" type="int" key="object_base_templates.id" />
+    <field name="configuration_table_name" type="string" />
+    <field name="default_values_table" type="string" />
+    <field name="enabled_in_splitscreen" type="bool" />
+    <field name="export_direction" type="bool" />
+    <field name="export_position" type="bool" />
+    <field name="export_transform" type="bool" />
+    <field name="expose_to_editor" type="bool" />
+    <field name="expose_to_max" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="max_description" type="string" />
+    <field name="register_with_lookup" type="bool" />
+    <field name="template_name" type="string" />
+  </table>
+  <table name="objective">
+    <field name="achievable_in_practice" type="bool" />
+    <field name="achievable_in_qualifying" type="bool" />
+    <field name="display_order_index" type="int" />
+    <field name="enabled" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_promo" type="bool" />
+    <field name="name_string_id" type="string" />
+    <field name="objective_type_id" type="int" key="objective_type.id" />
+    <field name="phase" type="int" key="phase.id" />
+    <field name="reward" type="int" key="fanbase_objective_reward.id" />
+    <field name="sponsor_id" type="int" key="sponsor.id" />
+    <field name="sponsor_ui_type_id" type="int" key="sponsor_slot.id" />
+    <field name="team_objective" type="bool" />
+  </table>
+  <table name="objective_champ_result">
+    <field name="beat_champ_driver_multiple" type="bool" />
+    <field name="beat_cup_driver_multiple" type="bool" />
+    <field name="beat_driver" type="bool" />
+    <field name="beat_team" type="bool" />
+    <field name="both_cups" type="bool" />
+    <field name="champ" type="bool" />
+    <field name="cup" type="bool" />
+    <field name="cup_id" type="int" key="cup.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="num_events_to_beat" type="int" />
+    <field name="objective_id" type="int" key="objective.id" />
+    <field name="podium_every_champ" type="bool" />
+    <field name="podium_every_cup" type="bool" />
+    <field name="position" type="int" />
+    <field name="ranking_to_beat" type="int" key="team_ranking_type.id" />
+    <field name="team" type="bool" />
+  </table>
+  <table name="objective_net_settings">
+    <field name="distance" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="minutes" type="int" />
+    <field name="objective_id" type="int" key="objective.id" />
+    <field name="position" type="int" />
+    <field name="race_type_id" type="int" key="race_type.id" />
+    <field name="reward_band_id" type="int" key="objective_reward_band.id" />
+    <field name="score" type="int" />
+    <field name="speed" type="int" />
+    <field name="times_to_complete" type="int" />
+    <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+  </table>
+  <table name="objective_restrict_event">
+    <field name="event_id" type="int" key="event.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="objective_id" type="int" key="objective.id" />
+    <field name="promo_objective" type="bool" />
+  </table>
+  <table name="objective_restrict_race_type">
+    <field name="exclude" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="objective_id" type="int" key="objective_type.id" />
+    <field name="race_type" type="int" key="race_type.id" />
+  </table>
+  <table name="objective_restrict_track">
+    <field name="id" type="int" key="primary" />
+    <field name="objective_id" type="int" key="objective.id" />
+    <field name="track_model_id" type="int" key="track_model.id" />
+  </table>
+  <table name="objective_restrict_track_type">
+    <field name="exclude" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="objective_id" type="int" key="objective_type.id" />
+    <field name="track_type" type="int" key="track_type.id" />
+  </table>
+  <table name="objective_reward_band">
+    <field name="cash" type="int" />
+    <field name="dxp" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="vxp" type="int" />
+  </table>
+  <table name="objective_type">
+    <field name="class_name" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="unit_type_id" type="int" key="objective_unit_type.id" />
+  </table>
+  <table name="objective_unit_type">
+    <field name="id" type="int" key="primary" />
+    <field name="string_id" type="string" />
+    <enum label="distance" value="1" />
+    <enum label="time" value="2" />
+    <enum label="times" value="3" />
+    <enum label="distance_small" value="4" />
+  </table>
+  <table name="on_off">
+    <field name="id" type="int" key="primary" />
+    <field name="is_on" type="bool" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="open_track_ai_settings">
+    <field name="id" type="int" key="primary" />
+    <field name="long_track_min_length" type="int" />
+    <field name="medium_track_min_length" type="int" />
+    <field name="num_ai_long" type="int" />
+    <field name="num_ai_medium" type="int" />
+    <field name="num_ai_short" type="int" />
+    <field name="practice_cycle_time" type="int" />
+  </table>
+  <table name="overtake_multiplier">
+    <field name="id" type="int" key="primary" />
+    <field name="multiplier" type="int" />
+    <field name="seperation_time" type="int" />
+    <field name="time" type="float" />
+  </table>
+  <table name="overtake_virtual_points">
+    <field name="best_score" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="track_model" type="int" key="track_model.id" />
+    <field name="vehicle_tier_id" type="int" key="vehicle_tier.id" />
+    <field name="worst_score" type="int" />
+  </table>
+  <table name="package_license_masks">
+    <field name="coming_soon" type="bool" />
+    <field name="hidden" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="license_mask" type="int" />
+    <field name="license_package" type="int" key="packages.id" />
+    <field name="offer_name_string_id" type="string" />
+    <field name="ps3_free_id" type="string" />
+    <field name="ps3_premium_id" type="string" />
+    <field name="show_in_dlc_screen" type="bool" />
+    <field name="win_free_id" type="string" />
+    <field name="win_premium_id" type="string" />
+    <field name="x360_free_id" type="string" />
+    <field name="x360_premium_id" type="string" />
+  </table>
+  <table name="package_type">
+    <field name="id" type="int" key="primary" />
+    <field name="package_type" type="string" />
+  </table>
+  <table name="packages">
+    <field name="extension_id" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_boost" type="bool" />
+    <field name="is_compatability" type="bool" />
+    <field name="is_season_pass" type="bool" />
+    <field name="is_unlock_all" type="bool" />
+    <field name="is_vip" type="bool" />
+    <field name="license_package" type="int" />
+    <field name="package_name_string_id" type="string" />
+    <field name="package_type" type="int" key="package_type.id" />
+    <field name="patch_extension_id_limit" type="int" />
+    <field name="show_in_dlc_screen" type="bool" />
+    <field name="skip_database_processing" type="bool" />
+    <field name="use_low_lod_on_disc" type="bool" />
+  </table>
+  <table name="phase">
+    <field name="fanbase_needed_to_unlock" type="int" />
+    <field name="fanbase_reward_max" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="index" type="int" />
+    <field name="is_final_phase" type="bool" />
+    <field name="is_league" type="bool" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+    <field name="season_id" type="int" key="season.id" />
+    <field name="sponsor_slots" type="int" />
+    <field name="timeline_video_file_name" type="string" />
+    <field name="unlock_on_event_completed" type="bool" />
+    <field name="unlock_on_event_id" type="int" key="event.id" />
+    <field name="unlock_requires_podium" type="bool" />
+  </table>
+  <table name="phase_fanbase_increase">
+    <field name="fanbase_at_start" type="int" />
+    <field name="fanbase_increase" type="int" />
+    <field name="fanbase_threshold" type="int" />
+    <field name="id" type="int" />
+    <field name="increase_index" type="int" />
+    <field name="is_club" type="bool" />
+    <field name="is_season_start" type="bool" />
+    <field name="phase_id" type="int" key="phase.id" />
+  </table>
+  <table name="playlist">
+    <field name="id" type="int" key="primary" />
+    <field name="lng_string" type="string" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="points">
+    <field name="default_event" type="bool" />
+    <field name="description" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="points" type="string" />
+  </table>
+  <table name="prestige_driver">
+    <field name="driver_id" type="int" key="driver.id" />
+    <field name="event_group_id" type="int" key="event_group.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_number_one" type="bool" />
+  </table>
+  <table name="preview_event">
+    <field name="event_id" type="int" key="event.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_league_dressing" type="bool" />
+    <field name="unlock_on_event" type="bool" />
+    <field name="unlock_on_event_id" type="int" key="event.id" />
+  </table>
+  <table name="promo_event_dressing">
+    <field name="event_id" type="int" key="event.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="league" type="bool" />
+    <field name="league_plus" type="bool" />
+  </table>
+  <table name="promo_event_vehicle">
+    <field name="event_id" type="int" key="event.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="livery_id" type="int" key="vehicle_livery.id" />
+    <field name="vehicle_id" type="int" key="vehicle.id" />
+  </table>
+  <table name="race_type">
+    <field name="achievement_alternate" type="int" />
+    <field name="ai_speciality_difficulty_bonus" type="float" />
+    <field name="ai_stop_on_finish" type="bool" />
+    <field name="ai_vehicle_template_id" type="int" key="object_templates.id" />
+    <field name="allowed_driving_cameras" type="int" key="driving_view_group.id" />
+    <field name="civilian_template_id" type="int" key="object_templates.id" />
+    <field name="counts_for_achievement" type="bool" />
+    <field name="default_time_limit" type="int" />
+    <field name="file_string" type="string" />
+    <field name="finished_condition" type="int" key="finish_condition.id" />
+    <field name="force_infinite_lap" type="bool" />
+    <field name="force_manual_gears" type="bool" />
+    <field name="game_mode" type="int" key="game_mode.id" />
+    <field name="game_mode_template_id" type="int" key="object_templates.id" />
+    <field name="grid_slot" type="string" />
+    <field name="has_grid" type="bool" />
+    <field name="higher_value_is_better" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_rounds_based" type="bool" />
+    <field name="loading_icon" type="string" />
+    <field name="max_entrants" type="int" />
+    <field name="name_string_id" type="string" />
+    <field name="no_loading_same_location" type="bool" />
+    <field name="obj_string_id" type="string" />
+    <field name="player_vehicle_template_id" type="int" key="object_templates.id" />
+    <field name="race_rules_string_id" type="string" />
+    <field name="remote_vehicle_template_id" type="int" key="object_templates.id" />
+    <field name="round_display_type_string" type="string" />
+    <field name="session_result_type" type="int" key="session_result_types.id" />
+    <field name="show_in_single_event" type="bool" />
+    <field name="solo_only" type="bool" />
+    <field name="staggered_start" type="bool" />
+    <field name="start_type" type="int" key="start_type.id" />
+    <field name="time_based_for_online_lb" type="bool" />
+    <field name="track_type" type="int" key="track_type.id" />
+    <enum label="lap" value="2" />
+    <enum label="time_attack" value="4" />
+    <enum label="drift_attack" value="7" />
+    <enum label="eliminator" value="14" />
+    <enum label="overtake" value="17" />
+    <enum label="checkpoint" value="22" />
+    <enum label="last_man_standing" value="23" />
+    <enum label="power_lap" value="24" />
+    <enum label="test_drive" value="29" />
+    <enum label="tutorial" value="31" />
+    <enum label="drag" value="32" />
+    <enum label="time_trial" value="34" />
+    <enum label="demolition_derby" value="35" />
+    <enum label="intel_attract" value="37" />
+  </table>
+  <table name="race_type_intro">
+    <field name="audio_name" type="string" />
+    <field name="event" type="int" key="event.id" />
+    <field name="event_name_string_id" type="string" />
+    <field name="event_texture_name" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="video_id" type="int" />
+    <field name="video_name" type="string" />
+  </table>
+  <table name="race_type_osd_settings">
+    <field name="driver_tags_fade_off_distance" type="float" />
+    <field name="driver_tags_fade_on_distance" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="race_type_id" type="int" key="game_mode.id" />
+    <field name="show_boost" type="bool" />
+    <field name="show_drift" type="bool" />
+    <field name="show_driver_tags" type="bool" />
+    <field name="show_lap_indicator" type="bool" />
+    <field name="show_minimap" type="bool" />
+    <field name="show_player_position" type="bool" />
+    <field name="show_progress_bar" type="bool" />
+    <field name="show_wrong_way" type="bool" />
+  </table>
+  <table name="racing_style">
+    <field name="awards_net_xp" type="bool" />
+    <field name="career" type="bool" />
+    <field name="custom_cup_max_teams" type="int" />
+    <field name="icon_image" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" />
+    <field name="name_string_id" type="string" />
+    <field name="online" type="bool" />
+    <field name="online_search_filter" type="bool" />
+    <field name="speech_code" type="string" />
+    <field name="video_audio_event" type="string" />
+    <field name="video_filename" type="string" />
+    <field name="video_id" type="int" />
+    <field name="xp_glyph" type="string" />
+    <field name="xp_icon" type="string" />
+    <enum label="touring_car" value="2" />
+    <enum label="endurance" value="3" />
+    <enum label="grand_prix" value="4" />
+    <enum label="tuner" value="5" />
+    <enum label="street" value="6" />
+    <enum label="party" value="8" />
+    <enum label="autosport" value="10" />
+  </table>
+  <table name="racing_style_points">
+    <field name="event_id" type="int" key="event.id" />
+    <field name="fastest_lap_point" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="lead_a_lap_point" type="int" />
+    <field name="max_points_id" type="int" key="points.id" />
+    <field name="min_points_id" type="int" key="points.id" />
+    <field name="most_laps_lead_point" type="int" />
+    <field name="qualifying_points_id" type="int" key="points.id" />
+    <field name="racing_style_id" type="int" key="racing_style.id" />
+  </table>
+  <table name="racing_style_tier">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+    <field name="racing_style_id" type="int" key="racing_style.id" />
+    <field name="should_create_team_offers" type="bool" />
+    <field name="unlock_on_xp" type="int" />
+    <field name="unlock_vo" type="string" />
+    <field name="unlocks_ravenwest" type="bool" />
+    <field name="vehicle_tier" type="int" key="vehicle_tier.id" />
+    <field name="xp_multiplier" type="int" />
+  </table>
+  <table name="radio_control_settings">
+    <field name="brakes_heavy" type="float" />
+    <field name="brakes_light" type="float" />
+    <field name="brakes_medium" type="float" />
+    <field name="engine_heavy" type="float" />
+    <field name="engine_light" type="float" />
+    <field name="engine_medium" type="float" />
+    <field name="exhaust_heavy" type="float" />
+    <field name="exhaust_light" type="float" />
+    <field name="exhaust_medium" type="float" />
+    <field name="gearbox_heavy" type="float" />
+    <field name="gearbox_light" type="float" />
+    <field name="gearbox_medium" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="radiator_heavy" type="float" />
+    <field name="radiator_light" type="float" />
+    <field name="radiator_medium" type="float" />
+    <field name="steering_heavy" type="float" />
+    <field name="steering_light" type="float" />
+    <field name="steering_medium" type="float" />
+    <field name="turbo_heavy" type="float" />
+    <field name="turbo_light" type="float" />
+    <field name="turbo_medium" type="float" />
+    <field name="tyre_heavy" type="float" />
+    <field name="tyre_medium" type="float" />
+  </table>
+  <table name="reset_process_attributes">
+    <field name="ai_drive_time" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="ignore_final_boundary" type="bool" />
+    <field name="name_string_id" type="string" />
+    <field name="penalty_distance" type="int" />
+    <field name="reset_at_speed" type="bool" />
+    <field name="reset_damage" type="bool" />
+    <field name="rolling_reset" type="bool" />
+    <field name="time_to_collide" type="float" />
+    <field name="time_to_delay" type="float" />
+    <field name="time_to_fade" type="float" />
+  </table>
+  <table name="reset_settings">
+    <field name="id" type="int" key="primary" />
+    <field name="maximum_speed" type="float" />
+    <field name="minimum_wait" type="float" />
+    <field name="name_string" type="string" />
+  </table>
+  <table name="reset_type">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="reset_type_restrictions">
+    <field name="id" type="int" key="primary" />
+    <field name="multiplayer" type="bool" />
+    <field name="reset_attributes" type="int" key="reset_process_attributes.id" />
+    <field name="reset_type" type="int" key="reset_type.id" />
+    <field name="splitscreen" type="bool" />
+  </table>
+  <table name="result_type_restrictions">
+    <field name="game_mode_id" type="int" key="game_mode.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_single_player" type="bool" />
+    <field name="race_discipline" type="int" />
+    <field name="result_type" type="int" key="result_types.id" />
+  </table>
+  <table name="result_types">
+    <field name="id" type="int" key="primary" />
+    <field name="result_type" type="string" />
+  </table>
+  <table name="results">
+    <field name="career_type" type="int" key="results_career_type.id" />
+    <field name="championship_points" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="race_type" type="int" key="race_type.id" />
+    <field name="result_type" type="int" key="session_result_types.id" />
+  </table>
+  <table name="results_career_type">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="save_identifier">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string" type="string" />
+    <field name="ps3_scea_string" type="string" />
+    <field name="ps3_scee_string" type="string" />
+    <field name="ps3_scej_string" type="string" />
+    <field name="win_string" type="string" />
+    <field name="win_title_id" type="int" />
+    <field name="x360_title_id" type="int" />
+  </table>
+  <table name="saveable_id_default">
+    <field name="id" type="int" key="primary" />
+    <field name="sponsor" type="int" key="sponsor.id" />
+    <field name="vehicle" type="int" key="vehicle.id" />
+    <field name="vehicle_livery" type="int" key="vehicle_livery.id" />
+    <field name="vehicle_livery_decal_set" type="int" key="vehicle_livery_decal_set.id" />
+    <field name="vehicle_livery_template" type="int" key="vehicle_livery_template.id" />
+    <field name="vehicle_livery_wheel_set" type="int" key="vehicle_livery_wheel_set.id" />
+    <field name="vehicle_livery_wheel_size" type="int" key="vehicle_livery_wheel_size.id" />
+  </table>
+  <table name="season">
+    <field name="continent_id" type="int" key="continent.id" />
+    <field name="fanbase_needed_to_unlock" type="int" />
+    <field name="final_event_id" type="int" key="event.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+    <field name="timeline_label" type="string" />
+    <field name="unlock_audio_speech" type="string" />
+    <field name="unlock_on_event_completed" type="bool" />
+    <field name="unlock_on_event_id" type="int" key="event.id" />
+    <field name="unlock_requires_podium" type="bool" />
+    <field name="unlock_with_any_championship" type="bool" />
+  </table>
+  <table name="separator">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="separator" type="string" />
+  </table>
+  <table name="session_result_types">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="result_type" type="int" key="result_types.id" />
+    <field name="team_result_type" type="int" key="session_team_result_types.id" />
+  </table>
+  <table name="session_team_result_types">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="single_race_competition">
+    <field name="competition_type_id" type="int" key="competition_type.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="race_type_id" type="int" key="race_type.id" />
+  </table>
+  <table name="single_race_laps">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="num_laps" type="int" />
+    <field name="order_index" type="int" />
+    <field name="track_type_id" type="int" />
+  </table>
+  <table name="single_race_type">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+  </table>
+  <table name="skill_ranking_settings">
+    <field name="failed_primary_obj" type="int" />
+    <field name="failed_secondary_obj" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="passed_primary_obj" type="int" />
+    <field name="passed_secondary_obj" type="int" />
+    <field name="successive_seasons_before_penalty" type="int" />
+    <field name="successive_seasons_penalty" type="int" />
+  </table>
+  <table name="speech_packages">
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" key="packages.id" />
+    <field name="speech_file" type="string" />
+  </table>
+  <table name="sponsor">
+    <field name="can_use_in_env" type="bool" />
+    <field name="category" type="int" key="sponsor_category.id" />
+    <field name="cost" type="int" />
+    <field name="decal_0_file_string" type="string" />
+    <field name="decal_1_file_string" type="string" />
+    <field name="decal_can_flip" type="bool" />
+    <field name="file_string" type="string" />
+    <field name="force_event_card_decal_0" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" />
+    <field name="name_string_id" type="string" />
+    <field name="num_logos" type="int" />
+    <field name="phase_id" type="int" key="phase.id" />
+    <field name="sponsor_0_b" type="int" />
+    <field name="sponsor_0_g" type="int" />
+    <field name="sponsor_0_intensity" type="float" />
+    <field name="sponsor_0_r" type="int" />
+    <field name="sponsor_1_b" type="int" />
+    <field name="sponsor_1_g" type="int" />
+    <field name="sponsor_1_intensity" type="float" />
+    <field name="sponsor_1_r" type="int" />
+    <field name="sponsor_2_b" type="int" />
+    <field name="sponsor_2_g" type="int" />
+    <field name="sponsor_2_intensity" type="float" />
+    <field name="sponsor_2_r" type="int" />
+    <field name="sponsor_3_b" type="int" />
+    <field name="sponsor_3_g" type="int" />
+    <field name="sponsor_3_intensity" type="float" />
+    <field name="sponsor_3_r" type="int" />
+    <field name="sponsor_car_b" type="int" />
+    <field name="sponsor_car_g" type="int" />
+    <field name="sponsor_car_intensity" type="float" />
+    <field name="sponsor_car_r" type="int" />
+    <field name="sponsor_type_id" type="int" />
+    <field name="sponsor_ui_type_id" type="int" />
+    <field name="unlock_xp_tier" type="int" />
+    <field name="vehicle_category" type="int" />
+  </table>
+  <table name="sponsor_category">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="sponsor_slot">
+    <field name="id" type="int" key="primary" />
+    <field name="slot_index" type="int" />
+    <field name="slot_name" type="string" />
+  </table>
+  <table name="sponsor_track_exclusions">
+    <field name="id" type="int" key="primary" />
+    <field name="sponsor_id" type="int" key="sponsor.id" />
+    <field name="track_id" type="int" key="track.id" />
+  </table>
+  <table name="sponsor_type">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="sponsor_ui_type">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+  </table>
+  <table name="sprint_difficulty">
+    <field name="bad_shift_recovery_speed" type="float" />
+    <field name="blowout_time" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="ls_clamp" type="float" />
+    <field name="nitrous_blowout_multiplier" type="float" />
+    <field name="ss_clamp_hi" type="float" />
+    <field name="ss_clamp_lo" type="float" />
+    <field name="sweet_spot" type="int" />
+    <field name="vehicle_tier" type="int" key="vehicle_tier.id" />
+  </table>
+  <table name="sprint_settings">
+    <field name="ai_blowouts_enabled" type="bool" />
+    <field name="extra_rpm" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="player_blowouts_enabled" type="bool" />
+  </table>
+  <table name="sprint_sweet_spot">
+    <field name="exposure_name" type="string" />
+    <field name="gear" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="multiplier" type="float" />
+  </table>
+  <table name="sr_race_types">
+    <field name="id" type="int" key="primary" />
+    <field name="practice_race_type_id" type="int" key="race_type.id" />
+    <field name="qualifying_race_type_id" type="int" key="race_type.id" />
+    <field name="race_type_id" type="int" key="race_type.id" />
+    <field name="sr_type_id" type="int" key="single_race_type.id" />
+    <field name="track_type_id" type="int" key="track_type.id" />
+  </table>
+  <table name="star_driver">
+    <field name="audio_id" type="int" />
+    <field name="driver_id" type="int" key="driver.id" />
+    <field name="id" type="int" key="primary" />
+  </table>
+  <table name="start_type">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="rolling" type="bool" />
+    <field name="staggered" type="bool" />
+  </table>
+  <table name="stats">
+    <field name="career_loading_stat" type="bool" />
+    <field name="custom_race_loading_stat" type="bool" />
+    <field name="fallback" type="bool" />
+    <field name="group_id" type="int" key="stats_groups.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_bigger_better" type="bool" />
+    <field name="is_career_club_phase" type="bool" />
+    <field name="is_career_league_phase" type="bool" />
+    <field name="is_race_type_specific" type="bool" />
+    <field name="loading_display_style" type="string" />
+    <field name="loading_style_string_id" type="string" />
+    <field name="name_string_id" type="string" />
+    <field name="offline_loading_stat" type="bool" />
+    <field name="online_leaderboard_string" type="string" />
+    <field name="online_loading_stat" type="bool" />
+    <field name="race_type_id" type="int" key="race_type.id" />
+    <field name="singular_string_id" type="string" />
+    <field name="splitscreen_loading_stat" type="bool" />
+    <field name="type_id" type="int" key="stats_types.id" />
+    <field name="uses_singular" type="bool" />
+  </table>
+  <table name="stats_categories">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string" type="string" />
+  </table>
+  <table name="stats_groups">
+    <field name="category_id" type="int" key="stats_categories.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_sting" type="string" />
+    <field name="show_in_fe" type="bool" />
+    <field name="title_string_id" type="string" />
+  </table>
+  <table name="stats_types">
+    <field name="data_type_id" type="int" key="data_types.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="type" type="string" />
+  </table>
+  <table name="sticky_note_progress">
+    <field name="event_group_unlock_id" type="int" key="event_group.id" />
+    <field name="event_unlock_id" type="int" key="event.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="progress_index" type="int" />
+  </table>
+  <table name="surface_type">
+    <field name="id" type="int" key="primary" />
+    <field name="surface_name_string_id" type="string" />
+  </table>
+  <table name="target_marker">
+    <field name="above_threshold" type="float" />
+    <field name="alpha_distance" type="float" />
+    <field name="below_threshold" type="float" />
+    <field name="colour_animation" type="string" />
+    <field name="height" type="float" />
+    <field name="height_marker" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="max_alpha" type="float" />
+    <field name="max_distance" type="float" />
+    <field name="max_distance_alpha" type="float" />
+    <field name="min_distance_alpha" type="float" />
+    <field name="off_distance" type="float" />
+    <field name="on_distance" type="float" />
+    <field name="scale_distance" type="float" />
+    <field name="team_id" type="int" />
+    <field name="texture" type="string" />
+    <field name="type" type="string" />
+    <field name="use_data_position" type="bool" />
+  </table>
+  <table name="team">
+    <field name="always_offers_autosport" type="bool" />
+    <field name="file_string" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_player_custom_team" type="bool" />
+    <field name="is_ravenwest" type="bool" />
+    <field name="livery_shift" type="string" />
+    <field name="logo_image" type="string" />
+    <field name="name_string_id" type="string" />
+    <field name="obj_string_id" type="string" />
+    <enum label="dark_horse" value="1" />
+    <enum label="money_makers" value="2" />
+    <enum label="overachievers" value="3" />
+    <enum label="all_rounders" value="4" />
+    <enum label="upstarts" value="5" />
+    <enum label="ravenwest" value="6" />
+    <enum label="showmen" value="7" />
+    <enum label="professionals" value="8" />
+    <enum label="underdogs" value="9" />
+    <enum label="americana" value="10" />
+    <enum label="player_custom_team" value="11" />
+  </table>
+  <table name="team_driver">
+    <field name="driver_id" type="int" key="driver.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="team_id" type="int" key="team.id" />
+  </table>
+  <table name="team_objective">
+    <field name="force_tier_id" type="int" key="racing_style_tier.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="primary_objective_id" type="int" key="objective.id" />
+    <field name="primary_xp" type="int" />
+    <field name="primary_xp_won_once" type="int" />
+    <field name="requires_min_num_cups" type="int" />
+    <field name="secondary_objective_id" type="int" key="objective.id" />
+    <field name="secondary_xp" type="int" />
+    <field name="secondary_xp_won_once" type="int" />
+    <field name="skill_ranking" type="int" />
+  </table>
+  <table name="team_offer">
+    <field name="cash_reward" type="int" />
+    <field name="championship_livery_id" type="int" key="vehicle_livery.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="primary_team_objective" type="int" key="objective.id" />
+    <field name="racing_style_tier_id" type="int" key="racing_style_tier.id" />
+    <field name="secondary_team_objective" type="int" key="objective.id" />
+    <field name="team_id" type="int" key="team.id" />
+    <field name="teammate_champ_livery_id" type="int" key="vehicle_livery.id" />
+    <field name="teammate_driver_id" type="int" key="driver.id" />
+  </table>
+  <table name="team_offer_cup_livery">
+    <field name="championship_id" type="int" key="championship.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="team_id" type="int" key="team.id" />
+    <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+  </table>
+  <table name="team_offer_livery">
+    <field name="id" type="int" key="primary" />
+    <field name="racing_style_tier_id" type="int" key="racing_style_tier.id" />
+    <field name="team_id" type="int" key="team.id" />
+    <field name="team_offer_id" type="int" key="team_offer.id" />
+    <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+  </table>
+  <table name="team_offer_teammate">
+    <field name="driver_id" type="int" key="driver.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="racing_style_tier_id" type="int" key="racing_style_tier.id" />
+    <field name="team_id" type="int" key="team.id" />
+  </table>
+  <table name="team_ranking">
+    <field name="id" type="int" key="primary" />
+    <field name="racing_style_tier_id" type="int" key="racing_style_tier.id" />
+    <field name="ranking_type" type="int" key="team_ranking_type.id" />
+    <field name="team_id" type="int" key="team.id" />
+  </table>
+  <table name="team_ranking_type">
+    <field name="id" type="int" key="primary" />
+    <field name="is_bronze" type="bool" />
+    <field name="is_gold" type="bool" />
+    <field name="is_silver" type="bool" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="team_rivalries">
+    <field name="id" type="int" key="primary" />
+    <field name="team_a" type="int" key="team.id" />
+    <field name="team_b" type="int" key="team.id" />
+  </table>
+  <table name="team_setup_capability">
+    <field name="id" type="int" key="primary" />
+    <field name="racing_style_tier_id" type="int" />
+    <field name="team_id" type="int" key="team.id" />
+    <field name="tuning_level_id" type="int" key="tuning_level.id" />
+    <field name="upgrade_level" type="int" />
+  </table>
+  <table name="team_setup_capability_upgrades">
+    <field name="id" type="int" key="primary" />
+    <field name="racing_style_tier_id" type="int" />
+    <field name="team_id" type="int" />
+    <field name="vehicle_upgrade_packages_id" type="int" />
+  </table>
+  <table name="team_skill_brackets">
+    <field name="bronze_high" type="int" />
+    <field name="bronze_low" type="int" />
+    <field name="gold_high" type="int" />
+    <field name="gold_low" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="racing_style_tier_id" type="int" key="racing_style_tier.id" />
+    <field name="silver_high" type="int" />
+    <field name="silver_low" type="int" />
+  </table>
+  <table name="team_sponsor">
+    <field name="id" type="int" key="primary" />
+    <field name="order_index" type="int" />
+    <field name="sponsor_id" type="int" key="sponsor.id" />
+    <field name="team_id" type="int" key="team.id" />
+  </table>
+  <table name="template_to_component">
+    <field name="component_id" type="int" key="components.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="template_id" type="int" key="object_templates.id" />
+  </table>
+  <table name="test">
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" key="packages.id" />
+    <field name="s" type="string" />
+    <field name="x" type="int" />
+    <field name="y" type="int" />
+  </table>
+  <table name="tier">
+    <field name="career_id" type="int" key="career.id" />
+    <field name="count_towards_event_completes" type="bool" />
+    <field name="count_towards_progress_stat" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="map_screen_tier" type="bool" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+  </table>
+  <table name="time_trial_event">
+    <field name="id" type="int" key="primary" />
+    <field name="racing_style" type="int" key="racing_style.id" />
+    <field name="track_model_conditions_id" type="int" key="vehicle_class.id" />
+    <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+  </table>
+  <table name="timeline_event">
+    <field name="event_id" type="int" key="event.id" />
+    <field name="fmv_id" type="int" key="narrative_fmv.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_fmv" type="bool" />
+    <field name="is_race_type_intro" type="bool" />
+    <field name="order_index" type="int" />
+    <field name="phase_id" type="int" key="phase.id" />
+    <field name="race_type_intro_id" type="int" key="race_type_intro.id" />
+  </table>
+  <table name="track">
+    <field name="additional_ground_clearance" type="float" />
+    <field name="affix" type="string" />
+    <field name="city_track" type="bool" />
+    <field name="count_towards_stats" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" key="packages.id" />
+    <field name="location_id" type="int" key="location.id" />
+    <field name="name_string_id" type="string" />
+    <field name="nationality_id" type="int" key="nationality.id" />
+  </table>
+  <table name="track_default_tag">
+    <field name="default_tag" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="track_model_id" type="int" key="track_model.id" />
+  </table>
+  <table name="track_group">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+  </table>
+  <table name="track_lighting_types">
+    <field name="id" type="int" key="primary" />
+    <field name="lighting_id" type="string" />
+    <field name="texture_suffix" type="string" />
+  </table>
+  <table name="track_location_reveal">
+    <field name="bespoke_text_event_id" type="int" />
+    <field name="bespoke_text_occasion_string" type="string" />
+    <field name="bespoke_text_time_string" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" />
+    <field name="scale" type="float" />
+    <field name="track_conditions_id" type="int" key="track_model_conditions.id" />
+    <field name="track_model_id" type="int" key="track_model.id" />
+    <field name="xPos" type="float" />
+    <field name="yPos" type="float" />
+  </table>
+  <table name="track_model">
+    <field name="ai_track_name" type="string" />
+    <field name="ao_track_override" type="string" />
+    <field name="audio_dressing" type="string" />
+    <field name="banked_track" type="bool" />
+    <field name="codriver_calls" type="bool" />
+    <field name="compound_reset" type="bool" />
+    <field name="default_ambience" type="string" />
+    <field name="default_reverb" type="string" />
+    <field name="discipline_id" type="int" />
+    <field name="drift_off_track" type="bool" />
+    <field name="dynamic_route_name" type="string" />
+    <field name="every_track_achievement" type="bool" />
+    <field name="file_string" type="string" />
+    <field name="folder_string" type="string" />
+    <field name="headlights_on" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="include_in_cycle_tracks" type="bool" />
+    <field name="is_dynamic_route" type="bool" />
+    <field name="length" type="float" />
+    <field name="license_package" type="int" key="packages.id" />
+    <field name="minimap_configuration" type="int" key="minimap_configuration.id" />
+    <field name="minimap_dist_above" type="float" />
+    <field name="minimap_dist_behind" type="float" />
+    <field name="minimap_fade_end" type="float" />
+    <field name="minimap_fade_start" type="float" />
+    <field name="minimap_width" type="float" />
+    <field name="minimap_zoom" type="float" />
+    <field name="name_string_id" type="string" />
+    <field name="not_single_race" type="bool" />
+    <field name="order_index" type="int" />
+    <field name="race_type_id" type="int" key="race_type.id" />
+    <field name="rolling_start_buffer" type="float" />
+    <field name="route_string" type="string" />
+    <field name="skipfe_track" type="bool" />
+    <field name="sponsor_a" type="int" key="sponsor.id" />
+    <field name="sponsor_b" type="int" key="sponsor.id" />
+    <field name="sponsor_c" type="int" key="sponsor.id" />
+    <field name="sponsor_d" type="int" key="sponsor.id" />
+    <field name="sponsor_e" type="int" key="sponsor.id" />
+    <field name="supports_time_of_day" type="bool" />
+    <field name="swap_for_dummy" type="bool" />
+    <field name="test_drive_track" type="bool" />
+    <field name="track_group_id" type="int" key="track_group.id" />
+    <field name="track_id" type="int" key="track.id" />
+    <field name="track_lights_on" type="bool" />
+    <field name="track_spline_id" type="string" />
+    <field name="track_type_id" type="int" key="track_type.id" />
+    <field name="tyre_type_id" type="int" key="tyre_type.id" />
+    <field name="ui_route_id" type="int" />
+    <field name="ui_track_model_id" type="int" key="track_model.id" />
+  </table>
+  <table name="track_model_conditions">
+    <field name="crowd_postfix" type="int" key="crowd_type.id" />
+    <field name="crowd_tint_group" type="int" key="crowd_tint_groups.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" />
+    <field name="lighting_type" type="int" key="track_lighting_types.id" />
+    <field name="name_string_id" type="string" />
+    <field name="not_in_splitscreen" type="bool" />
+    <field name="track_model_id" type="int" key="track_model.id" />
+    <field name="weather_type" type="int" key="weather_types.id" />
+  </table>
+  <table name="track_model_engineer_speech">
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" />
+    <field name="location_overview" type="string" />
+    <field name="track_model_id" type="int" />
+  </table>
+  <table name="track_model_surface">
+    <field name="id" type="int" key="primary" />
+    <field name="percentage" type="int" />
+    <field name="surface_id" type="int" key="surface_type.id" />
+    <field name="track_model_id" type="int" key="track_model.id" />
+  </table>
+  <table name="track_one_to_watch_reveal">
+    <field name="camera_alt" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="scale" type="float" />
+    <field name="track_id" type="int" key="track.id" />
+    <field name="track_lighting_id" type="int" key="track_lighting_types.id" />
+    <field name="xPos" type="float" />
+    <field name="yPos" type="float" />
+  </table>
+  <table name="track_type">
+    <field name="id" type="int" key="primary" />
+    <field name="type" type="string" />
+  </table>
+  <table name="traffic_driver">
+    <field name="ai_driver_id" type="int" key="ai_driver.id" />
+    <field name="event_id" type="int" key="event.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_default" type="bool" />
+    <field name="livery_id" type="int" key="vehicle_livery.id" />
+  </table>
+  <table name="trophies">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="position" type="int" />
+    <field name="season_id" type="int" key="season.id" />
+    <field name="test" type="string" />
+  </table>
+  <table name="tuning_component">
+    <field name="description_string_id" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="tuning_spec_index" type="int" />
+    <field name="type_string_id" type="string" />
+    <enum label="brake_bias" value="2" />
+    <enum label="differential" value="3" />
+    <enum label="downforce" value="4" />
+    <enum label="gears" value="5" />
+    <enum label="ride_height" value="6" />
+    <enum label="suspension_front" value="7" />
+    <enum label="suspension_rear" value="8" />
+  </table>
+  <table name="tuning_level">
+    <field name="id" type="int" key="primary" />
+    <field name="increment_steps" type="int" />
+    <field name="type_string_id" type="string" />
+    <enum label="level_0" value="2" />
+    <enum label="level_1" value="3" />
+    <enum label="level_2" value="4" />
+    <enum label="level_3" value="5" />
+  </table>
+  <table name="tuning_vehicle_class">
+    <field name="id" type="int" key="primary" />
+    <field name="tuning_component_id" type="int" key="tuning_component.id" />
+    <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+  </table>
+  <table name="tut_drift_scoring_thresholds">
+    <field name="grade_a" type="int" />
+    <field name="grade_b" type="int" />
+    <field name="grade_c" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="turn_index" type="int" />
+  </table>
+  <table name="tyre_type">
+    <field name="description" type="string" />
+    <field name="file_string" type="string" />
+    <field name="id" type="int" key="primary" />
+  </table>
+  <table name="ui_game_context_options">
+    <field name="has_background_texture" type="bool" />
+    <field name="has_difficulty" type="bool" />
+    <field name="has_sponsor_logo" type="bool" />
+    <field name="header_main_title" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="logo_texture_name" type="string" />
+    <field name="pause_assists" type="bool" />
+    <field name="pause_difficulty" type="bool" />
+    <field name="pause_objectives" type="bool" />
+    <field name="pause_quit_button_string_id" type="string" />
+    <field name="pause_quit_label_string_id" type="string" />
+    <field name="pause_quit_stitle_string_id" type="string" />
+    <field name="pause_quit_title_string_id" type="string" />
+    <field name="pause_quit_transition_name" type="string" />
+    <field name="pause_replay" type="bool" />
+    <field name="pause_restart" type="bool" />
+    <field name="pause_restart_stitle_string_id" type="string" />
+    <field name="pause_restart_title_string_id" type="string" />
+    <field name="pause_rules" type="bool" />
+    <field name="quit_save_allowed" type="bool" />
+    <field name="results_restart_body_string_id" type="string" />
+    <field name="results_restart_title_string_id" type="string" />
+    <field name="type" type="string" />
+  </table>
+  <table name="units">
+    <field name="id" type="int" key="primary" />
+    <field name="name" type="string" />
+  </table>
+  <table name="unlock_objectives">
+    <field name="id" type="int" key="primary" />
+    <field name="objective_type" type="string" />
+    <field name="required_string" type="string" />
+    <field name="required_value" type="int" />
+    <field name="unlock_audio_speech" type="string" />
+  </table>
+  <table name="vehicle">
+    <field name="acceleration" type="int" />
+    <field name="ai_vehicle_drive_type" type="string" />
+    <field name="ai_vehicle_drive_type_string_id" type="string" />
+    <field name="ai_vehicle_type_config" type="string" />
+    <field name="ai_vehicle_type_statistics" type="string" />
+    <field name="ai_vehicle_type_track" type="string" />
+    <field name="allow_customise_wheels" type="bool" />
+    <field name="bhp" type="int" />
+    <field name="brakes" type="int" />
+    <field name="career_region_id" type="int" />
+    <field name="coming_soon" type="bool" />
+    <field name="cornering" type="int" />
+    <field name="cost" type="int" />
+    <field name="count_towards_achievement" type="bool" />
+    <field name="desirability" type="int" key="vehicle_desirability.id" />
+    <field name="disable_online" type="bool" />
+    <field name="dont_unlock_with_unlock_all_dlc" type="bool" />
+    <field name="easter_egg" type="bool" />
+    <field name="file_string" type="string" />
+    <field name="flashback_sweet_spot_size" type="float" />
+    <field name="flashback_sweet_spot_speed" type="float" />
+    <field name="grip" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="ignore_main_livery_unlock" type="bool" />
+    <field name="image_string" type="string" />
+    <field name="initially_owned" type="bool" />
+    <field name="initially_owned_online" type="bool" />
+    <field name="license_package" type="int" key="packages.id" />
+    <field name="livery_image_to_use" type="string" />
+    <field name="loaner_car" type="bool" />
+    <field name="max_maintained_dents" type="float" />
+    <field name="max_maintained_dirt" type="float" />
+    <field name="max_maintained_scratches" type="float" />
+    <field name="open_wheeler" type="bool" />
+    <field name="open_windscreen" type="bool" />
+    <field name="order_index" type="int" />
+    <field name="pack_value" type="int" />
+    <field name="party_mode_class" type="int" key="vehicle_class.id" />
+    <field name="purchasable" type="bool" />
+    <field name="purchase_price" type="int" />
+    <field name="race_type_id" type="int" key="race_type.id" />
+    <field name="swap_with_dummy" type="bool" />
+    <field name="top_speed" type="int" />
+    <field name="torque_in_nm" type="float" />
+    <field name="unlock_audio_speech" type="string" />
+    <field name="unlock_xp_tier" type="int" />
+    <field name="upgrades_unlock_xp_tier" type="int" />
+    <field name="use_alternative_handling_files" type="bool" />
+    <field name="use_in_all_events_dlc" type="bool" />
+    <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+    <field name="vehicle_drive_type_id" type="int" key="vehicle_drive_type.id" />
+    <field name="vehicle_interior_id" type="int" key="vehicle_interior.id" />
+    <field name="vehicle_model_id" type="int" key="vehicle_model.id" />
+    <field name="vehicle_skid_type_id" type="int" key="vehicle_skid_type.id" />
+    <field name="vehicle_tier_id" type="int" key="vehicle_tier.id" />
+    <field name="weight_in_kg" type="int" />
+    <field name="wheel_size_max" type="int" />
+    <field name="wheel_size_min" type="int" />
+  </table>
+  <table name="vehicle_base_history">
+    <field name="avarage_race_dnf_complete" type="float" />
+    <field name="avarage_race_length" type="int" />
+    <field name="avarage_race_mph" type="float" />
+    <field name="distance_damage_penalty_mod" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="mileage_max_high" type="int" />
+    <field name="mileage_max_low" type="int" />
+    <field name="mileage_min_high" type="int" />
+    <field name="mileage_min_low" type="int" />
+    <field name="name_string_id" type="string" />
+    <field name="race_finished_max_high" type="float" />
+    <field name="race_finished_max_low" type="float" />
+    <field name="race_finished_min_high" type="float" />
+    <field name="race_finished_min_low" type="float" />
+    <field name="race_podiums_max_high" type="float" />
+    <field name="race_podiums_max_low" type="float" />
+    <field name="race_podiums_min_high" type="float" />
+    <field name="race_podiums_min_low" type="float" />
+    <field name="race_started_avarage" type="float" />
+    <field name="race_started_avarage_variance" type="float" />
+    <field name="race_terminal_max_high" type="float" />
+    <field name="race_terminal_max_low" type="float" />
+    <field name="race_terminal_min_high" type="float" />
+    <field name="race_terminal_min_low" type="float" />
+    <field name="race_wins_max_high" type="float" />
+    <field name="race_wins_max_low" type="float" />
+    <field name="race_wins_min_high" type="float" />
+    <field name="race_wins_min_low" type="float" />
+    <field name="ware_drivetrain_max_high" type="float" />
+    <field name="ware_drivetrain_max_low" type="float" />
+    <field name="ware_drivetrain_min_high" type="float" />
+    <field name="ware_drivetrain_min_low" type="float" />
+    <field name="ware_engine_max_high" type="float" />
+    <field name="ware_engine_max_low" type="float" />
+    <field name="ware_engine_min_high" type="float" />
+    <field name="ware_engine_min_low" type="float" />
+    <field name="ware_handling_max_high" type="float" />
+    <field name="ware_handling_max_low" type="float" />
+    <field name="ware_handling_min_high" type="float" />
+    <field name="ware_handling_min_low" type="float" />
+    <enum label="used" value="1" />
+    <enum label="loan" value="2" />
+    <enum label="default" value="3" />
+  </table>
+  <table name="vehicle_challenge_extra">
+    <field name="id" type="int" key="primary" />
+    <field name="unlock_on_vehicle_choice_id" type="int" key="vehicle_unlock_choices.id" />
+    <field name="vehicle_challenge_id" type="int" key="vehicle_challenges.id" />
+  </table>
+  <table name="vehicle_challenge_to_unlock">
+    <field name="id" type="int" key="primary" />
+    <field name="vehicle_challenge_id" type="int" key="vehicle_challenges.id" />
+    <field name="vehicle_unlock_choice_id" type="int" key="vehicle_unlock_choices.id" />
+  </table>
+  <table name="vehicle_challenges">
+    <field name="difficulty_five_time" type="int" />
+    <field name="difficulty_four_time" type="int" />
+    <field name="difficulty_one_time" type="int" />
+    <field name="difficulty_three_time" type="int" />
+    <field name="difficulty_two_time" type="int" />
+    <field name="event_id" type="int" key="event.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="not_part_of_choice" type="bool" />
+    <field name="order_index" type="string" />
+    <field name="speech_event_id" type="string" />
+    <field name="vehicle_id" type="int" key="vehicle.id" />
+  </table>
+  <table name="vehicle_class">
+    <field name="avarage_race_mph_max" type="float" />
+    <field name="avarage_race_mph_min" type="float" />
+    <field name="codriver_calls" type="bool" />
+    <field name="file_string" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="ignore_main_livery_unlock" type="bool" />
+    <field name="image_file_name" type="string" />
+    <field name="is_custom_race_cup_class" type="bool" />
+    <field name="is_decade_specific" type="bool" />
+    <field name="is_party" type="bool" />
+    <field name="is_rally_class" type="bool" />
+    <field name="is_specific_decade" type="bool" />
+    <field name="is_standalone" type="bool" />
+    <field name="is_time_trial" type="bool" />
+    <field name="license_package" type="int" />
+    <field name="order_index" type="int" />
+    <field name="race_type_id" type="int" key="race_type.id" />
+    <field name="racing_style" type="int" key="racing_style.id" />
+    <field name="tier_id" type="int" key="vehicle_tier.id" />
+    <field name="tt_name_string_id" type="string" />
+    <field name="type_string_id" type="string" />
+    <field name="use_formation_start" type="bool" />
+    <field name="xlast_context_id" type="int" />
+  </table>
+  <table name="vehicle_damage_components">
+    <field name="base_percentage_cost" type="float" />
+    <field name="description_string_id" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="title_string_id" type="string" />
+    <enum label="engine" value="1" />
+    <enum label="drivetrain" value="2" />
+    <enum label="handling" value="3" />
+  </table>
+  <table name="vehicle_damage_config">
+    <field name="damage_penalty_drivetrain" type="float" />
+    <field name="damage_penalty_engine" type="float" />
+    <field name="damage_penalty_handling" type="float" />
+    <field name="distance_penalty_drivetrain" type="float" />
+    <field name="distance_penalty_engine" type="float" />
+    <field name="distance_penalty_handling" type="float" />
+    <field name="distance_wear_distance_step" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="max_wear_drivetrain" type="float" />
+    <field name="max_wear_engine" type="float" />
+    <field name="max_wear_handling" type="float" />
+  </table>
+  <table name="vehicle_desirability">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="points" type="int" />
+  </table>
+  <table name="vehicle_drive_type">
+    <field name="id" type="int" key="primary" />
+    <field name="string_id" type="string" />
+    <field name="type" type="string" />
+  </table>
+  <table name="vehicle_garage_config">
+    <field name="average_wear_per_m_drivetrain" type="float" />
+    <field name="average_wear_per_m_engine" type="float" />
+    <field name="average_wear_per_m_handling" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="miles_driven_per_loss" type="int" />
+    <field name="miles_driven_percentage_loss" type="float" />
+    <field name="preowned_percentage_loss" type="float" />
+    <field name="races_lost_percentage_loss" type="float" />
+    <field name="races_no_win_podium_percentage_loss" type="float" />
+    <field name="terminal_percentage_loss" type="float" />
+    <field name="tuning_percentage_rebate" type="float" />
+    <field name="upgrade_percentage_rebate" type="float" />
+  </table>
+  <table name="vehicle_garage_slots">
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" />
+    <field name="slots" type="int" />
+  </table>
+  <table name="vehicle_garage_slots_unlock">
+    <field name="cost" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="index" type="int" />
+    <field name="initially_owned" type="bool" />
+    <field name="license_package" type="int" key="packages.id" />
+    <field name="total_dxp_level" type="int" />
+  </table>
+  <table name="vehicle_interior">
+    <field name="file_string" type="string" />
+    <field name="gear_type" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="small_cockpit" type="bool" />
+  </table>
+  <table name="vehicle_livery">
+    <field name="file_string" type="string" />
+    <field name="glass_decal_set_id" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="is_default_livery" type="bool" />
+    <field name="license_package" type="int" key="packages.id" />
+    <field name="livery_name_string_id" type="string" />
+    <field name="livery_number" type="int" />
+    <field name="livery_number_digits" type="int" />
+    <field name="livery_number_invert" type="bool" />
+    <field name="livery_sponsors_id" type="int" />
+    <field name="main_decal_set_id" type="int" />
+    <field name="palette_id" type="int" />
+    <field name="showroom_career" type="bool" />
+    <field name="showroom_online" type="bool" />
+    <field name="showroom_priority_group" type="int" />
+    <field name="template_id" type="int" />
+    <field name="type" type="int" />
+    <field name="ui_name_string_id" type="string" />
+    <field name="unlock_group_id" type="int" key="vehicle_livery_unlock_group.id" />
+    <field name="vehicle_id" type="int" key="vehicle.id" />
+    <field name="wheel_set_id" type="int" />
+    <field name="wheel_size" type="int" />
+  </table>
+  <table name="vehicle_livery_colours">
+    <field name="colour_blue" type="int" />
+    <field name="colour_green" type="int" />
+    <field name="colour_red" type="int" />
+    <field name="cost" type="int" />
+    <field name="default_ui_shade" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="index" type="int" />
+    <field name="name_string_id" type="string" />
+    <field name="swatch_shade" type="int" />
+    <field name="unlock_xp_tier" type="int" />
+  </table>
+  <table name="vehicle_livery_decal_set">
+    <field name="decal_set_type" type="int" />
+    <field name="design_label" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" />
+    <field name="name_string_id" type="string" />
+    <field name="vehicle_id" type="int" />
+  </table>
+  <table name="vehicle_livery_decal_set_type">
+    <field name="id" type="int" key="primary" />
+    <field name="layout_string_id" type="string" />
+    <field name="show_in_ui" type="bool" />
+    <field name="type_name" type="string" />
+  </table>
+  <table name="vehicle_livery_generic_setups">
+    <field name="decal_set_type" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="livery_number" type="int" />
+    <field name="livery_number_digits" type="int" />
+    <field name="livery_number_inverted" type="bool" />
+    <field name="palette_id" type="int" />
+    <field name="template_id" type="int" />
+    <field name="wheel_set_id" type="int" />
+    <field name="wheel_size" type="int" />
+  </table>
+  <table name="vehicle_livery_paint_type">
+    <field name="cost" type="int" />
+    <field name="dual_colours" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" />
+    <field name="name_string_id" type="string" />
+    <field name="unlock_xp_tier" type="int" />
+  </table>
+  <table name="vehicle_livery_palette">
+    <field name="black_colour_1" type="int" />
+    <field name="black_colour_2" type="int" />
+    <field name="black_paint_type_id" type="int" />
+    <field name="black_shade_1" type="int" />
+    <field name="black_shade_2" type="int" />
+    <field name="blue_colour_1" type="int" />
+    <field name="blue_colour_2" type="int" />
+    <field name="blue_paint_type_id" type="int" />
+    <field name="blue_shade_1" type="int" />
+    <field name="blue_shade_2" type="int" />
+    <field name="design_label" type="string" />
+    <field name="driver_colour_1" type="int" />
+    <field name="driver_shade_1" type="int" />
+    <field name="green_colour_1" type="int" />
+    <field name="green_colour_2" type="int" />
+    <field name="green_paint_type_id" type="int" />
+    <field name="green_shade_1" type="int" />
+    <field name="green_shade_2" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" />
+    <field name="red_colour_1" type="int" />
+    <field name="red_colour_2" type="int" />
+    <field name="red_paint_type_id" type="int" />
+    <field name="red_shade_1" type="int" />
+    <field name="red_shade_2" type="int" />
+    <field name="wheel_colour_1" type="int" />
+    <field name="wheel_colour_2" type="int" />
+    <field name="wheel_paint_type_id" type="int" />
+    <field name="wheel_shade_1" type="int" />
+    <field name="wheel_shade_2" type="int" />
+  </table>
+  <table name="vehicle_livery_sponsors">
+    <field name="club_id" type="int" />
+    <field name="decal_set_slot" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="livery_number" type="int" />
+    <field name="livery_number_digits" type="int" />
+    <field name="livery_number_inverted" type="bool" />
+    <field name="name_string_id" type="string" />
+    <field name="slot_0_decal" type="int" />
+    <field name="slot_0_flip" type="bool" />
+    <field name="slot_0_sponsor_id" type="int" />
+    <field name="slot_1_decal" type="int" />
+    <field name="slot_1_flip" type="bool" />
+    <field name="slot_1_sponsor_id" type="int" />
+    <field name="slot_10_decal" type="int" />
+    <field name="slot_10_flip" type="bool" />
+    <field name="slot_10_sponsor_id" type="int" />
+    <field name="slot_11_decal" type="int" />
+    <field name="slot_11_flip" type="bool" />
+    <field name="slot_11_sponsor_id" type="int" />
+    <field name="slot_2_decal" type="int" />
+    <field name="slot_2_flip" type="bool" />
+    <field name="slot_2_sponsor_id" type="int" />
+    <field name="slot_3_decal" type="int" />
+    <field name="slot_3_flip" type="bool" />
+    <field name="slot_3_sponsor_id" type="int" />
+    <field name="slot_4_decal" type="int" />
+    <field name="slot_4_flip" type="bool" />
+    <field name="slot_4_sponsor_id" type="int" />
+    <field name="slot_5_decal" type="int" />
+    <field name="slot_5_flip" type="bool" />
+    <field name="slot_5_sponsor_id" type="int" />
+    <field name="slot_6_decal" type="int" />
+    <field name="slot_6_flip" type="bool" />
+    <field name="slot_6_sponsor_id" type="int" />
+    <field name="slot_7_decal" type="int" />
+    <field name="slot_7_flip" type="bool" />
+    <field name="slot_7_sponsor_id" type="int" />
+    <field name="slot_8_decal" type="int" />
+    <field name="slot_8_flip" type="bool" />
+    <field name="slot_8_sponsor_id" type="int" />
+    <field name="slot_9_decal" type="int" />
+    <field name="slot_9_flip" type="bool" />
+    <field name="slot_9_sponsor_id" type="int" />
+    <field name="sponsor_id" type="int" />
+    <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+  </table>
+  <table name="vehicle_livery_template">
+    <field name="cost" type="int" />
+    <field name="design_label" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" />
+    <field name="name_string_id" type="string" />
+    <field name="template_type_id" type="int" key="vehicle_livery_template_type.id" />
+    <field name="unlock_xp_tier" type="int" />
+  </table>
+  <table name="vehicle_livery_template_type">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+    <field name="show_in_ui" type="bool" />
+  </table>
+  <table name="vehicle_livery_types">
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <enum label="manufacturer" value="1" />
+    <enum label="user" value="2" />
+    <enum label="other" value="4" />
+    <enum label="championship" value="5" />
+    <enum label="cup_a" value="6" />
+    <enum label="cup_b" value="7" />
+  </table>
+  <table name="vehicle_livery_unlock_group">
+    <field name="id" type="int" key="primary" />
+    <field name="string_id" type="string" />
+    <field name="total_dxp_level" type="int" />
+  </table>
+  <table name="vehicle_livery_wheel_set">
+    <field name="cost" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="unlock_xp_tier" type="int" />
+  </table>
+  <table name="vehicle_livery_wheel_size">
+    <field name="actual_size" type="float" />
+    <field name="cost" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="size_id" type="int" />
+    <field name="unlock_xp_tier" type="int" />
+  </table>
+  <table name="vehicle_max_stats">
+    <field name="bhp" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="torque_in_nm" type="float" />
+    <field name="weight_in_kg" type="int" />
+  </table>
+  <table name="vehicle_model">
+    <field name="all_vehicles_achievement" type="bool" />
+    <field name="camera_set_id" type="int" key="camera_sets.id" />
+    <field name="full_name_string_id" type="string" />
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" key="packages.id" />
+    <field name="manufacturer_id" type="int" key="manufacturer.id" />
+    <field name="name_in_veh_coll_string_id" type="string" />
+    <field name="short_name_string_id" type="string" />
+    <field name="super_short_name_string_id" type="string" />
+  </table>
+  <table name="vehicle_mp_select_restrict">
+    <field name="id" type="int" key="primary" />
+    <field name="vehicle_id" type="int" key="vehicle.id" />
+  </table>
+  <table name="vehicle_skid_type">
+    <field name="id" type="int" key="primary" />
+    <field name="type" type="string" />
+  </table>
+  <table name="vehicle_tier">
+    <field name="corner_cutting_class" type="int" key="vehicle_class.id" />
+    <field name="display_test_drive_event" type="bool" />
+    <field name="id" type="int" key="primary" />
+    <field name="license_package" type="int" key="packages.id" />
+    <field name="name_string_id" type="string" />
+    <field name="order_index" type="int" />
+    <field name="texture_id" type="string" />
+    <enum label="any" value="1" />
+    <enum label="vehicle_tier_1" value="2" />
+    <enum label="vehicle_tier_2" value="3" />
+    <enum label="vehicle_tier_3" value="4" />
+    <enum label="vehicle_tier_4" value="7" />
+    <enum label="vehicle_tier_5" value="8" />
+  </table>
+  <table name="vehicle_unlock_choices">
+    <field name="event_id" type="int" key="event.id" />
+    <field name="event_pool_id" type="int" key="event_pool.id" />
+    <field name="fanbase" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="phase_id" type="int" key="phase.id" />
+    <field name="speech_event_id" type="string" />
+  </table>
+  <table name="vehicle_upgrade_packages">
+    <field name="cost" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="name_string_id" type="string" />
+    <field name="package_name" type="string" />
+    <field name="physics_id" type="int" />
+    <field name="power" type="float" />
+    <field name="re_application_cost" type="int" />
+    <field name="tier_contribution" type="float" />
+    <field name="tier_id" type="int" />
+    <field name="top_speed" type="float" />
+    <field name="unlock_xp_tier" type="int" />
+    <field name="weight" type="float" />
+    <field name="zero_to_sixty" type="float" />
+  </table>
+  <table name="vehicle_upgrade_tuning_cost">
+    <field name="brake_bias_1" type="int" />
+    <field name="brake_bias_2" type="int" />
+    <field name="brake_bias_3" type="int" />
+    <field name="brakes" type="int" />
+    <field name="clutch" type="int" />
+    <field name="differential_1" type="int" />
+    <field name="differential_2" type="int" />
+    <field name="differential_3" type="int" />
+    <field name="downforce_1" type="int" />
+    <field name="downforce_2" type="int" />
+    <field name="downforce_3" type="int" />
+    <field name="engine" type="int" />
+    <field name="flywheel" type="int" />
+    <field name="gears_1" type="int" />
+    <field name="gears_2" type="int" />
+    <field name="gears_3" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="ride_height_1" type="int" />
+    <field name="ride_height_2" type="int" />
+    <field name="ride_height_3" type="int" />
+    <field name="suspension_front_1" type="int" />
+    <field name="suspension_front_2" type="int" />
+    <field name="suspension_front_3" type="int" />
+    <field name="suspension_rear_1" type="int" />
+    <field name="suspension_rear_2" type="int" />
+    <field name="suspension_rear_3" type="int" />
+    <field name="vehicle_id" type="int" />
+    <field name="weight" type="int" />
+  </table>
+  <table name="vehicle_upgrade_tuning_unlock">
+    <field name="brake_bias_1" type="int" />
+    <field name="brake_bias_2" type="int" />
+    <field name="brake_bias_3" type="int" />
+    <field name="brakes" type="int" />
+    <field name="clutch" type="int" />
+    <field name="differential_1" type="int" />
+    <field name="differential_2" type="int" />
+    <field name="differential_3" type="int" />
+    <field name="downforce_1" type="int" />
+    <field name="downforce_2" type="int" />
+    <field name="downforce_3" type="int" />
+    <field name="engine" type="int" />
+    <field name="flywheel" type="int" />
+    <field name="gears_1" type="int" />
+    <field name="gears_2" type="int" />
+    <field name="gears_3" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="ride_height_1" type="int" />
+    <field name="ride_height_2" type="int" />
+    <field name="ride_height_3" type="int" />
+    <field name="suspension_front_1" type="int" />
+    <field name="suspension_front_2" type="int" />
+    <field name="suspension_front_3" type="int" />
+    <field name="suspension_rear_1" type="int" />
+    <field name="suspension_rear_2" type="int" />
+    <field name="suspension_rear_3" type="int" />
+    <field name="vehicle_id" type="int" />
+    <field name="weight" type="int" />
+  </table>
+  <table name="vehicle_xp_bonus">
+    <field name="bonus_percentage" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="level" type="int" />
+  </table>
+  <table name="video_subthemes">
+    <field name="id" type="int" key="primary" />
+    <field name="parent_theme_id" type="int" />
+    <field name="subtheme_string_id" type="string" />
+  </table>
+  <table name="video_theme">
+    <field name="id" type="int" key="primary" />
+    <field name="profile_name" type="string" />
+    <field name="subtheme_id" type="int" />
+    <field name="theme_string_id" type="string" />
+  </table>
+  <table name="weather_types">
+    <field name="ai_weather_modifier" type="float" />
+    <field name="id" type="int" key="primary" />
+    <field name="weather_base" type="int" key="weather_types_base.id" />
+    <field name="weather_id" type="string" />
+  </table>
+  <table name="weather_types_base">
+    <field name="id" type="int" key="primary" />
+    <field name="weather_name" type="string" />
+  </table>
+  <table name="world_record">
+    <field name="driver_id" type="int" key="driver.id" />
+    <field name="game_mode_id" type="int" key="game_mode.id" />
+    <field name="id" type="int" key="primary" />
+    <field name="points" type="int" />
+    <field name="race_type_id" type="int" />
+    <field name="track_model_id" type="int" key="track_model.id" />
+    <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+    <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+    <field name="world_record" type="float" />
+  </table>
+  <table name="xp_boost">
+    <field name="career_dxp_boost" type="int" />
+    <field name="id" type="int" key="primary" />
+    <field name="online_cash_boost" type="int" />
+    <field name="online_dxp_boost" type="int" />
+    <field name="online_vxp_boost" type="int" />
+  </table>
+</schema>

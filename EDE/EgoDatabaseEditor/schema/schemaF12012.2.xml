@@ -1,0 +1,901 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<schema>
+  <table name="achievements">
+    <field name="achievement_type_id" description="" type="int" key="achievements_type.id" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="name_string_id" description="" type="string" size="29" />
+    <field name="order_index" description="" type="int" />
+    <field name="ps3_id" description="" type="int" />
+    <field name="required_value" description="" type="int" />
+    <field name="steam_id" description="" type="int" />
+    <field name="xbox_id" description="" type="int" />
+  </table>
+  <table name="achievements_type">
+    <field name="id" description="" type="int" key="primary" />
+    <field name="type_name" description="" type="string" size="25" />
+  </table>
+  <table name="ai_driver">
+    <field name="Aggression" description="" type="float" />
+    <field name="Bad_Day_Chance" description="" type="float" />
+    <field name="Control" description="" type="float" />
+    <field name="Good_Day_Chance" description="" type="float" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="Mechanical_Failures" description="" type="float" />
+    <field name="mind_games_effectiveness" description="" type="float" />
+    <field name="Mistakes" description="" type="float" />
+    <field name="name" description="" type="string" size="18" />
+    <field name="Reaction" description="" type="float" />
+    <field name="Speed_In" description="" type="float" />
+    <field name="Speed_Out" description="" type="float" />
+    <field name="Variance" description="" type="float" />
+    <field name="Virtual_Performance" description="Used to generate artificial results, similar field in vehicle" type="float" />
+    <field name="wet_weather_ability" description="Driver skill level for handling wet conditions expressed as a percentage." type="float" />
+  </table>
+  <table name="ai_engine_power_per_tier">
+    <field name="Team" description="" type="int" key="primary" />
+    <field name="Tier1" description="" type="int" />
+    <field name="Tier2" description="" type="int" />
+    <field name="Tier3" description="" type="int" />
+    <field name="Tier4" description="" type="int" />
+    <field name="Tier5" description="" type="int" />
+  </table>
+  <table name="ai_performance_tier_scenarios">
+    <field name="bhp" description="The amount of change to the engine output" type="int" />
+    <field name="positive_chance" description="a percentage chance that the change will be positive" type="int" />
+    <field name="scenario" description="" type="string" size="15" />
+    <field name="trigger_chance" description="a percentage chance that the change will happen" type="int" />
+    <field name="uid" description="" type="int" key="primary" />
+  </table>
+  <table name="ai_performance_tier_values">
+    <field name="bhp" description="The amount of change to the engine output" type="int" />
+    <field name="duration" description="The number of race weekends this occurs over" type="int" />
+    <field name="tier" description="The is of the tier, 1..5" type="int" key="primary" />
+    <field name="trigger_change" description="The percentage change that the performance variation will be applied" type="int" />
+  </table>
+  <table name="ai_performance_variation_tier1">
+    <field name="Race1" description="" type="int" />
+    <field name="Race10" description="" type="int" />
+    <field name="Race11" description="" type="int" />
+    <field name="Race12" description="" type="int" />
+    <field name="Race13" description="" type="int" />
+    <field name="Race14" description="" type="int" />
+    <field name="Race15" description="" type="int" />
+    <field name="Race16" description="" type="int" />
+    <field name="Race17" description="" type="int" />
+    <field name="Race18" description="" type="int" />
+    <field name="Race19" description="" type="int" />
+    <field name="Race2" description="" type="int" />
+    <field name="Race20" description="" type="int" />
+    <field name="Race3" description="" type="int" />
+    <field name="Race4" description="" type="int" />
+    <field name="Race5" description="" type="int" />
+    <field name="Race6" description="" type="int" />
+    <field name="Race7" description="" type="int" />
+    <field name="Race8" description="" type="int" />
+    <field name="Race9" description="" type="int" />
+    <field name="Team" description="" type="int" key="primary" />
+  </table>
+  <table name="ai_performance_variation_tier2">
+    <field name="Race1" description="" type="int" />
+    <field name="Race10" description="" type="int" />
+    <field name="Race11" description="" type="int" />
+    <field name="Race12" description="" type="int" />
+    <field name="Race13" description="" type="int" />
+    <field name="Race14" description="" type="int" />
+    <field name="Race15" description="" type="int" />
+    <field name="Race16" description="" type="int" />
+    <field name="Race17" description="" type="int" />
+    <field name="Race18" description="" type="int" />
+    <field name="Race19" description="" type="int" />
+    <field name="Race2" description="" type="int" />
+    <field name="Race20" description="" type="int" />
+    <field name="Race3" description="" type="int" />
+    <field name="Race4" description="" type="int" />
+    <field name="Race5" description="" type="int" />
+    <field name="Race6" description="" type="int" />
+    <field name="Race7" description="" type="int" />
+    <field name="Race8" description="" type="int" />
+    <field name="Race9" description="" type="int" />
+    <field name="Team" description="" type="int" key="primary" />
+  </table>
+  <table name="ai_performance_variation_tier3">
+    <field name="Race1" description="" type="int" />
+    <field name="Race10" description="" type="int" />
+    <field name="Race11" description="" type="int" />
+    <field name="Race12" description="" type="int" />
+    <field name="Race13" description="" type="int" />
+    <field name="Race14" description="" type="int" />
+    <field name="Race15" description="" type="int" />
+    <field name="Race16" description="" type="int" />
+    <field name="Race17" description="" type="int" />
+    <field name="Race18" description="" type="int" />
+    <field name="Race19" description="" type="int" />
+    <field name="Race2" description="" type="int" />
+    <field name="Race20" description="" type="int" />
+    <field name="Race3" description="" type="int" />
+    <field name="Race4" description="" type="int" />
+    <field name="Race5" description="" type="int" />
+    <field name="Race6" description="" type="int" />
+    <field name="Race7" description="" type="int" />
+    <field name="Race8" description="" type="int" />
+    <field name="Race9" description="" type="int" />
+    <field name="Team" description="" type="int" key="primary" />
+  </table>
+  <table name="ai_performance_variation_tier4">
+    <field name="Race1" description="" type="int" />
+    <field name="Race10" description="" type="int" />
+    <field name="Race11" description="" type="int" />
+    <field name="Race12" description="" type="int" />
+    <field name="Race13" description="" type="int" />
+    <field name="Race14" description="" type="int" />
+    <field name="Race15" description="" type="int" />
+    <field name="Race16" description="" type="int" />
+    <field name="Race17" description="" type="int" />
+    <field name="Race18" description="" type="int" />
+    <field name="Race19" description="" type="int" />
+    <field name="Race2" description="" type="int" />
+    <field name="Race20" description="" type="int" />
+    <field name="Race3" description="" type="int" />
+    <field name="Race4" description="" type="int" />
+    <field name="Race5" description="" type="int" />
+    <field name="Race6" description="" type="int" />
+    <field name="Race7" description="" type="int" />
+    <field name="Race8" description="" type="int" />
+    <field name="Race9" description="" type="int" />
+    <field name="Team" description="" type="int" key="primary" />
+  </table>
+  <table name="ai_performance_variation_tier5">
+    <field name="Race1" description="" type="int" />
+    <field name="Race10" description="" type="int" />
+    <field name="Race11" description="" type="int" />
+    <field name="Race12" description="" type="int" />
+    <field name="Race13" description="" type="int" />
+    <field name="Race14" description="" type="int" />
+    <field name="Race15" description="" type="int" />
+    <field name="Race16" description="" type="int" />
+    <field name="Race17" description="" type="int" />
+    <field name="Race18" description="" type="int" />
+    <field name="Race19" description="" type="int" />
+    <field name="Race2" description="" type="int" />
+    <field name="Race20" description="" type="int" />
+    <field name="Race3" description="" type="int" />
+    <field name="Race4" description="" type="int" />
+    <field name="Race5" description="" type="int" />
+    <field name="Race6" description="" type="int" />
+    <field name="Race7" description="" type="int" />
+    <field name="Race8" description="" type="int" />
+    <field name="Race9" description="" type="int" />
+    <field name="Team" description="" type="int" key="primary" />
+  </table>
+  <table name="ai_tier_characteristics">
+    <field name="Control" description="" type="float" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="Speed_In" description="" type="float" />
+    <field name="Speed_Out" description="" type="float" />
+    <field name="Tier" description="" type="int" />
+    <field name="Virtual_Performance" description="" type="float" />
+  </table>
+  <table name="audio_name">
+    <field name="greeting_id" description="" type="string" size="12" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="name_string_id" description="" type="string" size="10" />
+    <field name="sample_id" description="" type="string" size="7" />
+  </table>
+  <table name="audio_name_category">
+    <field name="designer_aid" description="" type="string" size="23" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="name_string_id" description="" type="string" size="22" />
+    <field name="order_index" description="" type="int" />
+  </table>
+  <table name="audio_name_category_to_name">
+    <field name="audio_name_category_id" description="" type="int" key="audio_name_category.id" />
+    <field name="audio_name_id" description="" type="int" />
+    <field name="id" description="" type="int" key="primary" />
+  </table>
+  <table name="audio_name_language_to_category">
+    <field name="audio_name_category_id" description="" type="int" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="language_id" description="" type="int" />
+  </table>
+  <table name="calendar_race_types">
+    <field name="descriptive_string" description="" type="string" size="25" />
+    <field name="ID" description="" type="int" key="primary" />
+  </table>
+  <table name="canned_events_driver_modifiers">
+    <field name="brake_early" description="Driver based adjustment percentage for the Brake Early event trigger" type="float" />
+    <field name="brake_failure" description="Driver based adjustment percentage for the Brake Failure event trigger" type="float" />
+    <field name="brake_late" description="Driver based adjustment percentage for the Brake Late event trigger" type="float" />
+    <field name="brake_lock" description="Driver based adjustment percentage for the Brake Lock event trigger" type="float" />
+    <field name="brake_problem" description="Driver based adjustment percentage for the Brake Problem event trigger" type="float" />
+    <field name="driver" description="Driver ID, referenced from f1drivers table." type="int" />
+    <field name="engine_failure" description="Driver based adjustment percentage for the Engine Failure event trigger" type="float" />
+    <field name="engine_problem" description="Driver based adjustment percentage for the Engine Problem event trigger" type="float" />
+    <field name="excessive_throttle" description="Driver based adjustment percentage for the Excessive Throttle event trigger" type="float" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="tyre_failure" description="Driver based adjustment percentage for the Tyre Failure event trigger" type="float" />
+  </table>
+  <table name="canned_events_round_modifiers">
+    <field name="brake_early" description="Round based adjustment percentage for the Brake Early event trigger" type="float" />
+    <field name="brake_failure" description="Round based adjustment percentage for the Brake Failure event trigger" type="float" />
+    <field name="brake_late" description="Round based adjustment percentage for the Brake Late event trigger" type="float" />
+    <field name="brake_lock" description="Round based adjustment percentage for the Brake Lock event trigger" type="float" />
+    <field name="brake_problem" description="Round based adjustment percentage for the Brake Problem event trigger" type="float" />
+    <field name="engine_failure" description="Round based adjustment percentage for the Engine Failure event trigger" type="float" />
+    <field name="engine_problem" description="Round based adjustment percentage for the Engine Problem event trigger" type="float" />
+    <field name="excessive_throttle" description="Round based adjustment percentage for the Excessive Throttle event trigger" type="float" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="round_number" description="Round number defining the position of the event in the season" type="int" />
+    <field name="tyre_failure" description="Round based adjustment percentage for the Tyre Failure event trigger" type="float" />
+  </table>
+  <table name="canned_events_team_modifiers">
+    <field name="brake_early" description="Team based adjustment percentage for the Brake Early event trigger" type="float" />
+    <field name="brake_failure" description="Team based adjustment percentage for the Brake Failure event trigger" type="float" />
+    <field name="brake_late" description="Team based adjustment percentage for the Brake Late event trigger" type="float" />
+    <field name="brake_lock" description="Team based adjustment percentage for the Brake Lock event trigger" type="float" />
+    <field name="brake_problem" description="Team based adjustment percentage for the Brake Problem event trigger" type="float" />
+    <field name="engine_failure" description="Team based adjustment percentage for the Engine Failure event trigger" type="float" />
+    <field name="engine_problem" description="Team based adjustment percentage for the Engine Problem event trigger" type="float" />
+    <field name="excessive_throttle" description="Team based adjustment percentage for the Excessive Throttle event trigger" type="float" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="team" description="Track ID, referenced from track table." type="int" />
+    <field name="tyre_failure" description="Team based adjustment percentage for the Tyre Failure event trigger" type="float" />
+  </table>
+  <table name="canned_events_track_modifiers">
+    <field name="brake_early" description="Track based adjustment percentage for the Brake Early event trigger" type="float" />
+    <field name="brake_failure" description="Track based adjustment percentage for the Brake Failure event trigger" type="float" />
+    <field name="brake_late" description="Track based adjustment percentage for the Brake Late event trigger" type="float" />
+    <field name="brake_lock" description="Track based adjustment percentage for the Brake Lock event trigger" type="float" />
+    <field name="brake_problem" description="Track based adjustment percentage for the Brake Problem event trigger" type="float" />
+    <field name="engine_failure" description="Track based adjustment percentage for the Engine Failure event trigger" type="float" />
+    <field name="engine_problem" description="Track based adjustment percentage for the Engine Problem event trigger" type="float" />
+    <field name="excessive_throttle" description="Track based adjustment percentage for the Excessive Throttle event trigger" type="float" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="track" description="Track ID, referenced from track table." type="int" />
+    <field name="tyre_failure" description="Track based adjustment percentage for the Tyre Failure event trigger" type="float" />
+  </table>
+  <table name="car_handling_levels">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="Level" description="" type="string" size="5" />
+  </table>
+  <table name="cash_threshold_cash">
+    <field name="cash" description="" type="int" />
+    <field name="cash_threshold" description="" type="int" key="primary" />
+  </table>
+  <table name="cash_threshold_max_per_tier">
+    <field name="max_cash_threshold" description="" type="int" />
+    <field name="tier" description="" type="int" key="primary" />
+  </table>
+  <table name="continents">
+    <field name="file_string" description="" type="string" size="13" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="other_type" description="" type="bool" />
+  </table>
+  <table name="currency">
+    <field name="conversion_rate" description="" type="float" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="name_string_id" description="" type="string" size="15" />
+    <field name="separator_string_id" description="" type="string" size="15" />
+    <field name="symbol_string_id" description="" type="string" size="14" />
+  </table>
+  <table name="default_car_livery">
+    <field name="garage_car" description="" type="int" key="vehicle_livery.id" />
+    <field name="id" description="" type="int" key="primary" />
+  </table>
+  <table name="default_track_model">
+    <field name="id" description="" type="int" key="primary" />
+    <field name="track_model" description="" type="int" key="track_model.id" />
+  </table>
+  <table name="difficulty">
+    <field name="ABS" description="" type="int" />
+    <field name="ai_level" description="" type="int" key="lookup_difficulty.ID" />
+    <field name="braking" description="" type="int" />
+    <field name="car_damage" description="" type="int" />
+    <field name="difficulty" description="" type="int" key="primary" />
+    <field name="dynamic_racing_line" description="" type="int" />
+    <field name="flashbacks" description="" type="int" />
+    <field name="fuel_simulation" description="" type="int" />
+    <field name="gearbox" description="" type="int" />
+    <field name="pit_box_control" description="" type="int" />
+    <field name="pit_limiter" description="" type="int" />
+    <field name="rules_flags" description="" type="int" />
+    <field name="stability_management" description="" type="int" />
+    <field name="steering" description="" type="int" key="lookup_steering_assist.ID" />
+    <field name="traction_control" description="" type="int" key="lookup_traction_control.ID" />
+    <field name="tyre_wear" description="" type="int" />
+  </table>
+  <table name="driver_rank_required_points">
+    <field name="rank" description="" type="int" key="primary" />
+    <field name="required_points_lower_bound" description="" type="int" />
+  </table>
+  <table name="driver_starting_rank">
+    <field name="driver" description="" type="int" key="f1drivers.id" />
+    <field name="five_year_contract" description="Driver starting rank for five year contract" type="int" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="seven_year_contract" description="Driver starting rank for seven year contract" type="int" />
+    <field name="three_year_contract" description="Driver starting rank for three year contract" type="int" />
+  </table>
+  <table name="dynamic_environment_settings">
+    <field name="clear_state_ratio" description="The ratio, percentage, of a clear state." type="float" />
+    <field name="dry_time" description="The time, in seconds, required to dry the track when there is no cloud at all." type="float" />
+    <field name="heavy_rain_state_ratio" description="The ratio, percentage, of a heavy rain state." type="float" />
+    <field name="ID" description="Automaticaly generated identifier." type="int" key="primary" />
+    <field name="light_cloud_state_ratio" description="The ratio, percentage, of a light cloud state." type="float" />
+    <field name="light_rain_state_ratio" description="The ratio, percentage, of a light rain state." type="float" />
+    <field name="max_humidity" description="The maximum absolute humidity." type="float" />
+    <field name="max_state_duration" description="The maximum time a state lasts in minutes." type="int" />
+    <field name="max_temp" description="The maximum temperature in celcius." type="float" />
+    <field name="max_transition_duration" description="The maximum time taken to change state in minutes." type="int" />
+    <field name="max_wind_speed" description="The maximum wind speed in m/s." type="float" />
+    <field name="min_humidity" description="The minumum absolute humidity." type="float" />
+    <field name="min_state_duration" description="The minimum time a state lasts in minutes." type="int" />
+    <field name="min_temp" description="The minimum temperature in celcius." type="float" />
+    <field name="min_transition_duration" description="The minimum time taken to change state in minutes." type="int" />
+    <field name="min_wind_speed" description="The minimum wind speed in m/s." type="float" />
+    <field name="overcast_state_ratio" description="The ratio, percentage, of a overcast state." type="float" />
+    <field name="soak_time" description="The time, in seconds, required to soak the track at full rain intensity." type="float" />
+    <field name="track" description="Track ID, referenced from track table." type="int" />
+  </table>
+  <table name="engine_manufacturer">
+    <field name="bad_engine_chance" description="" type="int" />
+    <field name="good_engine_chance" description="" type="int" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="Manufacturer" description="" type="string" size="13" />
+    <field name="max_bad_engine" description="" type="int" />
+    <field name="max_good_engine" description="" type="int" />
+    <field name="min_bad_engine" description="" type="int" />
+    <field name="min_good_engine" description="" type="int" />
+    <field name="nationality_id" description="" type="int" key="nationality.id" />
+    <field name="Power" description="" type="int" />
+  </table>
+  <table name="f1drivers">
+    <field name="audio_key_driver_number" description="Not sure what this is for, see NOTE1 in rd_audio_game_interface.cpp (AJG: used in the speech system to identify which driver the race engineer is talking about)" type="int" />
+    <field name="car_number" description="driver number as used in the driver selection screens" type="int" />
+    <field name="driver_voice" description="See NOTE2 in rd_audio_game_interface.cpp" type="int" />
+    <field name="fake_qualifying_ability" description="Will be used to generate grid [ositions for race only events" type="int" />
+    <field name="favourite_track" description="Stats boost will be applied to this driver if it is their favourite track" type="int" key="track_model.id" />
+    <field name="file_name" description="File name safe version of the drivers name" type="string" size="18" />
+    <field name="first_name_string_id" description="" type="string" size="10" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="nationality_id" description="" type="int" key="nationality.id" />
+    <field name="pit_speech_filename" description="The filename for the pit speech for this driver (if any)" type="string" size="0" />
+    <field name="short_name_string_id" description="" type="string" size="3" />
+    <field name="stat_previous_year_standing" description="Based on car numbers for the start of the current season" type="int" />
+    <field name="stats_driver_level" description="" type="int" />
+    <field name="stats_grand_prix" description="number of grand prix the driver has participated in" type="int" />
+    <field name="stats_highest_grid_pos" description="REMOVED FOR 2012" type="int" />
+    <field name="stats_highest_grid_pos_count" description="REMOVED FOR 2012" type="int" />
+    <field name="stats_highest_race_finish" description="REMOVED FOR 2012" type="int" />
+    <field name="stats_highest_race_finish_count" description="REMOVED FOR 2012" type="int" />
+    <field name="stats_podiums" description="number of 3rds, 2nds or 1sts achieved" type="int" />
+    <field name="stats_points" description="REMOVED FOR 2012" type="float" />
+    <field name="stats_pole_positions" description="Number of times the driver has started in pole position" type="int" />
+    <field name="stats_wins" description="number of race wins" type="int" />
+    <field name="stats_world_championships" description="number of world championship wins" type="int" />
+    <field name="surname_name_string_id" description="" type="string" size="11" />
+  </table>
+  <table name="f1drivers_f1teams">
+    <field name="ai_driver" description="" type="int" key="ai_driver.id" />
+    <field name="default_grid_position" description="Default grid position, currently used for GP mode" type="int" />
+    <field name="f1driver" description="" type="int" key="f1drivers.id" />
+    <field name="f1team" description="" type="int" key="f1teams.id" />
+    <field name="firstdriver" description="If yes then this is the first driver for the team, otherwise the second driver" type="bool" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="livery" description="The livery for this driver on this team this year" type="int" key="vehicle_livery.id" />
+    <field name="season" description="The year this pairing existed in" type="int" />
+  </table>
+  <table name="f1teams">
+    <field name="base_objective" description="Position in which teams expect drivers to finish. 0 is first. First drivers will be asked to finish 1 place above this" type="int" />
+    <field name="billboard_texture_id" description="Texture ID used for the billboards" type="int" />
+    <field name="boss_firstname" description="Team Principal First Name" type="string" size="34" />
+    <field name="boss_surname" description="Team Principal Surname" type="string" size="32" />
+    <field name="engine_manufacturer" description="" type="int" key="engine_manufacturer.ID" />
+    <field name="engine_power" description="in bhp" type="float" />
+    <field name="engine_string" description="Specified the language data string to use for this teams engine" type="string" size="26" />
+    <field name="file_string_id" description="the filename of team-related paddock objects" type="string" size="10" />
+    <field name="front_tyre_wear" description="Tyre wear modifier. 0.95=5% reduced wear, 1.05 = 5% more wear, 1.0=normal wear" type="float" />
+    <field name="garage_id" description="Position of garage box in pits" type="int" />
+    <field name="has_kers" description="Specifies wether a team has KERS by default" type="bool" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="nationality_id" description="" type="int" key="nationality.id" />
+    <field name="pitstop_highest_range" description="Worst case pitstop time offset" type="float" />
+    <field name="pitstop_lowest_range" description="Best case pitstop time offset" type="float" />
+    <field name="prestige" description="How desirable a team is to race with. Used when assigning cars to player in the MP game" type="int" />
+    <field name="rear_tyre_wear" description="Tyre wear modifier. 0.95=5% reduced wear, 1.05 = 5% more wear, 1.0=normal wear" type="float" />
+    <field name="short_name" description="3-letter team name" type="string" size="3" />
+    <field name="sponsor_index" description="Index into the sponsor system to determine textures (which needs a single character)" type="string" size="0" />
+    <field name="stat_championship_wins" description="Number of championship wins the team has had" type="int" />
+    <field name="stat_constructor_wins" description="Number of constructor championships the team has won" type="int" />
+    <field name="stat_previous_year_standing" description="" type="int" />
+    <field name="stat_team_boss" description="Team Principal" type="string" size="24" />
+    <field name="tier" description="This teams tier, there are five tiers, the 'better' teams are in tier 1, the 'worst' in 5" type="int" />
+    <field name="virtual_performance" description="scales virtual session times by this value" type="float" />
+  </table>
+  <table name="f1teams_team_stats">
+    <field name="stats_base" description="Base" type="string" size="24" />
+    <field name="stats_chassis" description="Chassis Name" type="string" size="27" />
+    <field name="stats_constructors_championships" description="Constructors Championships" type="int" />
+    <field name="stats_drivers_championships" description="Drivers Championships" type="int" />
+    <field name="stats_fastest_laps" description="Fastest Laps" type="int" />
+    <field name="stats_highest_race_finish" description="Highest Race Finish" type="string" size="8" />
+    <field name="stats_podium_finishes" description="Not Used" type="int" />
+    <field name="stats_points" description="Total Points" type="float" />
+    <field name="stats_pole_positions" description="Pole Positions" type="int" />
+    <field name="stats_race_wins" description="Not Used" type="int" />
+    <field name="stats_races_completed" description="Races Completed" type="int" />
+    <field name="stats_seasons" description="First Season" type="int" />
+    <field name="team" description="" type="int" key="primary" />
+  </table>
+  <table name="f1teams_upgrade_paths">
+    <field name="Path" description="" type="int" />
+    <field name="team" description="" type="int" key="primary" />
+  </table>
+  <table name="fuel_strategy">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="Type" description="" type="int" key="lookup_fuel_strategy.ID" />
+    <field name="Value" description="" type="float" />
+  </table>
+  <table name="helmet">
+    <field name="driver" description="" type="int" key="primary" />
+    <field name="helmet_metallic_specular_power" description="" type="float" />
+    <field name="helmet_metallic_specular_value" description="" type="float" />
+    <field name="helmet_specular_power" description="" type="float" />
+    <field name="helmet_specular_value" description="" type="float" />
+    <field name="vent" description="Either 0 (no vent), 0.5 (clear vent), or 1 (vent)" type="float" />
+    <field name="visor_specular_power" description="" type="float" />
+    <field name="visor_specular_value" description="" type="float" />
+    <field name="wing" description="Either 0 (no wing), 0.5 (clear wing), or 1 (wing)" type="float" />
+  </table>
+  <table name="language">
+    <field name="id" description="" type="int" key="primary" />
+    <field name="string" description="" type="string" size="18" />
+  </table>
+  <table name="lookup_ai_performance_variation">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="type" description="" type="string" size="10" />
+  </table>
+  <table name="lookup_car_damage">
+    <field name="damage" description="" type="string" size="8" />
+    <field name="ID" description="" type="int" key="primary" />
+  </table>
+  <table name="lookup_difficulty">
+    <field name="difficulty" description="" type="string" size="6" />
+    <field name="ID" description="" type="int" key="primary" />
+  </table>
+  <table name="lookup_driver_status">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="status" description="" type="string" size="6" />
+  </table>
+  <table name="lookup_fuel_simulation">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="simulation" description="" type="string" size="3" />
+  </table>
+  <table name="lookup_fuel_strategy">
+    <field name="Field1" description="" type="string" size="10" />
+    <field name="ID" description="" type="int" key="primary" />
+  </table>
+  <table name="lookup_gearbox">
+    <field name="gearbox" description="" type="string" size="9" />
+    <field name="ID" description="" type="int" />
+  </table>
+  <table name="lookup_high_med_low">
+    <field name="id" description="" type="int" key="primary" />
+    <field name="rating" description="" type="string" size="6" />
+  </table>
+  <table name="lookup_off_or_on">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="off_or_on" description="" type="string" size="3" />
+  </table>
+  <table name="lookup_pit_box_control">
+    <field name="ID" description="" type="int" />
+    <field name="pit_box_control" description="" type="string" size="9" />
+  </table>
+  <table name="lookup_rules_flags">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="rules_flags" description="" type="string" size="9" />
+  </table>
+  <table name="lookup_special_tracks">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="name" description="" type="string" size="7" />
+  </table>
+  <table name="lookup_steering_assist">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="Name" description="" type="string" size="6" />
+  </table>
+  <table name="lookup_track_downforce">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="string" description="" type="string" size="8" />
+  </table>
+  <table name="lookup_traction_control">
+    <field name="Field1" description="" type="string" size="6" />
+    <field name="ID" description="" type="int" key="primary" />
+  </table>
+  <table name="lookup_tyre_wear">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="simulation" description="" type="string" size="3" />
+  </table>
+  <table name="lookup_tyres">
+    <field name="enum_value" description="" type="int" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="type" description="" type="string" size="12" />
+  </table>
+  <table name="lookup_weather_settings_presets">
+    <field name="enum_value" description="the value of the preset in the neRacing::WeatherSettingsPresets:Type enumerator" type="int" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="language_string" description="" type="string" size="31" />
+    <field name="type" description="human-friendly name of the weather preset" type="string" size="11" />
+  </table>
+  <table name="nationality">
+    <field name="continent" description="" type="int" key="continents.ID" />
+    <field name="currency_id" description="" type="int" key="currency.id" />
+    <field name="file_string" description="" type="string" size="16" />
+    <field name="helmet_id" description="" type="int" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="name_string_id" description="" type="string" size="14" />
+    <field name="other_type" description="" type="bool" />
+    <field name="restrict_from_player" description="" type="bool" />
+    <field name="units_id" description="" type="int" key="units.id" />
+  </table>
+  <table name="objectives_special_tracks">
+    <field name="id" description="" type="int" key="primary" />
+    <field name="team" description="" type="int" />
+    <field name="track_model" description="" type="int" />
+    <field name="type" description="" type="int" />
+  </table>
+  <table name="online_id_list">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="onlineId" description="" type="string" size="15" />
+  </table>
+  <table name="online_xp_data">
+    <field name="description" description="" type="string" size="23" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="points" description="Value(s) to be read.  This can be a comma seperated list of values." type="string" size="43" />
+  </table>
+  <table name="online_xp_level_bonus">
+    <field name="bonus" description="The XP awarded" type="int" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="upper_bound" description="Upper bound of the level range" type="int" />
+  </table>
+  <table name="online_xp_levels">
+    <field name="id" description="" type="int" key="primary" />
+    <field name="level" description="" type="int" />
+  </table>
+  <table name="press_contexts">
+    <field name="context" description="" type="string" size="11" />
+    <field name="ID" description="" type="int" key="primary" />
+  </table>
+  <table name="press_criteria">
+    <field name="attribute" description="" type="string" size="41" />
+    <field name="criteria_id" description="" type="int" key="press_criteria_classes.ID" />
+    <field name="question_id" description="" type="int" />
+  </table>
+  <table name="press_criteria_classes">
+    <field name="criteria_name" description="" type="string" size="31" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="not_lockable" description="" type="bool" />
+  </table>
+  <table name="press_question_groups">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="Name" description="" type="string" size="31" />
+    <field name="Priority" description="" type="int" />
+  </table>
+  <table name="press_question_types">
+    <field name="colour" description="The colour of the box in the design doc for questions of this type" type="string" size="33" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="positive_outcome" description="Description in the design doc's positive outcome column" type="string" size="166" />
+    <field name="type" description="Who this question predominantly affects" type="string" size="26" />
+  </table>
+  <table name="press_questions">
+    <field name="answer_type" description="" type="int" key="press_question_types.ID" />
+    <field name="context" description="" type="int" key="press_contexts.ID" />
+    <field name="file_name" description="" type="string" size="16" />
+    <field name="group" description="" type="int" key="press_question_groups.ID" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="specified_team" description="" type="int" key="f1teams.id" />
+  </table>
+  <table name="quick_car_setup">
+    <field name="aero_front_wing" description="" type="int" />
+    <field name="aero_rear_wing" description="" type="int" />
+    <field name="alignment_front_camber" description="" type="int" />
+    <field name="alignment_front_toe" description="" type="int" />
+    <field name="alignment_rear_camber" description="" type="int" />
+    <field name="alignment_rear_toe" description="" type="int" />
+    <field name="balance_ballast_dist" description="ballast distribution" type="int" />
+    <field name="balance_ballast_total" description="" type="int" />
+    <field name="balance_bar_front" description="" type="int" />
+    <field name="balance_bar_rear" description="" type="int" />
+    <field name="brake_balance" description="" type="int" />
+    <field name="brake_pressure" description="" type="int" />
+    <field name="brake_size" description="" type="int" />
+    <field name="engine_fuel" description="" type="int" />
+    <field name="engine_rev_limit" description="" type="int" />
+    <field name="engine_throttle_map" description="" type="int" />
+    <field name="gearbox_g1" description="" type="int" />
+    <field name="gearbox_g2" description="" type="int" />
+    <field name="gearbox_g3" description="" type="int" />
+    <field name="gearbox_g4" description="" type="int" />
+    <field name="gearbox_g5" description="" type="int" />
+    <field name="gearbox_g6" description="" type="int" />
+    <field name="gearbox_g7" description="" type="int" />
+    <field name="gearbox_shift" description="" type="int" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="setupID" description="" type="int" />
+    <field name="suspension_packer_front" description="" type="int" />
+    <field name="suspension_packer_rear" description="" type="int" />
+    <field name="suspension_ride_front" description="front ride height" type="int" />
+    <field name="suspension_ride_rear" description="rear ride height" type="int" />
+    <field name="suspension_spring_front" description="front spring" type="int" />
+    <field name="suspension_spring_rear" description="rear spring" type="int" />
+    <field name="tyre_pressure_front" description="" type="int" />
+    <field name="tyre_pressure_rear" description="" type="int" />
+  </table>
+  <table name="rule_ticket_values">
+    <field name="clean_lap_gain" description="" type="int" />
+    <field name="corner_cutting_overtaking_loss" description="" type="int" />
+    <field name="corner_cutting_per_second_loss" description="" type="int" />
+    <field name="heavy_collision_loss" description="" type="int" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="ignoring_blue_flag_loss" description="" type="int" />
+    <field name="ignoring_yellow_flag_loss" description="" type="int" />
+    <field name="penalty_upper_limit" description="" type="int" />
+    <field name="pit_lane_speeding_loss" description="" type="int" />
+    <field name="ruleset" description="" type="string" size="9" />
+    <field name="slow_cumulative_loss" description="" type="int" />
+    <field name="slow_instant_loss" description="" type="int" />
+    <field name="total_tickets_1_lap" description="" type="int" />
+    <field name="total_tickets_10_pct_laps" description="" type="int" />
+    <field name="total_tickets_100_pct_laps" description="" type="int" />
+    <field name="total_tickets_20_pct_laps" description="" type="int" />
+    <field name="total_tickets_25_pct_laps" description="" type="int" />
+    <field name="total_tickets_3_laps" description="" type="int" />
+    <field name="total_tickets_30_pct_laps" description="" type="int" />
+    <field name="total_tickets_40_pct_laps" description="" type="int" />
+    <field name="total_tickets_5_laps" description="" type="int" />
+    <field name="total_tickets_50_pct_laps" description="" type="int" />
+    <field name="total_tickets_75_pct_laps" description="" type="int" />
+    <field name="total_tickets_practice" description="" type="int" />
+    <field name="total_tickets_qualifying" description="" type="int" />
+    <field name="warning_upper_limit" description="" type="int" />
+    <field name="wrong_way_cumulative_loss" description="" type="int" />
+    <field name="wrong_way_instant_loss" description="" type="int" />
+  </table>
+  <table name="safety_car_chance">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="safety_car_chance" description="" type="float" />
+  </table>
+  <table name="safety_car_deploy_count">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="max_deploy_count" description="" type="int" />
+  </table>
+  <table name="session_times">
+    <field name="id" description="" type="int" key="primary" />
+    <field name="practice_1_time_id" description="" type="string" size="12" />
+    <field name="practice_2_time_id" description="" type="string" size="12" />
+    <field name="practice_3_time_id" description="" type="string" size="12" />
+    <field name="practice_day_id" description="" type="string" size="33" />
+    <field name="qualifying_1_time_id" description="" type="string" size="12" />
+    <field name="qualifying_2_time_id" description="" type="string" size="12" />
+    <field name="qualifying_3_time_id" description="" type="string" size="12" />
+    <field name="qualifying_day_id" description="" type="string" size="35" />
+    <field name="race_1_time_id" description="" type="string" size="14" />
+    <field name="race_day_id" description="" type="string" size="29" />
+    <field name="track_model_id" description="" type="int" key="track_model.id" />
+  </table>
+  <table name="tier_difficulties">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="tier1" description="" type="float" />
+    <field name="tier2" description="" type="float" />
+    <field name="tier3" description="" type="float" />
+    <field name="tier4" description="" type="float" />
+    <field name="track" description="" type="int" />
+  </table>
+  <table name="time_trial_arcade_scenarios">
+    <field name="background_texture" description="The background texture displayed on the frontend screen" type="string" size="14" />
+    <field name="bronze_time" description="Minimum time required for a bronze medal (in microseconds)" type="int" />
+    <field name="gold_time" description="Minimum time required for a gold medal (in microseconds)" type="int" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="leaderboard_id" description="The leaderboard lookup id, corresponds to the friendly name of a leaderboard in the LIVE game configuration file." type="int" />
+    <field name="number_of_laps" description="" type="int" />
+    <field name="silver_time" description="Minimum time required for a silver medal (in microseconds)" type="int" />
+    <field name="sort_order" description="determines the position of this scenario in the frontend's scenario select list" type="int" />
+    <field name="team_id" description="The team the player will be driving for" type="int" key="f1teams.id" />
+    <field name="track_model_id" description="The track this scenario will use" type="int" key="track_model.id" />
+    <field name="Tyres" description="" type="int" key="lookup_tyres.ID" />
+    <field name="weather_id" description="the weather preset used in the scenario" type="int" key="lookup_weather_settings_presets.ID" />
+    <field name="weather_scenario_id" description="" type="int" />
+  </table>
+  <table name="track">
+    <field name="additional_ground_clearance" description="" type="float" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="location_id" description="" type="int" />
+    <field name="name_string_id" description="" type="string" size="17" />
+    <field name="nationality_id" description="" type="int" key="nationality.id" />
+  </table>
+  <table name="track_calendar">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="race_type" description="" type="int" key="calendar_race_types.ID" />
+    <field name="team_id" description="" type="int" key="f1teams.id" />
+    <field name="track_model_id" description="" type="int" key="track_model.id" />
+  </table>
+  <table name="track_car_handling">
+    <field name="AIDevTools" description="" type="bool" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="Level" description="" type="int" />
+    <field name="Track" description="" type="string" size="17" />
+  </table>
+  <table name="track_difficulties">
+    <field name="easy" description="" type="float" />
+    <field name="expert" description="" type="float" />
+    <field name="hard" description="" type="float" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="medium" description="" type="float" />
+    <field name="track" description="" type="int" />
+  </table>
+  <table name="track_fuel_distance">
+    <field name="fuel_usage_per_lap" description="" type="float" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="l100percent" description="" type="float" />
+    <field name="l10min" description="" type="float" />
+    <field name="l10percent" description="" type="float" />
+    <field name="l12laps" description="" type="float" />
+    <field name="l1lap" description="" type="float" />
+    <field name="l20percent" description="" type="float" />
+    <field name="l25percent" description="" type="float" />
+    <field name="l30percent" description="" type="float" />
+    <field name="l3laps" description="" type="float" />
+    <field name="l40percent" description="" type="float" />
+    <field name="l50percent" description="" type="float" />
+    <field name="l5laps" description="" type="float" />
+    <field name="l6laps" description="" type="float" />
+    <field name="l75percent" description="" type="float" />
+    <field name="l7laps" description="" type="float" />
+    <field name="track" description="" type="string" size="17" />
+  </table>
+  <table name="track_model">
+    <field name="calender_glyph" description="glyph path on race calender asset" type="int" />
+    <field name="distance_to_first_corner" description="in metres" type="float" />
+    <field name="downforce_level" description="" type="int" key="lookup_track_downforce.ID" />
+    <field name="drs_double_detection" description="Does this track have 2 dections zone for drs or just one?" type="bool" />
+    <field name="easy_dry_lap_time_adjustment" description="An adjustment to tweak generated times in qualifying sessions in seconds" type="float" />
+    <field name="easy_wet_lap_time_adjustment" description="An adjustment to tweak generated times in qualifying sessions in seconds" type="float" />
+    <field name="every_track_achievement" description="" type="bool" />
+    <field name="fe_index" description="The index in the FE this track model relates to (useful for network game track selection combo box)" type="int" />
+    <field name="file_string" description="" type="string" size="23" />
+    <field name="final_lap_time_limit" description="Time allotted to complete a single lap of the track in a given session" type="int" />
+    <field name="folder_string" description="" type="string" size="31" />
+    <field name="fuel_tank_size" description="" type="int" />
+    <field name="full_throttle_ratio" description="In percent" type="int" />
+    <field name="gear_changes" description="Per lap" type="int" />
+    <field name="gp_mode_round_number" description="Round number in 2011 season, starting at 1" type="int" />
+    <field name="hard_dry_lap_time_adjustment" description="An adjustment to tweak generated times in qualifying sessions in seconds" type="float" />
+    <field name="hard_wet_lap_time_adjustment" description="An adjustment to tweak generated times in qualifying sessions in seconds" type="float" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="is_night_race" description="does this race occur at night?" type="bool" />
+    <field name="lap_distance" description="In miles" type="float" />
+    <field name="leaderboard_id" description="The leaderboard id used to map between the track and the leaderboard's name" type="int" />
+    <field name="length" description="" type="float" />
+    <field name="local_audio_ambience" description="" type="string" size="4" />
+    <field name="location" description="Location of the circuit" type="string" size="36" />
+    <field name="long_event_name" description="Long event name, 2012 FORMULA 1 QANTAS AUSTRALIAN GRAND PRIX etc" type="string" size="35" />
+    <field name="long_track_name" description="Albert Park etc" type="string" size="37" />
+    <field name="main_career_round_number" description="" type="int" />
+    <field name="max_safety_car" description="Maximum number of times the safety car can be deployed on the given track" type="int" />
+    <field name="medium_event_name" description="Event, AUSTRALIAN GRAND PRIX etc" type="string" size="35" />
+    <field name="minimap_dist_above" description="Default value is from GRID" type="float" />
+    <field name="minimap_dist_behind" description="Default value is from GRID" type="float" />
+    <field name="minimap_file_string" description="" type="string" size="14" />
+    <field name="minimap_s1_icon_pos_x" description="Sector 1 icon in minimap (x position)" type="float" />
+    <field name="minimap_s1_icon_pos_y" description="Sector 1 icon in minimap (y position)" type="float" />
+    <field name="minimap_s2_icon_pos_x" description="Sector 1 icon in minimap (x position)" type="float" />
+    <field name="minimap_s2_icon_pos_y" description="Sector 1 icon in minimap (y position)" type="float" />
+    <field name="minimap_s3_icon_pos_x" description="Sector 1 icon in minimap (x position)" type="float" />
+    <field name="minimap_s3_icon_pos_y" description="Sector 1 icon in minimap (y position)" type="float" />
+    <field name="minimap_sf_icon_pos_x" description="Start/Finish icon in minimap (x position)" type="float" />
+    <field name="minimap_sf_icon_pos_y" description="Start/Finish icon in minimap (y position)" type="float" />
+    <field name="minimap_zoom" description="Default value is from GRID" type="float" />
+    <field name="name" description="Full name of the grand prix" type="string" size="32" />
+    <field name="name_string_id" description="" type="string" size="29" />
+    <field name="num_laps" description="The number of laps for this particular track (model)" type="int" />
+    <field name="number_of_turns" description="The number of corners/turns to be displayed as a stat about the track" type="int" />
+    <field name="option_tyre" description="" type="int" />
+    <field name="p1_grip" description="The scale of the TIS racing line grip in a practice session" type="float" />
+    <field name="p2_grip" description="The scale of the TIS racing line grip in a practice session" type="float" />
+    <field name="p3_grip" description="The scale of the TIS racing line grip in a practice session" type="float" />
+    <field name="pit_lane_mirrored" description="False is exit garage turn right, true is exit garage turn left" type="bool" />
+    <field name="pit_speed_limit_pq" description="Pit speed limit in practice and qualifying sessions." type="float" />
+    <field name="pit_speed_limit_race" description="Pit speed limit in race session." type="float" />
+    <field name="pitstop_dry_race_time_cost" description="pit-stop time in dry conditions" type="float" />
+    <field name="pitstop_wet_race_time_cost" description="pit-stop time in wet conditions" type="float" />
+    <field name="prime_tyre" description="" type="int" key="tyres.ID" />
+    <field name="q1_grip" description="The scale of the TIS racing line grip in a qualifying session" type="float" />
+    <field name="q2_grip" description="The scale of the TIS racing line grip in a qualifying session" type="float" />
+    <field name="q3_grip" description="The scale of the TIS racing line grip in a qualifying session" type="float" />
+    <field name="race_fixture_name" description="" type="string" size="35" />
+    <field name="race_grip" description="The scale of the TIS racing line grip in a race session" type="float" />
+    <field name="route_string" description="" type="string" size="7" />
+    <field name="safety_car_chance" description="Zero to 1 chance of the safety car coming out when an icident occurs. 0 = never come out, 1 = always come out" type="float" />
+    <field name="short_career_round_number" description="" type="int" />
+    <field name="short_career_weather" description="" type="int" key="lookup_weather_settings_presets.ID" />
+    <field name="short_event_name" description="Country, Australia etc" type="string" size="48" />
+    <field name="short_pit_lane" description="" type="bool" />
+    <field name="short_track_name" description="Melbourne etc" type="string" size="38" />
+    <field name="show_in_track_select_menu" description="This route will be available in the track selection menu if this box is ticked" type="bool" />
+    <field name="skipfe_track" description="Whether this is the track used by skipfe career" type="bool" />
+    <field name="stat_average_lap_time" description="Track select screen statistic - Time taken to complete a flying lap on average" type="int" />
+    <field name="stat_brake_wear_level" description="Track select screen statistic - Wear rate for the brakes on this track" type="int" key="lookup_high_med_low.id" />
+    <field name="stat_downforce_level" description="Track select screen statistic - Downforce rate for this track" type="int" key="lookup_high_med_low.id" />
+    <field name="supports_time_of_day" description="" type="bool" />
+    <field name="swap_for_dummy" description="if this track isn't available, mark this checkbox" type="bool" />
+    <field name="top_speed" description="In mph" type="int" />
+    <field name="track_id" description="" type="int" key="track.id" />
+    <field name="track_id_dev_string" description="Lowercase track name" type="string" size="23" />
+    <field name="track_lights_on" description="Should the track lights be on for this route?" type="bool" />
+    <field name="tt_grip" description="The scale of the TIS racing line grip in a timetrial session" type="float" />
+    <field name="tyre_wear_level" description="Wear rate for the tyres on this track (Low,Average,High)" type="int" key="lookup_high_med_low.id" />
+    <field name="upgrade_high_downforce" description="it is a high downforce weekend (see upgrade manager)" type="bool" />
+  </table>
+  <table name="track_stat_value">
+    <field name="id" description="" type="int" key="primary" />
+    <field name="stat_rating" description="The available ratings for a statistic" type="string" size="1" />
+    <field name="stat_rating_numeric" description="The numeric value for the rating" type="int" />
+  </table>
+  <table name="track_tyre_wear_level">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="type" description="" type="string" size="1" />
+    <field name="wear_level" description="Scaling factor" type="float" />
+  </table>
+  <table name="tyre_handling">
+    <field name="compound" description="0-100" type="int" key="lookup_tyres.ID" />
+    <field name="diff_off_throttle_multiplier" description="" type="float" />
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="rear_diff_full_effect_rate" description="0-90" type="float" />
+    <field name="rear_diff_max_torque" description="0-100" type="float" />
+    <field name="rear_diff_no_effect_rate" description="0-1" type="float" />
+  </table>
+  <table name="tyres">
+    <field name="ID" description="" type="int" key="primary" />
+    <field name="max_distance" description="In miles" type="float" />
+    <field name="type" description="" type="string" size="12" />
+  </table>
+  <table name="units">
+    <field name="id" description="" type="int" key="primary" />
+    <field name="name" description="" type="string" size="8" />
+  </table>
+  <table name="vehicle">
+    <field name="ai_vehicle_type_track" description="Reference to a generic car containing reduced mechanics data. All cars should be safe to use this" type="string" size="7" />
+    <field name="id" description="" type="int" key="primary" />
+  </table>
+  <table name="vehicle_livery">
+    <field name="file_string" description="" type="string" size="6" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="livery_name_string_id" description="" type="string" size="14" />
+    <field name="vehicle_id" description="" type="int" key="vehicle.id" />
+  </table>
+  <table name="weather_setting">
+    <field name="average_rain_duration" description="How long do showers last - range 0.0 (short sharp) and 1.0 (prolonged potentially whole race)." type="float" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="initial_cloud_cover_max" description="the maximum cloud cover percentage to initialise the simulation with (0.0 - 1.0)" type="float" />
+    <field name="initial_cloud_cover_min" description="the minimum cloud cover percentage to initialise the simulation with (0.0 - 1.0)" type="float" />
+    <field name="initial_cloud_threat_level_max" description="the max. cloud threat percentage to initialise the simulation with (0.0 - 1.0)" type="float" />
+    <field name="initial_cloud_threat_level_min" description="the min. cloud threat percentage to initialise the simulation with (0.0 - 1.0)" type="float" />
+    <field name="max_air_temperature" description="max air temperature in centigrade" type="float" />
+    <field name="max_humidity" description="maximum humidity (%) - range 0.0 - 1.0" type="float" />
+    <field name="max_windspeed" description="max wind speed in m/s." type="float" />
+    <field name="min_air_temperature" description="min air temperature in centigrade." type="float" />
+    <field name="min_humidity" description="minimum humidity (%) - range 0.0 - 1.0" type="float" />
+    <field name="min_windspeed" description="min wind speed in m/s" type="float" />
+    <field name="name" description="the name of this setting" type="string" size="20" />
+    <field name="rain_chance" description="percentage chance of rain - range 0.0 - 1.0" type="float" />
+    <field name="rain_max_intensity" description="How heavy should the rain get - range 0.0 (light drizzle) to 1.0 (monsoon)." type="float" />
+    <field name="sun_chance" description="percentage chance of sun - range 0.0 - 1.0" type="float" />
+    <field name="sun_intensity" description="How intense a factor is the sun in this geographical location - range 0.0 - 1.0" type="float" />
+  </table>
+  <table name="world_record">
+    <field name="database_language_key" description="Key string into the language database" type="string" size="27" />
+    <field name="f1driver_id" description="" type="int" />
+    <field name="id" description="" type="int" key="primary" />
+    <field name="track_model_id" description="" type="int" />
+    <field name="vehicle_livery_id" description="" type="int" />
+    <field name="world_record" description="The time of the default ghost car, in seconds (nb - at the moment we're using the lap record, not the previous year's fastest lap)" type="float" />
+    <field name="year" description="the year the record was set" type="int" />
+  </table>
+</schema>

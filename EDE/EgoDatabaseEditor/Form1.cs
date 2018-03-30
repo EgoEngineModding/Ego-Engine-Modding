@@ -28,7 +28,7 @@ namespace EgoDatabaseEditor
             this.Icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
 			dbFile = new DatabaseFile();
             // Load Schema List
-            foreach (string schemaPath in Directory.GetFiles(Application.StartupPath, "schema*.xml", SearchOption.TopDirectoryOnly))
+            foreach (string schemaPath in Directory.GetFiles(Path.Combine(Application.StartupPath, "schema"), "schema*.xml", SearchOption.TopDirectoryOnly))
             {
                 schemaPaths.Add(schemaPath);
             }
@@ -158,7 +158,7 @@ namespace EgoDatabaseEditor
 					}
                 }
             }
-            catch
+            catch (Exception ex)
             {
 				if (conversionType == 0) {
 					openController(path, conversionType, i + 1);

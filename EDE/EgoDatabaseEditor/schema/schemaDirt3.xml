@@ -1,0 +1,1839 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<schema>
+    <schemaVersion version="3934935529" />
+    <table name="achievement_championship">
+        <field name="achievement_type" type="int" key="achievements.id" />
+        <field name="championship_id" type="int" key="championship.id" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="achievement_discipline">
+        <field name="achievement_id" type="int" key="achievements.id" />
+        <field name="discipline_id" type="int" key="discipline.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="race_type_id" type="int" key="race_type.id" />
+    </table>
+    <table name="achievement_event">
+        <field name="achievement" type="int" />
+        <field name="event" type="int" key="event.id" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="achievement_sponsor">
+        <field name="achievement" type="int" key="achievements.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="sponsor" type="int" key="sponsor.id" />
+    </table>
+    <table name="achievement_vehicle">
+        <field name="achievement_id" type="int" key="achievements.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="vehicle_id" type="int" key="vehicle_model.id" />
+    </table>
+    <table name="achievements">
+        <field name="achievement_type" type="string" size="28" />
+        <field name="id" type="int" key="primary" />
+        <field name="order_index" type="int" />
+        <field name="ps3_id" type="int" />
+        <field name="required_string" type="string" size="0" />
+        <field name="required_value" type="int" />
+        <field name="screen_order_index" type="int" />
+        <field name="trophy_desc_string_id" type="string" size="15" />
+        <field name="trophy_name_string_id" type="string" size="15" />
+        <field name="win_live_id" type="int" />
+        <field name="xbox_id" type="int" />
+    </table>
+    <table name="ai_choreographer_config">
+        <field name="id" type="int" key="primary" />
+        <field name="identifier" type="string" size="26" />
+    </table>
+    <table name="ai_driver">
+        <field name="Aggression" type="float" />
+        <field name="Bad_Day_Chance" type="float" />
+        <field name="Control" type="float" />
+        <field name="Drift_Ability" type="float" />
+        <field name="Field1" type="int" />
+        <field name="Good_Day_Chance" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="Mechanical_Failures" type="float" />
+        <field name="Mistakes" type="float" />
+        <field name="name" type="string" size="16" />
+        <field name="P2P_Modifier" type="float" />
+        <field name="Reaction" type="float" />
+        <field name="Speed_In" type="float" />
+        <field name="Speed_Out" type="float" />
+        <field name="Variance" type="float" />
+        <field name="Virtual_Gymkhana_Performance" type="float" />
+        <field name="Virtual_Performance" type="float" />
+        <field name="Weather_Ability" type="float" />
+    </table>
+    <table name="ai_ratio">
+        <field name="ai_ratio" type="float" />
+        <field name="discipline_id" type="int" key="discipline.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="season_id" type="int" key="season.id" />
+        <field name="star_level" type="int" />
+    </table>
+    <table name="air_trick_settings">
+        <field name="id" type="int" key="primary" />
+        <field name="max_score_distance" type="float" />
+    </table>
+    <table name="audio_horn_sets">
+        <field name="id" type="int" key="primary" />
+        <field name="internal_name" type="string" size="15" />
+        <field name="parent_package" type="int" key="packages.id" />
+        <field name="set_name_string_id" type="string" size="29" />
+        <field name="unlock_audio_speech" type="string" size="24" />
+        <field name="unlock_fanbase_tier" type="int" />
+        <field name="unlock_texture_name" type="string" size="5" />
+    </table>
+    <table name="audio_horns">
+        <field name="attack" type="bool" />
+        <field name="horn_set" type="int" key="audio_horn_sets.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="internal_name" type="string" size="14" />
+        <field name="is_default" type="bool" />
+        <field name="looping" type="bool" />
+        <field name="parent_package" type="int" key="packages.id" />
+        <field name="sample_id_attack" type="string" size="15" />
+        <field name="sample_id_main" type="string" size="15" />
+        <field name="string_id" type="string" size="19" />
+    </table>
+    <table name="audio_name">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="8" />
+        <field name="sample_id" type="string" size="22" />
+    </table>
+    <table name="audio_name_category">
+        <field name="designer_aid" type="string" size="14" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="20" />
+        <field name="order_index" type="int" />
+    </table>
+    <table name="audio_name_category_to_name">
+        <field name="audio_name_category_id" type="int" key="audio_name_category.id" />
+        <field name="audio_name_id" type="int" key="audio_name.id" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="audio_name_language_to_category">
+        <field name="audio_name_category_id" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="language_id" type="int" />
+    </table>
+    <table name="avatar_reward_conditions">
+        <field name="condition_name" type="string" size="19" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="avatar_rewards">
+        <field name="condition" type="int" key="avatar_reward_conditions.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="15" />
+        <field name="unlock_level" type="int" />
+        <field name="xbox_id" type="int" />
+    </table>
+    <table name="axis">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string" type="string" size="5" />
+    </table>
+    <table name="camera_sets">
+        <field name="id" type="int" key="primary" />
+        <field name="identifier" type="string" size="6" />
+        <field name="set_id" type="int" />
+    </table>
+    <table name="capture_the_flag_settings">
+        <field name="collision_impulse_threshold" type="float" />
+        <field name="flag_respawn_delay" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="min_horizontal_distance" type="float" />
+        <field name="min_vertical_distance" type="float" />
+        <field name="no_spawn_period" type="float" />
+        <field name="no_steal_time" type="float" />
+    </table>
+    <table name="capture_the_flag_settings2">
+        <field name="drop_zones_for_player_count" type="int" />
+        <field name="flags_for_team_count" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="teams_or_players" type="int" />
+    </table>
+    <table name="career">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="20" />
+    </table>
+    <table name="career_global_settings">
+        <field name="ai_bad_day_driver_bonus" type="float" />
+        <field name="ai_good_day_driver_bonus" type="float" />
+        <field name="ai_speciality_difficulty_bonus" type="float" />
+        <field name="ai_speciality_driver_bonus" type="float" />
+        <field name="first_race_difficulty_modifier" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="initial_livery_id" type="int" key="vehicle_livery.id" />
+        <field name="initial_money" type="int" />
+        <field name="initial_sponsor_id" type="int" key="sponsor.id" />
+        <field name="initial_track_model_id" type="int" key="track_model.id" />
+        <field name="initial_tyre_type_id" type="int" key="tyre_type.id" />
+        <field name="initial_vehicle_grade_id" type="int" key="vehicle_grade.id" />
+        <field name="initial_vehicle_id" type="int" key="vehicle.id" />
+        <field name="race_objective_max" type="int" />
+        <field name="race_objective_min" type="int" />
+        <field name="start_race_team" type="int" />
+    </table>
+    <table name="cat_and_mouse_settings">
+        <field name="id" type="int" key="primary" />
+        <field name="mouse_mass_multiple" type="float" />
+        <field name="mouse_power_multiple" type="float" />
+    </table>
+    <table name="challenge_medals">
+        <field name="award_achievement" type="bool" />
+        <field name="empty_texture_id" type="string" size="11" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="8" />
+        <field name="position_index" type="int" />
+        <field name="texture_id" type="string" size="14" />
+    </table>
+    <table name="challenge_type">
+        <field name="event_select_image" type="string" size="12" />
+        <field name="file_string" type="string" size="8" />
+        <field name="id" type="int" key="primary" />
+        <field name="info_string_id" type="string" size="16" />
+        <field name="medals_are_points_based" type="bool" />
+        <field name="show_player_points" type="bool" />
+        <field name="show_player_time" type="bool" />
+        <field name="title_string_id" type="string" size="27" />
+    </table>
+    <table name="championship">
+        <field name="event_details_image" type="string" size="14" />
+        <field name="event_select_image" type="string" size="14" />
+        <field name="id" type="int" key="primary" />
+        <field name="image_name" type="string" size="18" />
+        <field name="is_dc_tutorial" type="bool" />
+        <field name="is_final" type="bool" />
+        <field name="is_world_tour" type="bool" />
+        <field name="name_string_id" type="string" size="31" />
+        <field name="order_index" type="int" />
+        <field name="season_id" type="int" key="season.id" />
+        <field name="season_unlock_id" type="int" />
+        <field name="sponsor_logo_image_name" type="string" size="11" />
+        <field name="unfolded_logo_image_name" type="string" size="19" />
+        <field name="unlock_audio_speech" type="string" size="29" />
+        <field name="unlock_discipline_id" type="int" key="discipline.id" />
+        <field name="unlock_discipline_pts" type="int" />
+        <field name="unlock_on_discipline" type="bool" />
+        <field name="unlock_on_event_completed" type="bool" />
+        <field name="unlock_on_event_id" type="int" key="event.id" />
+        <field name="unlock_on_season_pts" type="bool" />
+        <field name="unlock_requires_podium" type="bool" />
+        <field name="unlock_season_pts" type="int" />
+    </table>
+    <table name="co_driver_enable_combinations">
+        <field name="discipline" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="race_type" type="int" />
+    </table>
+    <table name="co_drivers">
+        <field name="driver_head_id" type="int" key="driver_head.id" />
+        <field name="driver_voice" type="string" size="9" />
+        <field name="id" type="int" key="primary" />
+        <field name="level_to_unlock" type="int" />
+        <field name="name_string_id" type="string" size="11" />
+        <field name="order_index" type="int" />
+        <field name="unlock_on_level" type="bool" />
+        <field name="xp_to_unlock" type="int" />
+    </table>
+    <table name="competition_type">
+        <field name="award_medals" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="is_challenge" type="bool" />
+        <field name="type" type="string" size="10" />
+    </table>
+    <table name="component_air_instance">
+        <field name="finish_game_on_max_score" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="instance_id" type="int" />
+        <field name="instance_name" type="string" size="16" />
+        <field name="max_score" type="int" />
+        <field name="max_score_distance" type="float" />
+        <field name="requires_landing_zone" type="bool" />
+    </table>
+    <table name="component_destructible">
+        <field name="affect_finish_count" type="bool" />
+        <field name="fallback" type="bool" />
+        <field name="group_complete" type="bool" />
+        <field name="group_size" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="instance_id" type="int" />
+        <field name="instance_name" type="string" size="23" />
+        <field name="instant_complete" type="bool" />
+        <field name="object_instance_id" type="int" />
+        <field name="osd_popup_string" type="string" size="11" />
+        <field name="points_id" type="int" />
+        <field name="score" type="int" />
+        <field name="sequence_id" type="int" />
+        <field name="sound" type="string" size="10" />
+    </table>
+    <table name="component_donut_instance">
+        <field name="activation_radius" type="float" />
+        <field name="allow_restart" type="bool" />
+        <field name="allow_simultaneous" type="bool" />
+        <field name="angular_velocity_threshold" type="float" />
+        <field name="center_radius" type="float" />
+        <field name="collision_threshold" type="float" />
+        <field name="deactivation_radius" type="float" />
+        <field name="detection_angle" type="int" />
+        <field name="drift_angle_threshold" type="float" />
+        <field name="full_score_max_distance_angle" type="int" />
+        <field name="full_score_min_distance_angle" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="instance_id" type="int" />
+        <field name="instance_name" type="string" size="16" />
+        <field name="max_score" type="int" />
+        <field name="sequence_id" type="int" />
+    </table>
+    <table name="component_drift_gate_instance">
+        <field name="id" type="int" key="primary" />
+        <field name="instance_id" type="int" />
+        <field name="instance_name" type="string" size="21" />
+        <field name="max_angle" type="float" />
+        <field name="max_score" type="int" />
+        <field name="max_speed" type="float" />
+        <field name="min_angle" type="float" />
+        <field name="min_speed" type="float" />
+        <field name="sequence_id" type="int" />
+        <field name="speed_to_angle_weight" type="float" />
+    </table>
+    <table name="component_gold_rush_target">
+        <field name="id" type="int" key="primary" />
+        <field name="instance_id" type="int" />
+        <field name="instance_name" type="string" size="8" />
+        <field name="is_zombie" type="bool" />
+    </table>
+    <table name="component_joyride_enter_zone">
+        <field name="id" type="int" key="primary" />
+        <field name="instance_id" type="int" />
+        <field name="instance_name" type="string" size="4" />
+    </table>
+    <table name="component_joyride_land_zone">
+        <field name="id" type="int" key="primary" />
+        <field name="instance_id" type="int" />
+        <field name="instance_name" type="string" size="9" />
+        <field name="spin_axis_id" type="int" key="axis.id" />
+        <field name="spin_degrees" type="float" />
+    </table>
+    <table name="component_proximity_alert">
+        <field name="id" type="int" key="primary" />
+        <field name="instance_id" type="int" />
+        <field name="instance_name" type="string" size="12" />
+        <field name="trick_type_id" type="int" key="trick_type.id" />
+    </table>
+    <table name="component_speed_run">
+        <field name="gate_id" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="instance_id" type="int" />
+        <field name="instance_name" type="string" size="2" />
+    </table>
+    <table name="component_spin_zone_instance">
+        <field name="angle_for_max_score" type="int" />
+        <field name="collision_threshold" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="instance_id" type="int" />
+        <field name="instance_name" type="string" size="20" />
+        <field name="max_score" type="int" />
+        <field name="sequence_id" type="int" />
+        <field name="should_fail_on_collisions" type="bool" />
+    </table>
+    <table name="component_transporter">
+        <field name="height" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="instance_id" type="int" />
+        <field name="instance_name" type="string" size="3" />
+    </table>
+    <table name="components">
+        <field name="class_name" type="string" size="26" />
+        <field name="id" type="int" key="primary" />
+        <field name="local_only" type="bool" />
+        <field name="settings_table" type="string" size="24" />
+    </table>
+    <table name="continent">
+        <field name="continent_name_string" type="string" size="7" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="currency">
+        <field name="conversion_rate" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="15" />
+        <field name="separator_string_id" type="string" size="15" />
+        <field name="symbol_string_id" type="string" size="14" />
+    </table>
+    <table name="dashboard_items">
+        <field name="end_day" type="int" />
+        <field name="end_month" type="int" />
+        <field name="file_string" type="string" size="0" />
+        <field name="hanging_item" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="is_avatar" type="bool" />
+        <field name="is_default" type="bool" />
+        <field name="level_to_unlock" type="int" />
+        <field name="name_string_id" type="string" size="10" />
+        <field name="only_present_on_x360" type="bool" />
+        <field name="reveal_object_name" type="string" size="0" />
+        <field name="save_title_id" type="int" key="save_identifier.id" />
+        <field name="start_day" type="int" />
+        <field name="start_month" type="int" />
+        <field name="unlock_by_date" type="bool" />
+        <field name="unlock_by_save_title" type="bool" />
+        <field name="unlock_by_xp" type="bool" />
+    </table>
+    <table name="data_types">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string" type="string" size="5" />
+    </table>
+    <table name="default_driver_assists">
+        <field name="difficulty_id" type="int" key="difficulty.id" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="dev_finish_position">
+        <field name="finish_position" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="1" />
+    </table>
+    <table name="difficulty">
+        <field name="ai_ratio" type="float" />
+        <field name="ai_ratio_staggered_start" type="float" />
+        <field name="available_flashbacks" type="int" />
+        <field name="base_time_factor" type="float" />
+        <field name="career_rank_id" type="int" key="vehicle_grade.id" />
+        <field name="flashback_bonus" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="mon_bonus_factor" type="float" />
+        <field name="performance_variance" type="float" />
+        <field name="season_id" type="int" key="season.id" />
+        <field name="staggered_start_base" type="float" />
+        <field name="staggered_start_gain" type="float" />
+        <field name="star_level" type="int" />
+        <field name="top_time_factor" type="float" />
+    </table>
+    <table name="discipline">
+        <field name="ai_speciality_difficulty_bonus" type="float" />
+        <field name="extended_results_table" type="bool" />
+        <field name="file_string" type="string" size="11" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="12" />
+        <field name="order_index" type="int" />
+        <field name="sponsor_id" type="int" key="sponsor.id" />
+        <field name="staggered_start" type="bool" />
+        <field name="track_type_id" type="int" key="track_type.id" />
+        <field name="valid_for_benchmark" type="bool" />
+    </table>
+    <table name="dlc_unlocks">
+        <field name="id" type="int" />
+        <field name="is_rep_boost" type="bool" />
+        <field name="parent_package" type="int" />
+    </table>
+    <table name="drift_session_time">
+        <field name="event_id" type="int" key="event.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="time" type="float" />
+    </table>
+    <table name="driver">
+        <field name="ai_driver_id" type="int" key="ai_driver.id" />
+        <field name="ai_driver0_id" type="int" key="ai_driver.id" />
+        <field name="audio_key_driver_number" type="int" />
+        <field name="capital_first_name_string_id" type="string" size="14" />
+        <field name="capital_surname_string_id" type="string" size="18" />
+        <field name="default_horn" type="int" key="audio_horns.id" />
+        <field name="driver_grade" type="int" key="vehicle_grade.id" />
+        <field name="driver_type_id" type="int" />
+        <field name="driver_voice" type="int" />
+        <field name="favourite_discipline_id" type="int" key="discipline.id" />
+        <field name="favourite_discipline2_id" type="int" key="discipline.id" />
+        <field name="fe_head_file_string" type="string" size="0" />
+        <field name="female" type="bool" />
+        <field name="first_name_string_id" type="string" size="9" />
+        <field name="head" type="int" key="driver_head.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="initial_respect" type="int" />
+        <field name="leaderboard_rank" type="int" />
+        <field name="level" type="int" />
+        <field name="main_character" type="bool" />
+        <field name="memorial_driver" type="bool" />
+        <field name="nationality_id" type="int" />
+        <field name="osd_drivertag_forename_string_id" type="string" size="14" />
+        <field name="osd_drivertag_surname_string_id" type="string" size="18" />
+        <field name="osd_sticker_file" type="string" size="0" />
+        <field name="pit_speech_filename" type="string" size="0" />
+        <field name="skill" type="float" />
+        <field name="surname_string_id" type="string" size="13" />
+        <field name="throwdown_world_record_offset" type="float" />
+    </table>
+    <table name="driver_default_vehicle">
+        <field name="driver_id" type="int" key="driver.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+        <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+    </table>
+    <table name="driver_group">
+        <field name="group_name" type="string" size="13" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="driver_head">
+        <field name="head_name" type="string" size="23" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="driver_rep_to_level">
+        <field name="id" type="int" key="primary" />
+        <field name="level_index" type="int" />
+        <field name="rep_required" type="int" />
+    </table>
+    <table name="driver_suit">
+        <field name="helm_tint1" type="string" size="11" />
+        <field name="helm_tint2" type="string" size="11" />
+        <field name="helm_tint3" type="string" size="11" />
+        <field name="hue_shift" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="luminance" type="float" />
+        <field name="name" type="string" size="16" />
+        <field name="saturation" type="float" />
+        <field name="tint1" type="string" size="11" />
+        <field name="tint2" type="string" size="11" />
+        <field name="tint3" type="string" size="11" />
+    </table>
+    <table name="driver_to_continent">
+        <field name="continent_id" type="int" key="continent.id" />
+        <field name="driver_id" type="int" key="driver.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="vehicle_class_1" type="int" key="vehicle_class.id" />
+        <field name="vehicle_class_2" type="int" />
+        <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+    </table>
+    <table name="dummy_tracks">
+        <field name="discipline_id" type="int" key="discipline.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+    </table>
+    <table name="dummy_tracks_race_type">
+        <field name="id" type="int" key="primary" />
+        <field name="race_type_id" type="int" key="race_type.id" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+    </table>
+    <table name="eligible_vehicle_classes">
+        <field name="discipline_id" type="int" key="discipline.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="race_type_id" type="int" key="race_type.id" />
+        <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+    </table>
+    <table name="entity_mode_layer_bitset">
+        <field name="bit" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="identifier" type="string" size="15" />
+    </table>
+    <table name="event">
+        <field name="bonus_max" type="int" />
+        <field name="bonus_min" type="int" />
+        <field name="card_string_id" type="string" size="37" />
+        <field name="championship_id" type="int" key="championship.id" />
+        <field name="competition_type" type="int" key="competition_type.id" />
+        <field name="currently_works" type="bool" />
+        <field name="discipline" type="int" key="discipline.id" />
+        <field name="driver_group_id" type="int" key="driver_group.id" />
+        <field name="event_image" type="string" size="20" />
+        <field name="event_logo" type="string" size="15" />
+        <field name="event_sponsor" type="int" key="sponsor.id" />
+        <field name="exclude_from_career_progress" type="bool" />
+        <field name="exclude_from_soak" type="bool" />
+        <field name="has_unique_intro" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="is_championship_final" type="bool" />
+        <field name="is_dlc" type="bool" />
+        <field name="is_final_event" type="bool" />
+        <field name="is_first_race_career" type="bool" />
+        <field name="is_joyride" type="bool" />
+        <field name="is_memorial_event" type="bool" />
+        <field name="is_season_final" type="bool" />
+        <field name="is_tutorial" type="bool" />
+        <field name="location" type="int" key="location.id" />
+        <field name="major_sponsor" type="int" key="sponsor.id" />
+        <field name="money_string_id" type="int" key="event_money_reward.id" />
+        <field name="name_string_id" type="string" size="32" />
+        <field name="num_competitions" type="int" />
+        <field name="num_entrants" type="int" />
+        <field name="num_event_wins" type="int" />
+        <field name="order_index" type="int" />
+        <field name="parent_package" type="int" key="packages.id" />
+        <field name="points_id" type="int" key="points.id" />
+        <field name="primary_minor_sponsor" type="int" key="sponsor.id" />
+        <field name="prize_money_for_first" type="int" key="event_money_reward.id" />
+        <field name="progression_points_id" type="int" key="points.id" />
+        <field name="protect_unlock" type="bool" />
+        <field name="race_type" type="int" key="race_type.id" />
+        <field name="reputation_pot" type="int" />
+        <field name="reputation_pot_min" type="int" />
+        <field name="reveal_group_id" type="int" key="event_reveal_group.id" />
+        <field name="secondary_minor_sponsor" type="int" key="sponsor.id" />
+        <field name="team_event" type="bool" />
+        <field name="tier_id" type="int" key="tier.id" />
+        <field name="unlock_audio_speech" type="string" size="32" />
+        <field name="unlock_championship_id" type="int" />
+        <field name="unlock_championship_pts" type="int" />
+        <field name="unlock_discipline_id" type="int" />
+        <field name="unlock_discipline_pts" type="int" />
+        <field name="unlock_on_championship_pts" type="bool" />
+        <field name="unlock_on_discipline_pts" type="bool" />
+        <field name="unlock_on_event_completed" type="bool" />
+        <field name="unlock_on_event_id" type="int" key="event.id" />
+        <field name="unlock_on_season_pts" type="bool" />
+        <field name="unlock_on_world_tour_wins" type="bool" />
+        <field name="unlock_requires_podium" type="bool" />
+        <field name="unlock_season_id" type="int" />
+        <field name="unlock_season_pts" type="int" />
+        <field name="use_event_driver_group" type="bool" />
+        <field name="use_event_vehicle" type="bool" />
+        <field name="use_first_race_setting" type="bool" />
+        <field name="vehicle_class_1" type="int" key="vehicle_class.id" />
+        <field name="vehicle_class_2" type="int" key="vehicle_class.id" />
+        <field name="vehicle_grade_id" type="int" key="vehicle_grade.id" />
+        <field name="world_tour_qualifier" type="bool" />
+    </table>
+    <table name="event_challenge">
+        <field name="event_id" type="int" key="event.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="medal_id" type="int" key="challenge_medals.id" />
+        <field name="reputation" type="int" />
+        <field name="requirement" type="string" size="6" />
+    </table>
+    <table name="event_challenge_settings">
+        <field name="bg_texture_id" type="string" size="19" />
+        <field name="challenge_type" type="int" key="challenge_type.id" />
+        <field name="event_id" type="int" key="event.id" />
+        <field name="event_pass_string_id" type="string" size="46" />
+        <field name="id" type="int" key="primary" />
+        <field name="logo_texture_id" type="string" size="21" />
+        <field name="objective_string_id" type="string" size="46" />
+        <field name="tutorial_id" type="string" size="13" />
+        <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+    </table>
+    <table name="event_driver">
+        <field name="driver_group_id" type="int" key="driver_group.id" />
+        <field name="driver_id" type="int" key="driver.id" />
+        <field name="event_id" type="int" key="event.id" />
+        <field name="featured_driver" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="team_number" type="int" />
+        <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+    </table>
+    <table name="event_driver_grid_position">
+        <field name="driver_id" type="int" />
+        <field name="event_track_pool_id" type="int" key="event_track_pool.id" />
+        <field name="grid_position_base" type="int" />
+        <field name="grid_position_range" type="int" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="event_grid_position_override">
+        <field name="event_id" type="int" key="event.id" />
+        <field name="grid_position" type="int" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="event_money_reward">
+        <field name="description" type="string" size="11" />
+        <field name="id" type="int" key="primary" />
+        <field name="money_string" type="string" size="84" />
+    </table>
+    <table name="event_replay_music_override">
+        <field name="event_id" type="int" key="event.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="music_track_id" type="string" size="0" />
+    </table>
+    <table name="event_reputation_reward">
+        <field name="id" type="int" key="primary" />
+        <field name="percentage_string" type="string" size="29" />
+    </table>
+    <table name="event_result_screen_audio">
+        <field name="career_event_id_alternative" type="int" key="event.id" />
+        <field name="career_event_id_first" type="int" key="event.id" />
+        <field name="career_first_event" type="bool" />
+        <field name="championship_id" type="int" key="championship.id" />
+        <field name="discipline_first_event" type="bool" />
+        <field name="discipline_id" type="int" key="discipline.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="is_championship_final" type="bool" />
+        <field name="is_season_final" type="bool" />
+        <field name="negative_audio_sources_count" type="int" />
+        <field name="negative_audio_sources_prefix" type="string" size="28" />
+        <field name="play_once" type="bool" />
+        <field name="positive_audio_sources_count" type="int" />
+        <field name="positive_audio_sources_prefix" type="string" size="25" />
+        <field name="season_generic_line" type="bool" />
+        <field name="season_id" type="int" key="season.id" />
+        <field name="unlocked_final" type="bool" />
+        <field name="unlocked_next_championship" type="bool" />
+    </table>
+    <table name="event_reveal_group">
+        <field name="event_complete_delay" type="int" />
+        <field name="event_id" type="int" key="event.id" />
+        <field name="event_id_2" type="int" key="event.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="level" type="int" />
+        <field name="name" type="string" size="0" />
+        <field name="order_index" type="int" />
+        <field name="reveal_on_world_tour_completed" type="bool" />
+        <field name="unlock_on_event" type="bool" />
+        <field name="unlock_on_level" type="bool" />
+        <field name="unlock_on_vehicle_owned" type="bool" />
+        <field name="vehicle_id" type="int" key="vehicle.id" />
+    </table>
+    <table name="event_track_pool">
+        <field name="ai_choreographer_config_id" type="int" key="ai_choreographer_config.id" />
+        <field name="base_result_list" type="string" size="0" />
+        <field name="countdown_timer" type="int" />
+        <field name="discipline_override" type="int" key="discipline.id" />
+        <field name="event_id" type="int" key="event.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="last_man_standing_timer" type="int" />
+        <field name="net_laps_long" type="int" />
+        <field name="net_laps_med" type="int" />
+        <field name="net_laps_short" type="int" />
+        <field name="net_timed" type="bool" />
+        <field name="network_bias" type="float" />
+        <field name="num_laps" type="int" />
+        <field name="order_index" type="int" />
+        <field name="player_grid_position_base" type="int" />
+        <field name="player_grid_position_range" type="int" />
+        <field name="racetype_override" type="int" />
+        <field name="start_type" type="int" key="start_type.id" />
+        <field name="time_limit_seconds" type="int" />
+        <field name="track_lighting_type_id" type="int" key="track_lighting_types.id" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+        <field name="vehicle_class_1" type="int" />
+        <field name="vehicle_class_2" type="int" />
+        <field name="weather_type_id" type="int" key="weather_types.id" />
+    </table>
+    <table name="event_vehicle">
+        <field name="event_id" type="int" key="event.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+    </table>
+    <table name="event_vehicle_class">
+        <field name="event_id" type="int" key="event.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+    </table>
+    <table name="fallback_news_strings">
+        <field name="content_string_id" type="string" size="40" />
+        <field name="id" type="int" key="primary" />
+        <field name="is_scribble" type="bool" />
+        <field name="title_string_id" type="string" size="26" />
+    </table>
+    <table name="flashback_hint_settings">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string" type="string" size="17" />
+        <field name="value_float" type="float" />
+        <field name="value_int" type="int" />
+    </table>
+    <table name="game_entity_collision_filter">
+        <field name="filter" type="string" size="16" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="game_settings">
+        <field name="difficulty_default_season" type="int" key="season.id" />
+        <field name="flashback_bonus" type="int" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="gold_rush_settings">
+        <field name="base_zombie_spawn_count" type="int" />
+        <field name="civ_min_spawn_chance_period" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="initial_base_zombie_count" type="int" />
+        <field name="initial_civilian_spawn_chance" type="float" />
+        <field name="initial_zombies_per_player" type="int" />
+        <field name="max_civilian_spawn_chance" type="float" />
+        <field name="max_civilians" type="int" />
+        <field name="max_mega_robots" type="int" />
+        <field name="max_zombie_spawn_ratio" type="float" />
+        <field name="max_zombies" type="int" />
+        <field name="mega_robot_points" type="int" />
+        <field name="min_distance_to_player" type="float" />
+        <field name="min_mega_robots" type="int" />
+        <field name="no_mega_robot_phases" type="int" />
+        <field name="spawn_period" type="float" />
+        <field name="zombie_min_spawn_ratio_period" type="float" />
+        <field name="zombie_spawn_per_player" type="int" />
+    </table>
+    <table name="grid_order">
+        <field name="id" type="int" key="primary" />
+        <field name="show_in_lan" type="bool" />
+        <field name="show_in_online" type="bool" />
+        <field name="show_in_splitscreen" type="bool" />
+        <field name="string_id" type="string" size="31" />
+        <field name="type" type="string" size="20" />
+    </table>
+    <table name="gymkhana_attack_session_time">
+        <field name="id" type="int" key="primary" />
+        <field name="time" type="int" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+    </table>
+    <table name="gymkhana_practice_modifiers">
+        <field name="event_id" type="int" key="event.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="modifier" type="float" />
+        <field name="trick_type_id" type="int" key="trick_type.id" />
+    </table>
+    <table name="gymkhana_practice_session_time">
+        <field name="end_on_all_destructibles" type="bool" />
+        <field name="event_id" type="int" key="event.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="time" type="float" />
+    </table>
+    <table name="gymkhana_session_time">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="15" />
+        <field name="time" type="float" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+    </table>
+    <table name="gymkhana_sprint_session_time">
+        <field name="id" type="int" key="primary" />
+        <field name="time" type="int" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+    </table>
+    <table name="joyride_settings">
+        <field name="exposed_name" type="string" size="28" />
+        <field name="id" type="int" key="primary" />
+        <field name="value_bool" type="bool" />
+        <field name="value_float" type="float" />
+        <field name="value_int" type="int" />
+    </table>
+    <table name="language">
+        <field name="id" type="int" key="primary" />
+        <field name="single_codriver" type="bool" />
+        <field name="string" type="string" size="9" />
+    </table>
+    <table name="leaderboard_types">
+        <field name="id" type="int" key="primary" />
+        <field name="type" type="string" size="14" />
+    </table>
+    <table name="leaderboards">
+        <field name="challenge_event_name" type="int" key="event.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="leaderboard_id" type="int" />
+        <field name="leaderboard_type" type="int" key="leaderboard_types.id" />
+        <field name="location_id" type="int" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+        <field name="tt_discipline_id" type="int" />
+        <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+    </table>
+    <table name="license_masks">
+        <field name="hidden" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="license_mask" type="int" />
+        <field name="offer_name_string_id" type="string" size="26" />
+        <field name="parent_package" type="int" key="packages.id" />
+        <field name="show_in_dlc_screen" type="bool" />
+    </table>
+    <table name="location">
+        <field name="continent" type="int" key="continent.id" />
+        <field name="count_for_achievement" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="11" />
+        <field name="order_index" type="int" />
+        <field name="parent_package" type="int" key="packages.id" />
+        <field name="xlast_context_id" type="int" />
+    </table>
+    <table name="manufacturer">
+        <field name="file_string" type="string" size="10" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="13" />
+    </table>
+    <table name="mission">
+        <field name="description_string_id" type="string" size="32" />
+        <field name="description_value" type="float" />
+        <field name="enabled" type="bool" />
+        <field name="fail_on_collision" type="bool" />
+        <field name="friendly_name" type="string" size="33" />
+        <field name="id" type="int" key="primary" />
+        <field name="is_bidirectional" type="bool" />
+        <field name="logic" type="string" size="8" />
+        <field name="minimum_speed" type="float" />
+        <field name="mission_area_id" type="int" />
+        <field name="mission_name_string_id" type="string" size="20" />
+        <field name="mission_type_id" type="int" key="mission_type.id" />
+        <field name="must_complete_all" type="bool" />
+        <field name="order_index" type="int" />
+        <field name="play_out_of_order_failure" type="bool" />
+        <field name="play_progress_sfx" type="bool" />
+        <field name="play_timeout_failure" type="bool" />
+        <field name="stats_type_id" type="int" key="stats_types.id" />
+        <field name="target_value" type="float" />
+        <field name="time_limit" type="float" />
+        <field name="use_time_limit" type="bool" />
+    </table>
+    <table name="mission_area">
+        <field name="display_unlock" type="bool" />
+        <field name="event_id" type="int" key="event.id" />
+        <field name="event_select_image" type="string" size="11" />
+        <field name="grid_position" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="7" />
+        <field name="unlock_audio_trigger" type="string" size="17" />
+        <field name="unlock_on_season_id" type="int" key="season.id" />
+        <field name="zone_image" type="string" size="20" />
+        <field name="zone_info_string_id" type="string" size="18" />
+        <field name="zone_logo" type="string" size="7" />
+        <field name="zone_order" type="int" />
+    </table>
+    <table name="mission_type">
+        <field name="complete_sfx_name_string" type="string" size="15" />
+        <field name="icon_file_name_string" type="string" size="14" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="16" />
+    </table>
+    <table name="nationality">
+        <field name="allow_german_tracks" type="bool" />
+        <field name="currency_id" type="int" key="currency.id" />
+        <field name="file_string" type="string" size="16" />
+        <field name="flag_id" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="iso_code" type="string" size="3" />
+        <field name="name_string_id" type="string" size="14" />
+        <field name="rest_of_world" type="bool" />
+        <field name="units_id" type="int" key="units.id" />
+    </table>
+    <table name="nationality_voice">
+        <field name="id" type="int" key="primary" />
+        <field name="nationality_id" type="int" key="nationality.id" />
+        <field name="voice" type="string" size="10" />
+    </table>
+    <table name="net_competition_type">
+        <field name="competition_type" type="string" size="4" />
+        <field name="competition_type_string_id" type="string" size="14" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="net_driver_rep_rewards">
+        <field name="driver_rep" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="objective_id" type="int" key="unlock_objectives.id" />
+    </table>
+    <table name="net_event_default">
+        <field name="collisions" type="int" />
+        <field name="conditions" type="int" key="track_model_conditions.id" />
+        <field name="elimination_time" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="number_of_laps" type="int" />
+        <field name="race_type" type="int" key="net_race_type.id" />
+        <field name="round_index" type="int" />
+        <field name="staggered_starts" type="bool" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+    </table>
+    <table name="net_fanbase">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="15" />
+        <field name="tier" type="int" />
+        <field name="title_id" type="int" key="net_fanbase_title.id" />
+        <field name="total_fanbase" type="int" />
+    </table>
+    <table name="net_fanbase_title">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="31" />
+    </table>
+    <table name="net_race_tracks">
+        <field name="gold_rush_slots" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="min_zombie_spacing" type="float" />
+        <field name="net_race_type" type="int" key="net_race_type.id" />
+        <field name="round_time" type="int" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+    </table>
+    <table name="net_race_type">
+        <field name="discipline" type="int" key="discipline.id" />
+        <field name="file_string_id" type="string" size="11" />
+        <field name="force_collisions" type="bool" />
+        <field name="has_catch_up" type="bool" />
+        <field name="has_end_race_timer" type="bool" />
+        <field name="has_flashbacks" type="bool" />
+        <field name="has_grid_options" type="bool" />
+        <field name="has_impact_ratings" type="bool" />
+        <field name="has_multiple_laps" type="bool" />
+        <field name="has_score_limit" type="bool" />
+        <field name="has_staggerred_starts" type="bool" />
+        <field name="has_time_limit" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="16" />
+        <field name="no_splitscreen_ai" type="bool" />
+        <field name="order_index" type="int" />
+        <field name="race_rules_string_id" type="string" size="31" />
+        <field name="race_type" type="int" key="race_type.id" />
+        <field name="session_list_string_id" type="string" size="39" />
+        <field name="typed_name_string_id" type="string" size="26" />
+    </table>
+    <table name="net_race_type_competition">
+        <field name="id" type="int" key="primary" />
+        <field name="in_splitscreen" type="bool" />
+        <field name="net_competition_type_id" type="int" key="net_competition_type.id" />
+        <field name="net_race_type_id" type="int" key="net_race_type.id" />
+    </table>
+    <table name="net_score_limit">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="15" />
+        <field name="score" type="int" />
+    </table>
+    <table name="net_score_time_limit">
+        <field name="id" type="int" key="primary" />
+        <field name="is_score" type="bool" />
+        <field name="name_string_id" type="string" size="15" />
+        <field name="value" type="int" />
+    </table>
+    <table name="net_time_limit">
+        <field name="id" type="int" key="primary" />
+        <field name="minutes" type="int" />
+        <field name="name_string_id" type="string" size="14" />
+    </table>
+    <table name="net_vehicle_class">
+        <field name="id" type="int" key="primary" />
+        <field name="net_type" type="string" size="26" />
+        <field name="order_index" type="int" />
+        <field name="session_list_string_id" type="string" size="43" />
+        <field name="type_string_id" type="string" size="32" />
+    </table>
+    <table name="net_vehicle_class_restrictions">
+        <field name="id" type="int" key="primary" />
+        <field name="net_race_type_id" type="int" key="net_race_type.id" />
+        <field name="net_vehicle_class_id" type="int" key="net_vehicle_class.id" />
+    </table>
+    <table name="net_vehicle_default">
+        <field name="id" type="int" key="primary" />
+        <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+        <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+    </table>
+    <table name="object_base_templates">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="13" />
+        <field name="template_id" type="int" key="object_templates.id" />
+    </table>
+    <table name="object_templates">
+        <field name="base_template_id" type="int" key="object_base_templates.id" />
+        <field name="configuration_table_name" type="string" size="29" />
+        <field name="export_direction" type="bool" />
+        <field name="export_position" type="bool" />
+        <field name="export_transform" type="bool" />
+        <field name="expose_to_max" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="max_description" type="string" size="76" />
+        <field name="register_with_lookup" type="bool" />
+        <field name="template_name" type="string" size="27" />
+    </table>
+    <table name="objective">
+        <field name="ai_difficulty" type="int" />
+        <field name="difficulty" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="26" />
+        <field name="objective_category_id" type="int" key="objective_category.id" />
+        <field name="objective_type_id" type="int" key="objective_type.id" />
+        <field name="points" type="int" />
+    </table>
+    <table name="objective_category">
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="objective_drift">
+        <field name="id" type="int" key="primary" />
+        <field name="meters" type="int" />
+        <field name="objective_id" type="int" key="objective.id" />
+        <field name="track_model" type="int" key="track_model.id" />
+    </table>
+    <table name="objective_finish_at_speed">
+        <field name="ai_difficulty" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="objective_id" type="int" key="objective.id" />
+    </table>
+    <table name="objective_finish_with_time">
+        <field name="difficulty" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="objective_id" type="int" />
+    </table>
+    <table name="objective_jump">
+        <field name="id" type="int" key="primary" />
+        <field name="meters" type="int" />
+        <field name="objective_id" type="int" key="objective.id" />
+        <field name="track_model" type="int" key="track_model.id" />
+    </table>
+    <table name="objective_no_wheel_finish">
+        <field name="id" type="int" key="primary" />
+        <field name="track_model" type="int" key="track_model.id" />
+    </table>
+    <table name="objective_restrictions">
+        <field name="discipline_id" type="int" key="discipline.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="objective_id" type="int" key="objective_type.id" />
+    </table>
+    <table name="objective_speed">
+        <field name="ai_difficulty" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="objective_id" type="int" key="objective.id" />
+    </table>
+    <table name="objective_time_ahead">
+        <field name="id" type="int" key="primary" />
+        <field name="objective_id" type="int" key="objective.id" />
+        <field name="seconds" type="int" />
+    </table>
+    <table name="objective_type">
+        <field name="class_name" type="string" size="14" />
+        <field name="id" type="int" key="primary" />
+        <field name="track_dependent" type="bool" />
+    </table>
+    <table name="on_off">
+        <field name="id" type="int" key="primary" />
+        <field name="is_on" type="bool" />
+        <field name="name_string_id" type="string" size="3" />
+    </table>
+    <table name="outbreak_settings">
+        <field name="airborne_infection_interval" type="float" />
+        <field name="collision_impulse_threshold" type="float" />
+        <field name="get_points_for_airborne_victim" type="bool" />
+        <field name="get_points_for_airborne_witness" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="infected_local_volume" type="float" />
+        <field name="infected_min_volume" type="float" />
+        <field name="infected_min_volume_distance" type="float" />
+        <field name="infected_nearby_volume" type="float" />
+        <field name="infection_points" type="int" />
+        <field name="infection_points_per_infected" type="int" />
+        <field name="survival_points" type="int" />
+        <field name="witness_points" type="int" />
+        <field name="witness_points_per_infected" type="int" />
+    </table>
+    <table name="package_type">
+        <field name="id" type="int" key="primary" />
+        <field name="package_type" type="string" size="9" />
+    </table>
+    <table name="packages">
+        <field name="extension_id" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="is_unlock_all" type="bool" />
+        <field name="is_vip" type="bool" />
+        <field name="package_name_string_id" type="string" size="25" />
+        <field name="package_type" type="int" key="package_type.id" />
+        <field name="parent_package" type="int" />
+        <field name="patch_extension_id_limit" type="int" />
+        <field name="show_in_dlc_screen" type="bool" />
+        <field name="skip_database_processing" type="bool" />
+    </table>
+    <table name="podium_names">
+        <field name="event" type="int" key="event.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="podium_string_id" type="string" size="20" />
+    </table>
+    <table name="points">
+        <field name="description" type="string" size="16" />
+        <field name="id" type="int" key="primary" />
+        <field name="points" type="string" size="32" />
+    </table>
+    <table name="progress_units">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string" type="string" size="10" />
+        <field name="si_conversion" type="float" />
+    </table>
+    <table name="race_type">
+        <field name="ai_vehicle_template_id" type="int" key="object_templates.id" />
+        <field name="auto_steer_off" type="bool" />
+        <field name="characters_use_progress" type="bool" />
+        <field name="corner_braking_off" type="bool" />
+        <field name="disable_race_line" type="bool" />
+        <field name="early_virtual_results" type="bool" />
+        <field name="enable_damage_reset" type="bool" />
+        <field name="entity_layer_id" type="int" key="entity_mode_layer_bitset.id" />
+        <field name="force_infinite_laps" type="bool" />
+        <field name="force_visual_only_damage" type="bool" />
+        <field name="game_mode_template_id" type="int" key="object_templates.id" />
+        <field name="grid_slot" type="string" size="18" />
+        <field name="gymkhana_assists" type="bool" />
+        <field name="has_ghost_laps" type="bool" />
+        <field name="has_laps" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="include_in_ghost_name" type="bool" />
+        <field name="is_party_mode" type="bool" />
+        <field name="load_generic_trick_lines" type="bool" />
+        <field name="loading_token" type="string" size="15" />
+        <field name="manual_ghost_record_end" type="bool" />
+        <field name="mouse_weight_multiple" type="float" />
+        <field name="name_string_id" type="string" size="17" />
+        <field name="need_trick_lines" type="bool" />
+        <field name="no_ai" type="bool" />
+        <field name="only_virtual_ai" type="bool" />
+        <field name="player_vehicle_template_id" type="int" key="object_templates.id" />
+        <field name="post_race_ai" type="bool" />
+        <field name="race_line_off" type="bool" />
+        <field name="remote_vehicle_template_id" type="int" key="object_templates.id" />
+        <field name="reset_settings_id" type="int" key="reset_settings.id" />
+        <field name="retirement_penalty_time" type="float" />
+        <field name="splitscreen_grid_slots" type="bool" />
+        <field name="sponsor_id" type="int" key="sponsor.id" />
+        <field name="stability_control_off" type="bool" />
+        <field name="throttle_management_off" type="bool" />
+        <field name="time_based_event" type="bool" />
+        <field name="type" type="string" size="17" />
+        <field name="use_retirement_penalty" type="bool" />
+        <field name="use_simple_race_line" type="bool" />
+    </table>
+    <table name="race_type_entity_filters">
+        <field name="entity_filter" type="string" size="15" />
+        <field name="id" type="int" key="primary" />
+        <field name="race_type_id" type="int" key="race_type.id" />
+    </table>
+    <table name="race_type_osd_settings">
+        <field name="disable_lap_indicator" type="bool" />
+        <field name="disable_mini_map" type="bool" />
+        <field name="disable_player_position" type="bool" />
+        <field name="disable_progress_bar" type="bool" />
+        <field name="disable_wrong_way" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="race_type_id" type="int" key="race_type.id" />
+    </table>
+    <table name="reset_settings">
+        <field name="id" type="int" key="primary" />
+        <field name="maximum_speed" type="float" />
+        <field name="minimum_wait" type="float" />
+        <field name="name_string" type="string" size="10" />
+    </table>
+    <table name="reset_to_slot">
+        <field name="id" type="int" key="primary" />
+        <field name="race_type_id" type="int" key="race_type.id" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+    </table>
+    <table name="result_type_restrictions">
+        <field name="id" type="int" key="primary" />
+        <field name="is_single_player" type="bool" />
+        <field name="race_discipline" type="int" key="discipline.id" />
+        <field name="race_mode" type="int" key="race_type.id" />
+        <field name="result_type" type="int" key="result_types.id" />
+    </table>
+    <table name="result_types">
+        <field name="id" type="int" key="primary" />
+        <field name="result_type" type="string" size="6" />
+    </table>
+    <table name="save_identifier">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string" type="string" size="0" />
+        <field name="ps3_scea_string" type="string" size="0" />
+        <field name="ps3_scee_string" type="string" size="0" />
+        <field name="ps3_scej_string" type="string" size="0" />
+        <field name="win_string" type="string" size="0" />
+        <field name="win_title_id" type="int" />
+        <field name="x360_title_id" type="int" />
+    </table>
+    <table name="season">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="10" />
+        <field name="order_index" type="int" />
+        <field name="unlock_audio_speech" type="string" size="8" />
+        <field name="unlock_on_event_completed" type="bool" />
+        <field name="unlock_on_event_id" type="int" key="event.id" />
+        <field name="unlock_requires_podium" type="bool" />
+        <field name="unlock_with_any_championship" type="bool" />
+    </table>
+    <table name="separator">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="15" />
+        <field name="separator" type="string" size="1" />
+    </table>
+    <table name="shutdown">
+        <field name="id" type="int" key="primary" />
+        <field name="message" type="string" size="0" />
+        <field name="should_shutdown" type="int" />
+    </table>
+    <table name="single_race_competition">
+        <field name="competition_type_id" type="int" key="competition_type.id" />
+        <field name="discipline_id" type="int" key="discipline.id" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="single_race_discipline">
+        <field name="discipline" type="int" key="discipline.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="laps_type_id" type="int" />
+        <field name="name_string_id" type="string" size="11" />
+        <field name="order_index" type="int" />
+        <field name="race_type" type="int" key="race_type.id" />
+    </table>
+    <table name="single_race_driver_list">
+        <field name="continent_id" type="int" key="continent.id" />
+        <field name="driver_id" type="int" key="driver.id" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="single_race_grid_position">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="6" />
+    </table>
+    <table name="single_race_laps">
+        <field name="id" type="int" key="primary" />
+        <field name="laps_type_id" type="int" />
+        <field name="name_string_id" type="string" size="13" />
+        <field name="num_laps" type="int" />
+        <field name="order_index" type="int" />
+        <field name="track_type_id" type="int" />
+    </table>
+    <table name="single_race_laps_type">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="14" />
+    </table>
+    <table name="single_race_vehicle_class">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="20" />
+        <field name="order_index" type="int" />
+    </table>
+    <table name="single_race_vehicle_groups">
+        <field name="id" type="int" key="primary" />
+        <field name="single_race_vehicle_class" type="int" />
+        <field name="vehicle_class" type="int" key="vehicle_class.id" />
+    </table>
+    <table name="smash_attack_time">
+        <field name="id" type="int" key="primary" />
+        <field name="time" type="int" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+    </table>
+    <table name="speed_run_settings">
+        <field name="gate_hit_sound" type="string" size="12" />
+        <field name="gate_miss_string" type="string" size="12" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="speed_run_time">
+        <field name="id" type="int" key="primary" />
+        <field name="time" type="int" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+    </table>
+    <table name="splitscreen_num_ai">
+        <field name="check_ai_allowed" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="in_team" type="bool" />
+        <field name="name_string_id" type="string" size="1" />
+        <field name="num_ai" type="int" />
+    </table>
+    <table name="sponsor">
+        <field name="file_string" type="string" size="23" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="16" />
+        <field name="num_logos" type="int" />
+        <field name="sponsor_0_b" type="int" />
+        <field name="sponsor_0_g" type="int" />
+        <field name="sponsor_0_intensity" type="float" />
+        <field name="sponsor_0_r" type="int" />
+        <field name="sponsor_1_b" type="int" />
+        <field name="sponsor_1_g" type="int" />
+        <field name="sponsor_1_intensity" type="float" />
+        <field name="sponsor_1_r" type="int" />
+        <field name="sponsor_2_b" type="int" />
+        <field name="sponsor_2_g" type="int" />
+        <field name="sponsor_2_intensity" type="float" />
+        <field name="sponsor_2_r" type="int" />
+        <field name="sponsor_type_id" type="int" />
+    </table>
+    <table name="sponsor_type">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="16" />
+    </table>
+    <table name="sr_vehicle_class_discipline">
+        <field name="id" type="int" key="primary" />
+        <field name="sr_discipline_id" type="int" />
+        <field name="sr_vehicle_class_id" type="int" />
+    </table>
+    <table name="start_type">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="4" />
+    </table>
+    <table name="stats">
+        <field name="fallback" type="bool" />
+        <field name="group_id" type="int" key="stats_groups.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="is_bigger_better" type="bool" />
+        <field name="name_string_id" type="string" size="28" />
+        <field name="online_leaderboard_string" type="string" size="34" />
+        <field name="type_id" type="int" key="stats_types.id" />
+    </table>
+    <table name="stats_categories">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string" type="string" size="17" />
+    </table>
+    <table name="stats_groups">
+        <field name="category_id" type="int" key="stats_categories.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_sting" type="string" size="22" />
+        <field name="title_string_id" type="string" size="23" />
+    </table>
+    <table name="stats_types">
+        <field name="data_type_id" type="int" key="data_types.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="type" type="string" size="14" />
+    </table>
+    <table name="surface_type">
+        <field name="id" type="int" key="primary" />
+        <field name="surface_name_string_id" type="string" size="29" />
+    </table>
+    <table name="table_names">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string" type="string" size="31" />
+    </table>
+    <table name="target_marker">
+        <field name="above_threshold" type="float" />
+        <field name="alpha_distance" type="float" />
+        <field name="below_threshold" type="float" />
+        <field name="colour_animation" type="string" size="11" />
+        <field name="height" type="float" />
+        <field name="height_marker" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="max_alpha" type="float" />
+        <field name="max_distance" type="float" />
+        <field name="max_distance_alpha" type="float" />
+        <field name="min_distance_alpha" type="float" />
+        <field name="off_distance" type="float" />
+        <field name="on_distance" type="float" />
+        <field name="scale_distance" type="float" />
+        <field name="speed_run_upcoming" type="bool" />
+        <field name="team_id" type="int" />
+        <field name="texture" type="string" size="18" />
+        <field name="type" type="string" size="32" />
+        <field name="use_data_position" type="bool" />
+        <field name="use_state" type="bool" />
+    </table>
+    <table name="target_marker_state">
+        <field name="active" type="int" key="target_marker.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="target_marker_id" type="int" key="target_marker.id" />
+        <field name="upcoming" type="int" key="target_marker.id" />
+    </table>
+    <table name="team">
+        <field name="bonus_reward_rating" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="26" />
+        <field name="objective_points" type="int" />
+        <field name="reward_team_name_string_id" type="string" size="33" />
+        <field name="sponsor_logo" type="string" size="20" />
+        <field name="team_offer_name_string_id" type="string" size="35" />
+        <field name="team_offer_string_id" type="string" size="0" />
+        <field name="unlock_level" type="int" />
+        <field name="unlock_texture_name" type="string" size="6" />
+    </table>
+    <table name="team_offer">
+        <field name="dev_text" type="string" size="0" />
+        <field name="driver_max_level" type="int" />
+        <field name="driver_min_level" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="order_index" type="int" />
+        <field name="parent_package" type="int" key="packages.id" />
+        <field name="team_id" type="int" key="team.id" />
+        <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+        <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+    </table>
+    <table name="template_to_component">
+        <field name="component_id" type="int" key="components.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="template_id" type="int" key="object_templates.id" />
+    </table>
+    <table name="tier">
+        <field name="career_id" type="int" key="career.id" />
+        <field name="count_towards_event_completes" type="bool" />
+        <field name="count_towards_progress_stat" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="map_screen_tier" type="bool" />
+        <field name="name_string_id" type="string" size="18" />
+        <field name="order_index" type="int" />
+    </table>
+    <table name="track">
+        <field name="additional_ground_clearance" type="float" />
+        <field name="city_track" type="bool" />
+        <field name="count_towards_stats" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="location_id" type="int" key="location.id" />
+        <field name="name_string_id" type="string" size="18" />
+        <field name="nationality_id" type="int" key="nationality.id" />
+        <field name="parent_package" type="int" key="packages.id" />
+        <field name="use_warm_weather_crowd" type="bool" />
+    </table>
+    <table name="track_lighting_types">
+        <field name="id" type="int" key="primary" />
+        <field name="lighting_id" type="string" size="7" />
+    </table>
+    <table name="track_model">
+        <field name="ai_track_name" type="string" size="15" />
+        <field name="ao_track_override" type="string" size="8" />
+        <field name="banked_track" type="bool" />
+        <field name="codriver_calls" type="bool" />
+        <field name="compound_reset" type="bool" />
+        <field name="discipline_id" type="int" key="discipline.id" />
+        <field name="drift_off_track" type="bool" />
+        <field name="every_track_achievement" type="bool" />
+        <field name="file_string" type="string" size="18" />
+        <field name="folder_string" type="string" size="16" />
+        <field name="has_day_alternate_lighting" type="bool" />
+        <field name="has_night_lighting" type="bool" />
+        <field name="has_snowing_lighting" type="bool" />
+        <field name="has_wet_lighting" type="bool" />
+        <field name="headlights_on" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="include_in_cycle_tracks" type="bool" />
+        <field name="length" type="float" />
+        <field name="local_audio_ambience" type="string" size="4" />
+        <field name="minimap_dist_above" type="float" />
+        <field name="minimap_dist_behind" type="float" />
+        <field name="minimap_fade_end" type="float" />
+        <field name="minimap_fade_start" type="float" />
+        <field name="minimap_width" type="float" />
+        <field name="minimap_zoom" type="float" />
+        <field name="name_string_id" type="string" size="28" />
+        <field name="not_single_race" type="bool" />
+        <field name="order_index" type="int" />
+        <field name="parent_package" type="int" key="packages.id" />
+        <field name="rolling_start_buffer" type="float" />
+        <field name="route_string" type="string" size="7" />
+        <field name="skipfe_track" type="bool" />
+        <field name="sponsor_a" type="int" key="sponsor.id" />
+        <field name="sponsor_b" type="int" key="sponsor.id" />
+        <field name="sponsor_c" type="int" key="sponsor.id" />
+        <field name="sponsor_d" type="int" key="sponsor.id" />
+        <field name="supports_time_of_day" type="bool" />
+        <field name="swap_for_dummy" type="bool" />
+        <field name="track_id" type="int" key="track.id" />
+        <field name="track_lights_on" type="bool" />
+        <field name="track_spline_id" type="string" size="19" />
+        <field name="track_type_id" type="int" key="track_type.id" />
+        <field name="tyre_type_id" type="int" key="tyre_type.id" />
+        <field name="ui_route_id" type="int" />
+        <field name="ui_track_model_id" type="int" key="track_model.id" />
+    </table>
+    <table name="track_model_conditions">
+        <field name="condition_icon" type="string" size="13" />
+        <field name="id" type="int" key="primary" />
+        <field name="lighting_id" type="int" key="track_lighting_types.id" />
+        <field name="name_string_id" type="string" size="35" />
+        <field name="not_in_splitscreen" type="bool" />
+        <field name="order_index" type="int" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+        <field name="weather_id" type="int" key="weather_types.id" />
+    </table>
+    <table name="track_model_surface">
+        <field name="id" type="int" key="primary" />
+        <field name="percentage" type="int" />
+        <field name="surface_id" type="int" key="surface_type.id" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+    </table>
+    <table name="track_sponsor_colours">
+        <field name="id" type="int" key="primary" />
+        <field name="sponsor_0_b" type="int" />
+        <field name="sponsor_0_g" type="int" />
+        <field name="sponsor_0_intensity" type="float" />
+        <field name="sponsor_0_r" type="int" />
+        <field name="sponsor_1_b" type="int" />
+        <field name="sponsor_1_g" type="int" />
+        <field name="sponsor_1_intensity" type="float" />
+        <field name="sponsor_1_r" type="int" />
+        <field name="sponsor_2_b" type="int" />
+        <field name="sponsor_2_g" type="int" />
+        <field name="sponsor_2_intensity" type="float" />
+        <field name="sponsor_2_r" type="int" />
+        <field name="sponsor_id" type="int" key="sponsor.id" />
+        <field name="track_id" type="int" key="track.id" />
+    </table>
+    <table name="track_type">
+        <field name="id" type="int" key="primary" />
+        <field name="type" type="string" size="14" />
+    </table>
+    <table name="trick_combo_earned_modifier">
+        <field name="combo_level" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="modifier" type="float" />
+    </table>
+    <table name="trick_line_instance">
+        <field name="disengage_angle" type="float" />
+        <field name="disengage_on_collision" type="bool" />
+        <field name="disengage_radius" type="float" />
+        <field name="disengage_time" type="float" />
+        <field name="disengage_velocity" type="float" />
+        <field name="filename" type="string" size="43" />
+        <field name="has_start" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="is_bidirectional" type="bool" />
+        <field name="name" type="string" size="30" />
+        <field name="pivot_at_end" type="bool" />
+        <field name="render_inner_radius" type="float" />
+        <field name="render_outer_radius" type="float" />
+        <field name="selectable_in_max" type="bool" />
+        <field name="start_angle" type="float" />
+        <field name="start_radius" type="float" />
+        <field name="start_velocity" type="float" />
+    </table>
+    <table name="trick_meter_segments">
+        <field name="bottom" type="float" />
+        <field name="height" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="rating" type="int" />
+        <field name="top" type="float" />
+        <field name="x" type="float" />
+        <field name="y" type="float" />
+    </table>
+    <table name="trick_score_settings">
+        <field name="bonus_1" type="float" />
+        <field name="bonus_2" type="float" />
+        <field name="bonus_3" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="max_score" type="int" />
+        <field name="meter_1" type="float" />
+        <field name="meter_2" type="float" />
+        <field name="meter_3" type="float" />
+        <field name="score_1" type="float" />
+        <field name="score_2" type="float" />
+        <field name="score_3" type="float" />
+        <field name="trick_type_id" type="int" key="trick_type.id" />
+    </table>
+    <table name="trick_settings">
+        <field name="exposed_name" type="string" size="35" />
+        <field name="id" type="int" key="primary" />
+        <field name="value_bool" type="bool" />
+        <field name="value_float" type="float" />
+        <field name="value_int" type="int" />
+    </table>
+    <table name="trick_stale">
+        <field name="final_level" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="multiplier" type="float" />
+        <field name="rating_level" type="int" />
+    </table>
+    <table name="trick_type">
+        <field name="colour_b" type="float" />
+        <field name="colour_g" type="float" />
+        <field name="colour_r" type="float" />
+        <field name="freestyle_trick" type="bool" />
+        <field name="freezes_combo" type="bool" />
+        <field name="freezes_combo_stale" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="is_gymkhana_trick" type="bool" />
+        <field name="required_rating_in_sprint" type="int" />
+        <field name="show_score_on_update" type="bool" />
+        <field name="type_id" type="int" />
+        <field name="type_identifier" type="string" size="12" />
+        <field name="type_string_id" type="string" size="19" />
+    </table>
+    <table name="tt_discipline">
+        <field name="discipline" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="18" />
+        <field name="order_index" type="int" />
+        <field name="race_type" type="int" />
+    </table>
+    <table name="tt_vehicle_class_disciplines">
+        <field name="id" type="int" key="primary" />
+        <field name="order_index" type="int" />
+        <field name="tt_discipline_id" type="int" />
+        <field name="vehicle_class_id" type="int" />
+    </table>
+    <table name="tyre_type">
+        <field name="description" type="string" size="6" />
+        <field name="file_string" type="string" size="2" />
+        <field name="id" type="int" key="primary" />
+    </table>
+    <table name="units">
+        <field name="id" type="int" key="primary" />
+        <field name="name" type="string" size="8" />
+    </table>
+    <table name="unlock_objectives">
+        <field name="id" type="int" key="primary" />
+        <field name="objective_type" type="string" size="16" />
+        <field name="required_string" type="string" size="0" />
+        <field name="required_value" type="int" />
+        <field name="unlock_audio_speech" type="string" size="16" />
+    </table>
+    <table name="vehicle">
+        <field name="acceleration" type="int" />
+        <field name="ai_vehicle_type_config" type="string" size="15" />
+        <field name="ai_vehicle_type_statistics" type="string" size="3" />
+        <field name="ai_vehicle_type_track" type="string" size="15" />
+        <field name="bhp" type="int" />
+        <field name="brakes" type="int" />
+        <field name="career_region_id" type="int" />
+        <field name="cornering" type="int" />
+        <field name="count_towards_achievement" type="bool" />
+        <field name="disable_online" type="bool" />
+        <field name="discipline" type="int" key="discipline.id" />
+        <field name="dont_unlock_with_unlock_all_dlc" type="bool" />
+        <field name="easter_egg" type="bool" />
+        <field name="file_string" type="string" size="3" />
+        <field name="grip" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="ignore_main_livery_unlock" type="bool" />
+        <field name="livery_image_to_use" type="string" size="6" />
+        <field name="max_maintained_dents" type="float" />
+        <field name="max_maintained_dirt" type="float" />
+        <field name="max_maintained_scratches" type="float" />
+        <field name="open_windscreen" type="bool" />
+        <field name="order_index" type="int" />
+        <field name="pack_value" type="int" />
+        <field name="parent_package" type="int" key="packages.id" />
+        <field name="purchasable" type="bool" />
+        <field name="purchase_price" type="int" />
+        <field name="swap_with_dummy" type="bool" />
+        <field name="top_speed" type="int" />
+        <field name="unlock_audio_speech" type="string" size="0" />
+        <field name="use_alternative_handling_files" type="bool" />
+        <field name="use_in_all_events_dlc" type="bool" />
+        <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+        <field name="vehicle_drive_type_id" type="int" key="vehicle_drive_type.id" />
+        <field name="vehicle_grade_id" type="int" key="vehicle_grade.id" />
+        <field name="vehicle_interior_id" type="int" key="vehicle_interior.id" />
+        <field name="vehicle_model_id" type="int" key="vehicle_model.id" />
+        <field name="vehicle_skid_type_id" type="int" key="vehicle_skid_type.id" />
+        <field name="weight_in_kg" type="int" />
+    </table>
+    <table name="vehicle_attribute">
+        <field name="acceleration" type="int" />
+        <field name="agility" type="int" />
+        <field name="filename" type="string" size="0" />
+        <field name="grade_id" type="int" key="vehicle_grade.id" />
+        <field name="grade_value" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="top_speed" type="int" />
+        <field name="vehicle_id" type="int" key="vehicle.id" />
+    </table>
+    <table name="vehicle_class">
+        <field name="codriver_calls" type="bool" />
+        <field name="discipline_id" type="int" key="discipline.id" />
+        <field name="file_string" type="string" size="16" />
+        <field name="id" type="int" key="primary" />
+        <field name="ignore_main_livery_unlock" type="bool" />
+        <field name="image_file_name" type="string" size="19" />
+        <field name="is_decade_specific" type="bool" />
+        <field name="is_rally_class" type="bool" />
+        <field name="is_specific_decade" type="bool" />
+        <field name="order_index" type="int" />
+        <field name="tt_name_string_id" type="string" size="37" />
+        <field name="type_id" type="int" key="vehicle_class_type.id" />
+        <field name="type_string_id" type="string" size="16" />
+        <field name="xlast_context_id" type="int" />
+    </table>
+    <table name="vehicle_class_type">
+        <field name="id" type="int" key="primary" />
+        <field name="name_string_id" type="string" size="11" />
+    </table>
+    <table name="vehicle_drive_type">
+        <field name="id" type="int" key="primary" />
+        <field name="string_id" type="string" size="14" />
+        <field name="type" type="string" size="3" />
+    </table>
+    <table name="vehicle_grade">
+        <field name="alt_mech_string" type="string" size="2" />
+        <field name="difficulty_order_index" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="mech_string" type="string" size="2" />
+        <field name="name_string_id" type="string" size="7" />
+        <field name="order_index" type="int" />
+    </table>
+    <table name="vehicle_interior">
+        <field name="drive" type="string" size="5" />
+        <field name="file_string" type="string" size="3" />
+        <field name="gearstick" type="string" size="6" />
+        <field name="gearstick_placement" type="string" size="6" />
+        <field name="h_pattern_type" type="string" size="6" />
+        <field name="handbrake_placement" type="string" size="6" />
+        <field name="handbrake_type" type="string" size="6" />
+        <field name="id" type="int" key="primary" />
+        <field name="sequential_type" type="string" size="6" />
+        <field name="small_cockpit" type="bool" />
+    </table>
+    <table name="vehicle_light_colours">
+        <field name="id" type="int" />
+        <field name="name" type="string" key="primary" size="6" />
+    </table>
+    <table name="vehicle_livery">
+        <field name="currently_works" type="bool" />
+        <field name="disable_online" type="bool" />
+        <field name="dont_unlock_with_unlock_all_dlc" type="bool" />
+        <field name="driver_suit_id" type="int" key="driver_suit.id" />
+        <field name="fake_team_name_string_id" type="string" size="42" />
+        <field name="file_string" type="string" size="6" />
+        <field name="group_index" type="int" />
+        <field name="has_alternative_handling" type="bool" />
+        <field name="id" type="int" key="primary" />
+        <field name="is_default_livery" type="bool" />
+        <field name="is_mouse_livery" type="bool" />
+        <field name="light_colour" type="string" key="vehicle_light_colours.name" size="6" />
+        <field name="livery_name_string_id" type="string" size="29" />
+        <field name="livery_price" type="int" />
+        <field name="objective_id" type="int" key="unlock_objectives.id" />
+        <field name="order_index" type="int" />
+        <field name="parent_package" type="int" key="packages.id" />
+        <field name="pc_only" type="bool" />
+        <field name="unlock_audio_speech" type="string" size="0" />
+        <field name="unlock_on_game_save" type="bool" />
+        <field name="unlock_on_objective" type="bool" />
+        <field name="unlock_save_identifier" type="int" key="save_identifier.id" />
+        <field name="unlock_with_vehicle" type="bool" />
+        <field name="use_image_for_group" type="bool" />
+        <field name="vehicle_id" type="int" key="vehicle.id" />
+    </table>
+    <table name="vehicle_model">
+        <field name="all_vehicles_achievement" type="bool" />
+        <field name="camera_set_id" type="int" key="camera_sets.id" />
+        <field name="full_name_string_id" type="string" size="46" />
+        <field name="id" type="int" key="primary" />
+        <field name="manufacturer_id" type="int" key="manufacturer.id" />
+        <field name="name_in_veh_coll_string_id" type="string" size="49" />
+        <field name="short_name_string_id" type="string" size="47" />
+        <field name="super_short_name_string_id" type="string" size="48" />
+    </table>
+    <table name="vehicle_skid_type">
+        <field name="id" type="int" key="primary" />
+        <field name="type" type="string" size="11" />
+    </table>
+    <table name="video_subthemes">
+        <field name="id" type="int" key="primary" />
+        <field name="parent_theme_id" type="int" />
+        <field name="subtheme_string_id" type="string" size="21" />
+    </table>
+    <table name="video_theme">
+        <field name="id" type="int" key="primary" />
+        <field name="profile_name" type="string" size="22" />
+        <field name="subtheme_id" type="int" />
+        <field name="theme_string_id" type="string" size="10" />
+    </table>
+    <table name="virtual_points_gymkhana">
+        <field name="best_score" type="int" />
+        <field name="id" type="int" key="primary" />
+        <field name="max_skill_variance" type="float" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+        <field name="worst_score" type="int" />
+    </table>
+    <table name="virtual_times">
+        <field name="difficulty" type="float" />
+        <field name="finishing_speed" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="time" type="float" />
+        <field name="top_speed" type="float" />
+        <field name="track_model_id" type="int" />
+        <field name="variance" type="float" />
+        <field name="vehicle_class" type="int" />
+    </table>
+    <table name="virtual_times_standard">
+        <field name="best_split_1" type="float" />
+        <field name="best_split_2" type="float" />
+        <field name="best_split_3" type="float" />
+        <field name="best_split_4" type="float" />
+        <field name="class_id" type="int" key="vehicle_grade.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="max_chance_terminal_damage" type="int" />
+        <field name="max_skill_variance" type="float" />
+        <field name="min_chance_terminal_damage" type="int" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+        <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+        <field name="worst_split_1" type="float" />
+        <field name="worst_split_2" type="float" />
+        <field name="worst_split_3" type="float" />
+        <field name="worst_split_4" type="float" />
+    </table>
+    <table name="weather_types">
+        <field name="ai_weather_modifier" type="float" />
+        <field name="id" type="int" key="primary" />
+        <field name="weather_base" type="int" key="weather_types_base.id" />
+        <field name="weather_id" type="string" size="10" />
+    </table>
+    <table name="weather_types_base">
+        <field name="id" type="int" key="primary" />
+        <field name="weather_name" type="string" size="7" />
+    </table>
+    <table name="world_record">
+        <field name="driver_id" type="int" key="driver.id" />
+        <field name="id" type="int" key="primary" />
+        <field name="points" type="int" />
+        <field name="race_type_id" type="int" key="race_type.id" />
+        <field name="track_model_id" type="int" key="track_model.id" />
+        <field name="vehicle_class_id" type="int" key="vehicle_class.id" />
+        <field name="vehicle_livery_id" type="int" key="vehicle_livery.id" />
+        <field name="world_record" type="float" />
+    </table>
+</schema>
