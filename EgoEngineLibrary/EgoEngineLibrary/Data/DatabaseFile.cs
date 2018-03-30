@@ -19,15 +19,13 @@
             this._loadErrors = new List<string[]>();
         }
 
-        public DatabaseFile(string xmlPath)
+        public DatabaseFile(string xmlPath) : this()
         {
-            this._loadErrors = new List<string[]>();
             string path = Path.GetFullPath(xmlPath).Replace(Path.GetFileName(xmlPath), string.Empty) + Path.GetFileNameWithoutExtension(xmlPath) + "_schema.xsd";
             if (File.Exists(path))
             {
                 base.ReadXmlSchema(path);
             }
-            this._loadErrors = new List<string[]>();
             try
             {
                 base.ReadXml(xmlPath, XmlReadMode.Auto);
@@ -144,42 +142,51 @@
             base.AcceptChanges();
         }
 
-        public DatabaseFile(string databasePath, string schemaPath)
+        public DatabaseFile(string databasePath, string schemaPath) : this()
         {
-            this._loadErrors = new List<string[]>();
             base.DataSetName = "database";
             using (DatabaseBinaryReader reader = new DatabaseBinaryReader(EndianBitConverter.Little, File.Open(databasePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
                 int num;
                 Exception exception;
                 Dictionary<DataColumn, string[]> dR = new Dictionary<DataColumn, string[]>();
-                this._loadErrors = new List<string[]>();
                 XmlDocument SXML = new XmlDocument();
                 SXML.Load(File.Open(schemaPath, FileMode.Open, FileAccess.Read, FileShare.Read));
                 int itemNum = 0;
                 int nodeNum = 0;
                 base.DataSetName = reader.ReadUInt32().ToString();
-                uint num4 = 0;
+                uint schemaVersion = 0;
+
                 if (SXML.DocumentElement.ChildNodes[nodeNum].Name == "schemaVersion")
                 {
-                    num4 = reader.ReadUInt32();
-                    base.DataSetName = base.DataSetName + ";" + num4.ToString();
+                    // Dirt 3 schemaVer, and schemaVerXml is different so don't do the error check
+                    uint schemaVersionXml = Convert.ToUInt32(SXML.DocumentElement.ChildNodes[nodeNum].Attributes["version"].Value);
+                    schemaVersion = reader.ReadUInt32();
+                    if (schemaVersion != schemaVersionXml && schemaVersion != 3914959594) throw new ArgumentException("The schema does not match with this database file.", nameof(schemaPath));
+                    base.DataSetName = base.DataSetName + ";" + schemaVersion.ToString();
                     nodeNum++;
                 }
+
+                // Figure out the offset to the strings
+                // this only applies to certain games
+                // Does not apply to Dirt 3, despite having a schemaVersion
+                // F12013 1000; GridAutosport 1407330540; Dirt3 3914959594;
                 int offset = 12;
-                if (num4 == 0x3e8)
+                if (schemaVersion == 1000 || schemaVersion == 1407330540)
                 {
                     num = 1;
                     while (num < SXML.DocumentElement.ChildNodes.Count)
                     {
                         reader.Seek(offset, SeekOrigin.Begin);
                         int num6 = reader.ReadInt32();
-                        offset += ((num6 * (SXML.DocumentElement.ChildNodes[num].ChildNodes.Count + 1)) * 4) + 8;
+                        int fieldCount = SXML.DocumentElement.ChildNodes[num].ChildNodes.OfType<XmlElement>().Count(x => x.Name == "field");
+                        offset += ((num6 * (fieldCount + 1)) * 4) + 8;
                         num++;
                     }
                     offset += 4;
                     reader.Seek(8, SeekOrigin.Begin);
                 }
+                
                 while (reader.BaseStream.Position < reader.BaseStream.Length &&
                     nodeNum < SXML.DocumentElement.ChildNodes.Count)
                 {
@@ -188,6 +195,11 @@
                     itemNum = reader.ReadInt32();
                     foreach (XmlElement element in SXML.DocumentElement.ChildNodes[nodeNum])
                     {
+                        if (element.Name != "field")
+                        {
+                            continue;
+                        }
+
                         DataColumn column = new DataColumn();
                         table.Columns.Add(column);
                         column.ColumnName = element.Attributes["name"].InnerText;
@@ -238,6 +250,11 @@
                         reader.Seek(4, SeekOrigin.Current);
                         foreach (XmlElement element in SXML.DocumentElement.ChildNodes[nodeNum])
                         {
+                            if (element.Name != "field")
+                            {
+                                continue;
+                            }
+
                             switch (element.Attributes["type"].InnerText)
                             {
                                 case "float":
@@ -247,12 +264,12 @@
                                     list.Add(reader.ReadInt32());
                                     break;
                                 case "string":
-                                    if (num4 == 1000)
+                                    if (schemaVersion == 1000 || schemaVersion == 1407330540)
                                     {
-                                        int offset2 = (int)reader.BaseStream.Position + 4;
-                                        reader.Seek(offset2 + reader.ReadInt32(), SeekOrigin.Begin);
+                                        int returnPosition = (int)reader.BaseStream.Position + 4;
+                                        reader.Seek(offset + reader.ReadInt32(), SeekOrigin.Begin);
                                         list.Add(reader.ReadTerminatedString(0));
-                                        reader.Seek(offset2, SeekOrigin.Begin);
+                                        reader.Seek(returnPosition, SeekOrigin.Begin);
                                     }
                                     else
                                     {
@@ -453,15 +470,15 @@
                 byte[] bytes = Encoding.UTF8.GetBytes("LBT");
                 List<byte> list = new List<byte>();
                 Dictionary<string, int> dictionary = new Dictionary<string, int>(StringComparer.Ordinal);
-                uint num = 0;
+                uint schemaVersion = 0;
                 foreach (string str in base.DataSetName.Split(new char[] { ';' }))
                 {
                     writer.Write(Convert.ToUInt32(str));
-                    num = Convert.ToUInt32(str);
+                    schemaVersion = Convert.ToUInt32(str);
                 }
                 for (int i = 0; i < base.Tables.Count; i++)
                 {
-                    if (num == 0x3e8)
+                    if (schemaVersion == 1000 || schemaVersion == 1407330540)
                     {
                         writer.Write((ushort)i);
                         writer.Write((ushort)0x2a2b);
@@ -474,7 +491,7 @@
                     writer.Write(base.Tables[i].Rows.Count);
                     foreach (DataRow row in base.Tables[i].Rows)
                     {
-                        if (num == 0x3e8)
+                        if (schemaVersion == 1000 || schemaVersion == 1407330540)
                         {
                             writer.Write((ushort)0x2a2d);
                             writer.Write((ushort)i);
@@ -496,7 +513,7 @@
                             }
                             else if (base.Tables[i].Columns[j].DataType == typeof(string))
                             {
-                                if (num == 0x3e8)
+                                if (schemaVersion == 1000 || schemaVersion == 1407330540)
                                 {
                                     if (dictionary.ContainsKey((string)row.ItemArray[j]))
                                     {
@@ -523,7 +540,7 @@
                         }
                     }
                 }
-                if (num == 0x3e8)
+                if (schemaVersion == 1000 || schemaVersion == 1407330540)
                 {
                     writer.Write(Encoding.UTF8.GetBytes("PRTS"));
                     writer.Write(list.Count);
