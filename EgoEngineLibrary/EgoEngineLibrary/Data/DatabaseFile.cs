@@ -180,13 +180,9 @@
                     offset += 4;
                     reader.Seek(8, SeekOrigin.Begin);
                 }
-                while (reader.BaseStream.Position < reader.BaseStream.Length)
+                while (reader.BaseStream.Position < reader.BaseStream.Length &&
+                    nodeNum < SXML.DocumentElement.ChildNodes.Count)
                 {
-                    string innerText;
-                    if (nodeNum >= SXML.DocumentElement.ChildNodes.Count)
-                    {
-                        break;
-                    }
                     DataTable table = new DataTable(SXML.DocumentElement.ChildNodes[nodeNum].Attributes["name"].InnerText);
                     reader.Seek(4, SeekOrigin.Current);
                     itemNum = reader.ReadInt32();
@@ -207,49 +203,33 @@
                                 dR.Add(column, strArray);
                             }
                         }
-                        innerText = element.Attributes["type"].InnerText;
-                        if (innerText == null)
+                        switch (element.Attributes["type"].InnerText)
                         {
-                            goto Label_03E8;
+                            case "float":
+                                column.DataType = typeof(float);
+                                column.DefaultValue = 0f;
+                                break;
+                            case "int":
+                                column.DataType = typeof(int);
+                                column.DefaultValue = 0;
+                                break;
+                            case "string":
+                                column.DataType = typeof(string);
+                                if (element.HasAttribute("size"))
+                                {
+                                    column.MaxLength = Convert.ToInt32(element.Attributes["size"].InnerText);
+                                }
+                                column.DefaultValue = string.Empty;
+                                break;
+                            case "bool":
+                                column.DataType = typeof(bool);
+                                column.DefaultValue = false;
+                                break;
+                            default:
+                                column.DataType = typeof(int);
+                                column.DefaultValue = 0;
+                                break;
                         }
-                        if (!(innerText == "float"))
-                        {
-                            if (innerText == "int")
-                            {
-                                goto Label_0346;
-                            }
-                            if (innerText == "string")
-                            {
-                                goto Label_036B;
-                            }
-                            if (innerText == "bool")
-                            {
-                                goto Label_03C6;
-                            }
-                            goto Label_03E8;
-                        }
-                        column.DataType = typeof(float);
-                        column.DefaultValue = 0f;
-                        continue;
-                    Label_0346:
-                        column.DataType = typeof(int);
-                        column.DefaultValue = 0;
-                        continue;
-                    Label_036B:
-                        column.DataType = typeof(string);
-                        if (element.HasAttribute("size"))
-                        {
-                            column.MaxLength = Convert.ToInt32(element.Attributes["size"].InnerText);
-                        }
-                        column.DefaultValue = string.Empty;
-                        continue;
-                    Label_03C6:
-                        column.DataType = typeof(bool);
-                        column.DefaultValue = false;
-                        continue;
-                    Label_03E8:
-                        column.DataType = typeof(int);
-                        column.DefaultValue = 0;
                     }
                     for (num = 0; num < itemNum; num++)
                     {
@@ -258,51 +238,35 @@
                         reader.Seek(4, SeekOrigin.Current);
                         foreach (XmlElement element in SXML.DocumentElement.ChildNodes[nodeNum])
                         {
-                            innerText = element.Attributes["type"].InnerText;
-                            if (innerText == null)
+                            switch (element.Attributes["type"].InnerText)
                             {
-                                goto Label_05C0;
+                                case "float":
+                                    list.Add(reader.ReadSingle());
+                                    break;
+                                case "int":
+                                    list.Add(reader.ReadInt32());
+                                    break;
+                                case "string":
+                                    if (num4 == 1000)
+                                    {
+                                        int offset2 = (int)reader.BaseStream.Position + 4;
+                                        reader.Seek(offset2 + reader.ReadInt32(), SeekOrigin.Begin);
+                                        list.Add(reader.ReadTerminatedString(0));
+                                        reader.Seek(offset2, SeekOrigin.Begin);
+                                    }
+                                    else
+                                    {
+                                        list.Add(reader.ReadDatabaseString(table.Columns[element.Attributes["name"].InnerText].MaxLength));
+                                    }
+                                    break;
+                                case "bool":
+                                    list.Add(reader.ReadBoolean());
+                                    reader.ReadBytes(3);
+                                    break;
+                                default:
+                                    list.Add(reader.ReadInt32());
+                                    break;
                             }
-                            if (!(innerText == "float"))
-                            {
-                                if (innerText == "int")
-                                {
-                                    goto Label_0502;
-                                }
-                                if (innerText == "string")
-                                {
-                                    goto Label_051A;
-                                }
-                                if (innerText == "bool")
-                                {
-                                    goto Label_05A3;
-                                }
-                                goto Label_05C0;
-                            }
-                            list.Add(reader.ReadSingle());
-                            continue;
-                        Label_0502:
-                            list.Add(reader.ReadInt32());
-                            continue;
-                        Label_051A:
-                            if (num4 == 0x3e8)
-                            {
-                                int num7 = ((int)reader.BaseStream.Position) + 4;
-                                reader.Seek(offset + reader.ReadInt32(), SeekOrigin.Begin);
-                                list.Add(reader.ReadTerminatedString(0));
-                                reader.Seek(num7, SeekOrigin.Begin);
-                            }
-                            else
-                            {
-                                list.Add(reader.ReadDatabaseString(table.Columns[element.Attributes["name"].InnerText].MaxLength));
-                            }
-                            continue;
-                        Label_05A3:
-                            list.Add(reader.ReadBoolean());
-                            reader.ReadBytes(3);
-                            continue;
-                        Label_05C0:
-                            list.Add(reader.ReadInt32());
                         }
                         row.ItemArray = list.ToArray();
                         try
