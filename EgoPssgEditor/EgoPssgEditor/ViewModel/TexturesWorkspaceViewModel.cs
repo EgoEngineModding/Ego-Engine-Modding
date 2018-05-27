@@ -1,4 +1,5 @@
 ﻿using EgoEngineLibrary.Graphics;
+using EgoEngineLibrary.Graphics.Dds;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -177,7 +178,7 @@ namespace EgoPssgEditor.ViewModel
             {
                 try
                 {
-                    DdsFile dds = new DdsFile(node, false);
+                    DdsFile dds = node.ToDdsFile(false);
                     dds.Write(File.Open(dialog.FileName, FileMode.Create), -1);
                 }
                 catch (Exception ex)
@@ -204,7 +205,7 @@ namespace EgoPssgEditor.ViewModel
                 try
                 {
                     DdsFile dds = new DdsFile(File.Open(dialog.FileName, FileMode.Open));
-                    dds.Write(node);
+                    dds.ToPssgNode(node);
                     texView.GetPreview();
                 }
                 catch (Exception ex)
@@ -227,7 +228,7 @@ namespace EgoPssgEditor.ViewModel
                 DdsFile dds;
                 foreach (PssgTextureViewModel texView in Textures)
                 {
-                    dds = new DdsFile(texView.Texture, false);
+                    dds = texView.Texture.ToDdsFile(false);
                     dds.Write(File.Open(mainView.FilePath.Replace(".", "_") + "_textures" + "\\" + texView.Texture.GetAttribute("id").DisplayValue + ".dds", FileMode.Create), -1);
                 }
                 MessageBox.Show("Textures exported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -256,7 +257,7 @@ namespace EgoPssgEditor.ViewModel
                             if (Path.GetFileNameWithoutExtension(filePath) == texView.Texture.GetAttribute("id").ToString())
                             {
                                 dds = new DdsFile(File.Open(filePath, FileMode.Open));
-                                dds.Write(texView.Texture);
+                                dds.ToPssgNode(texView.Texture);
                                 if (texView.IsSelected)
                                 {
                                     texView.GetPreview();
