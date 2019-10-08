@@ -13,6 +13,7 @@
         public string ResourceType { get; set; }
 
         public Int32 Unknown { get; set; }
+        public Int16 Unknown2 { get; set; }
 
         public List<ErpFragment> Fragments { get; set; }
 
@@ -85,6 +86,7 @@
         public ErpResource()
         {
             this.Unknown = 1;
+            this.Unknown2 = 0;
             this.Fragments = new List<ErpFragment>();
             this.Hash = new byte[16];
         }
@@ -101,6 +103,10 @@
             this.ResourceType = reader.ReadString(16);
 
             this.Unknown = reader.ReadInt32();
+            if (this.ParentFile.Version >= 4)
+            {
+                this.Unknown2 = reader.ReadInt16();
+            }
 
             byte numResources = reader.ReadByte();
 
@@ -124,6 +130,10 @@
             writer.Write(this.Identifier);
             writer.Write(this.ResourceType, 16);
             writer.Write(this.Unknown);
+            if (this.ParentFile.Version >= 4)
+            {
+                writer.Write(this.Unknown2);
+            }
             writer.Write((byte)this.Fragments.Count);
 
             foreach (ErpFragment res in this.Fragments)
@@ -150,6 +160,11 @@
 
             this._resourceInfoLength *= (UInt32)this.Fragments.Count;
             this._resourceInfoLength += (UInt32)this.Identifier.Length + 24;
+
+            if (this.ParentFile.Version >= 4)
+            {
+                this._resourceInfoLength += 2;
+            }
 
             if (this.ParentFile.Version > 2)
             {
@@ -228,7 +243,7 @@
                 }
             }
 
-            throw new ArgumentOutOfRangeException("name", name);
+            throw new ArgumentOutOfRangeException(nameof(name));
         }
     }
 }

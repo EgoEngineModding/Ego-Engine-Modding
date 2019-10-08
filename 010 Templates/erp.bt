@@ -27,6 +27,10 @@ struct
         char fileName[fileNameSize];
         char fileType[16];
         int32 unk;
+        if (version >= 4)
+        {
+            int16 unk2;
+        }
         byte numTempFiles;
         struct
         {

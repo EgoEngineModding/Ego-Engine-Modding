@@ -21,7 +21,7 @@
 
         public ErpFile()
         {
-            this.Version = 3;
+            this.Version = 4;
             this.Resources = new List<ErpResource>();
         }
 
