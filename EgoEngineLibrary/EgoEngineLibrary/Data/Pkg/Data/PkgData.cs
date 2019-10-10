@@ -62,6 +62,8 @@ namespace EgoEngineLibrary.Data.Pkg.Data
                     return new PkgVec4Data(parentFile);
                 case "quat":
                     return new PkgQuatData(parentFile);
+                case "bbox":
+                    return new PkgBboxData(parentFile);
                 default:
                     throw new Exception("Data type not supported! " + type);
             }

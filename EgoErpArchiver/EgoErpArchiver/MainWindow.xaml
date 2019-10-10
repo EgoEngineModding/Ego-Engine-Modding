@@ -57,7 +57,7 @@
                 <MenuItem Header="I_mport All" Command="{Binding Path=XmlFilesWorkspace.ImportAll}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Settings">
-                <MenuItem Header="F1 Game _Directory">
+                <MenuItem Header="Game _Directory">
                     <MenuItem Header="{Binding Source={x:Static properties:Settings.Default}, Path=F12016Dir}"></MenuItem>
                     <MenuItem Name="setDirectoryF12016MenuItem" Header="_Set Directory" Click="setDirectoryF12016MenuItem_Click"></MenuItem>
                 </MenuItem>
