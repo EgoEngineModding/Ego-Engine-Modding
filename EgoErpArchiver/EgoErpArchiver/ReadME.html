@@ -1,0 +1,264 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>EEA - Readme</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            margin-left: auto;
+            margin-right: auto;
+            width: 990px;
+            background: #000000;
+            color: #ebebeb;
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+        }
+
+        a {
+            color: #65CDEB;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #FFFFFF;
+        }
+
+        div#top {
+            margin: 0;
+            margin-bottom: 10px;
+            padding: 10px;
+            width: auto;
+            background: #000000;
+            border: 2px solid #292929;
+            border-top: none;
+            text-align: center;
+        }
+
+        div.readme-main {
+            margin: 0;
+            margin-bottom: 10px;
+            padding: 10px;
+            width: auto;
+            background: #000000;
+            border: 1px solid #292929;
+        }
+
+        div.red {
+            margin: 0;
+            padding: 5px;
+            background: #900;
+            border: solid #c00;
+        }
+
+        div.yellow {
+            margin: 0;
+            padding: 5px;
+            background: #c90;
+            border: solid #fc0;
+        }
+
+        h1 {
+            margin: 0;
+            padding: 0;
+            color: #E2001A;
+            font-family: Georgia, "Times New Roman", Times, serif;
+        }
+
+        h2 {
+            margin: 0;
+            color: #E2001A;
+            font-family: Georgia, "Times New Roman", Times, serif;
+            font-size: 1.4em;
+        }
+
+        h3 {
+            margin: 0;
+            color: #E2001A;
+            font-family: Georgia, "Times New Roman", Times, serif;
+            font-size: 1.2em;
+        }
+
+        div.red + h2, h2 + div.yellow {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="top">
+        <h1>Ego ERP Archiver</h1>
+        version 6.1.2017.1025<br />
+        <p style="font-family:Georgia, 'Times New Roman', Times, serif;"><a href="http://www.ryder25.com">Application Website</a></p>
+    </div>
+    <div class="readme-main">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#Reqs">Requirements</a></li>
+            <li><a href="#Inst">Installation</a></li>
+            <li><a href="#ApIn">Application Information</a></li>
+            <li><a href="#Usag">Usage</a></li>
+            <li><a href="#Issu">Issues</a></li>
+            <li><a href="#Chan">Changelog</a></li>
+            <li><a href="#Cred">Credits</a></li>
+        </ol>
+    </div>
+    <div class="readme-main">
+        <h2><a name="Reqs"></a>Requirements</h2>
+        <ul>
+            <li>.NET Framework 4.7.1</li>
+        </ul>
+        <h2><a name="Inst"></a>Installation</h2>
+        <ol>
+            <li>Extract everything from the zip file.</li>
+            <li>Open <em>Ego ERP Archiver.exe</em>.</li>
+            <li>Enjoy! :)</li>
+        </ol>
+    </div>
+    <div class="readme-main">
+        <h2><a name="ApIn"></a>Application Information</h2>
+        <p>This program lets you export and import resources from ERP archives for EGO engine games. Resources include various xml, pkg, and texture files. Supported texture types:</p>
+        <ul>
+            <li>ABGR8</li>
+            <li>DXT1</li>
+            <li>DXT5</li>
+            <li>ATI1</li>
+            <li>ATI2/3Dc</li>
+            <li>BC1-7 (and SRGB)</li>
+            <li>TexArray for above (Note: Currently not supported by Photoshop or GIMP)</li>
+        </ul>
+        <h2><a name="Usag"></a>Usage</h2>
+        <p>After turning on the program simply click File -&gt; Open and select a ERP file. When importing resources make sure to select the same folder that you exported into. The program will search for the same exact resource folder and file name as when the resource was exported.</p>
+        <p>If you have F1 2016/'17, make sure to set the directory from the Settings menu. Some textures in this game have mipmaps counterparts that get exported into a single dds. When importing these textures, you will be prompted to save a new mipmap file. Changes are made to the texture inside the erp during import as well, so make sure to save your erp file too.</p>
+    </div>
+    <div class="readme-main">
+        <h2><a name="Issu"></a>Issues</h2>
+        <ul>
+            <li>
+                If you get errors try one of the following:
+                <ul>
+                    <li>Make sure the folder that you put the files in is not readonly.</li>
+                    <li>Run the exe as an administrator or give it administrator rights.</li>
+                    <li>Put the files in a folder on the desktop.</li>
+                    <li>Create an issue <a href="https://github.com/Ryder25/Ego-Engine-Modding/issues" target="_blank">here</a>.</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <div class="readme-main">
+        <h2><a name="Chan"></a>Changelog</h2>
+        <ul>
+            <li>
+                <strong>6.1.2017.1025</strong>
+                <ul>
+                    <li>Fixed corrupt textures at lower mip levels when importing a textures with a separate mipmap file</li>
+                </ul>
+            </li>
+            <li>
+                <strong>6.0.2017.1022</strong>
+                <ul>
+                    <li>Added support for Export/Import of F1 2017 textures</li>
+                    <li>Changed required .Net Framework to 4.7.1</li>
+                    <li>Fixed minor UI text issues</li>
+                    <li>Fixed some cryptic error messages</li>
+                </ul>
+            </li>
+            <li>
+                <strong>5.2.2017.0805</strong>
+                <ul>
+                    <li>Added preview support for BC1-7 textures</li>
+                    <li>Added support for ATI1, BC6 and DX10 variants of DXT1,5 and ATI1-2</li>
+                    <li>Fixed incorrectly setting the format for SRGB textures (DXT1,5,BC7)</li>
+                </ul>
+            </li>
+            <li>
+                <strong>5.1.2016.1230</strong>
+                <ul>
+                    <li>Fixed bug causing invisible textures when the image format or mipmap count was changed</li>
+                    <li>Fixed preview for ARGB textures having swapped Red and Blue channels</li>
+                    <li>Updated help menu website link</li>
+                </ul>
+            </li>
+            <li>
+                <strong>5.0.2016.1125</strong>
+                <ul>
+                    <li>Added support for BC7 and ABGR8 texture types</li>
+                    <li>Added support for texarray dds files</li>
+                    <li>Added count of resources in each tab header</li>
+                    <li>Added some user friendly errors/warnings when previewing textures</li>
+                    <li>Fixed bug causing crashes with badly formed texture mods</li>
+                    <li>Fixed bug causing crashes when previewing certain textures on Windows 7</li>
+                </ul>
+            </li>
+            <li>
+                <strong>4.4.2016.0925</strong>
+                <ul>
+                    <li>Fixed error when importing pkg files more than once</li>
+                    <li>Fixed suggested filename in file dialogs to replace ? symbols</li>
+                </ul>
+            </li>
+            <li>
+                <strong>4.3.2016.0909</strong>
+                <ul>
+                    <li>Fixed broken import for XML files</li>
+                    <li>Fixed updating of preview after import for Pkg and XML files</li>
+                </ul>
+            </li>
+            <li>
+                <strong>4.2.2016.0906</strong>
+                <ul>
+                    <li>Fixed export/import of Pkg files with strings >=128 bytes</li>
+                </ul>
+            </li>
+            <li>
+                <strong>4.1.2016.0905</strong>
+                <ul>
+                    <li>Added 7 Pkg file resource type filters</li>
+                    <li>Added 17 Xml file resource type filters</li>
+                </ul>
+            </li>
+            <li>
+                <strong>4.0.2016.0904</strong>
+                <ul>
+                    <li>Added a Pkg Files, and Xml files tab for easy editing</li>
+                    <li>Added texutre info to the texture preview area</li>
+                    <li>Added progress dialog for Export/Import All functions</li>
+                    <li>Recreated the resources tab to allow column sorting</li>
+                    <li>Fixed importing resources to include all fragments</li>
+                    <li>Fixed importing DXT1 textures</li>
+                    <li>Fixed exporting textures with 0 mips in the mipmaps file</li>
+                    <li>Added settings for the defualt starting tab</li>
+                </ul>
+            </li>
+            <li>
+                <strong>3.0.2016.0828</strong>
+                <ul>
+                    <li>Added a textures tab to make editing easier</li>
+                    <li>Added support for F1 2016 mipmaps textures</li>
+                    <li>Ability to Import/Export all textures at once</li>
+                    <li>Ability to Import/Export a single resource at a time</li>
+                    <li>Rewrote the UI in WPF</li>
+                </ul>
+            </li>
+            <li>
+                <strong>2.0.2015.1031</strong>
+                <ul>
+                    <li>Support for importing and exporting all files</li>
+                    <li>Added full file path to UI</li>
+                </ul>
+            </li>
+            <li>
+                <strong>1.0.2015.1031</strong>
+                <ul>
+                    <li>First Release</li>
+                </ul>
+            </li>
+        </ul>
+        <h2><a name="Cred"></a>Credits</h2>
+        <ul>
+            <li>Ryder25 - <small>For creating the program. (modding(at)ryder25.com)</small></li>
+            <li>luh-koala - <small>For creating icon and other graphics</small></li>
+            <li>famfamfam.com - <small>For the "silk" menu icons.</small></li>
+        </ul>
+    </div>
+</body>
+</html>
