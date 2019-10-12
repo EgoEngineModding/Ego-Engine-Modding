@@ -1,6 +1,7 @@
 ﻿using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Archive.Erp.Data;
 using EgoEngineLibrary.Graphics.Dds;
+using K4os.Compression.LZ4;
 using MiscUtil.Conversion;
 using System;
 using System.Collections.Generic;
@@ -150,8 +151,9 @@ namespace EgoEngineLibrary.Graphics
                                 output.Write(mipData, 0, mipData.Length);
                                 break;
                             case ErpCompressionAlgorithm.LZ4:
-                                mipData = LZ4.LZ4Codec.Decode(mipData, 0, mipData.Length, (int)mip.Size);
-                                output.Write(mipData, 0, mipData.Length);
+                                byte[] decompressedMipData = new byte[(int)mip.Size];
+                                int decompSize = LZ4Codec.Decode(mipData, 0, mipData.Length, decompressedMipData, 0, decompressedMipData.Length);
+                                output.Write(decompressedMipData, 0, decompSize);
                                 break;
                             default:
                                 throw new NotSupportedException($"MipMap compression type {mip.Compression} is not supported");
@@ -267,21 +269,26 @@ namespace EgoEngineLibrary.Graphics
                         mip.Offset = offset;
 
                         byte[] mipData = reader.ReadBytes((int)mipLinearSize);
+                        ulong mipPackedSize = (ulong)mipData.Length;
                         switch (mip.Compression)
                         {
                             case ErpCompressionAlgorithm.LZ4:
-                                mipData = LZ4.LZ4Codec.EncodeHC(mipData, 0, mipData.Length);
+                                byte[] compressedMipData = new byte[LZ4Codec.MaximumOutputSize(mipData.Length)];
+                                int compSize = LZ4Codec.Encode(mipData, 0, mipData.Length, compressedMipData, 0, compressedMipData.Length, LZ4Level.L12_MAX);
+                                writer.Write(compressedMipData, 0, compSize);
+                                mipPackedSize = (ulong)compSize;
                                 break;
                             case ErpCompressionAlgorithm.None:
-                            default:
+                                writer.Write(mipData);
                                 break;
+                            default:
+                                throw new NotSupportedException($"MipMap compression type {mip.Compression} is not supported");
                         }
-                        writer.Write(mipData);
 
-                        mip.PackedSize = (UInt64)mipData.LongLength;
+                        mip.PackedSize = mipPackedSize;
                         mip.Size = mipLinearSize;
 
-                        offset += (UInt64)mipData.LongLength;
+                        offset += mipPackedSize;
                         mipLinearSize /= 4;
 
                         newMips.Add(mip);
