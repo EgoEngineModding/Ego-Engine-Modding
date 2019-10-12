@@ -5,11 +5,9 @@
     <Product>Ego Engine Library</Product>
     <Authors>Petar Tasev</Authors>
     <Company>Petar Tasev</Company>
-    <Version>14.0.1</Version>
+    <Version>15.0.0</Version>
     <Description></Description>
-    <Copyright>Copyright © Petar Tasev 2017</Copyright>
-    <AssemblyVersion>14.0.1.0</AssemblyVersion>
-    <FileVersion>14.0.1.0</FileVersion>
+    <Copyright>Copyright © Petar Tasev 2019</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

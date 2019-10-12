@@ -253,7 +253,7 @@ namespace EgoErpArchiver.ViewModel
                 else if (isPreview)
                 {
                     // Not found during preview
-                    TextureInfo += Environment.NewLine + "Mipmaps not found! Make sure they are in the correct F1 game folder!";
+                    TextureInfo += Environment.NewLine + "Mipmaps not found! Make sure they are in the correct game folder!";
                 }
                 else
                 {
