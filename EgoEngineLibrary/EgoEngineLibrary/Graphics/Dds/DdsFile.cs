@@ -139,7 +139,7 @@
 
         public void Write(System.IO.Stream fileStream, int cubeIndex)
         {
-            using (System.IO.BinaryWriter b = new System.IO.BinaryWriter(fileStream))
+            using (System.IO.BinaryWriter b = new System.IO.BinaryWriter(fileStream, Encoding.UTF8, true))
             {
                 b.Write(magic);
                 b.Write(header.size);

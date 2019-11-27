@@ -179,7 +179,8 @@ namespace EgoPssgEditor.ViewModel
                 try
                 {
                     DdsFile dds = node.ToDdsFile(false);
-                    dds.Write(File.Open(dialog.FileName, FileMode.Create), -1);
+                    using (var fs = File.Open(dialog.FileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+                        dds.Write(fs, -1);
                 }
                 catch (Exception ex)
                 {
@@ -229,7 +230,9 @@ namespace EgoPssgEditor.ViewModel
                 foreach (PssgTextureViewModel texView in Textures)
                 {
                     dds = texView.Texture.ToDdsFile(false);
-                    dds.Write(File.Open(mainView.FilePath.Replace(".", "_") + "_textures" + "\\" + texView.Texture.GetAttribute("id").DisplayValue + ".dds", FileMode.Create), -1);
+                    string filePath = mainView.FilePath.Replace(".", "_") + "_textures" + "\\" + texView.Texture.GetAttribute("id").DisplayValue + ".dds";
+                    using (var fs = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+                        dds.Write(fs, -1);
                 }
                 MessageBox.Show("Textures exported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
