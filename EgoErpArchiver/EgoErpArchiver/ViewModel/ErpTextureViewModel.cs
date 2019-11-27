@@ -4,14 +4,17 @@ using EgoEngineLibrary.Graphics;
 using EgoEngineLibrary.Graphics.Dds;
 using Microsoft.Win32;
 using MiscUtil.Conversion;
+using Pfim;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace EgoErpArchiver.ViewModel
@@ -60,6 +63,8 @@ namespace EgoErpArchiver.ViewModel
         bool isSelected;
         string _textureInfo;
         uint _texArrayIndex;
+        IImage image;
+        GCHandle imageDataHandle;
         BitmapSource preview;
         string previewError;
         Visibility previewErrorVisibility;
@@ -92,10 +97,13 @@ namespace EgoErpArchiver.ViewModel
                     isSelected = value;
                     if (value)
                     {
-                        Task.Run(() => GetPreview()).Wait();
+                        GetPreview();
                         resView.Select();
                     }
-                    else { preview = null; }
+                    else 
+                    {
+                        CleanPreview();
+                    }
                     OnPropertyChanged("IsSelected");
                 }
             }
@@ -139,35 +147,73 @@ namespace EgoErpArchiver.ViewModel
         public void GetPreview()
         {
             DdsFile dds;
-            CSharpImageLibrary.ImageEngineImage image = null;
             try
             {
-                this.Preview = null;
-                dds = ExportDDS(System.AppDomain.CurrentDomain.BaseDirectory + "\\temp.dds", true, false);
-                int maxDimension = (int)Math.Max(dds.header.width, dds.header.height);
+                CleanPreview();
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    dds = ExportDDS(ms, true, false);
+                    ms.Seek(0, SeekOrigin.Begin);
+                    image = Pfim.Pfim.FromStream(ms);
+                }
+
+                imageDataHandle = System.Runtime.InteropServices.GCHandle.Alloc(image.Data, System.Runtime.InteropServices.GCHandleType.Pinned);
+                var addr = imageDataHandle.AddrOfPinnedObject(); 
+                var bsource = BitmapSource.Create(image.Width, image.Height, 96.0, 96.0,
+                 PixelFormat(image), null, addr, image.DataLen, image.Stride);
+
                 Width = (int)dds.header.width;
                 Height = (int)dds.header.height;
-                
-                image = new CSharpImageLibrary.ImageEngineImage(System.AppDomain.CurrentDomain.BaseDirectory + "\\temp.dds", maxDimension);
-                Preview = null;
-                this.Preview = image.GetWPFBitmap(maxDimension, true);
+                this.Preview = bsource;
 
                 this.PreviewErrorVisibility = Visibility.Collapsed;
             }
-            catch (Exception ex) when (!Debugger.IsAttached)
+            catch (Exception ex)
             {
-                Preview = null;
                 this.PreviewError = "Could not create preview! Export/Import may still work in certain circumstances." + Environment.NewLine + Environment.NewLine + ex.Message;
                 this.PreviewErrorVisibility = Visibility.Visible;
+
+                CleanPreview();
             }
             finally
             {
                 dds = null;
-                image?.Dispose();
-                image = null;
             }
         }
+        private void CleanPreview()
+        {
+            Preview = null;
+            if (imageDataHandle.IsAllocated) imageDataHandle.Free();
+            image?.Dispose();
+            image = null;
+        }
+        private PixelFormat PixelFormat(IImage image)
+        {
+            switch (image.Format)
+            {
+                case ImageFormat.Rgb24:
+                    return PixelFormats.Bgr24;
+                case ImageFormat.Rgba32:
+                    return PixelFormats.Bgra32;
+                case ImageFormat.Rgb8:
+                    return PixelFormats.Gray8;
+                case ImageFormat.R5g5b5a1:
+                case ImageFormat.R5g5b5:
+                    return PixelFormats.Bgr555;
+                case ImageFormat.R5g6b5:
+                    return PixelFormats.Bgr565;
+                default:
+                    throw new Exception($"Unsupported preview for {image.Format} PixelFormat");
+            }
+        }
+
         public DdsFile ExportDDS(string fileName, bool isPreview, bool exportTexArray)
+        {
+            using (FileStream fs = File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read))
+                return ExportDDS(fs, isPreview, exportTexArray);
+        }
+        private DdsFile ExportDDS(Stream stream, bool isPreview, bool exportTexArray)
         {
             ErpGfxSRVResource srvRes = new ErpGfxSRVResource();
             srvRes.FromResource(Texture);
@@ -268,7 +314,7 @@ namespace EgoErpArchiver.ViewModel
                 dds = srvRes.ToDdsFile(mipMapStream, exportTexArray, _texArrayIndex);
             }
 
-            dds.Write(File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read), -1);
+            dds.Write(stream, -1);
             return dds;
         }
         public void ImportDDS(string fileName, string mipMapSaveLocation, bool importTexArray)
