@@ -220,17 +220,6 @@
 
         public ErpFragment TryGetFragment(string name, int count)
         {
-            try
-            {
-                return GetFragment(name, count);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-        public ErpFragment GetFragment(string name, int count)
-        {
             foreach (ErpFragment fragment in Fragments)
             {
                 if (fragment.Name == name)
@@ -243,7 +232,14 @@
                 }
             }
 
-            throw new ArgumentOutOfRangeException(nameof(name));
+            return null;
+        }
+        public ErpFragment GetFragment(string name, int count)
+        {
+            var fragment = TryGetFragment(name, count);
+            if (fragment == null)
+                throw new ArgumentOutOfRangeException(nameof(name));
+            return fragment;
         }
     }
 }
