@@ -142,7 +142,7 @@
 
             hasChanges = false;
         }
-        public DataSet WriteXml(Stream fileStream, DataTable dataSource = null)
+        public DataSet WriteXml(Stream fileStream, DataTable? dataSource = null)
         {
             DataSet LNG = new DataSet("language");
             LNG.Tables.Add(GetInfoTable());
@@ -314,7 +314,7 @@
             {
                 uint hash;
                 int index = lookup(key, out hash);
-                return index == -1 ? null : hsht.Table[hash][index].Value;
+                return index == -1 ? string.Empty : hsht.Table[hash][index].Value;
             }
         }
         public bool ContainsKey(string key)

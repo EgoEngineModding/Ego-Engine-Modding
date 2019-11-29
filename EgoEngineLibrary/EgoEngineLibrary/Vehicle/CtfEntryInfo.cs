@@ -43,7 +43,7 @@
                         fList.items = new float[0];
                         return fList;
                     default:
-                        return null;
+                        throw new FormatException($"Ctf entry cannot be of type {type}.");
                 }
             }
         }
@@ -66,7 +66,7 @@
                     case "float-list":
                         return typeof(FloatList);
                     default:
-                        return null;
+                        throw new FormatException($"Ctf entry cannot be of type {type}.");
                 }
             }
         }
@@ -111,6 +111,7 @@
                 linkID = -1;
             }
             readOnly = entry.HasAttribute("readOnly") ? true : false;
+            description = string.Empty;
             List<string> rVals = new List<string>();
             foreach (XmlElement param in entry)
             {

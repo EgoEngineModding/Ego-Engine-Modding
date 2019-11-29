@@ -34,14 +34,7 @@
         {
             get
             {
-                if (data != null)
-                {
-                    return data.GetType();
-                }
-                else
-                {
-                    return null;
-                }
+                return data.GetType();
             }
         }
 

@@ -16,8 +16,8 @@
         public List<ErpResource> Resources { get; set; }
 
         private UInt64 _resourceInfoTotalLength;
-        public Progress<int> ProgressPercentage;
-        public Progress<string> ProgressStatus;
+        public Progress<int>? ProgressPercentage;
+        public Progress<string>? ProgressStatus;
 
         public ErpFile()
         {
@@ -123,7 +123,7 @@
 
             return res;
         }
-        public ErpResource TryFindResource(string fileName)
+        public ErpResource? TryFindResource(string fileName)
         {
             foreach (ErpResource entry in this.Resources)
             {

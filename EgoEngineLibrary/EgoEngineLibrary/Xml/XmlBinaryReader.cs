@@ -57,7 +57,7 @@
             }
             else
             {
-                return null;
+                throw new NotImplementedException($"Converting xml node of type {nodeType} is not supported.");
             }
         }
     }

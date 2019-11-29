@@ -23,16 +23,13 @@
 
         internal byte[] _data;
 
-        public ErpFragment()
+        public ErpFragment(ErpFile parentFile)
         {
+            this.ParentFile = parentFile;
             this.Name = "temp";
             this.Flags = 16;
             this.Compression = ErpCompressionAlgorithm.Zlib;
-        }
-        public ErpFragment(ErpFile parentFile)
-            : this()
-        {
-            this.ParentFile = parentFile;
+            this._data = Array.Empty<byte>();
         }
 
         public void Read(ErpBinaryReader reader)

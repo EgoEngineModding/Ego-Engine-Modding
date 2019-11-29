@@ -70,6 +70,7 @@ namespace EgoEngineLibrary.Data.Pkg
             : base(parentFile)
         {
             valueOffsetType = new PkgOffsetType();
+            complexValueData = new PkgObject(parentFile);
         }
 
         public override void Read(PkgBinaryReader reader)

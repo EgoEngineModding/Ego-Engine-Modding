@@ -230,7 +230,7 @@ namespace EgoPssgEditor.ViewModel
                 foreach (PssgTextureViewModel texView in Textures)
                 {
                     dds = texView.Texture.ToDdsFile(false);
-                    string filePath = mainView.FilePath.Replace(".", "_") + "_textures" + "\\" + texView.Texture.GetAttribute("id").DisplayValue + ".dds";
+                    string filePath = mainView.FilePath.Replace(".", "_") + "_textures" + "\\" + texView.Texture.Attributes["id"].DisplayValue + ".dds";
                     using (var fs = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                         dds.Write(fs, -1);
                 }
@@ -257,7 +257,7 @@ namespace EgoPssgEditor.ViewModel
                     {
                         foreach (PssgTextureViewModel texView in Textures)
                         {
-                            if (Path.GetFileNameWithoutExtension(filePath) == texView.Texture.GetAttribute("id").ToString())
+                            if (Path.GetFileNameWithoutExtension(filePath) == texView.Texture.Attributes["id"].ToString())
                             {
                                 dds = new DdsFile(File.Open(filePath, FileMode.Open));
                                 dds.ToPssgNode(texView.Texture);

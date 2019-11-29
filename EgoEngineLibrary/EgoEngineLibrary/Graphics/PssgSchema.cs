@@ -250,7 +250,7 @@
                     attribute = new Attribute(reader.ReadPSSGString());
                     attribute.Id = id;
 
-                    Attribute attr = PssgSchema.GetAttribute(node.Name, attribute.Name);
+                    Attribute? attr = PssgSchema.GetAttribute(node.Name, attribute.Name);
                     if (attr == null)
                     {
                         PssgSchema.AddAttribute(node.Name, attribute);
@@ -300,7 +300,7 @@
             }
         }
 
-        public static Node GetNode(string node)
+        public static Node? GetNode(string node)
         {
             if (entries.ContainsKey(node))
             {
@@ -319,9 +319,9 @@
                 }
             }
 
-            return null;
+            throw new ArgumentOutOfRangeException(nameof(nodeId));
         }
-        public static Attribute GetAttribute(string node, string attr)
+        public static Attribute? GetAttribute(string node, string attr)
         {
             if (entries.ContainsKey(node))
             {
@@ -349,23 +349,23 @@
                 }
             }
 
-            return null;
+            throw new ArgumentOutOfRangeException(nameof(attrId));
         }
-        public static Type GetAttributeType(string node, string attr)
-        {
-            if (entries.ContainsKey(node))
-            {
-                foreach (Attribute attrEntry in entries[node].Attributes)
-                {
-                    if (attrEntry.Name == attr)
-                    {
-                        return attrEntry.DataType;
-                    }
-                }
-            }
+        //public static Type GetAttributeType(string node, string attr)
+        //{
+        //    if (entries.ContainsKey(node))
+        //    {
+        //        foreach (Attribute attrEntry in entries[node].Attributes)
+        //        {
+        //            if (attrEntry.Name == attr)
+        //            {
+        //                return attrEntry.DataType;
+        //            }
+        //        }
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
         public static string[] GetNodeNames()
         {
             return entries.Keys.ToArray();
@@ -432,52 +432,35 @@
         {
             Node node = PssgSchema.AddNode(nodeName);
 
-            if (attrType != null)
+            for (int i = 0; i < node.Attributes.Count; i++)
             {
-                bool add = true;
-                for (int i = 0; i < node.Attributes.Count; i++)
+                if (node.Attributes[i].Name == attributeName)
                 {
-                    if (node.Attributes[i].Name == attributeName)
-                    {
-                        add = false;
-                        // Allow overwrite if current data type is null
-                        PssgSchema.SetAttributeDataTypeIfNull(node.Attributes[i], attrType);
-                        return node.Attributes[i];
-                    }
-                }
-
-                if (add)
-                {
-                    PssgSchema.Attribute attr = new Attribute(attributeName, attrType);
-                    node.Attributes.Add(attr);
-                    return attr;
+                    // Allow overwrite if current data type is null
+                    PssgSchema.SetAttributeDataTypeIfNull(node.Attributes[i], attrType);
+                    return node.Attributes[i];
                 }
             }
 
-            return null;
+            PssgSchema.Attribute attr = new Attribute(attributeName, attrType);
+            node.Attributes.Add(attr);
+            return attr;
         }
         public static Attribute AddAttribute(string nodeName, string attributeName)
         {
             Node node = PssgSchema.AddNode(nodeName);
 
-            bool add = true;
             for (int i = 0; i < node.Attributes.Count; i++)
             {
                 if (node.Attributes[i].Name == attributeName)
                 {
-                    add = false;
                     return node.Attributes[i];
                 }
             }
 
-            if (add)
-            {
-                PssgSchema.Attribute attr = new Attribute(attributeName);
-                node.Attributes.Add(attr);
-                return attr;
-            }
-
-            return null;
+            PssgSchema.Attribute attr = new Attribute(attributeName);
+            node.Attributes.Add(attr);
+            return attr;
         }
         public static void AddAttribute(string nodeName, Attribute attribute)
         {

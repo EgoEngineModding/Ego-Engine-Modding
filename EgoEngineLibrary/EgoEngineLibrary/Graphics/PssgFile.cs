@@ -31,6 +31,7 @@
         public PssgFile(PssgFileType fileType)
         {
             this.FileType = fileType;
+            this.RootNode = new PssgNode("PSSGDATABASE", this, null);
         }
         public static PssgFile Open(Stream stream)
         {
@@ -255,7 +256,7 @@
                 {
                     asset.AppendChild(pssg.CreateElement("contributor"));
                     asset.LastChild.AppendChild(pssg.CreateElement("author"));
-                    asset.LastChild.LastChild.InnerText = RootNode.GetAttribute("creator").ToString();
+                    asset.LastChild.LastChild.InnerText = RootNode.Attributes["creator"].ToString();
                 }
                 // TODO: unit meter 1, created, up axis, scale?, creatorMachine
 
@@ -263,7 +264,7 @@
             }
         }
 
-        public List<PssgNode> FindNodes(string name, string attributeName = null, string attributeValue = null)
+        public List<PssgNode> FindNodes(string name, string? attributeName = null, string? attributeValue = null)
         {
             if (RootNode == null)
             {
@@ -274,6 +275,9 @@
 
         public void MoveNode(PssgNode source, PssgNode target)
         {
+            if (source.ParentNode == null) throw new InvalidOperationException("Cannot move root node");
+            if (target.IsDataNode) throw new InvalidOperationException("Cannot append a child node to a data node");
+
             source.ParentNode.RemoveChild(source);
             target.AppendChild(source);
         }

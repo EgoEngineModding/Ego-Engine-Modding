@@ -30,8 +30,22 @@
                         return attributes[i];
                     }
                 }
-                return null;
+
+                throw new ArgumentOutOfRangeException(nameof(attributeName));
             }
+        }
+
+        internal bool Contains(string attributeName)
+        {
+            for (int i = 0; i < attributes.Count; i++)
+            {
+                if (string.Equals(attributes[i].Name, attributeName, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         internal void Add(PssgAttribute attribute)

@@ -25,14 +25,11 @@
         private int _nameOffset;
         private int _fileOffset;
 
-        public JpkEntry()
-        {
-
-        }
         public JpkEntry(JpkFile parentFile)
-            : this()
         {
             this.ParentFile = parentFile;
+            this.Name = string.Empty;
+            this.Data = Array.Empty<byte>();
         }
 
         public void Read(JpkBinaryReader reader)

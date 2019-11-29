@@ -22,6 +22,7 @@ namespace EgoEngineLibrary.Data.Pkg
         public PkgDataArrayReference(PkgFile parentFile)
             : base(parentFile)
         {
+            reference = string.Empty;
         }
         
         public override void Read(PkgBinaryReader reader)

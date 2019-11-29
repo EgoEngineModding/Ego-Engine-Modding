@@ -43,7 +43,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
             Fragment0.FromFragment(resource.GetFragment("temp", 0));
             Fragment1.FromFragment(resource.GetFragment("temp", 1));
 
-            ErpFragment mipsFragment = resource.TryGetFragment("mips", 0);
+            ErpFragment? mipsFragment = resource.TryGetFragment("mips", 0);
             if (mipsFragment != null)
             {
                 Frag2.FromFragment(mipsFragment);
@@ -65,7 +65,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
             Fragment0.ToFragment(resource.GetFragment("temp", 0));
             Fragment1.ToFragment(resource.GetFragment("temp", 1));
 
-            ErpFragment mipsFragment = resource.TryGetFragment("mips", 0);
+            ErpFragment? mipsFragment = resource.TryGetFragment("mips", 0);
             if (mipsFragment != null)
             {
                 Frag2.ToFragment(mipsFragment);

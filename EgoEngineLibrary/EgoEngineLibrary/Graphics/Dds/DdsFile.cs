@@ -23,6 +23,8 @@
             header.caps |= DdsHeader.Caps.DDSCAPS_TEXTURE;
             header10.resourceDimension = D3D10_Resource_Dimension.D3D10_RESOURCE_DIMENSION_TEXTURE2D;
             header10.arraySize = 1;
+            bdata = Array.Empty<byte>();
+            bdata2 = new Dictionary<int, byte[]>();
         }
         public DdsFile(System.IO.Stream fileStream)
             : this()
@@ -62,56 +64,56 @@
                     if ((header.caps2 & DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEX) == DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEX)
                     {
                         count++;
-                        bdata2.Add(0, null);
+                        bdata2.Add(0, Array.Empty<byte>());
                     }
                     else
                     {
-                        bdata2.Add(-1, null);
+                        bdata2.Add(-1, Array.Empty<byte>());
                     }
                     if ((header.caps2 & DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEX) == DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEX)
                     {
                         count++;
-                        bdata2.Add(1, null);
+                        bdata2.Add(1, Array.Empty<byte>());
                     }
                     else
                     {
-                        bdata2.Add(-2, null);
+                        bdata2.Add(-2, Array.Empty<byte>());
                     }
                     if ((header.caps2 & DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEY) == DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEY)
                     {
                         count++;
-                        bdata2.Add(2, null);
+                        bdata2.Add(2, Array.Empty<byte>());
                     }
                     else
                     {
-                        bdata2.Add(-3, null);
+                        bdata2.Add(-3, Array.Empty<byte>());
                     }
                     if ((header.caps2 & DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEY) == DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEY)
                     {
                         count++;
-                        bdata2.Add(3, null);
+                        bdata2.Add(3, Array.Empty<byte>());
                     }
                     else
                     {
-                        bdata2.Add(-4, null);
+                        bdata2.Add(-4, Array.Empty<byte>());
                     }
                     if ((header.caps2 & DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEZ) == DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEZ)
                     {
                         count++;
-                        bdata2.Add(4, null);
+                        bdata2.Add(4, Array.Empty<byte>());
                     }
                     else
                     {
-                        bdata2.Add(-5, null);
+                        bdata2.Add(-5, Array.Empty<byte>());
                     }
                     if ((header.caps2 & DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEZ) == DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEZ)
                     {
                         count++;
-                        bdata2.Add(5, null);
+                        bdata2.Add(5, Array.Empty<byte>());
                     }
                     else
                     {
-                        bdata2.Add(-6, null);
+                        bdata2.Add(-6, Array.Empty<byte>());
                     }
                     if (count > 0)
                     {

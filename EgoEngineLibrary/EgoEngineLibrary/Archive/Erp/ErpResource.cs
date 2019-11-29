@@ -83,17 +83,15 @@
 
         private UInt32 _resourceInfoLength;
 
-        public ErpResource()
+        public ErpResource(ErpFile parentFile)
         {
+            this.ParentFile = parentFile;
+            this.Identifier = string.Empty;
+            this.ResourceType = string.Empty;
             this.Unknown = 1;
             this.Unknown2 = 0;
             this.Fragments = new List<ErpFragment>();
             this.Hash = new byte[16];
-        }
-        public ErpResource(ErpFile parentFile)
-            : this()
-        {
-            this.ParentFile = parentFile;
         }
 
         public void Read(ErpBinaryReader reader)
@@ -218,7 +216,7 @@
             return false;
         }
 
-        public ErpFragment TryGetFragment(string name, int count)
+        public ErpFragment? TryGetFragment(string name, int count)
         {
             foreach (ErpFragment fragment in Fragments)
             {
