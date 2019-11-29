@@ -26,7 +26,7 @@
             return Encoding.UTF8.GetString(strBytes.ToArray());
         }
 
-        public XmlNode ReadBxmlElement(XmlDocument doc)
+        public XmlNode? ReadBxmlElement(XmlDocument doc)
         {
             int nodeLength = this.ReadInt16();
             int nodeType = this.ReadInt16(); // pad
@@ -44,7 +44,7 @@
                 }
 
                 // Keep Reading Child Elements until the current element ends
-                XmlNode childNode;
+                XmlNode? childNode;
                 while ((childNode = ReadBxmlElement(doc)) != null)
                 {
                     element.AppendChild(childNode);
@@ -54,6 +54,10 @@
             else if (nodeType == 1)
             {
                 return doc.CreateTextNode(ReadTerminatedString());
+            }
+            else if (nodeType == 5)
+            {
+                return null;
             }
             else
             {

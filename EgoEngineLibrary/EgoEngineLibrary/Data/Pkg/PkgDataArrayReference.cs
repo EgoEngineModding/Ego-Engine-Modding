@@ -42,7 +42,7 @@ namespace EgoEngineLibrary.Data.Pkg
 
         public override void FromJson(JsonTextReader reader)
         {
-            reference = ((string)reader.Value).Substring(5);
+            reference = ((string?)reader.Value)?.Substring(5) ?? string.Empty;
         }
         public override void ToJson(JsonTextWriter writer)
         {
