@@ -1,5 +1,7 @@
 ﻿namespace EgoEngineLibrary.Archive.Erp
 {
+    using ICSharpCode.SharpZipLib.Zip.Compression;
+    using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
     using MiscUtil.Conversion;
     using System;
     using System.Collections.Generic;
@@ -100,7 +102,13 @@
                         data = this._data;
                         break;
                     case ErpCompressionAlgorithm.Zlib:
-                        data = Ionic.Zlib.ZlibStream.UncompressBuffer(this._data);
+                        using (var ms = new MemoryStream(this._data))
+                        using (var iis = new InflaterInputStream(ms))
+                        using (var mso = new MemoryStream())
+                        {
+                            iis.CopyTo(mso);
+                            data = mso.ToArray();
+                        }
                         break;
                     case ErpCompressionAlgorithm.LZ4:
                     default:
@@ -130,7 +138,14 @@
                         this._data = data;
                         break;
                     case ErpCompressionAlgorithm.Zlib:
-                        this._data = Ionic.Zlib.ZlibStream.CompressBuffer(data);
+                        using (var mso = new MemoryStream())
+                        using (var dos = new DeflaterOutputStream(mso, new Deflater(Deflater.BEST_COMPRESSION)))
+                        {
+                            dos.Write(data, 0, data.Length);
+                            dos.Flush();
+                            dos.Finish();
+                            this._data = mso.ToArray();
+                        }
                         break;
                     default:
                         throw new NotSupportedException($"{nameof(ErpFragment)} compression type {Compression} is not supported!");
