@@ -3,7 +3,9 @@ using ICSharpCode.AvalonEdit.Folding;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -70,12 +72,41 @@ namespace EgoErpArchiver
 
         private void websiteMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://www.ryder25.com/modding/ego-engine/#EgoERPArchiver");
+            OpenBrowser("https://www.ryder25.com/modding/ego-engine/#EgoERPArchiver");
         }
 
         private void issuesMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/Ryder25/Ego-Engine-Modding/issues");
+            OpenBrowser("https://github.com/Ryder25/Ego-Engine-Modding/issues");
+        }
+
+        private void OpenBrowser(string url)
+        {
+            try
+            {
+                Process.Start(url);
+            }
+            catch
+            {
+                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    url = url.Replace("&", "^&");
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Process.Start("xdg-open", url);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Process.Start("open", url);
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         private void mainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
