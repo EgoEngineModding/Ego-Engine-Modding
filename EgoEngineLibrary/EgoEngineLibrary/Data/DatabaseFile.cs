@@ -147,7 +147,6 @@
             base.DataSetName = "database";
             using (DatabaseBinaryReader reader = new DatabaseBinaryReader(EndianBitConverter.Little, File.Open(databasePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
             {
-                int num;
                 Exception exception;
                 Dictionary<DataColumn, string[]> dR = new Dictionary<DataColumn, string[]>();
                 XmlDocument SXML = new XmlDocument();
@@ -157,12 +156,22 @@
                 base.DataSetName = reader.ReadUInt32().ToString();
                 uint schemaVersion = 0;
 
+                bool hasStringTable = false;
                 if (SXML.DocumentElement.ChildNodes[nodeNum].Name == "schemaVersion")
                 {
-                    // Dirt 3 schemaVer, and schemaVerXml is different so don't do the error check
                     uint schemaVersionXml = Convert.ToUInt32(SXML.DocumentElement.ChildNodes[nodeNum].Attributes["version"].Value);
                     schemaVersion = reader.ReadUInt32();
-                    if (schemaVersion != schemaVersionXml && schemaVersion != 3914959594) throw new ArgumentException("The schema does not match with this database file.", nameof(schemaPath));
+
+                    // Dirt 3 schemaVer, and schemaVerXml is different so don't do the error check
+                    // Also D3 doesn't have a string table despite having a schemaVersion
+                    if (schemaVersion != 3934935529) // Dirt has 3934935529 in db, and 3914959594 in schema
+                    {
+                        if (schemaVersion != schemaVersionXml)
+                            throw new ArgumentException("The schema does not match with this database file.", nameof(schemaPath));
+
+                        hasStringTable = true;
+                    }
+
                     base.DataSetName = base.DataSetName + ";" + schemaVersion.ToString();
                     nodeNum++;
                 }
@@ -170,29 +179,36 @@
                 // Figure out the offset to the strings
                 // this only applies to certain games
                 // Does not apply to Dirt 3, despite having a schemaVersion
-                // F12013 1000; GridAutosport 1407330540; Dirt3 3914959594;
+                // F12013 1000; GridAutosport 1407330540; Dirt3 3914959594, Dirt Rally 539233987;
                 int offset = 12;
-                if (schemaVersion == 1000 || schemaVersion == 1407330540)
+                if (hasStringTable)
                 {
-                    num = 1;
-                    while (num < SXML.DocumentElement.ChildNodes.Count)
+                    // Loop through the tables in the schema, and jump through the database file to find the string table offset
+                    for (int i = 1; i < SXML.DocumentElement.ChildNodes.Count; ++i)
                     {
                         reader.Seek(offset, SeekOrigin.Begin);
-                        int num6 = reader.ReadInt32();
-                        int fieldCount = SXML.DocumentElement.ChildNodes[num].ChildNodes.OfType<XmlElement>().Count(x => x.Name == "field");
-                        offset += ((num6 * (fieldCount + 1)) * 4) + 8;
-                        num++;
+                        int tableRowCount = reader.ReadInt32();
+                        int fieldCount = SXML.DocumentElement.ChildNodes[i].ChildNodes.OfType<XmlElement>().Count(x => x.Name == "field");
+                        offset += ((tableRowCount * (fieldCount + 1)) * 4) + 8;
                     }
                     offset += 4;
                     reader.Seek(8, SeekOrigin.Begin);
                 }
                 
+                // Loop through all the data table by table
                 while (reader.BaseStream.Position < reader.BaseStream.Length &&
                     nodeNum < SXML.DocumentElement.ChildNodes.Count)
                 {
-                    DataTable table = new DataTable(SXML.DocumentElement.ChildNodes[nodeNum].Attributes["name"].InnerText);
-                    reader.Seek(4, SeekOrigin.Current);
+                    reader.Seek(2, SeekOrigin.Current);
+                    var tableID = reader.ReadUInt16();
+                    if ((hasStringTable && tableID != 10795) || (!hasStringTable && tableID != 21570)) // 0x2A2B or 0x5442 (BT from LBT)
+                    {
+                        throw new ArgumentException("The schema does not match with this database file.", nameof(schemaPath));
+                    }
                     itemNum = reader.ReadInt32();
+
+                    // Setup DataTable with proper columns based on the schema
+                    DataTable table = new DataTable(SXML.DocumentElement.ChildNodes[nodeNum].Attributes["name"].InnerText);
                     foreach (XmlElement element in SXML.DocumentElement.ChildNodes[nodeNum])
                     {
                         if (element.Name != "field")
@@ -243,11 +259,20 @@
                                 break;
                         }
                     }
-                    for (num = 0; num < itemNum; num++)
+
+                    // Read the data for this table
+                    for (int num = 0; num < itemNum; num++)
                     {
+                        var itmID = reader.ReadUInt16();
+                        if (hasStringTable && itmID != 10797) // 0x2A2D
+                        {
+                            throw new ArgumentException("The schema does not match with this database file.", nameof(schemaPath));
+                        }
+                        reader.Seek(2, SeekOrigin.Current);
+
+                        // Read the data for each field in the schema
                         DataRow row = table.NewRow();
                         List<object> list = new List<object>();
-                        reader.Seek(4, SeekOrigin.Current);
                         foreach (XmlElement element in SXML.DocumentElement.ChildNodes[nodeNum])
                         {
                             if (element.Name != "field")
@@ -264,7 +289,7 @@
                                     list.Add(reader.ReadInt32());
                                     break;
                                 case "string":
-                                    if (schemaVersion == 1000 || schemaVersion == 1407330540)
+                                    if (hasStringTable)
                                     {
                                         int returnPosition = (int)reader.BaseStream.Position + 4;
                                         reader.Seek(offset + reader.ReadInt32(), SeekOrigin.Begin);
@@ -470,15 +495,21 @@
                 byte[] bytes = Encoding.UTF8.GetBytes("LBT");
                 List<byte> list = new List<byte>();
                 Dictionary<string, int> dictionary = new Dictionary<string, int>(StringComparer.Ordinal);
+
                 uint schemaVersion = 0;
                 foreach (string str in base.DataSetName.Split(new char[] { ';' }))
                 {
                     writer.Write(Convert.ToUInt32(str));
                     schemaVersion = Convert.ToUInt32(str);
                 }
+
+                // Old style games, and Dirt 3's version don't have the table
+                bool hasStringTable = schemaVersion != 1313096275 && schemaVersion != 3934935529;
+
+                // Begin writing each table's data
                 for (int i = 0; i < base.Tables.Count; i++)
                 {
-                    if (schemaVersion == 1000 || schemaVersion == 1407330540)
+                    if (hasStringTable)
                     {
                         writer.Write((ushort)i);
                         writer.Write((ushort)0x2a2b);
@@ -489,9 +520,11 @@
                         writer.Write(Encoding.UTF8.GetBytes("LBT"));
                     }
                     writer.Write(base.Tables[i].Rows.Count);
+
+                    // Write each itm/row
                     foreach (DataRow row in base.Tables[i].Rows)
                     {
-                        if (schemaVersion == 1000 || schemaVersion == 1407330540)
+                        if (hasStringTable)
                         {
                             writer.Write((ushort)0x2a2d);
                             writer.Write((ushort)i);
@@ -501,6 +534,8 @@
                             writer.Write(Encoding.UTF8.GetBytes("ITM"));
                             writer.Write(Convert.ToByte(i));
                         }
+
+                        // Write the itm/row's data
                         for (int j = 0; j < base.Tables[i].Columns.Count; j++)
                         {
                             if (base.Tables[i].Columns[j].DataType == typeof(float))
@@ -513,7 +548,7 @@
                             }
                             else if (base.Tables[i].Columns[j].DataType == typeof(string))
                             {
-                                if (schemaVersion == 1000 || schemaVersion == 1407330540)
+                                if (hasStringTable)
                                 {
                                     if (dictionary.ContainsKey((string)row.ItemArray[j]))
                                     {
@@ -540,7 +575,9 @@
                         }
                     }
                 }
-                if (schemaVersion == 1000 || schemaVersion == 1407330540)
+
+                // Write the string table
+                if (hasStringTable)
                 {
                     writer.Write(Encoding.UTF8.GetBytes("PRTS"));
                     writer.Write(list.Count);
