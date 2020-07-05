@@ -9,6 +9,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
 {
     public class ErpGfxSurfaceRes0 : ErpFragmentData
     {
+        private long _leftoverBytes;
         public Int32 Unknown { get; set; }
         public Int32 Unknown2 { get; set; }
         public ErpGfxSurfaceFormat ImageType { get; set; }
@@ -18,6 +19,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
         public UInt32 MipMapCount { get; set; }
         public UInt32 ArraySize { get; set; }
         public Int32 Unknown4 { get; set; }
+        public Int32 Unknown5 { get; set; }
 
         public ErpGfxSurfaceRes0()
         {
@@ -30,6 +32,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
             MipMapCount = 1;
             ArraySize = 1;
             Unknown4 = 0;
+            Unknown5 = 0;
         }
 
         public override void FromFragment(ErpFragment fragment)
@@ -46,6 +49,17 @@ namespace EgoEngineLibrary.Archive.Erp.Data
                 MipMapCount = reader.ReadUInt32();
                 ArraySize = reader.ReadUInt32();
                 Unknown4 = reader.ReadInt32();
+
+                _leftoverBytes = reader.BaseStream.Length - reader.BaseStream.Position;
+                if (_leftoverBytes == 4)
+                {
+                    // noticed this extra field in F1 2020, not sure if in earlier ones
+                    Unknown5 = reader.ReadInt32();
+                }
+                else if (_leftoverBytes > 0)
+                {
+                    throw new NotSupportedException("The GfxSurfaceRes0 data is not supported.");
+                }
             }
         }
 
@@ -63,6 +77,11 @@ namespace EgoEngineLibrary.Archive.Erp.Data
                 writer.Write(MipMapCount);
                 writer.Write(ArraySize);
                 writer.Write(Unknown4);
+
+                if (_leftoverBytes >= 4)
+                {
+                    writer.Write(Unknown5);
+                }
 
                 fragment.SetData(newData.ToArray());
             }

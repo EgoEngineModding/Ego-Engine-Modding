@@ -19,6 +19,7 @@
     <PackageReference Include="SharpZipLib" Version="1.2.0" />
     <PackageReference Include="System.IO.Packaging" Version="4.6.0" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
+    <PackageReference Include="Zstandard.Net" Version="1.1.7" />
   </ItemGroup>
 
 </Project>

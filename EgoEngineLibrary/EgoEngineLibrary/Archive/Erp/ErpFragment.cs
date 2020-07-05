@@ -9,6 +9,7 @@
     using System.IO.Compression;
     using System.Linq;
     using System.Text;
+    using Zstandard.Net;
 
     public class ErpFragment
     {
@@ -99,6 +100,7 @@
                 {
                     case ErpCompressionAlgorithm.None:
                     case ErpCompressionAlgorithm.None2:
+                    case ErpCompressionAlgorithm.None3:
                         data = this._data;
                         break;
                     case ErpCompressionAlgorithm.Zlib:
@@ -107,6 +109,15 @@
                         using (var mso = new MemoryStream())
                         {
                             iis.CopyTo(mso);
+                            data = mso.ToArray();
+                        }
+                        break;
+                    case ErpCompressionAlgorithm.ZStandard:
+                        using (var ms = new MemoryStream(this._data))
+                        using (var zss = new ZstandardStream(ms, CompressionMode.Decompress))
+                        using (var mso = new MemoryStream())
+                        {
+                            zss.CopyTo(mso);
                             data = mso.ToArray();
                         }
                         break;
@@ -135,6 +146,7 @@
                 {
                     case ErpCompressionAlgorithm.None:
                     case ErpCompressionAlgorithm.None2:
+                    case ErpCompressionAlgorithm.None3:
                         this._data = data;
                         break;
                     case ErpCompressionAlgorithm.Zlib:
@@ -144,6 +156,15 @@
                             dos.Write(data, 0, data.Length);
                             dos.Flush();
                             dos.Finish();
+                            this._data = mso.ToArray();
+                        }
+                        break;
+                    case ErpCompressionAlgorithm.ZStandard:
+                        using (var mso = new MemoryStream())
+                        using (var zss = new ZstandardStream(mso, CompressionMode.Compress))
+                        {
+                            zss.Write(data, 0, data.Length);
+                            zss.Flush();
                             this._data = mso.ToArray();
                         }
                         break;

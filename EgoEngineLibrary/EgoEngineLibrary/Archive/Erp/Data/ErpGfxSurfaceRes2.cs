@@ -27,6 +27,8 @@ namespace EgoEngineLibrary.Archive.Erp.Data
         {
             MipMapFileName = string.Empty;
             Mips = new List<ErpGfxSurfaceRes2Mips>();
+            Unknown = 25;
+            Unknown2 = 1;
         }
 
         public override void FromFragment(ErpFragment fragment)
@@ -48,12 +50,17 @@ namespace EgoEngineLibrary.Archive.Erp.Data
                     Mips.Add(mip);
                 }
 
-                // This part was introduces in F1 2017
-                if (reader.BaseStream.Length - reader.BaseStream.Position == 8)
+                long leftoverBytes = reader.BaseStream.Length - reader.BaseStream.Position;
+                if (leftoverBytes == 8)
                 {
+                    // This part was introduced in F1 2017
                     hasTwoUnknowns = true;
                     Unknown = reader.ReadSingle();
                     Unknown2 = reader.ReadSingle();
+                }
+                else if (leftoverBytes > 0)
+                {
+                    throw new NotSupportedException("The GfxSurfaceRes2 data is not supported.");
                 }
             }
         }
