@@ -72,6 +72,7 @@
             <MenuItem Header="_Help">
                 <MenuItem Header="_Website" Name="websiteMenuItem" Click="websiteMenuItem_Click"></MenuItem>
                 <MenuItem Header="_Issues" Name="issuesMenuItem" Click="issuesMenuItem_Click"></MenuItem>
+                <MenuItem Header="Modding _Discord" Name="moddingDiscordMenuItem" Click="moddingDiscordMenuItem_Click"/>
             </MenuItem>
         </Menu>
 

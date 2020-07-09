@@ -77,7 +77,12 @@ namespace EgoErpArchiver
 
         private void issuesMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            OpenBrowser("https://github.com/Ryder25/Ego-Engine-Modding/issues");
+            OpenBrowser("https://github.com/ptasev/Ego-Engine-Modding/issues");
+        }
+
+        private void moddingDiscordMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            OpenBrowser("https://discord.gg/5bCjMqS");
         }
 
         private void OpenBrowser(string url)

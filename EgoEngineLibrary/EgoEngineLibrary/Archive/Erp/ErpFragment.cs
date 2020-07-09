@@ -163,6 +163,7 @@
                         using (var mso = new MemoryStream())
                         using (var zss = new ZstandardStream(mso, CompressionMode.Compress))
                         {
+                            zss.CompressionLevel = 22;
                             zss.Write(data, 0, data.Length);
                             zss.Flush();
                             this._data = mso.ToArray();
