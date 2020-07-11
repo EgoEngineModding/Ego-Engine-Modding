@@ -148,7 +148,7 @@ namespace EgoEngineLibrary.Graphics
                         byte[] mipData = reader.ReadBytes((int)mip.PackedSize);
                         if (mip.PackedSize != (ulong)mipData.LongLength)
                         {
-                            throw new FileFormatException($"The mipmaps file, and erp data do not match");
+                            throw new FileFormatException($"The mipmaps file, and erp data do not match. (compressed size)");
                         }
 
                         switch (mip.Compression)
@@ -159,6 +159,10 @@ namespace EgoEngineLibrary.Graphics
                             case ErpCompressionAlgorithm.LZ4:
                                 byte[] decompressedMipData = new byte[(int)mip.Size];
                                 int decompSize = LZ4Codec.Decode(mipData, 0, mipData.Length, decompressedMipData, 0, decompressedMipData.Length);
+                                if (decompSize < 0)
+                                {
+                                    throw new InvalidDataException($"The mipmaps file, and erp data do not match. (uncompressed size)");
+                                }
                                 output.Write(decompressedMipData, 0, decompSize);
                                 break;
                             default:

@@ -8,7 +8,7 @@
     <AssemblyName>Ego ERP Archiver</AssemblyName>
     <ApplicationIcon>Resources\Ryder25.ico</ApplicationIcon>
     <Authors>Petar Tasev</Authors>
-    <Version>7.0.0</Version>
+    <Version>7.1.0</Version>
     <Copyright>Copyright © Petar Tasev 2017</Copyright>
   </PropertyGroup>
 
