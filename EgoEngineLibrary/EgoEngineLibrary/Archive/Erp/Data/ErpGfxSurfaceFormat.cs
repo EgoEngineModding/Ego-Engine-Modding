@@ -13,6 +13,8 @@ namespace EgoEngineLibrary.Archive.Erp.Data
         DXT1_SRGB = 54,
         DXT5 = 55,
         DXT5_SRGB = 57,
+        // not sure anymore which is BC2/DXT3 and which is BC3/DXT5
+        BC2_SRGB = 62,
         ATI1 = 63,
         ATI2 = 65,
         BC6 = 67,

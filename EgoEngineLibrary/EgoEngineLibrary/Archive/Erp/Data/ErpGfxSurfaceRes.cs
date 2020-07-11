@@ -85,6 +85,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
                     return width * height / 2;
                 case ErpGfxSurfaceFormat.DXT5: // ferrari_sfc
                 case ErpGfxSurfaceFormat.DXT5_SRGB: // ferrari_decal
+                case ErpGfxSurfaceFormat.BC2_SRGB:
                 case ErpGfxSurfaceFormat.ATI2: // ferrari_wheel_nm
                 case ErpGfxSurfaceFormat.BC6: // key0_2016; environment abu_dhabi tree_palm_06
                 case ErpGfxSurfaceFormat.BC7:

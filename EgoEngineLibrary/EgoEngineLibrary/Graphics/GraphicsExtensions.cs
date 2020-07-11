@@ -80,6 +80,12 @@ namespace EgoEngineLibrary.Graphics
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
                     dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB;
                     break;
+                case ErpGfxSurfaceFormat.BC2_SRGB:
+                    dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+                    dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                    dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC2_UNORM_SRGB;
+                    break;
                 case ErpGfxSurfaceFormat.ATI1: // gameparticles k_smoke
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
@@ -406,6 +412,10 @@ namespace EgoEngineLibrary.Graphics
                     else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB)
                     {
                         imageType = ErpGfxSurfaceFormat.DXT5_SRGB;
+                    }
+                    else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC2_UNORM_SRGB)
+                    {
+                        imageType = ErpGfxSurfaceFormat.BC2_SRGB;
                     }
                     else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC4_TYPELESS ||
                         dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC4_UNORM ||

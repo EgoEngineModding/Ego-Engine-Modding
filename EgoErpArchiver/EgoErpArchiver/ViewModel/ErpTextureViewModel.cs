@@ -79,7 +79,7 @@ namespace EgoErpArchiver.ViewModel
                     _texArrayIndex = value;
                     if (IsSelected)
                     {
-                        Task.Run(() => GetPreview()).Wait();
+                        GetPreview();
                         resView.Select();
                     }
                     OnPropertyChanged(nameof(TexArrayIndex));
@@ -244,6 +244,9 @@ namespace EgoErpArchiver.ViewModel
                     break;
                 case ErpGfxSurfaceFormat.DXT5_SRGB: // ferrari_decal
                     TextureInfo += "BC3_SRGB";
+                    break;
+                case ErpGfxSurfaceFormat.BC2_SRGB:
+                    TextureInfo += "BC2_SRGB"; // F1 2020,fom_car,myteam_logo
                     break;
                 case ErpGfxSurfaceFormat.ATI1: // gameparticles k_smoke
                     TextureInfo += "ATI1";

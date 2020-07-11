@@ -212,10 +212,14 @@
                         header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_R8G8B8A8_SINT:
                     linearSize = (header.width * header.height) * 4;
                     break;
+                case 861165636: // DXT3 aka DXGI_FORMAT_BC2_UNORM
                 case 894720068: // DXT5 aka DXGI_FORMAT_BC3_UNORM
                 case 843666497: // ATI2 aka DXGI_FORMAT_BC5_UNORM
                 case 1429553986: // BC5U from Intel® Texture Works Plugin for Photoshop
-                case 808540228 when header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_TYPELESS ||
+                case 808540228 when header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC2_TYPELESS ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC2_UNORM ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC2_UNORM_SRGB ||
+                        header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_TYPELESS ||
                         header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM ||
                         header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB ||
                         header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC5_TYPELESS ||
