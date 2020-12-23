@@ -44,7 +44,7 @@ namespace EgoPssgEditor
 
         private void websiteMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("http://www.ryder25.com/");
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("http://www.ryder25.com/") { UseShellExecute = true });
         }
 
         //private void termpToolStripMenuItem_Click(object sender, EventArgs e)
