@@ -481,9 +481,13 @@
         public void RemoveChildNodes(IEnumerable<PssgNode>? childNodes = null)
         {
             childNodes ??= ChildNodes;
-            foreach (var childNode in childNodes)
+            while (true)
             {
-                RemoveChild(childNode);
+                var child = childNodes.FirstOrDefault();
+                if (child is null)
+                    break;
+
+                RemoveChild(child);
             }
         }
 
