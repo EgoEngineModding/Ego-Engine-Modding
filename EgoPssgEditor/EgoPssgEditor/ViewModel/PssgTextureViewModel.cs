@@ -1,12 +1,16 @@
-﻿using EgoEngineLibrary.Graphics;
-using EgoEngineLibrary.Graphics.Dds;
+﻿using BCnEncoder.Decoder;
+using EgoEngineLibrary.Graphics;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace EgoPssgEditor.ViewModel
@@ -55,10 +59,13 @@ namespace EgoPssgEditor.ViewModel
                     isSelected = value;
                     if (value)
                     {
-                        Task.Run(() => GetPreview()).Wait();
+                        GetPreview();
                         NodeView.IsSelected = true;
                     }
-                    else { preview = null; }
+                    else 
+                    {
+                        Preview = null;
+                    }
                     OnPropertyChanged("IsSelected");
                 }
             }
@@ -87,19 +94,34 @@ namespace EgoPssgEditor.ViewModel
 
         public void GetPreview()
         {
-            DdsFile dds;
-            CSharpImageLibrary.ImageEngineImage image = null;
+            Image<Rgba32> image = null;
             try
             {
-                this.Preview = null;
-                dds = Texture.ToDdsFile(false);
-                using (var fs = File.Open(System.AppDomain.CurrentDomain.BaseDirectory + "\\temp.dds", FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
-                    dds.Write(fs, -1);
-                int maxDimension = (int)Math.Max(dds.header.width, dds.header.height);
-
-                image = new CSharpImageLibrary.ImageEngineImage(System.AppDomain.CurrentDomain.BaseDirectory + "\\temp.dds", maxDimension);
                 Preview = null;
-                this.Preview = image.GetWPFBitmap(maxDimension, true);
+
+                // Write and decode dds
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    var dds = Texture.ToDdsFile(false);
+                    dds.Write(ms, -1);
+                    ms.Seek(0, SeekOrigin.Begin);
+
+                    BcDecoder decoder = new BcDecoder();
+                    image = decoder.Decode(ms);
+                }
+
+                // Copy pixels to WPF format
+                var pixels = new byte[image.Width * image.Height * 4];
+                var pixelsSpan = MemoryMarshal.Cast<byte, Bgra32>(pixels);
+                for (int r = 0; r < image.Height; ++r)
+                {
+                    var destRow = pixelsSpan.Slice(r * image.Width, image.Width);
+                    var sorcRow = image.GetPixelRowSpan(r);
+                    PixelOperations<Rgba32>.Instance.ToBgra32(Configuration.Default, sorcRow, destRow);
+                    
+                }
+                var bmSource = BitmapSource.Create(image.Width, image.Height, 96.0, 96.0, PixelFormats.Bgra32, null, pixels, image.Width * 4);
+                this.Preview = bmSource;
                 
                 this.PreviewErrorVisibility = Visibility.Collapsed;
                 OnPropertyChanged(nameof(Width));
@@ -114,9 +136,7 @@ namespace EgoPssgEditor.ViewModel
             }
             finally
             {
-                dds = null;
                 image?.Dispose();
-                image = null;
             }
         }
     }

@@ -90,16 +90,6 @@ namespace EgoPssgEditor.ViewModel
             textures.Clear();
         }
 
-        ~TexturesWorkspaceViewModel()
-        {
-            // Silently delete the temp texture preview dds file
-            try
-            {
-                File.Delete(AppDomain.CurrentDomain.BaseDirectory + "\\temp.dds");
-            }
-            catch { }
-        }
-
         public void RemoveTexture(PssgNodeViewModel nodeView)
         {
             int index = -1;

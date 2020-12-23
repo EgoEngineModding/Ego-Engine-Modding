@@ -7,7 +7,6 @@
         xmlns:eel_graphics="clr-namespace:EgoEngineLibrary.Graphics;assembly=EgoEngineLibrary"
         xmlns:vm="clr-namespace:EgoPssgEditor.ViewModel"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        xmlns:imageLib="clr-namespace:CSharpImageLibrary;assembly=CSharpImageLibrary"
         mc:Ignorable="d"
         Title="{Binding DisplayName}" Height="600" Width="800"
         DataContext="{Binding Source={StaticResource MainVM}}">
