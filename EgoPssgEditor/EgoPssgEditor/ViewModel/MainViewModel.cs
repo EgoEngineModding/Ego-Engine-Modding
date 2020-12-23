@@ -1,17 +1,10 @@
 using EgoEngineLibrary.Graphics;
+using EgoPssgEditor.Models3d;
 using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Input;
-using System.Windows.Media.Imaging;
 
 namespace EgoPssgEditor.ViewModel
 {
@@ -24,6 +17,7 @@ namespace EgoPssgEditor.ViewModel
         PssgFile file;
         readonly NodesWorkspaceViewModel nodesWorkspace;
         readonly TexturesWorkspaceViewModel texturesWorkspace;
+        readonly ModelsWorkspaceViewModel _modelsWorkspace;
 
         public override string DisplayName
         {
@@ -51,6 +45,10 @@ namespace EgoPssgEditor.ViewModel
         {
             get { return texturesWorkspace; }
         }
+        public ModelsWorkspaceViewModel ModelsWorkspace
+        {
+            get { return _modelsWorkspace; }
+        }
         #endregion
 
         #region Presentation Data
@@ -75,6 +73,7 @@ namespace EgoPssgEditor.ViewModel
 
             nodesWorkspace = new NodesWorkspaceViewModel(this);
             texturesWorkspace = new TexturesWorkspaceViewModel(this);
+            _modelsWorkspace = new ModelsWorkspaceViewModel(this);
 
             // Commands
             newCommand = new RelayCommand(NewCommand_Execute);
@@ -148,11 +147,8 @@ namespace EgoPssgEditor.ViewModel
                 try
                 {
                     filePath = args[1];
-                    ClearVars(true);
-                    file = PssgFile.Open(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    nodesWorkspace.LoadData(file);
-                    texturesWorkspace.LoadData(nodesWorkspace.RootNode);
-                    if (texturesWorkspace.Textures.Count > 0) SelectedTabIndex = 1;
+                    var pssg = PssgFile.Open(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+                    LoadPssg(pssg);
                     DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
                 }
                 catch (Exception excp)
@@ -186,11 +182,8 @@ namespace EgoPssgEditor.ViewModel
                 try
                 {
                     filePath = openFileDialog.FileName;
-                    ClearVars(true);
-                    file = Task<PssgFile>.Run(() => { return PssgFile.Open(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)); }).Result;
-                    nodesWorkspace.LoadData(file);
-                    texturesWorkspace.LoadData(nodesWorkspace.RootNode);
-                    if (texturesWorkspace.Textures.Count > 0) SelectedTabIndex = 1;
+                    var pssg = Task<PssgFile>.Run(() => { return PssgFile.Open(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)); }).Result;
+                    LoadPssg(pssg);
                     DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
                 }
                 catch (Exception excp)
@@ -232,6 +225,25 @@ namespace EgoPssgEditor.ViewModel
         private void ClearSchema_Execute(object parameter)
         {
             PssgSchema.ClearSchema();
+        }
+
+        public void LoadPssg(PssgFile pssg)
+        {
+            // if pssg is null, we just want to reload the workspaces
+            if (pssg is null)
+            {
+                ClearVars(false);
+            }
+            else
+            {
+                ClearVars(true);
+                file = pssg;
+            }
+
+            nodesWorkspace.LoadData(file);
+            texturesWorkspace.LoadData(nodesWorkspace.RootNode);
+            if (texturesWorkspace.Textures.Count > 0) SelectedTabIndex = 1;
+            _modelsWorkspace.LoadData(file);
         }
         private void SavePssg(int type)
         {
@@ -304,10 +316,11 @@ namespace EgoPssgEditor.ViewModel
 
             nodesWorkspace.ClearData();
             texturesWorkspace.ClearData();
+            _modelsWorkspace.ClearData();
 
-            DisplayName = Properties.Resources.AppTitleLong;
             if (clearPSSG == true)
             {
+                DisplayName = Properties.Resources.AppTitleLong;
                 file = null;
             }
         }

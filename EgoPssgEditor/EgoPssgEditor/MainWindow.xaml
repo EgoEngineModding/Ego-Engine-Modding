@@ -59,6 +59,10 @@
                 <MenuItem Header="_Duplicate Texture" Command="{Binding Path=TexturesWorkspace.DuplicateTexture}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
                 <MenuItem Header="_Remove Texture" Command="{Binding Path=TexturesWorkspace.RemoveTextureC}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
             </MenuItem>
+            <MenuItem Header="_Models">
+                <MenuItem Header="_Export Grid Car" Command="{Binding Path=ModelsWorkspace.Export}"></MenuItem>
+                <MenuItem Header="_Import Grid Car" Command="{Binding Path=ModelsWorkspace.Import}"></MenuItem>
+            </MenuItem>
             <MenuItem Header="_Schema">
                 <MenuItem Header="_Load" Command="{Binding Path=LoadSchema}"></MenuItem>
                 <MenuItem Header="_Save" Command="{Binding Path=SaveSchema}"></MenuItem>

@@ -152,6 +152,11 @@
             this.data = attrToCopy.data;
         }
 
+        public T GetValue<T>()
+        {
+            return (T)data;
+        }
+
         public void Write(PssgBinaryWriter writer)
         {
             writer.Write(this.Id);

@@ -472,8 +472,19 @@
         }
         public void RemoveChild(PssgNode childNode)
         {
-            this.ChildNodes.Remove(childNode);
-            childNode.ParentNode = null;
+            if (this.ChildNodes.Remove(childNode))
+                childNode.ParentNode = null;
+            else
+                throw new InvalidOperationException("Failed to remove child node.");
+        }
+
+        public void RemoveChildNodes(IEnumerable<PssgNode>? childNodes = null)
+        {
+            childNodes ??= ChildNodes;
+            foreach (var childNode in childNodes)
+            {
+                RemoveChild(childNode);
+            }
         }
 
         public PssgAttribute AddAttribute(string attributeName, object data)

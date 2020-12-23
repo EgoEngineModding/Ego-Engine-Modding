@@ -58,9 +58,9 @@
 
             return null;
         }
-        internal void Remove(PssgNode node)
+        internal bool Remove(PssgNode node)
         {
-            this.nodes.Remove(node);
+            return this.nodes.Remove(node);
         }
 
         public int Count
