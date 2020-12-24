@@ -2,8 +2,8 @@
   <PropertyGroup>
     <TargetFramework>net5.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <AssemblyName>Ego PSSG Editor</AssemblyName>
     <UseWPF>true</UseWPF>
+    <AssemblyName>Ego PSSG Editor</AssemblyName>
   </PropertyGroup>
   
   <PropertyGroup>
