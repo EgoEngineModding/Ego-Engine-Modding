@@ -3,19 +3,13 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <UseWindowsForms>true</UseWindowsForms>
-    <AssemblyName>Ego Language Editor</AssemblyName>
+    <AssemblyName>Ego CTF Editor</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   
   <PropertyGroup>
     <ApplicationIcon>Resources\Ryder25.ico</ApplicationIcon>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <Reference Include="DgvFilterPopup">
-      <HintPath>..\..\References\DgvFilterPopup.dll</HintPath>
-    </Reference>
-  </ItemGroup>
   
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
@@ -40,6 +34,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\EgoEngineLibrary\EgoEngineLibrary\EgoEngineLibrary.csproj" />
+    <ProjectReference Include="..\EgoEngineLibrary\EgoEngineLibrary.csproj" />
   </ItemGroup>
 </Project>

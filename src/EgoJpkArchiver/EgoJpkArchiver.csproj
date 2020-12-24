@@ -3,7 +3,7 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <UseWindowsForms>true</UseWindowsForms>
-    <AssemblyName>Ego CTF Editor</AssemblyName>
+    <AssemblyName>Ego JPK Archiver</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   
@@ -34,6 +34,10 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\EgoEngineLibrary\EgoEngineLibrary\EgoEngineLibrary.csproj" />
+    <ProjectReference Include="..\EgoEngineLibrary\EgoEngineLibrary.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="ObjectListView.Official" Version="2.8.1" />
   </ItemGroup>
 </Project>

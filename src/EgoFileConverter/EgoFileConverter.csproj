@@ -2,8 +2,12 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <OutputType>Exe</OutputType>
-    <AssemblyName>Ego ERP Archiver Console</AssemblyName>
+    <AssemblyName>Ego File Converter</AssemblyName>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <ApplicationIcon>Resources\Ryder25.ico</ApplicationIcon>
   </PropertyGroup>
   
   <ItemGroup>
@@ -22,6 +26,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\EgoEngineLibrary\EgoEngineLibrary\EgoEngineLibrary.csproj" />
+    <ProjectReference Include="..\EgoEngineLibrary\EgoEngineLibrary.csproj" />
   </ItemGroup>
 </Project>

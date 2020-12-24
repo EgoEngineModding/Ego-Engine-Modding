@@ -3,25 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29519.87
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EgoEngineLibrary", "EgoEngineLibrary\EgoEngineLibrary.csproj", "{F86348B9-87B8-445D-912E-A1732439E36A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EgoEngineLibrary", "src\EgoEngineLibrary\EgoEngineLibrary.csproj", "{F86348B9-87B8-445D-912E-A1732439E36A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EgoCtfEditor", "..\ECE\EgoCtfEditor\EgoCtfEditor.csproj", "{9780FFCA-15B7-4779-A702-F610ECD13EBB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EgoCtfEditor", "src\EgoCtfEditor\EgoCtfEditor.csproj", "{9780FFCA-15B7-4779-A702-F610ECD13EBB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EgoDatabaseEditor", "..\EDE\EgoDatabaseEditor\EgoDatabaseEditor.csproj", "{C707EB7A-84D8-4167-9B7E-5B38525969F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EgoDatabaseEditor", "src\EgoDatabaseEditor\EgoDatabaseEditor.csproj", "{C707EB7A-84D8-4167-9B7E-5B38525969F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoLngEditor", "..\ELE\EgoLngEditor\EgoLngEditor.csproj", "{77AB17BD-707A-4FA0-9D16-C0CDEE0D7939}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoLngEditor", "src\EgoLngEditor\EgoLngEditor.csproj", "{77AB17BD-707A-4FA0-9D16-C0CDEE0D7939}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoTngEditor", "..\ETE\EgoTngEditor\EgoTngEditor.csproj", "{E921040B-99FF-4423-A18B-A69EF5F097DA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoTngEditor", "src\EgoTngEditor\EgoTngEditor.csproj", "{E921040B-99FF-4423-A18B-A69EF5F097DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoJpkArchiver", "..\EJA\EgoJpkArchiver\EgoJpkArchiver.csproj", "{F437FCE3-6708-4E82-9603-9C63316AA13A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoJpkArchiver", "src\EgoJpkArchiver\EgoJpkArchiver.csproj", "{F437FCE3-6708-4E82-9603-9C63316AA13A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EgoPssgEditor", "..\EgoPssgEditor\EgoPssgEditor\EgoPssgEditor.csproj", "{B47E7D07-220B-4124-A084-AF255A80BE94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EgoPssgEditor", "src\EgoPssgEditor\EgoPssgEditor.csproj", "{B47E7D07-220B-4124-A084-AF255A80BE94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoFileConverter", "..\EgoFileConverter\EgoFileConverter\EgoFileConverter.csproj", "{A0B471B4-42C7-4912-91A8-4182CEC2044B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoFileConverter", "src\EgoFileConverter\EgoFileConverter.csproj", "{A0B471B4-42C7-4912-91A8-4182CEC2044B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoErpArchiverConsole", "..\EgoErpArchiverConsole\EgoErpArchiverConsole\EgoErpArchiverConsole.csproj", "{B8C89F96-CB92-4214-957A-42148EE94C1F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EgoErpArchiverConsole", "src\EgoErpArchiverConsole\EgoErpArchiverConsole.csproj", "{B8C89F96-CB92-4214-957A-42148EE94C1F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EgoErpArchiver", "..\EgoErpArchiver\EgoErpArchiver\EgoErpArchiver.csproj", "{13AA9133-6B64-40D1-936B-569E7A624098}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EgoErpArchiver", "src\EgoErpArchiver\EgoErpArchiver.csproj", "{13AA9133-6B64-40D1-936B-569E7A624098}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

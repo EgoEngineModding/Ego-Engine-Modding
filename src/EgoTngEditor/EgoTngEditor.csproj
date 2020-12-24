@@ -34,6 +34,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\EgoEngineLibrary\EgoEngineLibrary\EgoEngineLibrary.csproj" />
+    <ProjectReference Include="..\EgoEngineLibrary\EgoEngineLibrary.csproj" />
   </ItemGroup>
 </Project>
