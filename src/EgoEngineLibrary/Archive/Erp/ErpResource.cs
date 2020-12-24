@@ -39,14 +39,14 @@
             {
                 if (Identifier.StartsWith("eaid", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return Path.GetDirectoryName(Identifier.Substring(7)).Replace('/', '\\');
+                    return Path.GetDirectoryName(Identifier.Substring(7))?.Replace('/', '\\') ?? string.Empty;
                 }
                 else
                 {
                     string temp = Identifier;
                     if (temp.Contains('/') || temp.Contains('\\'))
                     {
-                        return Path.GetDirectoryName(temp).Replace('/', '\\');
+                        return Path.GetDirectoryName(temp)?.Replace('/', '\\') ?? string.Empty;
                     }
                     else
                     {

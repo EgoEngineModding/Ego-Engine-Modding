@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Xml;
@@ -74,8 +75,10 @@
         public CtfEntryInfo(int _id, XmlElement entry)
         {
             id = _id;
-            name = entry.Attributes["name"].Value;
-            type = entry.Attributes["type"].Value;
+            name = entry.Attributes["name"]?.Value ??
+                throw new InvalidDataException("The ctf entry info element does not have attribute name");
+            type = entry.Attributes["type"]?.Value ??
+                throw new InvalidDataException("The ctf entry info element does not have attribute type");
             minOperator = entry.GetAttribute("minOperator");
             if (entry.HasAttribute("minFlag"))
             {

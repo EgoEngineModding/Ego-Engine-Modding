@@ -9,6 +9,76 @@
     using System.Text;
     using System.Xml;
 
+    internal static class XmlNodeExtensions
+    {
+        public static XmlNode ChildNode(this XmlNode? parent, int index)
+        {
+            var child = parent?.ChildNodes[index];
+            if (child is null)
+                throw new InvalidOperationException($"Could not get child at index {index} from xml node {parent?.Name}.");
+            return child;
+        }
+
+        public static XmlAttribute Attribute(this XmlNode? parent, string name)
+        {
+            var child = parent?.Attributes?[name];
+            if (child is null)
+                throw new InvalidOperationException($"Could not find attribute {name} from xml node {parent?.Name}.");
+            return child;
+        }
+    }
+
+    internal static class DataSetExtensions
+    {
+        public static DataTable Table(this DataSet set, string name)
+        {
+            var table = set?.Tables[name];
+            if (table is null)
+                throw new InvalidOperationException($"Could not find table {name} in data set.");
+            return table;
+        }
+    }
+
+    internal static class DataColumnExtensions
+    {
+        public static DataColumn Column(this DataTable? table, string name)
+        {
+            var col = table?.Columns[name];
+            if (col is null)
+                throw new InvalidOperationException($"Could not find column {name} in table {table?.TableName}.");
+            return col;
+        }
+
+        public static DataRow Row(this DataTable? table, int index)
+        {
+            var row = table?.Rows[index];
+            if (row is null)
+                throw new InvalidOperationException($"Could not find row at index {index} in table {table?.TableName}.");
+            return row;
+        }
+    }
+
+    internal static class DataRowExtensions
+    {
+        public static T Items<T>(this DataRow? row, int index)
+            where T : struct
+        {
+            var item = row?.ItemArray[index];
+            if (item is not T val)
+                throw new InvalidOperationException($"Could not find item at index {index} in data row.");
+            return val;
+        }
+
+        public static T Itemc<T>(this DataRow? row, int index)
+            where T : class
+        {
+            var item = row?.ItemArray[index];
+            if (item is not T val)
+                throw new InvalidOperationException($"Could not find item at index {index} in data row.");
+            return val;
+        }
+    }
+
     [Serializable]
     public class DatabaseFile : DataSet
     {
@@ -52,7 +122,7 @@
                                 try
                                 {
                                     this._loadErrors.Add(new string[] { row.Table.TableName, row.RowError, string.Empty });
-                                    row.Table.PrimaryKey = null;
+                                    row.Table.PrimaryKey = Array.Empty<DataColumn>();
                                     this._loadErrors[this._loadErrors.Count - 1][2] = "The rows were kept but it is recommended that you fix the problem.";
                                     handledErrors.Add(row.RowError);
                                 }
@@ -60,7 +130,7 @@
                                 {
                                     (this._loadErrors[this._loadErrors.Count - 1])[1] += " " + exception2.Message;
                                     (this._loadErrors[this._loadErrors.Count - 1])[1] += " The row was removed. Below are its contents separated by \" | \". Make sure to fix the problem if you are going to add it again.";
-                                    foreach (object value in row.ItemArray)
+                                    foreach (object? value in row.ItemArray)
                                     {
                                         if (value is float)
                                         {
@@ -93,7 +163,7 @@
                                     str2 = row.RowError.Remove(row.RowError.IndexOf(" requires")).Remove(0, 0x15);
                                     row.Table.Constraints.Remove(str2);
                                     this._loadErrors.Add(new string[] { row.Table.TableName, row.RowError + " It is recommended that you fix the problem. To help you find the row, it is displayed below:", string.Empty });
-                                    foreach (object value in row.ItemArray)
+                                    foreach (object? value in row.ItemArray)
                                     {
                                         if (value is float)
                                         {
@@ -151,15 +221,18 @@
                 Dictionary<DataColumn, string[]> dR = new Dictionary<DataColumn, string[]>();
                 XmlDocument SXML = new XmlDocument();
                 SXML.Load(File.Open(schemaPath, FileMode.Open, FileAccess.Read, FileShare.Read));
+                if (SXML.DocumentElement is null)
+                    throw new InvalidDataException("The schema root xml element does not exist.");
+
                 int itemNum = 0;
                 int nodeNum = 0;
                 base.DataSetName = reader.ReadUInt32().ToString();
                 uint schemaVersion = 0;
 
                 bool hasStringTable = false;
-                if (SXML.DocumentElement.ChildNodes[nodeNum].Name == "schemaVersion")
+                if (SXML.DocumentElement.ChildNode(nodeNum).Name == "schemaVersion")
                 {
-                    uint schemaVersionXml = Convert.ToUInt32(SXML.DocumentElement.ChildNodes[nodeNum].Attributes["version"].Value);
+                    uint schemaVersionXml = Convert.ToUInt32(SXML.DocumentElement.ChildNode(nodeNum).Attribute("version").Value);
                     schemaVersion = reader.ReadUInt32();
 
                     // Dirt 3 schemaVer, and schemaVerXml is different so don't do the error check
@@ -188,7 +261,7 @@
                     {
                         reader.Seek(offset, SeekOrigin.Begin);
                         int tableRowCount = reader.ReadInt32();
-                        int fieldCount = SXML.DocumentElement.ChildNodes[i].ChildNodes.OfType<XmlElement>().Count(x => x.Name == "field");
+                        int fieldCount = SXML.DocumentElement.ChildNode(i).ChildNodes.OfType<XmlElement>().Count(x => x.Name == "field");
                         offset += ((tableRowCount * (fieldCount + 1)) * 4) + 8;
                     }
                     offset += 4;
@@ -208,8 +281,8 @@
                     itemNum = reader.ReadInt32();
 
                     // Setup DataTable with proper columns based on the schema
-                    DataTable table = new DataTable(SXML.DocumentElement.ChildNodes[nodeNum].Attributes["name"].InnerText);
-                    foreach (XmlElement element in SXML.DocumentElement.ChildNodes[nodeNum])
+                    DataTable table = new DataTable(SXML.DocumentElement.ChildNode(nodeNum).Attribute("name").InnerText);
+                    foreach (XmlElement element in SXML.DocumentElement.ChildNode(nodeNum))
                     {
                         if (element.Name != "field")
                         {
@@ -218,20 +291,20 @@
 
                         DataColumn column = new DataColumn();
                         table.Columns.Add(column);
-                        column.ColumnName = element.Attributes["name"].InnerText;
+                        column.ColumnName = element.Attribute("name").InnerText;
                         if (element.HasAttribute("key"))
                         {
-                            if (element.Attributes["key"].InnerText == "primary")
+                            if (element.Attribute("key").InnerText == "primary")
                             {
                                 table.PrimaryKey = new DataColumn[] { column };
                             }
                             else
                             {
-                                string[] strArray = element.Attributes["key"].InnerText.Split(new char[] { '.' });
+                                string[] strArray = element.Attribute("key").InnerText.Split(new char[] { '.' });
                                 dR.Add(column, strArray);
                             }
                         }
-                        switch (element.Attributes["type"].InnerText)
+                        switch (element.Attribute("type").InnerText)
                         {
                             case "float":
                                 column.DataType = typeof(float);
@@ -245,7 +318,7 @@
                                 column.DataType = typeof(string);
                                 if (element.HasAttribute("size"))
                                 {
-                                    column.MaxLength = Convert.ToInt32(element.Attributes["size"].InnerText);
+                                    column.MaxLength = Convert.ToInt32(element.Attribute("size").InnerText);
                                 }
                                 column.DefaultValue = string.Empty;
                                 break;
@@ -273,14 +346,14 @@
                         // Read the data for each field in the schema
                         DataRow row = table.NewRow();
                         List<object> list = new List<object>();
-                        foreach (XmlElement element in SXML.DocumentElement.ChildNodes[nodeNum])
+                        foreach (XmlElement element in SXML.DocumentElement.ChildNode(nodeNum))
                         {
                             if (element.Name != "field")
                             {
                                 continue;
                             }
 
-                            switch (element.Attributes["type"].InnerText)
+                            switch (element.Attribute("type").InnerText)
                             {
                                 case "float":
                                     list.Add(reader.ReadSingle());
@@ -298,7 +371,7 @@
                                     }
                                     else
                                     {
-                                        list.Add(reader.ReadDatabaseString(table.Columns[element.Attributes["name"].InnerText].MaxLength));
+                                        list.Add(reader.ReadDatabaseString(table.Column(element.Attribute("name").InnerText).MaxLength));
                                     }
                                     break;
                                 case "bool":
@@ -326,7 +399,7 @@
                                 try
                                 {
                                     this._loadErrors.Add(new string[] { table.TableName, exception.Message, string.Empty });
-                                    table.PrimaryKey = null;
+                                    table.PrimaryKey = Array.Empty<DataColumn>();
                                     table.Rows.Add(row);
                                     this._loadErrors[this._loadErrors.Count - 1][2] = "The rows were kept but it is recommended that you fix the problem.";
                                 }
@@ -392,7 +465,9 @@
                 }
                 foreach (KeyValuePair<DataColumn, string[]> pair in dR)
                 {
-                    DataRelation relation = new DataRelation(pair.Key.Table.TableName + "." + pair.Key.ColumnName, base.Tables[pair.Value[0]].Columns[pair.Value[1]], pair.Key);
+                    if (pair.Key.Table is null)
+                        throw new InvalidDataException($"Data column {pair.Key.ColumnName} does not have a data table.");
+                    DataRelation relation = new DataRelation(pair.Key.Table.TableName + "." + pair.Key.ColumnName, this.Table(pair.Value[0]).Column(pair.Value[1]), pair.Key);
                     pair.Key.Table.ExtendedProperties.Add(pair.Key.ColumnName, pair.Value[0]);
                     try
                     {
@@ -436,33 +511,33 @@
                     throw new ArgumentException("The files contain a different amount of tables!");
                 }
                 DataTable table3 = table2.Copy();
-                DataTable table4 = base.Tables[table3.TableName].Copy();
-                if (base.Tables[table4.TableName].PrimaryKey.Length == 0)
+                DataTable table4 = this.Table(table3.TableName).Copy();
+                if (this.Table(table4.TableName).PrimaryKey.Length == 0)
                 {
-                    if (base.Tables[table4.TableName].Columns.Contains("ID"))
+                    if (this.Table(table4.TableName).Columns.Contains("ID"))
                     {
-                        ordinal = base.Tables[table4.TableName].Columns["ID"].Ordinal;
+                        ordinal = this.Table(table4.TableName).Column("ID").Ordinal;
                         goto Label_01B2;
                     }
                     list.Add(table4.TableName);
                     continue;
                 }
-                ordinal = base.Tables[table4.TableName].PrimaryKey[0].Ordinal;
+                ordinal = this.Table(table4.TableName).PrimaryKey[0].Ordinal;
             Label_01B2:
                 num2 = 0;
                 while (num2 < table4.Rows.Count)
                 {
                     for (int j = 0; j < table3.Rows.Count; j++)
                     {
-                        if (!((table3.Rows[j].RowState != DataRowState.Deleted) && table4.Rows[num2].ItemArray[ordinal].Equals(table3.Rows[j].ItemArray[ordinal])))
+                        if (!((table3.Rows[j].RowState != DataRowState.Deleted) && table4.Row(num2).ItemArray[ordinal] == table3.Rows[j].ItemArray[ordinal]))
                         {
                             continue;
                         }
                         for (int k = 0; k < table3.Rows[j].ItemArray.Length; k++)
                         {
-                            if (!table4.Rows[num2].ItemArray[k].Equals(table3.Rows[j].ItemArray[k]))
+                            if (table4.Row(num2).ItemArray[k] != table3.Rows[j].ItemArray[k])
                             {
-                                file.Tables[table3.TableName].ImportRow(table3.Rows[j]);
+                                file.Table(table3.TableName).ImportRow(table3.Rows[j]);
                                 break;
                             }
                         }
@@ -473,7 +548,7 @@
                 }
                 foreach (DataRow row in table3.Rows)
                 {
-                    file.Tables[table3.TableName].ImportRow(row);
+                    file.Table(table3.TableName).ImportRow(row);
                 }
             }
             string str = Environment.NewLine + Environment.NewLine;
@@ -540,36 +615,36 @@
                         {
                             if (base.Tables[i].Columns[j].DataType == typeof(float))
                             {
-                                writer.Write((float)row.ItemArray[j]);
+                                writer.Write(row.Items<float>(j));
                             }
                             else if (base.Tables[i].Columns[j].DataType == typeof(int))
                             {
-                                writer.Write((int)row.ItemArray[j]);
+                                writer.Write(row.Items<int>(j));
                             }
                             else if (base.Tables[i].Columns[j].DataType == typeof(string))
                             {
                                 if (hasStringTable)
                                 {
-                                    if (dictionary.ContainsKey((string)row.ItemArray[j]))
+                                    if (dictionary.ContainsKey(row.Itemc<string>(j)))
                                     {
-                                        writer.Write(dictionary[(string)row.ItemArray[j]]);
+                                        writer.Write(dictionary[row.Itemc<string>(j)]);
                                     }
                                     else
                                     {
                                         writer.Write(list.Count);
-                                        dictionary.Add((string)row.ItemArray[j], list.Count);
-                                        list.AddRange(Encoding.UTF8.GetBytes((string)row.ItemArray[j]));
+                                        dictionary.Add(row.Itemc<string>(j), list.Count);
+                                        list.AddRange(Encoding.UTF8.GetBytes(row.Itemc<string>(j)));
                                         list.Add(0);
                                     }
                                 }
                                 else
                                 {
-                                    writer.WriteDatabaseString((string)row.ItemArray[j], base.Tables[i].Columns[j].MaxLength);
+                                    writer.WriteDatabaseString(row.Itemc<string>(j), base.Tables[i].Columns[j].MaxLength);
                                 }
                             }
                             else if (base.Tables[i].Columns[j].DataType == typeof(bool))
                             {
-                                writer.Write((bool)row.ItemArray[j]);
+                                writer.Write(row.Items<bool>(j));
                                 writer.Write(new byte[3]);
                             }
                         }

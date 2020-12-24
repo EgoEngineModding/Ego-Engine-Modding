@@ -57,7 +57,7 @@
             }
             else
             {
-                return this.Value.ToString();
+                return this.Value.ToString() ?? string.Empty;
             }
         }
         public object FromString(string value)

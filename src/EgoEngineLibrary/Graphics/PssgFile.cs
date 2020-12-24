@@ -142,7 +142,13 @@
 
             //PssgSchema.CreatePssgInfo(out file.nodeInfo, out file.attributeInfo);
 
-            file.RootNode = new PssgNode((XElement)((XElement)xDoc.FirstNode).FirstNode, file, null);
+            var docElem = xDoc.FirstNode as XElement ??
+                throw new InvalidDataException("The pssg xml does not have a root element.");
+
+            var firstNode = docElem.FirstNode as XElement ??
+                throw new InvalidDataException("The pssg xml does not have an element within the root element.");
+
+            file.RootNode = new PssgNode(firstNode, file, null);
 
             fileStream.Close();
             return file;
@@ -213,13 +219,13 @@
                     writer.Close();
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 if (writer != null)
                 {
                     writer.Close();
                 }
-                throw ex;
+                throw;
             }
         }
         public void WriteXml(Stream fileStream)
@@ -233,34 +239,12 @@
             settings.IndentChars = "";
             settings.CloseOutput = true;
 
-            XElement pssg = (XElement)xDoc.FirstNode;
+            XElement pssg = (XElement)xDoc.FirstNode!;
             RootNode.WriteXml(pssg);
 
             using (XmlWriter writer = XmlWriter.Create(fileStream, settings))
             {
                 xDoc.Save(writer);
-            }
-        }
-        public void WriteAsModel(Stream fileStream)
-        {
-            XmlDocument pssg = new XmlDocument();
-            pssg.AppendChild(pssg.CreateXmlDeclaration("1.0", "utf-8", string.Empty));
-            pssg.AppendChild(pssg.CreateElement("COLLADA", "http://www.collada.org/2008/03/COLLADASchema"));
-            pssg.DocumentElement.AppendChild(pssg.CreateAttribute("version"));
-            pssg.DocumentElement.Attributes["version"].InnerText = "1.5.0";
-
-            if (RootNode.HasAttributes)
-            {
-                XmlElement asset = pssg.CreateElement("asset");
-                if (RootNode.HasAttribute("creator"))
-                {
-                    asset.AppendChild(pssg.CreateElement("contributor"));
-                    asset.LastChild.AppendChild(pssg.CreateElement("author"));
-                    asset.LastChild.LastChild.InnerText = RootNode.Attributes["creator"].ToString();
-                }
-                // TODO: unit meter 1, created, up axis, scale?, creatorMachine
-
-
             }
         }
 

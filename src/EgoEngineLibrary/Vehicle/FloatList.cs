@@ -27,7 +27,7 @@
             return !(x == y);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is FloatList && this == (FloatList)obj;
         }

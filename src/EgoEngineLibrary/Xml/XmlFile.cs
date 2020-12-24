@@ -3,6 +3,7 @@
     using MiscUtil.Conversion;
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Xml;
@@ -37,7 +38,7 @@
                     {
                         try
                         {
-                            type = (XMLType)Enum.Parse(typeof(XMLType), child.Value);
+                            type = (XMLType)Enum.Parse(typeof(XMLType), child.Value ?? string.Empty);
                             break;
                         }
                         catch
@@ -132,7 +133,9 @@
                         doc = new XmlDocument();
                         doc.AppendChild(doc.CreateXmlDeclaration("1.0", "UTF-8", "yes"));
                         doc.AppendChild(doc.CreateComment(type.ToString()));
-                        doc.AppendChild(reader.ReadBxmlElement(doc));
+                        var rootElem = reader.ReadBxmlElement(doc);
+                        if (rootElem is not null)
+                            doc.AppendChild(rootElem);
                     }
                 }
                 else if (type == XMLType.BXMLLittle)
@@ -143,7 +146,9 @@
                         doc = new XmlDocument();
                         doc.AppendChild(doc.CreateXmlDeclaration("1.0", "UTF-8", "yes"));
                         doc.AppendChild(doc.CreateComment(type.ToString()));
-                        doc.AppendChild(reader.ReadBxmlElement(doc));
+                        var rootElem = reader.ReadBxmlElement(doc);
+                        if (rootElem is not null)
+                            doc.AppendChild(rootElem);
                     }
                 }
             }
@@ -167,6 +172,9 @@
                 List<BinaryXmlElement> xmlElems = new List<BinaryXmlElement>();
                 List<BinaryXmlAttribute> xmlAttrs = new List<BinaryXmlAttribute>();
                 List<int> valueLocations = new List<int>();
+
+                if (doc.DocumentElement is null)
+                    throw new InvalidDataException("The root xml element does not exist.");
 
                 BuildBinXml(doc.DocumentElement, valuesToID, xmlElems, xmlAttrs);
                 valueLocations.Add(0);
@@ -233,6 +241,10 @@
                 {
                     writer.Write((byte)0);
                     writer.Write(Encoding.UTF8.GetBytes("BXML"));
+
+                    if (doc.DocumentElement is null)
+                        throw new InvalidDataException("The root xml element does not exist.");
+
                     writer.WriteBxmlElement(doc.DocumentElement);
 
                     // File Ending: "0004 06000000" x2
@@ -250,6 +262,10 @@
                 {
                     writer.Write((byte)1);
                     writer.Write(Encoding.UTF8.GetBytes("BXML"));
+
+                    if (doc.DocumentElement is null)
+                        throw new InvalidDataException("The root xml element does not exist.");
+
                     writer.WriteBxmlElement(doc.DocumentElement);
 
                     // File Ending: "0004 06000000" x2
@@ -322,10 +338,9 @@
             {
                 // Values inside of an element are considered child nodes like <element>ThisValue</element>
                 // More Specifically they're called "XmlText" or Text Nodes
-                if (elem.ChildNodes[0].NodeType == XmlNodeType.Text)
+                if (elem.ChildNodes[0] is XmlText textNode)
                 {
                     //System.Windows.Forms.MessageBox.Show("daasda22222222222222222");
-                    XmlText textNode = (XmlText)elem.ChildNodes[0];
                     if (textNode.Value != null)
                     {
                         if (!valuesToID.ContainsKey(textNode.Value))

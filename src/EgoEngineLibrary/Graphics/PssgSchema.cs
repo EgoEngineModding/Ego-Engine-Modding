@@ -134,15 +134,22 @@
                     if (xN is XElement)
                     {
                         XElement elemNode = (XElement)xN;
-                        string nodeName = elemNode.Attribute("name").Value;
+
+                        string nodeName = elemNode.Attribute("name")?.Value ??
+                            throw new InvalidDataException($"The schema element {elemNode.Name} does not have attribute name.");
+                        string nType = elemNode.Attribute("dataType")?.Value ??
+                            throw new InvalidDataException($"The schema element {elemNode.Name} does not have attribute dataType.");
+
                         Node node = PssgSchema.AddNode(nodeName);
-                        Type nodeType = Type.GetType(elemNode.Attribute("dataType").Value, false);
+                        Type? nodeType = Type.GetType(nType, false);
                         if (nodeType != null)
                         {
                             node.DataType = nodeType;
                         }
-                        node.ElementsPerRow = Convert.ToInt32(elemNode.Attribute("elementsPerRow").Value);
-                        string linkAttributeName = elemNode.Attribute("linkAttributeName").Value;
+                        node.ElementsPerRow = Convert.ToInt32(elemNode.Attribute("elementsPerRow")?.Value ??
+                            throw new InvalidDataException($"The schema element {elemNode.Name} does not have attribute elementsPerRow."));
+                        string linkAttributeName = elemNode.Attribute("linkAttributeName")?.Value ??
+                            throw new InvalidDataException($"The schema element {elemNode.Name} does not have attribute linkAttributeName.");
                         if (!string.IsNullOrEmpty(linkAttributeName))
                         {
                             node.LinkAttributeName = linkAttributeName;
@@ -150,10 +157,12 @@
 
                         foreach (XNode subNode in elemNode.Descendants("attribute"))
                         {
-                            if (xN is XElement)
+                            if (subNode is XElement subElem)
                             {
-                                string attrName = ((XElement)subNode).Attribute("name").Value;
-                                Type attrType = Type.GetType(((XElement)subNode).Attribute("dataType").Value, false);
+                                string attrName = ((XElement)subNode).Attribute("name")?.Value ??
+                                    throw new InvalidDataException($"The schema element {subElem.Name} does not have attribute name.");
+                                Type? attrType = Type.GetType(((XElement)subNode).Attribute("dataType")?.Value ??
+                                    throw new InvalidDataException($"The schema element {subElem.Name} does not have attribute dataType."), false);
                                 if (attrType != null)
                                 {
                                     bool add = true;
@@ -184,7 +193,7 @@
             {
                 XDocument xDoc = new XDocument();
                 xDoc.Add(new XElement("PSSGFILE", new XAttribute("version", "1.0.0.0")));
-                XElement parent = (XElement)xDoc.FirstNode;
+                XElement parent = (XElement)xDoc.FirstNode!;
 
                 foreach (KeyValuePair<string, Node> entry in entries)
                 {

@@ -58,7 +58,8 @@
         public LngFile(DataSet data)
         {
             hasChanges = false;
-            DataTable DT = data.Tables["info"];
+            DataTable DT = data.Tables["info"] ??
+                throw new InvalidDataException("The dataset does not have a table named info.");
             magic = (int)DT.Rows[0][0];
             count = (int)DT.Rows[0][1];
             hshs = new Hshs((int)DT.Rows[0][2], (uint)DT.Rows[0][3], (uint)DT.Rows[0][4], (uint)DT.Rows[0][5]);
@@ -67,7 +68,8 @@
             sidb = new SidB((int)DT.Rows[0][8]);
             lngb = new LngB((int)DT.Rows[0][9]);
 
-            DT = data.Tables["entry"];
+            DT = data.Tables["entry"] ??
+                throw new InvalidDataException("The dataset does not have a table named entry.");
             count = DT.Rows.Count;
             resize();
             count = 0;
@@ -191,7 +193,7 @@
             DT.CaseSensitive = true;
             DT.Columns.Add("LNG_Key", typeof(string));
             DT.Columns.Add("LNG_Value", typeof(string));
-            DT.PrimaryKey = new DataColumn[] { DT.Columns["LNG_Key"] };
+            DT.PrimaryKey = new DataColumn[] { DT.Columns["LNG_Key"]! };
             DataRow row;
             foreach (HashEntry entry in hsht.Entries)
             {
@@ -376,7 +378,7 @@
             // Get Differences and Load them into DataTable diffs
             for (int i = 0; i < tableTwo.Rows.Count; i++)
             {
-                DataRow tableRow = table.Rows.Find(tableTwo.Rows[i][0]);
+                DataRow? tableRow = table.Rows.Find(tableTwo.Rows[i][0]);
                 if (tableRow == null || !tableRow[1].Equals(tableTwo.Rows[i][1]))
                 {
                     diffs.ImportRow(tableTwo.Rows[i]);
@@ -391,7 +393,7 @@
         {
             foreach (DataRow rowTwo in tableTwo.Rows)
             {
-                DataRow tableRow = table.Rows.Find(rowTwo[0]);
+                DataRow? tableRow = table.Rows.Find(rowTwo[0]);
                 if (tableRow == null)
                 {
                     table.ImportRow(rowTwo);

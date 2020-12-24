@@ -12,7 +12,7 @@ namespace EgoEngineLibrary.Graphics
 {
     public static class GraphicsExtensions
     {
-        public static DdsFile ToDdsFile(this ErpGfxSRVResource srvRes, Stream mipMapsStream, bool exportTexArray, uint texArrayIndex)
+        public static DdsFile ToDdsFile(this ErpGfxSRVResource srvRes, Stream? mipMapsStream, bool exportTexArray, uint texArrayIndex)
         {
             DdsFile dds = new DdsFile();
 
@@ -137,8 +137,7 @@ namespace EgoEngineLibrary.Graphics
             }
 
             byte[] imageData = srvRes.SurfaceRes.Fragment1.Data;
-            bool foundMipMapFile = mipMapsStream != null;
-            if (srvRes.SurfaceRes.HasMips && srvRes.SurfaceRes.HasValidMips && foundMipMapFile)
+            if (srvRes.SurfaceRes.HasMips && srvRes.SurfaceRes.HasValidMips && mipMapsStream is not null)
             {
                 using (MemoryStream output = new MemoryStream())
                 using (BinaryReader reader = new BinaryReader(mipMapsStream, Encoding.ASCII, true))

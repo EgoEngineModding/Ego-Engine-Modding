@@ -221,14 +221,10 @@ namespace EgoEngineLibrary.Formats.Pssg
 			public RenderDataSource(PssgNode rdsNode)
 			{
 				_rdsNode = rdsNode;
-				_risNode = rdsNode.ChildNodes.FirstOrDefault();
-
-				if (_risNode is null || _risNode.Name != "RENDERINDEXSOURCE")
+				_risNode = rdsNode.ChildNodes.FirstOrDefault(n => n.Name == "RENDERINDEXSOURCE") ??
 					throw new InvalidDataException($"RDS node {(string)_rdsNode.Attributes["id"].Value} must have RENDERINDEXSOURCE as its first child.");
 
-				_isdNode = _risNode.ChildNodes.FirstOrDefault();
-
-				if (_isdNode is null || _isdNode.Name != "INDEXSOURCEDATA")
+				_isdNode = _risNode.ChildNodes.FirstOrDefault(n => n.Name == "INDEXSOURCEDATA") ??
 					throw new InvalidDataException($"RENDERINDEXSOURCE node {(string)_risNode.Attributes["id"].Value} must have INDEXSOURCEDATA as its first child.");
 
 				_renderStreamNodes = _rdsNode.FindNodes("RENDERSTREAM").ToList();

@@ -60,7 +60,7 @@
                     // Attribute Count
                     this.Write((Int16)0);
 
-                    elemLength += this.WriteTerminatedString(childNode.Value) + 1;
+                    elemLength += this.WriteTerminatedString(childNode.Value ?? string.Empty) + 1;
 
                     // Go back, Update Element Length, and Come Back to Continue Writing
                     this.Seek(-2 - elemLength, System.IO.SeekOrigin.Current);

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Xml;
@@ -42,6 +43,10 @@
             {
                 XmlDocument ctfSchema = new XmlDocument();
                 ctfSchema.Load(fileStream);
+
+                if (ctfSchema.DocumentElement is null)
+                    throw new InvalidDataException("The ctf schema does not have a root element.");
+
                 filterIndex = GetFilterIndex(ctfSchema.DocumentElement.GetAttribute("extension"));
                 Int32.TryParse(ctfSchema.DocumentElement.GetAttribute("line"), out lineIndex);
                 parentTab = _parentTab;
