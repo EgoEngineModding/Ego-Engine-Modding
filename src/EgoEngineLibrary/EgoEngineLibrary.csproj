@@ -12,6 +12,14 @@
     <Copyright>Copyright © Petar Tasev 2019</Copyright>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="JonSkeet.MiscUtil" Version="0.2.0" />
     <PackageReference Include="K4os.Compression.LZ4" Version="1.1.11" />

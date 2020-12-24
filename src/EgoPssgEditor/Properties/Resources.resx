@@ -118,9 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AppTitleLong" xml:space="preserve">
-    <value>Ego PSSG Editor vNext Beta 1</value>
+    <value>Ego PSSG Editor vNext Beta 2</value>
   </data>
   <data name="AppTitleShort" xml:space="preserve">
-    <value>EPE vNext Beta 1</value>
+    <value>EPE vNext Beta 2</value>
   </data>
 </root>

@@ -92,7 +92,7 @@ namespace EgoPssgEditor.Models3d
             {
                 try
                 {
-                    GridCarPssgGltfConverter converter = new GridCarPssgGltfConverter();
+                    CarPssgGltfConverter converter = new CarPssgGltfConverter();
                     var model = converter.Convert(_pssg);
                     model.Save(dialog.FileName);
                 }

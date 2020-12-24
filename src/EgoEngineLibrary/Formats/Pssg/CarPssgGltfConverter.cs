@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
-    public class GridCarPssgGltfConverter
+    public class CarPssgGltfConverter
     {
         public ModelRoot Convert(PssgFile pssg)
 		{
@@ -23,21 +23,16 @@ namespace EgoEngineLibrary.Formats.Pssg
 
 			var matBuilderMap = ConvertMaterials(pssg);
 
-			var parent = pssg.FindNodes("LIBRARY", "type", "NODE").First();
+			// F1 games use lib YYY
+			var parent = pssg.FindNodes("LIBRARY", "type", "NODE").FirstOrDefault();
+			if (parent is null)
+				parent = pssg.FindNodes("LIBRARY", "type", "YYY").FirstOrDefault();
+			if (parent is null)
+				throw new InvalidDataException("Could not find library with scene nodes.");
+
 			foreach (var child in parent.ChildNodes)
 			{
 				CreateNode(sceneBuilder, child, null, matBuilderMap);
-			}
-
-			List<PssgNode> mpbnNodes = pssg.FindNodes("MATRIXPALETTEBUNDLENODE");
-			foreach (PssgNode mpbnNode in mpbnNodes)
-			{
-				String lod = (string)mpbnNode.Attributes["id"].Value;
-				List<PssgNode> mpjnNodes = mpbnNode.FindNodes("MATRIXPALETTEJOINTNODE");
-				foreach (PssgNode mpjnNode in mpjnNodes)
-				{
-					//CreateMeshNode(sceneBuilder, pssg, mpjnNode, matBuilderMap);
-				}
 			}
 
 			return sceneBuilder.ToGltf2();
@@ -93,7 +88,8 @@ namespace EgoEngineLibrary.Formats.Pssg
 		{
 			string name = (string)mpjnNode.Attributes["id"].Value;
 			var mb = new MeshBuilder<VertexPositionNormal, VertexColor1Texture1, VertexEmpty>(name);
-			var primitives = mpjnNode.FindNodes("MATRIXPALETTERENDERINSTANCE");
+			IEnumerable<PssgNode> primitives = mpjnNode.FindNodes("MATRIXPALETTERENDERINSTANCE"); // RD: Grid
+			primitives = primitives.Concat(mpjnNode.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE")); // Dirt 2 and beyond
 
 			foreach (var prim in primitives)
 			{
@@ -104,30 +100,65 @@ namespace EgoEngineLibrary.Formats.Pssg
 				string rdsId = ((string)prim.Attributes["indices"].Value).Substring(1);
 				var rdsNode = prim.File.FindNodes("RENDERDATASOURCE", "id", rdsId).First();
 
-				var rds = new RenderDataSource(rdsNode);
-				var positions = rds.GetPositions();
-				var colors = rds.GetColors();
-				var normals = rds.GetNormals();
-				var tangents = rds.GetTangents();
-				var texCoords = rds.GetTexCoords();
-
+				var rds = new RenderDataSourceReader(rdsNode);
 				var indexOffset = prim.Attributes["indexOffset"].GetValue<uint>();
 				var indexCount = prim.Attributes["indicesCountFromOffset"].GetValue<uint>();
-				var indices = rds.GetIndices().AsSpan().Slice((int)indexOffset, (int)indexCount);
-				for (int i = 0; i < indexCount; i += 3)
+				var triangles = rds.GetTriangles((int)indexOffset, (int)indexCount);
+				foreach (var tri in triangles)
 				{
-					var a = indices[i + 0];
-					var b = indices[i + 1];
-					var c = indices[i + 2];
-
 					pb.AddTriangle(
-						GetVertexBuilder(positions[a], normals[a], tangents[a], texCoords[a], colors[a]),
-						GetVertexBuilder(positions[b], normals[b], tangents[b], texCoords[b], colors[b]),
-						GetVertexBuilder(positions[c], normals[c], tangents[c], texCoords[c], colors[c]));
+						GetVertexBuilder(rds, tri.A),
+						GetVertexBuilder(rds, tri.B),
+						GetVertexBuilder(rds, tri.C));
 				}
+
+				//var rds = new RenderDataSource(rdsNode);
+				//var positions = rds.GetPositions();
+				//var colors = rds.GetColors();
+				//var normals = rds.GetNormals();
+				//var tangents = rds.GetTangents();
+				//var texCoords = rds.GetTexCoords();
+
+				//var indexOffset = prim.Attributes["indexOffset"].GetValue<uint>();
+				//var indexCount = prim.Attributes["indicesCountFromOffset"].GetValue<uint>();
+				//var indices = rds.GetIndices().AsSpan().Slice((int)indexOffset, (int)indexCount);
+				//for (int i = 0; i < indexCount; i += 3)
+				//{
+				//	var a = indices[i + 0];
+				//	var b = indices[i + 1];
+				//	var c = indices[i + 2];
+
+				//	pb.AddTriangle(
+				//		GetVertexBuilder(positions[a], normals[a], tangents[a], texCoords[a], colors[a]),
+				//		GetVertexBuilder(positions[b], normals[b], tangents[b], texCoords[b], colors[b]),
+				//		GetVertexBuilder(positions[c], normals[c], tangents[c], texCoords[c], colors[c]));
+				//}
 			}
 
 			return mb;
+		}
+
+		private static VertexBuilder<VertexPositionNormal, VertexColor1Texture1, VertexEmpty> GetVertexBuilder(RenderDataSourceReader rds, int index)
+		{
+			var vb = new VertexBuilder<VertexPositionNormal, VertexColor1Texture1, VertexEmpty>();
+			vb.Geometry.Position = rds.GetPosition(index);
+			vb.Geometry.Normal = rds.GetNormal(index);
+			//vb.Geometry.Tangent = new Vector4(tangent, 1);
+
+			vb.Material.TexCoord = rds.GetTexCoord(index);
+			var color = rds.GetColor(index);
+			vb.Material.Color = new Vector4(
+				((color >> 8) & 0xFF) / (float)byte.MaxValue,
+				((color >> 16) & 0xFF) / (float)byte.MaxValue,
+				((color >> 24) & 0xFF) / (float)byte.MaxValue,
+				((color >> 0) & 0xFF) / (float)byte.MaxValue);
+
+			//var vertWeight = mesh.VertexWeights[face.Indices[index]];
+			//var vws = vertWeight.BoneIndices.Zip(vertWeight.Weights, (First, Second) => (First, Second)).Where(vw => vw.Second > 0).ToArray();
+			//if (vws.Length > 4) throw new NotSupportedException("A vertex cannot be bound to more than 4 bones.");
+			//vb.Skinning.SetWeights(SparseWeight8.Create(vws));
+
+			return vb;
 		}
 
 		private static VertexBuilder<VertexPositionNormal, VertexColor1Texture1, VertexEmpty> GetVertexBuilder(Vector3 position, Vector3 normal, Vector3 tangent, Vector2 texCoord, uint color)

@@ -60,7 +60,7 @@
                 <MenuItem Header="_Remove Texture" Command="{Binding Path=TexturesWorkspace.RemoveTextureC}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Models">
-                <MenuItem Header="_Export Grid Car" Command="{Binding Path=ModelsWorkspace.Export}"></MenuItem>
+                <MenuItem Header="_Export Car" Command="{Binding Path=ModelsWorkspace.Export}"></MenuItem>
                 <MenuItem Header="_Import Grid Car" Command="{Binding Path=ModelsWorkspace.Import}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Schema">
