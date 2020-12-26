@@ -45,6 +45,7 @@ namespace EgoPssgEditor.Models3d
 
             export = new RelayCommand(Export_Execute, Export_CanExecute);
             import = new RelayCommand(Import_Execute, Import_CanExecute);
+            ImportGrid = new RelayCommand(ImportGrid_Execute, ImportGrid_CanExecute);
         }
 
         public override void LoadData(object data)
@@ -71,10 +72,13 @@ namespace EgoPssgEditor.Models3d
         {
             get { return import; }
         }
+        public RelayCommand ImportGrid { get; }
 
         private bool Export_CanExecute(object parameter)
         {
-            return _pssg != null;
+            var mpriNodes = _pssg?.FindNodes("MATRIXPALETTERENDERINSTANCE");
+            var mpjriNodes = _pssg?.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE");
+            return _pssg != null && (mpriNodes.Count > 0 || mpjriNodes.Count > 0);
         }
         private void Export_Execute(object parameter)
         {
@@ -103,11 +107,47 @@ namespace EgoPssgEditor.Models3d
                 }
             }
         }
+
         private bool Import_CanExecute(object parameter)
         {
-            return _pssg != null;
+            return _pssg != null && _pssg.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE").Count > 0;
         }
         private void Import_Execute(object parameter)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Filter = "Gltf files|*.glb;*.gltf|All files|*.*";
+            dialog.Title = "Select a gltf model file";
+            if (!string.IsNullOrEmpty(mainView.FilePath))
+            {
+                dialog.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
+                dialog.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+            }
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var gltf = ModelRoot.Load(dialog.FileName);
+
+                    var conv = new GltfDirt2F1CarPssgConverter();
+                    conv.Convert(gltf, _pssg);
+
+                    mainView.LoadPssg(null);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Could not import the model!" + Environment.NewLine + Environment.NewLine +
+                        ex.Message, "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private bool ImportGrid_CanExecute(object parameter)
+        {
+            var rsiNodes = _pssg?.FindNodes("RENDERSTREAMINSTANCE");
+            return _pssg != null && rsiNodes.Count > 0 && rsiNodes[0].ParentNode?.Name == "MATRIXPALETTENODE";
+        }
+        private void ImportGrid_Execute(object parameter)
         {
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "Gltf files|*.glb;*.gltf|All files|*.*";

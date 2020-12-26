@@ -143,7 +143,9 @@ namespace EgoEngineLibrary.Formats.Pssg
 			var vb = new VertexBuilder<VertexPositionNormal, VertexColor1Texture1, VertexEmpty>();
 			vb.Geometry.Position = rds.GetPosition(index);
 			vb.Geometry.Normal = rds.GetNormal(index);
-			//vb.Geometry.Tangent = new Vector4(tangent, 1);
+			// Sometimes the normal would be NaNs, and the tangent/binormal zeros
+			// not sure what to do in this case so I just leave out the tangent
+			//vb.Geometry.Tangent = rds.GetTangent(index);
 
 			vb.Material.TexCoord = rds.GetTexCoord(index);
 			var color = rds.GetColor(index);

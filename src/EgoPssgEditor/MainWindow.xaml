@@ -61,7 +61,8 @@
             </MenuItem>
             <MenuItem Header="_Models">
                 <MenuItem Header="_Export Car" Command="{Binding Path=ModelsWorkspace.Export}"></MenuItem>
-                <MenuItem Header="_Import Grid Car" Command="{Binding Path=ModelsWorkspace.Import}"></MenuItem>
+                <MenuItem Header="_Import Car" Command="{Binding Path=ModelsWorkspace.Import}"></MenuItem>
+                <MenuItem Header="Import _Grid Car" Command="{Binding Path=ModelsWorkspace.ImportGrid}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Schema">
                 <MenuItem Header="_Load" Command="{Binding Path=LoadSchema}"></MenuItem>
