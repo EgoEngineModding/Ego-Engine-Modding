@@ -15,6 +15,7 @@ namespace EgoEngineLibrary.Formats.Pssg
         private record VertexAttributeData(string Name, string DataType, uint ElementCount, uint Offset, uint Stride, byte[] Data);
 
         private readonly string _indexFormat;
+        private readonly int _indexStride;
         private readonly byte[] _indexData;
         private readonly Dictionary<string, VertexAttributeData> _vertexAttributes;
 
@@ -32,6 +33,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             // Setup indices
             _indexFormat = risNode.Attributes["format"].GetValue<string>();
+            _indexStride = GetIndexStride(_indexFormat);
             Primitive = risNode.Attributes["primitive"].GetValue<string>();
             IndexCount = risNode.Attributes["count"].GetValue<uint>();
             _indexData = ((byte[])isdNode.Value);
@@ -67,53 +69,90 @@ namespace EgoEngineLibrary.Formats.Pssg
                     continue;
                 _vertexAttributes.Add(attr.Name, attr);
             }
-        }
 
-
-        public IEnumerable<(ushort A, ushort B, ushort C)> GetTriangles()
-        {
-            return GetTriangles(0, (int)IndexCount);
-        }
-        public IEnumerable<(ushort A, ushort B, ushort C)> GetTriangles(int startIndex, int indexCount)
-        {
-            if (_indexFormat != "ushort")
-                throw new NotImplementedException($"Support for {_indexFormat} primitive index format not implemented.");
-
-            if (Primitive != "triangles")
-                throw new InvalidOperationException($"Cannot get triangle from primitive type {Primitive}.");
-
-            var data = _indexData.AsMemory(startIndex * sizeof(ushort), indexCount * sizeof(ushort));
-            var triCount = indexCount / 3;
-            for (int i = 0; i < triCount; ++i)
+            static int GetIndexStride(string indexFormat)
             {
-                var dataSpan = data.Span;
-                var a = BinaryPrimitives.ReadUInt16BigEndian(dataSpan);
-                var b = BinaryPrimitives.ReadUInt16BigEndian(dataSpan.Slice(2));
-                var c = BinaryPrimitives.ReadUInt16BigEndian(dataSpan.Slice(4));
-                yield return(a, b, c);
-
-                data = data.Slice(6);
+                return indexFormat switch
+                {
+                    "ushort" => sizeof(ushort),
+                    "uint" => sizeof(uint),
+                    _ => throw new NotImplementedException($"Support for {indexFormat} primitive index format not implemented.")
+                };
             }
         }
 
-        public (ushort A, ushort B, ushort C) GetTriangle(int index)
-        {
-            if (_indexFormat != "ushort")
-                throw new NotImplementedException($"Support for {_indexFormat} primitive index format not implemented.");
 
+        public IEnumerable<(uint A, uint B, uint C)> GetTriangles()
+        {
+            return GetTriangles(0, (int)IndexCount);
+        }
+        public IEnumerable<(uint A, uint B, uint C)> GetTriangles(int startIndex, int indexCount)
+        {
             if (Primitive != "triangles")
                 throw new InvalidOperationException($"Cannot get triangle from primitive type {Primitive}.");
 
-            var offset = index * 3;
-            var data = _indexData.AsSpan(offset);
+            var data = _indexData.AsMemory(startIndex * _indexStride, indexCount * _indexStride);
+            var triCount = indexCount / 3;
+            switch (_indexFormat)
+            {
+                case "ushort":
+                    {
+                        for (int i = 0; i < triCount; ++i)
+                        {
+                            var dataSpan = data.Span;
+                            var a = BinaryPrimitives.ReadUInt16BigEndian(dataSpan);
+                            var b = BinaryPrimitives.ReadUInt16BigEndian(dataSpan.Slice(2));
+                            var c = BinaryPrimitives.ReadUInt16BigEndian(dataSpan.Slice(4));
+                            yield return (a, b, c);
 
-            var a = BinaryPrimitives.ReadUInt16BigEndian(data);
-            var b = BinaryPrimitives.ReadUInt16BigEndian(data.Slice(2));
-            var c = BinaryPrimitives.ReadUInt16BigEndian(data.Slice(4));
-            return (a, b, c);
+                            data = data.Slice(6);
+                        }
+                        break;
+                    }
+                case "uint":
+                    {
+                        for (int i = 0; i < triCount; ++i)
+                        {
+                            var dataSpan = data.Span;
+                            var a = BinaryPrimitives.ReadUInt32BigEndian(dataSpan);
+                            var b = BinaryPrimitives.ReadUInt32BigEndian(dataSpan.Slice(4));
+                            var c = BinaryPrimitives.ReadUInt32BigEndian(dataSpan.Slice(8));
+                            yield return (a, b, c);
+
+                            data = data.Slice(12);
+                        }
+                        break;
+                    }
+                default:
+                    throw new NotImplementedException($"Support for {_indexFormat} primitive index format not implemented.");
+            }
         }
 
-        public Vector3 GetPosition(int index)
+        public uint GetIndex(int index)
+        {
+            if (Primitive != "triangles")
+                throw new InvalidOperationException($"Cannot get triangle from primitive type {Primitive}.");
+
+            var offset = index * _indexStride;
+            var data = _indexData.AsSpan(offset);
+            switch (_indexFormat)
+            {
+                case "ushort":
+                    {
+                        var a = BinaryPrimitives.ReadUInt16BigEndian(data);
+                        return a;
+                    }
+                case "uint":
+                    {
+                        var a = BinaryPrimitives.ReadUInt32BigEndian(data);
+                        return a;
+                    }
+                default:
+                    throw new NotImplementedException($"Support for {_indexFormat} primitive index format not implemented.");
+            }
+        }
+
+        public Vector3 GetPosition(uint index)
         {
             bool found = _vertexAttributes.TryGetValue("Vertex", out var attribute);
 
@@ -122,7 +161,8 @@ namespace EgoEngineLibrary.Formats.Pssg
                 if (attribute.DataType != "float3")
                     throw new NotImplementedException($"Support for {attribute.Name} data type {attribute.DataType} is not implemented.");
 
-                var data = attribute.Data.AsSpan((int)attribute.Stride * index + (int)attribute.Offset);
+                var offset = (int)(attribute.Stride * index + attribute.Offset);
+                var data = attribute.Data.AsSpan(offset);
                 return ReadVector3(data);
             }
             else
@@ -131,13 +171,13 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
         }
 
-        public Vector3 GetNormal(int index)
+        public Vector3 GetNormal(uint index)
         {
             bool found = _vertexAttributes.TryGetValue("Normal", out var attribute);
 
             if (found && attribute is not null)
             {
-                var offset = (int)attribute.Stride * index + (int)attribute.Offset;
+                var offset = (int)(attribute.Stride * index + attribute.Offset);
                 var data = attribute.Data.AsSpan(offset);
 
                 switch (attribute.DataType)
@@ -154,13 +194,13 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
         }
 
-        public Vector4 GetTangent(int index)
+        public Vector4 GetTangent(uint index)
         {
             bool found = _vertexAttributes.TryGetValue("Tangent", out var attribute);
 
             if (found && attribute is not null)
             {
-                var offset = (int)attribute.Stride * index + (int)attribute.Offset;
+                var offset = (int)(attribute.Stride * index + attribute.Offset);
                 var data = attribute.Data.AsSpan(offset);
 
                 switch (attribute.DataType)
@@ -179,13 +219,13 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
         }
 
-        public Vector4 GetBinormal(int index)
+        public Vector4 GetBinormal(uint index)
         {
             bool found = _vertexAttributes.TryGetValue("Binormal", out var attribute);
 
             if (found && attribute is not null)
             {
-                var offset = (int)attribute.Stride * index + (int)attribute.Offset;
+                var offset = (int)(attribute.Stride * index + attribute.Offset);
                 var data = attribute.Data.AsSpan(offset);
 
                 switch (attribute.DataType)
@@ -204,13 +244,13 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
         }
 
-        public Vector2 GetTexCoord(int index)
+        public Vector2 GetTexCoord(uint index)
         {
             bool found = _vertexAttributes.TryGetValue("ST", out var attribute);
 
             if (found && attribute is not null)
             {
-                var offset = (int)attribute.Stride * index + (int)attribute.Offset;
+                var offset = (int)(attribute.Stride * index + attribute.Offset);
                 var data = attribute.Data.AsSpan(offset);
 
                 switch (attribute.DataType)
@@ -235,13 +275,13 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
         }
 
-        public uint GetColor(int index)
+        public uint GetColor(uint index)
         {
             bool found = _vertexAttributes.TryGetValue("Color", out var attribute);
 
             if (found && attribute is not null)
             {
-                var offset = (int)attribute.Stride * index + (int)attribute.Offset;
+                var offset = (int)(attribute.Stride * index + attribute.Offset);
                 var data = attribute.Data.AsSpan(offset);
 
                 switch (attribute.DataType)

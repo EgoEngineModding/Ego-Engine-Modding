@@ -129,7 +129,7 @@ namespace EgoPssgEditor.Models3d
                 {
                     var gltf = ModelRoot.Load(dialog.FileName);
 
-                    var conv = new GltfDirt2F1CarPssgConverter();
+                    var conv = new GltfDirt3PssgConverter();
                     conv.Convert(gltf, _pssg);
 
                     mainView.LoadPssg(null);

@@ -51,7 +51,7 @@ struct ARG {
 
 string readarg(struct ARG &a) {
     string ret;
-    SPrintf(ret, "%d", n.id);
+    SPrintf(ret, "%d", a.id);
     return ret;
 }
 

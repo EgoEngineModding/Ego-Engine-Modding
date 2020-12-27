@@ -138,7 +138,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 			return mb;
 		}
 
-		private static VertexBuilder<VertexPositionNormal, VertexColor1Texture1, VertexEmpty> GetVertexBuilder(RenderDataSourceReader rds, int index)
+		private static VertexBuilder<VertexPositionNormal, VertexColor1Texture1, VertexEmpty> GetVertexBuilder(RenderDataSourceReader rds, uint index)
 		{
 			var vb = new VertexBuilder<VertexPositionNormal, VertexColor1Texture1, VertexEmpty>();
 			vb.Geometry.Position = rds.GetPosition(index);
