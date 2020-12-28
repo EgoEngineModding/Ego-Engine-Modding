@@ -248,13 +248,31 @@
             }
         }
 
-        public List<PssgNode> FindNodes(string name, string? attributeName = null, string? attributeValue = null)
+        /// <summary>
+        /// Gets the file's node hierarchy as a flat sequence.
+        /// </summary>
+        /// <returns>the flat node hierarchy.</returns>
+        public IEnumerable<PssgNode> GetNodes()
         {
-            if (RootNode == null)
+            if (RootNode is null)
             {
-                return new List<PssgNode>();
+                return Enumerable.Empty<PssgNode>();
             }
-            return RootNode.FindNodes(name, attributeName, attributeValue);
+            return RootNode.GetNodes();
+        }
+
+        public IEnumerable<PssgNode> FindNodes(string nodeName)
+        {
+            return GetNodes().FindNodes(nodeName);
+        }
+        public IEnumerable<PssgNode> FindNodes(string nodeName, string attributeName)
+        {
+            return GetNodes().FindNodes(nodeName, attributeName);
+        }
+        public IEnumerable<PssgNode> FindNodes<T>(string nodeName, string attributeName, T attributeValue)
+            where T : notnull
+        {
+            return GetNodes().FindNodes(nodeName, attributeName, attributeValue);
         }
 
         public void MoveNode(PssgNode source, PssgNode target)
@@ -264,6 +282,17 @@
 
             source.ParentNode.RemoveChild(source);
             target.AppendChild(source);
+        }
+
+        public PssgNode CloneNode(PssgNode nodeToClone)
+        {
+            if (nodeToClone.ParentNode == null) throw new InvalidOperationException("Cannot clone root node, or a node without a parent.");
+            if (nodeToClone.File != this)
+                throw new InvalidOperationException("Cannot clone a node that doesn't belong to a file");
+
+            var clonedNode = new PssgNode(nodeToClone);
+            clonedNode.ParentNode?.AppendChild(clonedNode);
+            return clonedNode;
         }
     }
 }

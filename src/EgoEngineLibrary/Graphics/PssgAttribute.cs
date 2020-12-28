@@ -153,6 +153,7 @@
         }
 
         public T GetValue<T>()
+            where T : notnull
         {
             return (T)data;
         }

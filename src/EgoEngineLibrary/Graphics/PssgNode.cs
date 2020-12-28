@@ -514,50 +514,34 @@
                 this.Attributes.Remove(this.Attributes[attributeName]);
         }
 
-        public List<PssgNode> FindNodes(string nodeName, string? attributeName = null, string? attributeValue = null)
+        /// <summary>
+        /// Gets this node, and it's hierarchy as a flat sequence.
+        /// </summary>
+        /// <returns>the flat node hierarchy.</returns>
+        public IEnumerable<PssgNode> GetNodes()
         {
-            List<PssgNode> ret = new List<PssgNode>();
-            if (this.Name == nodeName)
+            yield return this;
+
+            foreach (var c in ChildNodes)
             {
-                if (attributeName != null && attributeValue != null)
-                {
-                    if (this.HasAttribute(attributeName) &&
-                        this.Attributes[attributeName].ToString() == attributeValue)
-                    {
-                        ret.Add(this);
-                    }
-                }
-                else if (attributeName != null)
-                {
-                    if (this.HasAttribute(attributeName) == true)
-                    {
-                        ret.Add(this);
-                    }
-                }
-                else if (attributeValue != null)
-                {
-                    foreach (PssgAttribute pair in Attributes)
-                    {
-                        if (pair.ToString() == attributeValue)
-                        {
-                            ret.Add(this);
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    ret.Add(this);
-                }
+                var cc = c.GetNodes();
+
+                foreach (var ccc in cc) yield return ccc;
             }
-            if (ChildNodes != null)
-            {
-                foreach (PssgNode subNode in ChildNodes)
-                {
-                    ret.AddRange(subNode.FindNodes(nodeName, attributeName, attributeValue));
-                }
-            }
-            return ret;
+        }
+
+        public IEnumerable<PssgNode> FindNodes(string nodeName)
+        {
+            return GetNodes().FindNodes(nodeName);
+        }
+        public IEnumerable<PssgNode> FindNodes(string nodeName, string attributeName)
+        {
+            return GetNodes().FindNodes(nodeName, attributeName);
+        }
+        public IEnumerable<PssgNode> FindNodes<T>(string nodeName, string attributeName, T attributeValue)
+            where T : notnull
+        {
+            return GetNodes().FindNodes(nodeName, attributeName, attributeValue);
         }
 
         public PssgNode this[int index]

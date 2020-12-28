@@ -6,6 +6,7 @@ using SharpGLTF.Schema2;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Windows;
 
 namespace EgoPssgEditor.Models3d
@@ -78,7 +79,7 @@ namespace EgoPssgEditor.Models3d
         {
             var mpriNodes = _pssg?.FindNodes("MATRIXPALETTERENDERINSTANCE");
             var mpjriNodes = _pssg?.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE");
-            return _pssg != null && (mpriNodes.Count > 0 || mpjriNodes.Count > 0);
+            return _pssg != null && (mpriNodes.Any() || mpjriNodes.Any());
         }
         private void Export_Execute(object parameter)
         {
@@ -110,7 +111,7 @@ namespace EgoPssgEditor.Models3d
 
         private bool Import_CanExecute(object parameter)
         {
-            return _pssg != null && _pssg.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE").Count > 0;
+            return _pssg != null && _pssg.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE").Any();
         }
         private void Import_Execute(object parameter)
         {
@@ -145,7 +146,7 @@ namespace EgoPssgEditor.Models3d
         private bool ImportGrid_CanExecute(object parameter)
         {
             var rsiNodes = _pssg?.FindNodes("RENDERSTREAMINSTANCE");
-            return _pssg != null && rsiNodes.Count > 0 && rsiNodes[0].ParentNode?.Name == "MATRIXPALETTENODE";
+            return _pssg != null && rsiNodes.Any() && rsiNodes.First().ParentNode?.Name == "MATRIXPALETTENODE";
         }
         private void ImportGrid_Execute(object parameter)
         {
