@@ -58,6 +58,8 @@ namespace EgoPssgEditor.ViewModel
 
             addNode = new RelayCommand(AddNode_Execute, AddNode_CanExecute);
             removeNode = new RelayCommand(RemoveNode_Execute, RemoveNode_CanExecute);
+            CloneNode = new RelayCommand(CloneNode_Execute, CloneNode_CanExecute);
+
             addAttribute = new RelayCommand(AddAttribute_Execute, AddAttribute_CanExecute);
             removeAttribute = new RelayCommand(RemoveAttribute_Execute, RemoveAttribute_CanExecute);
         }
@@ -110,6 +112,8 @@ namespace EgoPssgEditor.ViewModel
         {
             get { return removeNode; }
         }
+        public RelayCommand CloneNode { get; }
+
         public RelayCommand AddAttribute
         {
             get { return addAttribute; }
@@ -309,6 +313,33 @@ namespace EgoPssgEditor.ViewModel
 
             nodeView.Parent.Children.Remove(nodeView);
             mainView.TexturesWorkspace.RemoveTexture(nodeView);
+        }
+        private bool CloneNode_CanExecute(object parameter)
+        {
+            return parameter != null && parameter != RootNode;
+        }
+        private void CloneNode_Execute(object parameter)
+        {
+            try
+            {
+                PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
+                var newNode = nodeView.Node.File.CloneNode(nodeView.Node);
+
+                PssgNodeViewModel newNodeView = new PssgNodeViewModel(newNode, nodeView.Parent);
+                var nodeViewIndex = nodeView.Parent.Children.IndexOf(nodeView);
+                if (nodeViewIndex < 0 || nodeViewIndex >= nodeView.Parent.Children.Count)
+                    nodeView.Parent.Children.Add(newNodeView);
+                else
+                    nodeView.Parent.Children.Insert(nodeViewIndex + 1, newNodeView);
+
+                mainView.TexturesWorkspace.LoadTextures(newNodeView);
+                newNodeView.IsSelected = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not clone node!" + Environment.NewLine + Environment.NewLine +
+                    ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private bool AddAttribute_CanExecute(object parameter)

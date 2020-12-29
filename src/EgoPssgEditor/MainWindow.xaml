@@ -48,6 +48,7 @@
                 <MenuItem Header="I_mport Data" Command="{Binding Path=NodesWorkspace.ImportData}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
                 <MenuItem Header="Add _Node" Command="{Binding Path=NodesWorkspace.AddNode}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
                 <MenuItem Header="_Remove Node" Command="{Binding Path=NodesWorkspace.RemoveNode}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Clone Node" Command="{Binding Path=NodesWorkspace.CloneNode}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
                 <MenuItem Header="Add _Attribute" Command="{Binding Path=NodesWorkspace.AddAttribute}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
                 <MenuItem Header="Rem_ove Attribute" Command="{Binding Path=NodesWorkspace.RemoveAttribute}" CommandParameter="{Binding ElementName=attributesDataGrid, Path=SelectedItem}"></MenuItem>
             </MenuItem>

@@ -72,7 +72,7 @@ namespace EgoPssgEditor.ViewModel
             //    textures.Add(new PssgTextureViewModel(texture));
             //}
         }
-        private void LoadTextures(PssgNodeViewModel nodeView)
+        public void LoadTextures(PssgNodeViewModel nodeView)
         {
             if (nodeView.Node.Name == "TEXTURE" && nodeView.Node.HasAttribute("id"))
             {
