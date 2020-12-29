@@ -9,8 +9,8 @@
 
     public class PssgBinaryWriter : EndianBinaryWriter
     {
-        public PssgBinaryWriter(EndianBitConverter bitConvertor, System.IO.Stream stream)
-            : base(bitConvertor, stream)
+        public PssgBinaryWriter(EndianBitConverter bitConvertor, System.IO.Stream stream, bool leaveOpen)
+            : base(bitConvertor, stream, leaveOpen)
         {
         }
 

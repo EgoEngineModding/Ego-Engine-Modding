@@ -147,8 +147,11 @@ namespace EgoPssgEditor.ViewModel
                 try
                 {
                     filePath = args[1];
-                    var pssg = PssgFile.Open(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    LoadPssg(pssg);
+                    using (var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        var pssg = PssgFile.Open(fs);
+                        LoadPssg(pssg);
+                    }
                     DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
                 }
                 catch (Exception excp)
@@ -182,8 +185,11 @@ namespace EgoPssgEditor.ViewModel
                 try
                 {
                     filePath = openFileDialog.FileName;
-                    var pssg = Task<PssgFile>.Run(() => { return PssgFile.Open(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read)); }).Result;
-                    LoadPssg(pssg);
+                    using (var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        var pssg = PssgFile.Open(fs);
+                        LoadPssg(pssg);
+                    }
                     DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
                 }
                 catch (Exception excp)
@@ -265,25 +271,27 @@ namespace EgoPssgEditor.ViewModel
                 SaveTag();
                 try
                 {
-                    FileStream fileStream = File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-                    if (type == 0)
+                    using (var fileStream = File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                     {
-                        Task.Run( () => file.Save(fileStream)).Wait(); // Auto
-                    }
-                    else if (type == 1)
-                    {
-                        file.FileType = PssgFileType.Pssg;
-                        Task.Run(() => file.Save(fileStream)).Wait(); // Pssg
-                    }
-                    else if (type == 2)
-                    {
-                        file.FileType = PssgFileType.CompressedPssg;
-                        Task.Run(() => file.Save(fileStream)).Wait();
-                    }
-                    else
-                    {
-                        file.FileType = PssgFileType.Xml;
-                        Task.Run(() => file.Save(fileStream)).Wait();
+                        if (type == 0)
+                        {
+                            file.Save(fileStream); // Auto
+                        }
+                        else if (type == 1)
+                        {
+                            file.FileType = PssgFileType.Pssg;
+                            file.Save(fileStream); // Pssg
+                        }
+                        else if (type == 2)
+                        {
+                            file.FileType = PssgFileType.CompressedPssg;
+                            file.Save(fileStream);
+                        }
+                        else
+                        {
+                            file.FileType = PssgFileType.Xml;
+                            file.Save(fileStream);
+                        }
                     }
                     filePath = saveFileDialog.FileName;
                     DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);

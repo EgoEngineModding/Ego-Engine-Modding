@@ -230,7 +230,8 @@ namespace EgoPssgEditor.ViewModel
                 try
                 {
                     PssgNode node = nodeView.Node;
-                    using (PssgBinaryWriter writer = new PssgBinaryWriter(new BigEndianBitConverter(), File.Open(dialog.FileName, FileMode.Create)))
+                    using (var fs = File.Open(dialog.FileName, FileMode.Create))
+                    using (PssgBinaryWriter writer = new PssgBinaryWriter(EndianBitConverter.Big, fs, false))
                     {
                         writer.WriteObject(node.Value);
                     }
@@ -260,7 +261,8 @@ namespace EgoPssgEditor.ViewModel
                 try
                 {
                     PssgNode node = nodeView.Node;
-                    using (PssgBinaryReader reader = new PssgBinaryReader(new BigEndianBitConverter(), File.Open(dialog.FileName, FileMode.Open, FileAccess.Read)))
+                    using (var fs = File.Open(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (PssgBinaryReader reader = new PssgBinaryReader(EndianBitConverter.Big, fs, false))
                     {
                         node.Value = reader.ReadNodeValue((int)reader.BaseStream.Length);
                         nodeView.IsSelected = false;

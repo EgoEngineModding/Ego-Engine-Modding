@@ -10,8 +10,8 @@
 
     public class PssgBinaryReader : EndianBinaryReader
     {
-        public PssgBinaryReader(EndianBitConverter bitConvertor, System.IO.Stream stream)
-            : base(bitConvertor, stream)
+        public PssgBinaryReader(EndianBitConverter bitConvertor, System.IO.Stream stream, bool leaveOpen)
+            : base(bitConvertor, stream, leaveOpen)
         {
         }
 

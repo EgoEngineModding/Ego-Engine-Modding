@@ -12,7 +12,7 @@
 
     public enum PssgFileType
     {
-        Pssg, Xml, CompressedPssg
+        Pssg, Xml, CompressedPssg, CompressedXml
     }
 
     public class PssgFile
@@ -43,33 +43,36 @@
             }
             else if (fileType == PssgFileType.Xml)
             {
-                return PssgFile.ReadXml(stream);
+                return PssgFile.ReadXml(stream, fileType);
             }
             else // CompressedPssg
             {
                 string tempPath = "temp.pssg";
                 try
                 {
-                    FileStream fs = File.Open(tempPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
-
-                    // Decompress stream into temp file
-                    using (stream)
+                    using (var fs = File.Open(tempPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                     {
-                        using (GZipStream gZipStream = new GZipStream(stream, CompressionMode.Decompress))
+                        // Decompress stream into temp file
+                        using (GZipStream gZipStream = new GZipStream(stream, CompressionMode.Decompress, true))
                         {
                             gZipStream.CopyTo(fs);
                         }
+
+                        // Determine the file type after inflate, add CompressedPssg to make compressed
+                        fs.Seek(0, SeekOrigin.Begin);
+                        fileType = GetPssgType(fs) + (int)PssgFileType.CompressedPssg;
+                        PssgFile pFile = fileType switch
+                        {
+                            PssgFileType.CompressedPssg => PssgFile.ReadPssg(fs, fileType),
+                            PssgFileType.CompressedXml => PssgFile.ReadXml(fs, fileType),
+                            _ => throw new FileFormatException("This is not a pssg file.")
+                        };
+
+                        return pFile;
                     }
-
-                    // Read temp file, and close it
-                    fs.Seek(0, SeekOrigin.Begin);
-                    PssgFile pFile = PssgFile.ReadPssg(fs, fileType);
-
-                    return pFile;
                 }
                 finally
                 {
-
                     // Attempt to delete the temporary file
                     try
                     {
@@ -103,14 +106,14 @@
             }
             else
             {
-                throw new Exception("This is not a PSSG file!");
+                throw new FileFormatException("This is not a pssg file!");
             }
         }
         public static PssgFile ReadPssg(Stream fileStream, PssgFileType fileType)
         {
             PssgFile file = new PssgFile(fileType);
 
-            using (PssgBinaryReader reader = new PssgBinaryReader(new BigEndianBitConverter(), fileStream))
+            using (PssgBinaryReader reader = new PssgBinaryReader(EndianBitConverter.Big, fileStream, true))
             {
                 reader.ReadPSSGString(4); // "PSSG"
                 int size = reader.ReadInt32();
@@ -135,12 +138,10 @@
 
             return file;
         }
-        public static PssgFile ReadXml(Stream fileStream)
+        public static PssgFile ReadXml(Stream fileStream, PssgFileType fileType)
         {
-            PssgFile file = new PssgFile(PssgFileType.Xml);
+            PssgFile file = new PssgFile(fileType);
             XDocument xDoc = XDocument.Load(fileStream);
-
-            //PssgSchema.CreatePssgInfo(out file.nodeInfo, out file.attributeInfo);
 
             var docElem = xDoc.FirstNode as XElement ??
                 throw new InvalidDataException("The pssg xml does not have a root element.");
@@ -150,7 +151,6 @@
 
             file.RootNode = new PssgNode(firstNode, file, null);
 
-            fileStream.Close();
             return file;
         }
 
@@ -158,11 +158,11 @@
         {
             if (this.FileType == PssgFileType.Pssg)
             {
-                this.WritePssg(stream, true);
+                WritePssg(stream);
             }
             else if (this.FileType == PssgFileType.Xml)
             {
-                this.WriteXml(stream);
+                WriteXml(stream);
             }
             else // CompressedPssg
             {
@@ -171,8 +171,12 @@
                 {
                     using (FileStream fs = File.Open(tempPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                     {
-                        this.WritePssg(fs, false);
-                        using (GZipStream gzip = new GZipStream(stream, CompressionMode.Compress))
+                        switch (FileType)
+                        {
+                            case PssgFileType.CompressedXml: { WriteXml(fs); break; }
+                            default: { WritePssg(fs); break; }
+                        }
+                        using (GZipStream gzip = new GZipStream(stream, CompressionMode.Compress, true))
                         {
                             fs.Seek(0, SeekOrigin.Begin);
                             fs.CopyTo(gzip);
@@ -190,10 +194,9 @@
                 }
             }
         }
-        public void WritePssg(Stream fileStream, bool close)
+        public void WritePssg(Stream fileStream)
         {
-            PssgBinaryWriter writer = new PssgBinaryWriter(new BigEndianBitConverter(), fileStream);
-            try
+            using (PssgBinaryWriter writer = new PssgBinaryWriter(EndianBitConverter.Big, fileStream, true))
             {
                 writer.Write(Encoding.ASCII.GetBytes("PSSG"));
                 writer.Write(0); // Length, filled in later
@@ -214,21 +217,9 @@
                     RootNode.UpdateSize();
                     RootNode.Write(writer);
                 }
+
                 writer.BaseStream.Position = 4;
                 writer.Write((int)writer.BaseStream.Length - 8);
-
-                if (close)
-                {
-                    writer.Close();
-                }
-            }
-            catch
-            {
-                if (writer != null)
-                {
-                    writer.Close();
-                }
-                throw;
             }
 
             static void GetNodeAttributeNameCount(PssgFile file, out int nodeNameCount, out int attributeNameCount)
@@ -264,7 +255,7 @@
             settings.NewLineChars = "\n";
             settings.Indent = true;
             settings.IndentChars = "";
-            settings.CloseOutput = true;
+            settings.CloseOutput = false;
 
             XElement pssg = (XElement)xDoc.FirstNode!;
             RootNode.WriteXml(pssg);
