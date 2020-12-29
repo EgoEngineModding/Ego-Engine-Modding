@@ -520,11 +520,11 @@
         public static PssgSchema.Node AddNode(PssgNode node)
         {
             Node sNode = new Node(node.Name);
-            sNode.DataType = node.ValueType;
+            sNode.DataType = node.Value.GetType();
 
             foreach (PssgAttribute attr in node.Attributes)
             {
-                Attribute sAttr = new Attribute(attr.Name, attr.ValueType);
+                Attribute sAttr = new Attribute(attr.Name, attr.Value.GetType());
                 sNode.Attributes.Add(sAttr);
             }
 

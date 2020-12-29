@@ -2,6 +2,7 @@
 {
     using EgoEngineLibrary.Helper;
     using System;
+    using System.Buffers.Binary;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
@@ -12,12 +13,8 @@
         // id, size, and attributeSize are only used during Reading/Writing
         private int size;
         private int attributeSize;
-        private object data;
+        private byte[] data;
 
-        public int Id
-        {
-            get { return this.NodeInfo.Id; }
-        }
         public string Name
         {
             get { return NodeInfo.Name; }
@@ -32,17 +29,10 @@
             get;
             set;
         }
-        public object Value
+        public byte[] Value
         {
             get { return data; }
             set { data = value; }
-        }
-        public Type ValueType
-        {
-            get
-            {
-                return data.GetType();
-            }
         }
 
         public string DisplayValue
@@ -62,18 +52,7 @@
             {
                 if (this.ChildNodes.Count == 0)
                 {
-                    if (ValueType == typeof(Single[]))
-                    {
-                        return ((Single[])data).Length > 0;
-                    }
-                    else if (ValueType == typeof(UInt16[]))
-                    {
-                        return ((UInt16[])data).Length > 0;
-                    }
-                    else
-                    {
-                        return ((byte[])data).Length > 0;
-                    }
+                    return data.Length > 0;
                 }
 
                 return false;
@@ -177,13 +156,12 @@
 
             if (isDataNode)
             {
-                this.data = reader.ReadNodeValue(GetValueType(), (int)(end - reader.BaseStream.Position));
+                this.data = reader.ReadNodeValue((int)(end - reader.BaseStream.Position));
                 this.ChildNodes = new PssgNodeCollection();
-                //data = reader.ReadBytes((int)(end - reader.BaseStream.Position));
             }
             else
             {
-                this.data = new byte[0];
+                this.data = Array.Empty<byte>();
                 // Each node at least 12 bytes (id + size + arg size)
                 this.ChildNodes = new PssgNodeCollection((int)(end - reader.BaseStream.Position) / 12);
                 int nodeCount = 0;
@@ -193,7 +171,7 @@
                     nodeCount++;
                 }
             }
-            PssgSchema.SetNodeDataTypeIfNull(this.NodeInfo, this.ValueType);
+            PssgSchema.SetNodeDataTypeIfNull(this.NodeInfo, Value.GetType());
         }
         public PssgNode(XElement elem, PssgFile file, PssgNode? node)
         {
@@ -217,7 +195,7 @@
             }
             else
             {
-                this.data = new byte[0];
+                this.data = Array.Empty<byte>();
                 this.ChildNodes = new PssgNodeCollection(elem.Elements().Count());
                 int nodeCount = 0;
                 foreach (XElement subElem in elem.Elements())
@@ -226,7 +204,7 @@
                     ++nodeCount;
                 }
             }
-            PssgSchema.SetNodeDataTypeIfNull(this.NodeInfo, this.ValueType);
+            PssgSchema.SetNodeDataTypeIfNull(this.NodeInfo, Value.GetType());
         }
         public PssgNode(PssgNode nodeToCopy)
         {
@@ -253,7 +231,7 @@
             }
             else
             {
-                this.data = new byte[0];
+                this.data = Array.Empty<byte>();
                 // Each node at least 12 bytes (id + size + arg size)
                 this.ChildNodes = new PssgNodeCollection(nodeToCopy.ChildNodes.Count);
                 foreach (PssgNode subNodeToCopy in nodeToCopy.ChildNodes)
@@ -270,7 +248,7 @@
             this.ParentNode = node;
             this.NodeInfo = PssgSchema.AddNode(name);
             this.Attributes = new PssgAttributeCollection();
-            this.data = new byte[0];
+            this.data = Array.Empty<byte>();
             this.ChildNodes = new PssgNodeCollection();
         }
 
@@ -321,7 +299,7 @@
 
         public void Write(PssgBinaryWriter writer)
         {
-            writer.Write(this.Id);
+            writer.Write(this.NodeInfo.Id);
             writer.Write(size);
             writer.Write(attributeSize);
             if (Attributes != null)
@@ -371,32 +349,7 @@
 
             parent.Add(pNode);
         }
-        public void UpdateId(ref int nodeNameCount, ref int attributeNameCount)
-        {
-            PssgSchema.Node sNode = this.NodeInfo;
-            if (sNode.Id == -1)
-            {
-                sNode.Id = ++nodeNameCount;
-            }
-
-            //this.id = sNode.Id;
-            if (Attributes != null)
-            {
-                foreach (PssgAttribute attr in Attributes)
-                {
-                    attr.UpdateId(ref attributeNameCount);
-                }
-            }
-
-            if (ChildNodes != null)
-            {
-                foreach (PssgNode node in ChildNodes)
-                {
-                    node.UpdateId(ref nodeNameCount, ref attributeNameCount);
-                }
-            }
-        }
-        public void UpdateSize()
+        internal void UpdateSize()
         {
             attributeSize = 0;
             if (Attributes != null)
@@ -411,18 +364,7 @@
 
             if (this.IsDataNode)
             {
-                if (ValueType == typeof(Single[]))
-                {
-                    size += ((Single[])data).Length * 4;
-                }
-                else if (ValueType == typeof(UInt16[]))
-                {
-                    size += ((UInt16[])data).Length * 2;
-                }
-                else
-                {
-                    size += ((byte[])data).Length;
-                }
+                size += data.Length;
             }
             else
             {
@@ -577,67 +519,73 @@
 
         public override string ToString()
         {
-            PssgSchema.Node sNode = this.NodeInfo;// PssgSchema.GetNode(this.Name);
-            if (ValueType == typeof(Single[]))
+            var valueType = GetValueType();
+            if (valueType == typeof(float[]))
             {
-                string result = string.Empty;
-                for (int i = 0; i < ((Single[])Value).Length; i++)
-                {
-                    if (i % sNode.ElementsPerRow == 0)
-                    {
-                        result += Environment.NewLine;
-                    }
-                    result += ((Single[])Value)[i].ToString("e9", System.Globalization.CultureInfo.InvariantCulture);
-                    result += " ";
-                }
-                return result;
+                return ToString<float>(d => BinaryPrimitives.ReadSingleBigEndian(d).ToString("e9", System.Globalization.CultureInfo.InvariantCulture));
             }
-            else if (ValueType == typeof(UInt16[]))
+            else if (valueType == typeof(ushort[]))
             {
-                string result = string.Empty;
-                for (int i = 0; i < ((UInt16[])Value).Length; i++)
-                {
-                    if (i % sNode.ElementsPerRow == 0)
-                    {
-                        result += Environment.NewLine;
-                    }
-                    result += ((UInt16[])Value)[i].ToString();
-                    result += " ";
-                }
-                return result;
+                return ToString<ushort>(d => BinaryPrimitives.ReadUInt16BigEndian(d).ToString());
             }
             else
             {
-                return HexHelper.ByteArrayToHexViaLookup32((byte[])Value, sNode.ElementsPerRow);
+                return HexHelper.ByteArrayToHexViaLookup32((byte[])Value, NodeInfo.ElementsPerRow);
             }
         }
-        public object FromString(string value)
+        private delegate T ReadDataBigEndian<T>(ReadOnlySpan<byte> source);
+        private unsafe string ToString<T>(ReadDataBigEndian<string> readFunc)
+            where T : unmanaged
+        {
+            var elementSize = sizeof(T);
+            var elementsPerRow = NodeInfo.ElementsPerRow;
+
+            var sb = new StringBuilder();
+            var dataSpan = data.AsSpan();
+            for (int e = 0; dataSpan.Length >= elementSize; e++)
+            {
+                if (e % elementsPerRow == 0)
+                {
+                    sb.Append(Environment.NewLine);
+                }
+                sb.Append(readFunc(dataSpan));
+                sb.Append(' ');
+                dataSpan = dataSpan.Slice(elementSize);
+            }
+            return sb.ToString();
+        }
+
+        public byte[] FromString(string value)
         {
             Type valueType = this.GetValueType();
-            if (valueType == typeof(Single[]))
+            if (valueType == typeof(float[]))
             {
-                string[] values = value.Split(new string[] { "\r", "\n", " " }, StringSplitOptions.RemoveEmptyEntries);
-                Single[] result = new Single[values.Length];
-                for (int i = 0; i < values.Length; i++)
-                {
-                    result[i] = Convert.ToSingle(values[i]);
-                }
-                return result;
+                return FromString<float>(value, (s, d) => BinaryPrimitives.WriteSingleBigEndian(d, Convert.ToSingle(s)));
             }
-            else if (valueType == typeof(UInt16[]))
+            else if (valueType == typeof(ushort[]))
             {
-                string[] values = value.Split(new string[] { "\r", "\n", " " }, StringSplitOptions.RemoveEmptyEntries);
-                UInt16[] result = new UInt16[values.Length];
-                for (int i = 0; i < values.Length; i++)
-                {
-                    result[i] = Convert.ToUInt16(values[i]);
-                }
-                return result;
+                return FromString<ushort>(value, (s, d) => BinaryPrimitives.WriteUInt16BigEndian(d, Convert.ToUInt16(s)));
             }
             else
             {
                 return HexHelper.HexLineToByteUsingByteManipulation(value);
             }
+        }
+        private delegate void WriteDataBigEndian(string source, Span<byte> destination);
+        private unsafe byte[] FromString<T>(string value, WriteDataBigEndian writeFunc)
+            where T : unmanaged
+        {
+            var elementSize = sizeof(T);
+            string[] values = value.Split(new string[] { "\r", "\n", " " }, StringSplitOptions.RemoveEmptyEntries);
+
+            var result = new byte[values.Length * elementSize];
+            var resultSpan = result.AsSpan();
+            for (int i = 0; i < values.Length; i++)
+            {
+                writeFunc(values[i], resultSpan);
+                resultSpan = resultSpan.Slice(elementSize);
+            }
+            return result;
         }
     }
 }

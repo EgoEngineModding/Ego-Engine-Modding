@@ -200,13 +200,16 @@
 
                 if (RootNode != null)
                 {
-                    int nodeNameCount = 0;
-                    int attributeNameCount = 0;
-                    PssgSchema.ClearSchemaIds(); // make all ids -1
-                    RootNode.UpdateId(ref nodeNameCount, ref attributeNameCount);
+                    // make all ids -1
+                    PssgSchema.ClearSchemaIds();
+
+                    // Get the counts, and update ids of the nodes/attributes used in this file
+                    GetNodeAttributeNameCount(this, out var nodeNameCount, out var attributeNameCount);
                     writer.Write(attributeNameCount);
                     writer.Write(nodeNameCount);
-                    PssgSchema.SaveToPssg(writer); // Update Ids again, to make sequential
+
+                    // Update ids again to make sequential and save ones used in this file
+                    PssgSchema.SaveToPssg(writer);
 
                     RootNode.UpdateSize();
                     RootNode.Write(writer);
@@ -226,6 +229,30 @@
                     writer.Close();
                 }
                 throw;
+            }
+
+            static void GetNodeAttributeNameCount(PssgFile file, out int nodeNameCount, out int attributeNameCount)
+            {
+                nodeNameCount = 0;
+                attributeNameCount = 0;
+                foreach (var node in file.GetNodes())
+                {
+                    PssgSchema.Node sNode = node.NodeInfo;
+                    if (sNode.Id == -1)
+                    {
+                        // change this so we don't count it twice
+                        sNode.Id = ++nodeNameCount;
+                    }
+
+                    foreach (PssgAttribute attr in node.Attributes)
+                    {
+                        if (attr.AttributeInfo.Id == -1)
+                        {
+                            // change this so we don't count it twice
+                            attr.AttributeInfo.Id = ++attributeNameCount;
+                        }
+                    }
+                }
             }
         }
         public void WriteXml(Stream fileStream)

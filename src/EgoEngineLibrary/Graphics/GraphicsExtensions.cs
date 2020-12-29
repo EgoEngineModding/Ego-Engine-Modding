@@ -6,6 +6,7 @@ using MiscUtil.Conversion;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace EgoEngineLibrary.Graphics
@@ -548,37 +549,37 @@ namespace EgoEngineLibrary.Graphics
             }
 
             // Byte Data
-            List<PssgNode> textureImageBlocks = node.FindNodes("TEXTUREIMAGEBLOCK");
+            var textureImageBlocks = node.FindNodes("TEXTUREIMAGEBLOCK");
             if ((uint)node.Attributes["imageBlockCount"].Value > 1)
             {
                 dds.bdata2 = new Dictionary<int, byte[]>();
-                for (int i = 0; i < textureImageBlocks.Count; i++)
+                foreach (var textureImageBlock in textureImageBlocks)
                 {
-                    switch (textureImageBlocks[i].Attributes["typename"].ToString())
+                    switch (textureImageBlock.Attributes["typename"].ToString())
                     {
                         case "Raw":
                             dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEX;
-                            dds.bdata2.Add(0, (byte[])textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value);
+                            dds.bdata2.Add(0, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
                             break;
                         case "RawNegativeX":
                             dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEX;
-                            dds.bdata2.Add(1, (byte[])textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value);
+                            dds.bdata2.Add(1, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
                             break;
                         case "RawPositiveY":
                             dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEY;
-                            dds.bdata2.Add(2, (byte[])textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value);
+                            dds.bdata2.Add(2, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
                             break;
                         case "RawNegativeY":
                             dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEY;
-                            dds.bdata2.Add(3, (byte[])textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value);
+                            dds.bdata2.Add(3, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
                             break;
                         case "RawPositiveZ":
                             dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEZ;
-                            dds.bdata2.Add(4, (byte[])textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value);
+                            dds.bdata2.Add(4, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
                             break;
                         case "RawNegativeZ":
                             dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEZ;
-                            dds.bdata2.Add(5, (byte[])textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value);
+                            dds.bdata2.Add(5, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
                             break;
                     }
                 }
@@ -600,7 +601,7 @@ namespace EgoEngineLibrary.Graphics
             }
             else
             {
-                dds.bdata = (byte[])textureImageBlocks[0].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value;
+                dds.bdata = textureImageBlocks.First().FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value;
             }
 
             return dds;
@@ -677,18 +678,18 @@ namespace EgoEngineLibrary.Graphics
             {
                 node.Attributes["texelFormat"].Value = Encoding.UTF8.GetString(BitConverter.GetBytes(dds.header.ddspf.fourCC)).ToLower();
             }
-            List<PssgNode> textureImageBlocks = node.FindNodes("TEXTUREIMAGEBLOCK");
+            var textureImageBlocks = node.FindNodes("TEXTUREIMAGEBLOCK");
             if (dds.bdata2 != null && dds.bdata2.Count > 0)
             {
-                for (int i = 0; i < textureImageBlocks.Count; i++)
+                foreach (var textureImageBlock in textureImageBlocks)
                 {
-                    switch (textureImageBlocks[i].Attributes["typename"].ToString())
+                    switch (textureImageBlock.Attributes["typename"].ToString())
                     {
                         case "Raw":
                             if (dds.bdata2.ContainsKey(0) == true)
                             {
-                                textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value = dds.bdata2[0];
-                                textureImageBlocks[i].Attributes["size"].Value = (UInt32)dds.bdata2[0].Length;
+                                textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[0];
+                                textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[0].Length;
                             }
                             else
                             {
@@ -698,8 +699,8 @@ namespace EgoEngineLibrary.Graphics
                         case "RawNegativeX":
                             if (dds.bdata2.ContainsKey(1) == true)
                             {
-                                textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value = dds.bdata2[1];
-                                textureImageBlocks[i].Attributes["size"].Value = (UInt32)dds.bdata2[1].Length;
+                                textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[1];
+                                textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[1].Length;
                             }
                             else
                             {
@@ -709,8 +710,8 @@ namespace EgoEngineLibrary.Graphics
                         case "RawPositiveY":
                             if (dds.bdata2.ContainsKey(2) == true)
                             {
-                                textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value = dds.bdata2[2];
-                                textureImageBlocks[i].Attributes["size"].Value = (UInt32)dds.bdata2[2].Length;
+                                textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[2];
+                                textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[2].Length;
                             }
                             else
                             {
@@ -720,8 +721,8 @@ namespace EgoEngineLibrary.Graphics
                         case "RawNegativeY":
                             if (dds.bdata2.ContainsKey(3) == true)
                             {
-                                textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value = dds.bdata2[3];
-                                textureImageBlocks[i].Attributes["size"].Value = (UInt32)dds.bdata2[3].Length;
+                                textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[3];
+                                textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[3].Length;
                             }
                             else
                             {
@@ -731,8 +732,8 @@ namespace EgoEngineLibrary.Graphics
                         case "RawPositiveZ":
                             if (dds.bdata2.ContainsKey(4) == true)
                             {
-                                textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value = dds.bdata2[4];
-                                textureImageBlocks[i].Attributes["size"].Value = (UInt32)dds.bdata2[4].Length;
+                                textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[4];
+                                textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[4].Length;
                             }
                             else
                             {
@@ -742,8 +743,8 @@ namespace EgoEngineLibrary.Graphics
                         case "RawNegativeZ":
                             if (dds.bdata2.ContainsKey(5) == true)
                             {
-                                textureImageBlocks[i].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value = dds.bdata2[5];
-                                textureImageBlocks[i].Attributes["size"].Value = (UInt32)dds.bdata2[5].Length;
+                                textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[5];
+                                textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[5].Length;
                             }
                             else
                             {
@@ -759,8 +760,8 @@ namespace EgoEngineLibrary.Graphics
                 {
                     throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
                 }
-                textureImageBlocks[0].FindNodes("TEXTUREIMAGEBLOCKDATA")[0].Value = dds.bdata;
-                textureImageBlocks[0].Attributes["size"].Value = (UInt32)dds.bdata.Length;
+                textureImageBlocks.First().FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata;
+                textureImageBlocks.First().Attributes["size"].Value = (UInt32)dds.bdata.Length;
             }
         }
     }

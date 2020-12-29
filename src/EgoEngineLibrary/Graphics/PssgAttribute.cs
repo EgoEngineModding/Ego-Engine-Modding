@@ -13,10 +13,6 @@
         private int size;
         private object data;
 
-        public int Id
-        {
-            get { return this.AttributeInfo.Id; }
-        }
         public string Name
         {
             get { return AttributeInfo.Name; }
@@ -29,13 +25,6 @@
         {
             get { return data; }
             set { data = value; }
-        }
-        public Type ValueType
-        {
-            get
-            {
-                return data.GetType();
-            }
         }
 
         public string DisplayValue
@@ -51,9 +40,9 @@
         }
         public override string ToString()
         {
-            if (ValueType == typeof(byte[]))
+            if (Value is byte[] bval)
             {
-                return HexHelper.ByteArrayToHexViaLookup32((byte[])this.Value);
+                return HexHelper.ByteArrayToHexViaLookup32(bval);
             }
             else
             {
@@ -129,7 +118,7 @@
             this.AttributeInfo = PssgSchema.GetAttribute(id);
             this.size = reader.ReadInt32();
             this.data = reader.ReadAttributeValue(this.AttributeInfo.DataType, size);
-            this.AttributeInfo = PssgSchema.AddAttribute(this.ParentNode.Name, this.Name, this.ValueType);
+            this.AttributeInfo = PssgSchema.AddAttribute(this.ParentNode.Name, this.Name, this.Value.GetType());
         }
         public PssgAttribute(XAttribute xAttr, PssgFile file, PssgNode node)
         {
@@ -140,7 +129,7 @@
             string attrName = xAttr.Name.LocalName.StartsWith("___") ? xAttr.Name.LocalName.Substring(3) : xAttr.Name.LocalName;
             this.AttributeInfo = PssgSchema.AddAttribute(this.ParentNode.Name, attrName);// PssgSchema.GetAttribute(this.ParentNode.Name, xAttr.Name.LocalName);
             this.data = this.FromString(xAttr.Value);
-            PssgSchema.SetAttributeDataTypeIfNull(this.AttributeInfo, this.ValueType);
+            PssgSchema.SetAttributeDataTypeIfNull(this.AttributeInfo, this.Value.GetType());
         }
         public PssgAttribute(PssgAttribute attrToCopy)
         {
@@ -160,21 +149,12 @@
 
         public void Write(PssgBinaryWriter writer)
         {
-            writer.Write(this.Id);
+            writer.Write(this.AttributeInfo.Id);
             writer.Write(this.size);
             writer.WriteObject(this.data);
         }
 
-        public void UpdateId(ref int attributeNameCount)
-        {
-            if (this.AttributeInfo.Id == -1)
-            {
-                this.AttributeInfo.Id = ++attributeNameCount;
-            }
-
-            //this.id = this.AttributeInfo.Id;
-        }
-        public void UpdateSize()
+        internal void UpdateSize()
         {
             if (data is string)
             {

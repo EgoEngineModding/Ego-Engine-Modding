@@ -258,7 +258,7 @@ namespace EgoPssgEditor.ViewModel
                     PssgNode node = nodeView.Node;
                     using (PssgBinaryReader reader = new PssgBinaryReader(new BigEndianBitConverter(), File.Open(dialog.FileName, FileMode.Open, FileAccess.Read)))
                     {
-                        node.Value = reader.ReadNodeValue(node.ValueType, (int)reader.BaseStream.Length);
+                        node.Value = reader.ReadNodeValue((int)reader.BaseStream.Length);
                         nodeView.IsSelected = false;
                         nodeView.IsSelected = true;
                     }

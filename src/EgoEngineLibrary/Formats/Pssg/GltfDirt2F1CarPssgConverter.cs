@@ -388,7 +388,7 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
         }
 
-        private static object GetBoundingBoxData(Vector3 min, Vector3 max)
+        private static byte[] GetBoundingBoxData(Vector3 min, Vector3 max)
         {
             byte[] buffer = new byte[6 * 4];
             MiscUtil.Conversion.BigEndianBitConverter bc = new MiscUtil.Conversion.BigEndianBitConverter();
