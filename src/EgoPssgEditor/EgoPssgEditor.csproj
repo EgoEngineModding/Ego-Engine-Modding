@@ -18,7 +18,17 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <None Remove="schema.xml" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="schema.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   
   <ItemGroup>

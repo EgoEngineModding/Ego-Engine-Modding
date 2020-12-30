@@ -11,11 +11,11 @@ namespace EgoEngineLibrary.Data.Pkg
     public class PkgBinaryWriter : EndianBinaryWriter
     {
         public PkgBinaryWriter(System.IO.Stream stream)
-            : base(EndianBitConverter.Little, stream, Encoding.UTF8)
+            : base(EndianBitConverter.Little, stream, Encoding.UTF8, false)
         {
         }
         public PkgBinaryWriter(EndianBitConverter bitConverter, System.IO.Stream stream)
-            : base(bitConverter, stream, Encoding.UTF8)
+            : base(bitConverter, stream, Encoding.UTF8, false)
         {
         }
 
