@@ -47,6 +47,12 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
         }
 
+        public static bool SupportsPssg(PssgFile pssg)
+        {
+            var rsiNodes = pssg.FindNodes("RENDERSTREAMINSTANCE");
+            return rsiNodes.Any() && rsiNodes.First().ParentNode?.Name == "MATRIXPALETTENODE";
+        }
+
         public void Convert(ModelRoot gltf, PssgFile pssg)
         {
             // Get a list of nodes in the default scene as a flat list

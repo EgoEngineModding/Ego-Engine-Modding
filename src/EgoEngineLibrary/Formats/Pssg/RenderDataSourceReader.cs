@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,11 +19,13 @@ namespace EgoEngineLibrary.Formats.Pssg
         private readonly int _indexStride;
         private readonly byte[] _indexData;
         private readonly Dictionary<string, VertexAttributeData> _vertexAttributes;
+        private readonly List<VertexAttributeData> _texCoordSets;
 
         public uint VertexCount => _vertexAttributes.TryGetValue("Vertex", out var attr) ? attr.ElementCount : 0;
 
         public string Primitive { get; }
         public uint IndexCount { get; }
+        public int TexCoordSetCount => _texCoordSets.Count;
 
         public RenderDataSourceReader(PssgNode rdsNode)
         {
@@ -41,6 +44,7 @@ namespace EgoEngineLibrary.Formats.Pssg
             // Setup vertex attributes
             var renderStreamNodes = rdsNode.FindNodes("RENDERSTREAM").ToList();
             _vertexAttributes = new Dictionary<string, VertexAttributeData>();
+            _texCoordSets = new List<VertexAttributeData>();
             foreach (var rsNode in renderStreamNodes)
             {
                 var dbId = rsNode.Attributes["dataBlock"].GetValue<string>().Substring(1);
@@ -65,9 +69,15 @@ namespace EgoEngineLibrary.Formats.Pssg
 
                 var attr = new VertexAttributeData(renderType, dataType, elemCount, offset, stride, data);
                 // skip multiple ST attributes for now
-                if (attr.Name == "ST" && _vertexAttributes.ContainsKey("ST"))
-                    continue;
-                _vertexAttributes.Add(attr.Name, attr);
+                if (attr.Name == "ST")
+                {
+                    // tex coords are a different case since I need to differntiate them into different uv sets
+                    _texCoordSets.AddRange(HandleSTAttribute(attr));
+                }
+                else
+                {
+                    _vertexAttributes.Add(attr.Name, attr);
+                }
             }
 
             static int GetIndexStride(string indexFormat)
@@ -81,6 +91,46 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
         }
 
+        private IEnumerable<VertexAttributeData> HandleSTAttribute(VertexAttributeData attribute)
+        {
+            switch (attribute.DataType)
+            {
+                case "float2":
+                case "half2":
+                    yield return attribute;
+                    break;
+                case "half4":
+                    attribute = attribute with 
+                    {
+                        DataType = "half2" 
+                    };
+                    yield return attribute;
+
+                    attribute = attribute with
+                    {
+                        DataType = "half2",
+                        Offset = attribute.Offset + (uint)(Unsafe.SizeOf<Half>() * 2)
+                    };
+                    yield return attribute;
+                    break;
+                case "float4":
+                    attribute = attribute with
+                    {
+                        DataType = "float2"
+                    };
+                    yield return attribute;
+
+                    attribute = attribute with
+                    {
+                        DataType = "float2",
+                        Offset = attribute.Offset + sizeof(float) * 2
+                    };
+                    yield return attribute;
+                    break;
+                default:
+                    throw new NotImplementedException($"Support for {attribute.Name} data type {attribute.DataType} is not implemented.");
+            }
+        }
 
         public IEnumerable<(uint A, uint B, uint C)> GetTriangles()
         {
@@ -244,11 +294,12 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
         }
 
-        public Vector2 GetTexCoord(uint index)
+        public Vector2 GetTexCoord(uint index, int texCoordSetIndex)
         {
-            bool found = _vertexAttributes.TryGetValue("ST", out var attribute);
+            var attribute = texCoordSetIndex >= 0 && texCoordSetIndex < _texCoordSets.Count ?
+                _texCoordSets[texCoordSetIndex] : null;
 
-            if (found && attribute is not null)
+            if (attribute is not null)
             {
                 var offset = (int)(attribute.Stride * index + attribute.Offset);
                 var data = attribute.Data.AsSpan(offset);
@@ -271,7 +322,10 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
             else
             {
-                return Vector2.Zero;
+                if (texCoordSetIndex <= 0)
+                    return Vector2.Zero;
+                else
+                    return GetTexCoord(index, texCoordSetIndex - 1);
             }
         }
 

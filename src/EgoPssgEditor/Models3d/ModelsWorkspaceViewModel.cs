@@ -77,9 +77,11 @@ namespace EgoPssgEditor.Models3d
 
         private bool Export_CanExecute(object parameter)
         {
-            var mpriNodes = _pssg?.FindNodes("MATRIXPALETTERENDERINSTANCE");
-            var mpjriNodes = _pssg?.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE");
-            return _pssg != null && (mpriNodes.Any() || mpjriNodes.Any());
+            try
+            {
+                return _pssg != null && CarPssgGltfConverter.SupportsPssg(_pssg);
+            }
+            catch { return false; }
         }
         private void Export_Execute(object parameter)
         {
@@ -111,7 +113,11 @@ namespace EgoPssgEditor.Models3d
 
         private bool Import_CanExecute(object parameter)
         {
-            return _pssg != null && _pssg.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE").Any();
+            try
+            {
+                return _pssg != null && GltfDirt3PssgConverter.SupportsPssg(_pssg);
+            }
+            catch { return false; }
         }
         private void Import_Execute(object parameter)
         {
@@ -145,8 +151,11 @@ namespace EgoPssgEditor.Models3d
 
         private bool ImportGrid_CanExecute(object parameter)
         {
-            var rsiNodes = _pssg?.FindNodes("RENDERSTREAMINSTANCE");
-            return _pssg != null && rsiNodes.Any() && rsiNodes.First().ParentNode?.Name == "MATRIXPALETTENODE";
+            try
+            {
+                return _pssg != null && GltfGridCarPssgConverter.SupportsPssg(_pssg);
+            }
+            catch { return false; }
         }
         private void ImportGrid_Execute(object parameter)
         {

@@ -35,6 +35,8 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             public PssgNode RibLib { get; }
 
+            public bool IsF1 { get; }
+
             public Dictionary<int, ShaderData> MatShaderMapping { get; }
 
             public ImportState(PssgNode rdsLib, PssgNode ribLib)
@@ -42,6 +44,9 @@ namespace EgoEngineLibrary.Formats.Pssg
                 RdsLib = rdsLib;
                 RibLib = ribLib;
                 MatShaderMapping = new Dictionary<int, ShaderData>();
+
+                if (rdsLib == ribLib)
+                    IsF1 = true;
             }
         }
         private class ShaderData
@@ -58,6 +63,14 @@ namespace EgoEngineLibrary.Formats.Pssg
                 Rds = rds;
                 JointNames = new List<string>();
             }
+        }
+
+        public static bool SupportsPssg(PssgFile pssg)
+        {
+            return pssg.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE").Any() &&
+                !pssg.FindNodes("RENDERDATASOURCE", "streamCount", 8u).Any() &&
+                !pssg.FindNodes("DATABLOCKSTREAM", "renderType", "Tangent").Any(n => n.Attributes["dataType"].GetValue<string>().EndsWith('4')) &&
+                !pssg.FindNodes("DATABLOCKSTREAM", "renderType", "Binormal").Any(n => n.Attributes["dataType"].GetValue<string>().EndsWith('4'));
         }
 
         public void Convert(ModelRoot gltf, PssgFile pssg)
@@ -293,7 +306,15 @@ namespace EgoEngineLibrary.Formats.Pssg
                 mpriNode.ChildNodes.Add(risNode);
 
                 var texCoordSet0 = GetDiffuseBaseColorTexCoord(p.Material);
-                var texCoordSet1 = texCoordSet0 == 0 ? 1 : 0;
+                var texCoordSet1 = GetOcclusionTexCoord(p.Material);
+
+                if (state.IsF1)
+                {
+                    // F1 stores spec occ first, then diffuse
+                    var temp = texCoordSet0;
+                    texCoordSet0 = texCoordSet1;
+                    texCoordSet1 = temp;
+                }
 
                 // Make sure we have all the necessary data
                 if (p.VertexCount < 3) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have at least 3 positions.");
@@ -354,6 +375,13 @@ namespace EgoEngineLibrary.Formats.Pssg
                 if (channel.HasValue) return channel.Value.TextureCoordinate;
 
                 channel = srcMaterial.FindChannel("BaseColor");
+                if (channel.HasValue) return channel.Value.TextureCoordinate;
+
+                return 0;
+            }
+            static int GetOcclusionTexCoord(Material srcMaterial)
+            {
+                var channel = srcMaterial.FindChannel("Occlusion");
                 if (channel.HasValue) return channel.Value.TextureCoordinate;
 
                 return 0;
