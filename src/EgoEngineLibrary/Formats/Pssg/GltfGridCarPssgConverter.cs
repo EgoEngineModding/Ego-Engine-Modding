@@ -1,19 +1,18 @@
 ﻿using EgoEngineLibrary.Graphics;
-using MiscUtil.Conversion;
 using SharpGLTF.Runtime;
 using SharpGLTF.Schema2;
 using System;
-using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Text.RegularExpressions;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
     public class GltfGridCarPssgConverter
     {
-        private class ImportState
+        private class ImportState : PssgModelWriterState
         {
             public int LodNumber { get; set; }
 
@@ -23,26 +22,31 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             public uint JointId { get; set; }
 
-            public uint DataBlockCount { get; set; }
+            public Dictionary<string, ShaderInputInfo> ShaderGroupMap { get; }
 
-            public uint RenderStreamCount { get; set; }
+            public Dictionary<int, ShaderInstanceData> MatShaderMapping { get; }
 
-            public Dictionary<int, ShaderData> MatShaderMapping { get; }
+            public Regex LodMatcher { get; }
 
-            public ImportState()
+            public ImportState(Dictionary<string, ShaderInputInfo> shaderGroupMap)
             {
-                MatShaderMapping = new Dictionary<int, ShaderData>();
+                ShaderGroupMap = shaderGroupMap;
+                MatShaderMapping = new Dictionary<int, ShaderInstanceData>();
+                LodMatcher = new Regex("^LOD([0-9]+)_$", RegexOptions.CultureInvariant);
             }
         }
-        private class ShaderData
+        private class ShaderInstanceData
         {
             public string ShaderInstanceName { get; }
 
-            public RenderDataSource Rds { get; }
+            public string ShaderGroupName { get; }
 
-            public ShaderData(string shaderInstanceName, RenderDataSource rds)
+            public RenderDataSourceWriter Rds { get; }
+
+            public ShaderInstanceData(string shaderInstanceName, string shaderGroupName, RenderDataSourceWriter rds)
             {
                 ShaderInstanceName = shaderInstanceName;
+                ShaderGroupName = shaderGroupName;
                 Rds = rds;
             }
         }
@@ -61,24 +65,26 @@ namespace EgoEngineLibrary.Formats.Pssg
             if (rootNode is null)
                 throw new InvalidDataException("The default scene must have node name starting with `Scene Root`.");
 
-            // Clear libraries
+            // Determine libraries in which to store data
             var nodeLib = pssg.FindNodes("LIBRARY", "type", "NODE").First();
-            nodeLib.RemoveChildNodes();
-
             var rdsLib = pssg.FindNodes("LIBRARY", "type", "RENDERDATASOURCE").First();
-            rdsLib.RemoveChildNodes(rdsLib.ChildNodes.Where(n => n.Name == "RENDERDATASOURCE"));
-
             var ribLib = pssg.FindNodes("LIBRARY", "type", "RENDERINTERFACEBOUND").First();
+
+            var state = new ImportState(ShaderInputInfo.CreateFromPssg(pssg).ToDictionary(si => si.ShaderGroupId));
+
+            // Clear out the libraries
+            nodeLib.RemoveChildNodes(nodeLib.ChildNodes.Where(n => n.Name == "ROOTNODE"));
+            rdsLib.RemoveChildNodes(rdsLib.ChildNodes.Where(n => n.Name == "RENDERDATASOURCE"));
             ribLib.RemoveChildNodes(ribLib.ChildNodes.Where(n => n.Name == "DATABLOCK"));
 
             // Write the scene graph, and collect mesh data
-            var state = new ImportState();
             ConvertSceneNodes(pssg, nodeLib, rootNode, state);
         }
 
         private static void ConvertSceneNodes(PssgFile pssg, PssgNode parent, Node gltfNode, ImportState state)
         {
             PssgNode node;
+            Match lodMatch;
             if (gltfNode.Name.StartsWith("Scene Root"))
             {
                 node = new PssgNode("ROOTNODE", parent.File, parent);
@@ -87,14 +93,10 @@ namespace EgoEngineLibrary.Formats.Pssg
                 node.AddAttribute("id", "Scene Root");
                 parent.ChildNodes.Add(node);
             }
-            else if (gltfNode.Name.StartsWith("LOD1_"))
+            else if ((lodMatch = state.LodMatcher.Match(gltfNode.Name)).Success)
             {
-                node = CreateMatrixPaletteBundleNode(parent, gltfNode, 1, state);
-                return;
-            }
-            else if (gltfNode.Name.StartsWith("LOD0_"))
-            {
-                node = CreateMatrixPaletteBundleNode(parent, gltfNode, 0, state);
+                var lodNumber = int.Parse(lodMatch.Groups[1].Value);
+                node = CreateMatrixPaletteBundleNode(parent, gltfNode, lodNumber, state);
                 return;
             }
             else
@@ -244,7 +246,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 
                 // Get the new material index in grn
                 int faceMatId = p.Material.LogicalIndex;
-                ShaderData shaderData;
+                ShaderInstanceData shaderData;
                 if (state.MatShaderMapping.ContainsKey(faceMatId))
                 {
                     shaderData = state.MatShaderMapping[faceMatId];
@@ -299,7 +301,7 @@ namespace EgoEngineLibrary.Formats.Pssg
                     rds.Positions.Add(pos);
                     rds.Normals.Add(p.GetNormal(i));
                     rds.Tangents.Add(p.GetTangent(i));
-                    rds.TexCoords.Add(p.GetTextureCoord(i, texCoordSet));
+                    rds.TexCoords0.Add(p.GetTextureCoord(i, texCoordSet));
                     rds.Colors.Add(PackColor(color));
                     rds.SkinIndices.Add(state.JointId);
                 }
@@ -354,7 +356,10 @@ namespace EgoEngineLibrary.Formats.Pssg
                     throw new InvalidDataException($"The pssg must already contain a shader instance with name {gltfMat.Name}.");
 
                 state.MatShaderMapping.Add(gltfMat.LogicalIndex,
-                    new ShaderData(shader.Attributes["id"].GetValue<string>(), new RenderDataSource(state.LodNumber, state.RenderDataSourceCount)));
+                    new ShaderInstanceData(
+                        shader.Attributes["id"].GetValue<string>(),
+                        shader.Attributes["shaderGroup"].GetValue<string>().Substring(1),
+                        new RenderDataSourceWriter($"x{state.LodNumber}_RDS{state.RenderDataSourceCount}")));
                 state.RenderDataSourceCount++;
             }
         }
@@ -364,7 +369,10 @@ namespace EgoEngineLibrary.Formats.Pssg
             foreach (var shader in state.MatShaderMapping.Values)
             {
                 var rds = shader.Rds;
-                rds.Write(rdsLib, ribLib, state);
+                if (!state.ShaderGroupMap.TryGetValue(shader.ShaderGroupName, out var shaderInput))
+                    throw new InvalidDataException($"The pssg does not have existing data blocks to model the layout of the input for shader {shader.ShaderGroupName}.");
+
+                rds.Write(shaderInput, rdsLib, ribLib, state);
             }
         }
 
@@ -412,277 +420,6 @@ namespace EgoEngineLibrary.Formats.Pssg
             bc.CopyBytes(t.M44, buffer, i); i += 4;
 
             return buffer;
-        }
-
-        private class RenderDataSource
-        {
-            public string Name { get; }
-
-            public uint StreamCount { get; }
-
-            public List<ushort> Indices { get; }
-
-            public List<Vector3> Positions { get; }
-
-            public List<Vector3> Normals { get; }
-
-            public List<Vector4> Tangents { get; }
-
-            public List<Vector2> TexCoords { get; }
-
-            public List<uint> Colors { get; }
-
-            public List<float> SkinIndices { get; }
-
-            public RenderDataSource(int lodNumber, int rdsCount)
-            {
-                Name = $"x{lodNumber}_RDS{rdsCount}";
-                StreamCount = 7;
-
-                Indices = new List<ushort>();
-                Positions = new List<Vector3>();
-                Normals = new List<Vector3>();
-                Tangents = new List<Vector4>();
-                TexCoords = new List<Vector2>();
-                Colors = new List<uint>();
-                SkinIndices = new List<float>();
-            }
-
-            public void Write(PssgNode rdsLib, PssgNode ribLib, ImportState state)
-            {
-                var rdsNode = new PssgNode("RENDERDATASOURCE", rdsLib.File, rdsLib);
-                rdsNode.AddAttribute("streamCount", StreamCount);
-                rdsNode.AddAttribute("id", Name);
-                rdsLib.ChildNodes.Add(rdsNode);
-
-                var risNode = new PssgNode("RENDERINDEXSOURCE", rdsNode.File, rdsNode);
-                risNode.AddAttribute("primitive", "triangles");
-                risNode.AddAttribute("format", "ushort");
-                risNode.AddAttribute("count", (uint)Indices.Count);
-                risNode.AddAttribute("id", Name.Replace("RDS", "RIS"));
-                rdsNode.ChildNodes.Add(risNode);
-
-                var isdNode = new PssgNode("INDEXSOURCEDATA", risNode.File, risNode);
-                var isdData = new byte[Indices.Count * 2];
-                isdNode.Value = isdData;
-                risNode.ChildNodes.Add(isdNode);
-
-                var isdSpan = isdData.AsSpan();
-                var maxIndex = 0u;
-                for (int i = 0; i < Indices.Count; ++i)
-                {
-                    var index = Indices[i];
-                    BinaryPrimitives.WriteUInt16BigEndian(isdSpan, index);
-                    isdSpan = isdSpan.Slice(2);
-
-                    maxIndex = Math.Max(index, maxIndex);
-                }
-
-                risNode.AddAttribute("maximumIndex", maxIndex);
-
-                // Create pos/col data
-                WritePositionColorDataBlock(ribLib, state.DataBlockCount);
-
-                var rsNode = new PssgNode("RENDERSTREAM", rdsNode.File, rdsNode);
-                rsNode.AddAttribute("dataBlock", $"#block{state.DataBlockCount}");
-                rsNode.AddAttribute("subStream", 0u);
-                rsNode.AddAttribute("id", $"stream{state.RenderStreamCount}");
-                state.RenderStreamCount++;
-                rdsNode.ChildNodes.Add(rsNode);
-
-                rsNode = new PssgNode("RENDERSTREAM", rdsNode.File, rdsNode);
-                rsNode.AddAttribute("dataBlock", $"#block{state.DataBlockCount}");
-                rsNode.AddAttribute("subStream", 1u);
-                rsNode.AddAttribute("id", $"stream{state.RenderStreamCount}");
-                state.RenderStreamCount++; state.DataBlockCount++;
-                rdsNode.ChildNodes.Add(rsNode);
-
-                // Create tex coord/normal data
-                WriteTexCoordNormalDataBlock(ribLib, state.DataBlockCount);
-
-                rsNode = new PssgNode("RENDERSTREAM", rdsNode.File, rdsNode);
-                rsNode.AddAttribute("dataBlock", $"#block{state.DataBlockCount}");
-                rsNode.AddAttribute("subStream", 0u);
-                rsNode.AddAttribute("id", $"stream{state.RenderStreamCount}");
-                state.RenderStreamCount++;
-                rdsNode.ChildNodes.Add(rsNode);
-
-                rsNode = new PssgNode("RENDERSTREAM", rdsNode.File, rdsNode);
-                rsNode.AddAttribute("dataBlock", $"#block{state.DataBlockCount}");
-                rsNode.AddAttribute("subStream", 1u);
-                rsNode.AddAttribute("id", $"stream{state.RenderStreamCount}");
-                state.RenderStreamCount++;
-                rdsNode.ChildNodes.Add(rsNode);
-
-                rsNode = new PssgNode("RENDERSTREAM", rdsNode.File, rdsNode);
-                rsNode.AddAttribute("dataBlock", $"#block{state.DataBlockCount}");
-                rsNode.AddAttribute("subStream", 2u);
-                rsNode.AddAttribute("id", $"stream{state.RenderStreamCount}");
-                state.RenderStreamCount++;
-                rdsNode.ChildNodes.Add(rsNode);
-
-                rsNode = new PssgNode("RENDERSTREAM", rdsNode.File, rdsNode);
-                rsNode.AddAttribute("dataBlock", $"#block{state.DataBlockCount}");
-                rsNode.AddAttribute("subStream", 3u);
-                rsNode.AddAttribute("id", $"stream{state.RenderStreamCount}");
-                state.RenderStreamCount++; state.DataBlockCount++;
-                rdsNode.ChildNodes.Add(rsNode);
-
-                // Create Skin Indices data
-                WriteSkinIndexDataBlock(ribLib, state.DataBlockCount);
-
-                rsNode = new PssgNode("RENDERSTREAM", rdsNode.File, rdsNode);
-                rsNode.AddAttribute("dataBlock", $"#block{state.DataBlockCount}");
-                rsNode.AddAttribute("subStream", 0u);
-                rsNode.AddAttribute("id", $"stream{state.RenderStreamCount}");
-                state.RenderStreamCount++; state.DataBlockCount++;
-                rdsNode.ChildNodes.Add(rsNode);
-            }
-
-            private void WritePositionColorDataBlock(PssgNode ribLib, uint dataBlockId)
-            {
-                var stride = 16u;
-                var size = (uint)(stride * Positions.Count);
-
-                var dbNode = new PssgNode("DATABLOCK", ribLib.File, ribLib);
-                dbNode.AddAttribute("streamCount", 2u);
-                dbNode.AddAttribute("size", size);
-                dbNode.AddAttribute("elementCount", (uint)Positions.Count);
-                dbNode.AddAttribute("id", $"block{dataBlockId}");
-                ribLib.ChildNodes.Add(dbNode);
-
-                var dbsNode = new PssgNode("DATABLOCKSTREAM", dbNode.File, dbNode);
-                dbsNode.AddAttribute("renderType", "Vertex");
-                dbsNode.AddAttribute("dataType", "float3");
-                dbsNode.AddAttribute("offset", 0u);
-                dbsNode.AddAttribute("stride", 16u);
-                dbNode.ChildNodes.Add(dbsNode);
-
-                dbsNode = new PssgNode("DATABLOCKSTREAM", dbNode.File, dbNode);
-                dbsNode.AddAttribute("renderType", "Color");
-                dbsNode.AddAttribute("dataType", "uint_color_argb");
-                dbsNode.AddAttribute("offset", 12u);
-                dbsNode.AddAttribute("stride", 16u);
-                dbNode.ChildNodes.Add(dbsNode);
-
-                var dbdNode = new PssgNode("DATABLOCKDATA", dbNode.File, dbNode);
-                var data = new byte[size];
-                dbdNode.Value = data;
-                dbNode.ChildNodes.Add(dbdNode);
-
-                for (uint i = 0, e = 0; i < size; i += stride, ++e)
-                {
-                    Vector3 pos = Positions[(int)e];
-                    uint color = Colors[(int)e];
-
-                    EndianBitConverter.Big.CopyBytes(pos.X, data, (int)i);
-                    EndianBitConverter.Big.CopyBytes(pos.Y, data, (int)i + 4);
-                    EndianBitConverter.Big.CopyBytes(pos.Z, data, (int)i + 8);
-                    EndianBitConverter.Big.CopyBytes(color, data, (int)i + 12);
-                }
-            }
-
-            private void WriteTexCoordNormalDataBlock(PssgNode ribLib, uint dataBlockId)
-            {
-                var stride = 44u;
-                var size = (uint)(stride * TexCoords.Count);
-
-                var dbNode = new PssgNode("DATABLOCK", ribLib.File, ribLib);
-                dbNode.AddAttribute("streamCount", 4u);
-                dbNode.AddAttribute("size", size);
-                dbNode.AddAttribute("elementCount", (uint)TexCoords.Count);
-                dbNode.AddAttribute("id", $"block{dataBlockId}");
-                ribLib.ChildNodes.Add(dbNode);
-
-                var dbsNode = new PssgNode("DATABLOCKSTREAM", dbNode.File, dbNode);
-                dbsNode.AddAttribute("renderType", "ST");
-                dbsNode.AddAttribute("dataType", "float2");
-                dbsNode.AddAttribute("offset", 0u);
-                dbsNode.AddAttribute("stride", stride);
-                dbNode.ChildNodes.Add(dbsNode);
-
-                dbsNode = new PssgNode("DATABLOCKSTREAM", dbNode.File, dbNode);
-                dbsNode.AddAttribute("renderType", "Normal");
-                dbsNode.AddAttribute("dataType", "float3");
-                dbsNode.AddAttribute("offset", 8u);
-                dbsNode.AddAttribute("stride", stride);
-                dbNode.ChildNodes.Add(dbsNode);
-
-                dbsNode = new PssgNode("DATABLOCKSTREAM", dbNode.File, dbNode);
-                dbsNode.AddAttribute("renderType", "Tangent");
-                dbsNode.AddAttribute("dataType", "float3");
-                dbsNode.AddAttribute("offset", 20u);
-                dbsNode.AddAttribute("stride", stride);
-                dbNode.ChildNodes.Add(dbsNode);
-
-                dbsNode = new PssgNode("DATABLOCKSTREAM", dbNode.File, dbNode);
-                dbsNode.AddAttribute("renderType", "Binormal");
-                dbsNode.AddAttribute("dataType", "float3");
-                dbsNode.AddAttribute("offset", 32u);
-                dbsNode.AddAttribute("stride", stride);
-                dbNode.ChildNodes.Add(dbsNode);
-
-                var dbdNode = new PssgNode("DATABLOCKDATA", dbNode.File, dbNode);
-                var data = new byte[size];
-                dbdNode.Value = data;
-                dbNode.ChildNodes.Add(dbdNode);
-
-                for (uint i = 0, e = 0; i < size; i += stride, ++e)
-                {
-                    Vector2 texc = TexCoords[(int)e];
-                    Vector3 norm = Normals[(int)e];
-                    Vector4 tang = Tangents[(int)e];
-                    Vector3 tang3 = new Vector3(tang.X, tang.Y, tang.Z);
-                    Vector3 bino = Vector3.Cross(norm, tang3) * tang.W;
-
-                    EndianBitConverter.Big.CopyBytes(texc.X, data, (int)i);
-                    EndianBitConverter.Big.CopyBytes(texc.Y, data, (int)i + 4);
-
-                    EndianBitConverter.Big.CopyBytes(norm.X, data, (int)i + 8);
-                    EndianBitConverter.Big.CopyBytes(norm.Y, data, (int)i + 12);
-                    EndianBitConverter.Big.CopyBytes(norm.Z, data, (int)i + 16);
-
-                    EndianBitConverter.Big.CopyBytes(tang.X, data, (int)i + 20);
-                    EndianBitConverter.Big.CopyBytes(tang.Y, data, (int)i + 24);
-                    EndianBitConverter.Big.CopyBytes(tang.Z, data, (int)i + 28);
-
-                    EndianBitConverter.Big.CopyBytes(bino.X, data, (int)i + 32);
-                    EndianBitConverter.Big.CopyBytes(bino.Y, data, (int)i + 36);
-                    EndianBitConverter.Big.CopyBytes(bino.Z, data, (int)i + 40);
-                }
-            }
-
-            private void WriteSkinIndexDataBlock(PssgNode ribLib, uint dataBlockId)
-            {
-                var stride = 4u;
-                var size = (uint)(stride * SkinIndices.Count);
-
-                var dbNode = new PssgNode("DATABLOCK", ribLib.File, ribLib);
-                dbNode.AddAttribute("streamCount", 1u);
-                dbNode.AddAttribute("size", size);
-                dbNode.AddAttribute("elementCount", (uint)Positions.Count);
-                dbNode.AddAttribute("id", $"block{dataBlockId}");
-                ribLib.ChildNodes.Add(dbNode);
-
-                var dbsNode = new PssgNode("DATABLOCKSTREAM", dbNode.File, dbNode);
-                dbsNode.AddAttribute("renderType", "SkinIndices");
-                dbsNode.AddAttribute("dataType", "float");
-                dbsNode.AddAttribute("offset", 0u);
-                dbsNode.AddAttribute("stride", stride);
-                dbNode.ChildNodes.Add(dbsNode);
-
-                var dbdNode = new PssgNode("DATABLOCKDATA", dbNode.File, dbNode);
-                var data = new byte[size];
-                dbdNode.Value = data;
-                dbNode.ChildNodes.Add(dbdNode);
-
-                for (uint i = 0, e = 0; i < size; i += stride, ++e)
-                {
-                    float skinIndex = SkinIndices[(int)e];
-
-                    EndianBitConverter.Big.CopyBytes(skinIndex, data, (int)i);
-                }
-            }
         }
     }
 }
