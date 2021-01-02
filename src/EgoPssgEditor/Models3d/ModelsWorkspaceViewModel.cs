@@ -115,7 +115,7 @@ namespace EgoPssgEditor.Models3d
         {
             try
             {
-                return _pssg != null && GltfDirt3PssgConverter.SupportsPssg(_pssg);
+                return _pssg != null && GltfDirt2F1CarPssgConverter.SupportsPssg(_pssg);
             }
             catch { return false; }
         }
@@ -136,7 +136,7 @@ namespace EgoPssgEditor.Models3d
                 {
                     var gltf = ModelRoot.Load(dialog.FileName);
 
-                    var conv = new GltfDirt3PssgConverter();
+                    var conv = new GltfDirt2F1CarPssgConverter();
                     conv.Convert(gltf, _pssg);
 
                     mainView.LoadPssg(null);

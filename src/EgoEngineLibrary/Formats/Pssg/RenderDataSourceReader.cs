@@ -68,10 +68,9 @@ namespace EgoEngineLibrary.Formats.Pssg
                     throw new InvalidDataException($"The data block size ({size}) is different than data block data size ({data.Length}).");
 
                 var attr = new VertexAttributeData(renderType, dataType, elemCount, offset, stride, data);
-                // skip multiple ST attributes for now
                 if (attr.Name == "ST")
                 {
-                    // tex coords are a different case since I need to differntiate them into different uv sets
+                    // tex coords are a different case since I need to differentiate them into different uv sets
                     _texCoordSets.AddRange(HandleSTAttribute(attr));
                 }
                 else
