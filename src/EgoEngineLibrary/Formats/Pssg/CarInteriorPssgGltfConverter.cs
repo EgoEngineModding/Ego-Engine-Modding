@@ -13,7 +13,7 @@ using System.Numerics;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
-    public class CarPssgGltfConverter : PssgGltfConverter
+	public class CarInteriorPssgGltfConverter : PssgGltfConverter
 	{
 		private class ExportState
 		{
@@ -21,16 +21,15 @@ namespace EgoEngineLibrary.Formats.Pssg
 
 			public Dictionary<string, MaterialBuilder> ShaderMaterialMap { get; }
 
-            public ExportState()
-            {
+			public ExportState()
+			{
 				ShaderMaterialMap = new Dictionary<string, MaterialBuilder>();
 			}
 		}
 
 		public static bool SupportsPssg(PssgFile pssg)
 		{
-			return pssg.FindNodes("MATRIXPALETTERENDERINSTANCE").Any() ||
-				pssg.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE").Any();
+			return pssg.FindNodes("RENDERNODE").Any();
 		}
 
 		public ModelRoot Convert(PssgFile pssg)
@@ -70,20 +69,19 @@ namespace EgoEngineLibrary.Formats.Pssg
 				gltfNode = new NodeBuilder(name);
 				gltfNode.LocalTransform = getTransform((byte[])node.ChildNodes[0].Value);
 			}
-			else if (node.Name == "MATRIXPALETTEJOINTNODE")
+			else if (node.Name == "RENDERNODE")
 			{
 				gltfNode = CreateMeshNode(sceneBuilder, node, parent, state);
 			}
-			else if (node.Name == "MATRIXPALETTENODE")
-			{
-				// do nothing for this node
-				return;
-			}
-			else
+			else if (node.Name == "NODE")
 			{
 				string name = (string)node.Attributes["id"].Value;
 				gltfNode = parent.CreateNode(name);
 				gltfNode.LocalTransform = getTransform((byte[])node.ChildNodes[0].Value);
+			}
+			else
+			{
+				throw new NotImplementedException($"Support for node {node.Name} not implemented.");
 			}
 
 			foreach (var child in node.ChildNodes)
@@ -92,24 +90,23 @@ namespace EgoEngineLibrary.Formats.Pssg
 			}
 		}
 
-		private static NodeBuilder CreateMeshNode(SceneBuilder sceneBuilder, PssgNode mpjnNode, NodeBuilder parent, ExportState state)
+		private static NodeBuilder CreateMeshNode(SceneBuilder sceneBuilder, PssgNode renderNode, NodeBuilder parent, ExportState state)
 		{
-			string name = (string)mpjnNode.Attributes["id"].Value;
+			string name = (string)renderNode.Attributes["id"].Value;
 			NodeBuilder node = parent.CreateNode(name);
-			node.LocalTransform = getTransform((byte[])mpjnNode.ChildNodes[0].Value);
+			node.LocalTransform = getTransform((byte[])renderNode.ChildNodes[0].Value);
 
-			var mesh = ConvertMesh(mpjnNode, state);
+			var mesh = ConvertMesh(renderNode, state);
 			sceneBuilder.AddRigidMesh(mesh, node);
 
 			return node;
 		}
 
-        private static MeshBuilder<VertexPositionNormal, VertexColor1Texture4, VertexEmpty> ConvertMesh(PssgNode mpjnNode, ExportState state)
+		private static MeshBuilder<VertexPositionNormal, VertexColor1Texture4, VertexEmpty> ConvertMesh(PssgNode renderNode, ExportState state)
 		{
-			string name = (string)mpjnNode.Attributes["id"].Value;
+			string name = (string)renderNode.Attributes["id"].Value;
 			var mb = new MeshBuilder<VertexPositionNormal, VertexColor1Texture4, VertexEmpty>(name);
-			IEnumerable<PssgNode> primitives = mpjnNode.FindNodes("MATRIXPALETTERENDERINSTANCE"); // RD: Grid
-			primitives = primitives.Concat(mpjnNode.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE")); // Dirt 2 and beyond
+			IEnumerable<PssgNode> primitives = renderNode.FindNodes("RENDERSTREAMINSTANCE");
 
 			foreach (var prim in primitives)
 			{
@@ -121,9 +118,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 				var rdsNode = prim.File.FindNodes("RENDERDATASOURCE", "id", rdsId).First();
 
 				var rds = new RenderDataSourceReader(rdsNode);
-				var indexOffset = prim.Attributes["indexOffset"].GetValue<uint>();
-				var indexCount = prim.Attributes["indicesCountFromOffset"].GetValue<uint>();
-				var triangles = rds.GetTriangles((int)indexOffset, (int)indexCount);
+				var triangles = rds.GetTriangles();
 				foreach (var tri in triangles)
 				{
 					pb.AddTriangle(
@@ -180,24 +175,28 @@ namespace EgoEngineLibrary.Formats.Pssg
 
 			foreach (var shader in shaders)
 			{
+				var shaderGroupId = shader.Attributes["shaderGroup"].GetValue<string>().Substring(1);
+				var sgNode = shader.File.FindNodes("SHADERGROUP", "id", shaderGroupId).FirstOrDefault();
+				var textureInputs = shader.FindNodes("SHADERINPUT", "type", "texture");
+
 				var id = shader.Attributes["id"].GetValue<string>();
 				var mat = new MaterialBuilder(id);
 
 				mat.WithMetallicRoughnessShader()
-				    .WithMetallicRoughness(0.1f, 0.5f)
-					.WithBaseColor(new Vector4(0.5f, 0.5f, 0.5f, 1));
+					.WithMetallicRoughness(0.1f, 0.5f)
+					.WithBaseColor(new Vector4(1, 1, 1, 1));
 
 				mat.UseChannel(KnownChannel.BaseColor).UseTexture()
-					.WithPrimaryImage(new MemoryImage(grayImageBytes))
+					.WithPrimaryImage(new MemoryImage(GetDiffuseTexture(sgNode, textureInputs)))
 					.WithCoordinateSet(0);
 				mat.UseChannel(KnownChannel.Occlusion).UseTexture()
-					.WithPrimaryImage(new MemoryImage(whiteImageBytes))
+					.WithPrimaryImage(new MemoryImage(GetOcclusionTexture(sgNode, textureInputs)))
 					.WithCoordinateSet(1);
 				mat.UseChannel(KnownChannel.Emissive).UseTexture()
-					.WithPrimaryImage(new MemoryImage(blackImageBytes))
+					.WithPrimaryImage(new MemoryImage(GetEmissiveTexture(sgNode, textureInputs)))
 					.WithCoordinateSet(2);
 				mat.UseChannel(KnownChannel.Normal).UseTexture()
-					.WithPrimaryImage(new MemoryImage(blackImageBytes))
+					.WithPrimaryImage(new MemoryImage(GetNormalTexture(sgNode, textureInputs)))
 					.WithCoordinateSet(3);
 
 				state.ShaderMaterialMap.Add(id, mat);

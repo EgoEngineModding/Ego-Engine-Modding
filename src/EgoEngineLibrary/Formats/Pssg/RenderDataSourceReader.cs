@@ -22,6 +22,7 @@ namespace EgoEngineLibrary.Formats.Pssg
         private readonly List<VertexAttributeData> _texCoordSets;
 
         public uint VertexCount => _vertexAttributes.TryGetValue("Vertex", out var attr) ? attr.ElementCount : 0;
+        public bool HasNormals => _vertexAttributes.ContainsKey("Normal");
 
         public string Primitive { get; }
         public uint IndexCount { get; }
@@ -207,12 +208,18 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             if (found && attribute is not null)
             {
-                if (attribute.DataType != "float3")
-                    throw new NotImplementedException($"Support for {attribute.Name} data type {attribute.DataType} is not implemented.");
-
                 var offset = (int)(attribute.Stride * index + attribute.Offset);
                 var data = attribute.Data.AsSpan(offset);
-                return ReadVector3(data);
+
+                switch (attribute.DataType)
+                {
+                    case "float3":
+                        return ReadVector3(data);
+                    case "half4": // just read Vec3, pretty sure 4th item is just 1.0
+                        return ReadVectorHalf3(data);
+                    default:
+                        throw new NotImplementedException($"Support for {attribute.Name} data type {attribute.DataType} is not implemented.");
+                }
             }
             else
             {
@@ -233,6 +240,8 @@ namespace EgoEngineLibrary.Formats.Pssg
                 {
                     case "float3":
                         return ReadVector3(data);
+                    case "half4": // just read Vec3, pretty sure 4th item is just 1.0
+                        return ReadVectorHalf3(data);
                     default:
                         throw new NotImplementedException($"Support for {attribute.Name} data type {attribute.DataType} is not implemented.");
                 }
@@ -324,7 +333,7 @@ namespace EgoEngineLibrary.Formats.Pssg
                 if (texCoordSetIndex <= 0)
                     return Vector2.Zero;
                 else
-                    return GetTexCoord(index, texCoordSetIndex - 1);
+                    return GetTexCoord(index, _texCoordSets.Count - 1);
             }
         }
 
@@ -347,7 +356,7 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
             else
             {
-                return uint.MinValue;
+                return uint.MaxValue;
             }
         }
 
@@ -375,6 +384,15 @@ namespace EgoEngineLibrary.Formats.Pssg
             vec.Y = (float)BigToHalf(data.Slice(2));
             vec.Z = (float)BigToHalf(data.Slice(4));
             vec.W = (float)BigToHalf(data.Slice(6));
+            return vec;
+        }
+
+        private static Vector3 ReadVectorHalf3(ReadOnlySpan<byte> data)
+        {
+            var vec = new Vector3();
+            vec.X = (float)BigToHalf(data);
+            vec.Y = (float)BigToHalf(data.Slice(2));
+            vec.Z = (float)BigToHalf(data.Slice(4));
             return vec;
         }
 

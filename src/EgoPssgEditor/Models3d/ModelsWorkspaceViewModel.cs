@@ -47,6 +47,8 @@ namespace EgoPssgEditor.Models3d
             export = new RelayCommand(Export_Execute, Export_CanExecute);
             import = new RelayCommand(Import_Execute, Import_CanExecute);
             ImportGrid = new RelayCommand(ImportGrid_Execute, ImportGrid_CanExecute);
+
+            ExportCarInterior = new RelayCommand(ExportCarInterior_Execute, ExportCarInterior_CanExecute);
         }
 
         public override void LoadData(object data)
@@ -74,6 +76,8 @@ namespace EgoPssgEditor.Models3d
             get { return import; }
         }
         public RelayCommand ImportGrid { get; }
+
+        public RelayCommand ExportCarInterior { get; }
 
         private bool Export_CanExecute(object parameter)
         {
@@ -183,6 +187,42 @@ namespace EgoPssgEditor.Models3d
                 {
                     MessageBox.Show("Could not import the model!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private bool ExportCarInterior_CanExecute(object parameter)
+        {
+            try
+            {
+                return _pssg != null && CarInteriorPssgGltfConverter.SupportsPssg(_pssg);
+            }
+            catch { return false; }
+        }
+        private void ExportCarInterior_Execute(object parameter)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.Filter = "Gltf files|*.glb;*.gltf|All files|*.*";
+            dialog.Title = "Select the model's save location and file name";
+            dialog.DefaultExt = "glb";
+            if (!string.IsNullOrEmpty(mainView.FilePath))
+            {
+                dialog.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
+                dialog.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+            }
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var converter = new CarInteriorPssgGltfConverter();
+                    var model = converter.Convert(_pssg);
+                    model.Save(dialog.FileName);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Could not export the model!" + Environment.NewLine + Environment.NewLine +
+                        ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
