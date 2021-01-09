@@ -64,7 +64,9 @@
                 <MenuItem Header="_Export Car" Command="{Binding Path=ModelsWorkspace.Export}"></MenuItem>
                 <MenuItem Header="_Import Car" Command="{Binding Path=ModelsWorkspace.Import}"></MenuItem>
                 <MenuItem Header="Import _Grid Car" Command="{Binding Path=ModelsWorkspace.ImportGrid}"></MenuItem>
+                <Separator/>
                 <MenuItem Header="Export _Car Interior" Command="{Binding Path=ModelsWorkspace.ExportCarInterior}"></MenuItem>
+                <MenuItem Header="Import C_ar Interior" Command="{Binding Path=ModelsWorkspace.ImportCarInterior}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Schema">
                 <MenuItem Header="_Load" Command="{Binding Path=LoadSchema}"></MenuItem>
@@ -73,6 +75,7 @@
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_Website" Name="websiteMenuItem" Click="websiteMenuItem_Click"></MenuItem>
+                <MenuItem Header="_Source Code" Name="sourceCodeMenuItem" Click="sourceCodeMenuItem_Click"></MenuItem>
             </MenuItem>
         </Menu>
 
@@ -160,7 +163,8 @@
                                      TextWrapping="Wrap" 
                                      AcceptsReturn="True" 
                                      IsReadOnly="True" 
-                                     VerticalScrollBarVisibility="Auto"></TextBox>
+                                     VerticalScrollBarVisibility="Auto"
+                                     FontFamily="Consolas"></TextBox>
                         </DockPanel>
                     </Grid>
                 </Grid>

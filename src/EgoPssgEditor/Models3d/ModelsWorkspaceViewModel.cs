@@ -49,6 +49,7 @@ namespace EgoPssgEditor.Models3d
             ImportGrid = new RelayCommand(ImportGrid_Execute, ImportGrid_CanExecute);
 
             ExportCarInterior = new RelayCommand(ExportCarInterior_Execute, ExportCarInterior_CanExecute);
+            ImportCarInterior = new RelayCommand(ImportCarInterior_Execute, ImportCarInterior_CanExecute);
         }
 
         public override void LoadData(object data)
@@ -78,6 +79,7 @@ namespace EgoPssgEditor.Models3d
         public RelayCommand ImportGrid { get; }
 
         public RelayCommand ExportCarInterior { get; }
+        public RelayCommand ImportCarInterior { get; }
 
         private bool Export_CanExecute(object parameter)
         {
@@ -110,7 +112,7 @@ namespace EgoPssgEditor.Models3d
                 catch (Exception ex)
                 {
                     MessageBox.Show("Could not export the model!" + Environment.NewLine + Environment.NewLine +
-                        ex.Message, "Export Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                        ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -148,7 +150,7 @@ namespace EgoPssgEditor.Models3d
                 catch (Exception ex)
                 {
                     MessageBox.Show("Could not import the model!" + Environment.NewLine + Environment.NewLine +
-                        ex.Message, "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                        ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -186,7 +188,7 @@ namespace EgoPssgEditor.Models3d
                 catch (Exception ex)
                 {
                     MessageBox.Show("Could not import the model!" + Environment.NewLine + Environment.NewLine +
-                        ex.Message, "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                        ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -222,6 +224,45 @@ namespace EgoPssgEditor.Models3d
                 catch (Exception ex)
                 {
                     MessageBox.Show("Could not export the model!" + Environment.NewLine + Environment.NewLine +
+                        ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+
+        private bool ImportCarInterior_CanExecute(object parameter)
+        {
+            try
+            {
+                return _pssg != null && GltfCarInteriorPssgConverter.SupportsPssg(_pssg);
+            }
+            catch { return false; }
+        }
+        private void ImportCarInterior_Execute(object parameter)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Filter = "Gltf files|*.glb;*.gltf|All files|*.*";
+            dialog.Title = "Select a gltf model file";
+            if (!string.IsNullOrEmpty(mainView.FilePath))
+            {
+                dialog.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
+                dialog.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+            }
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var gltf = ModelRoot.Load(dialog.FileName);
+
+                    var conv = new GltfCarInteriorPssgConverter();
+                    conv.Convert(gltf, _pssg);
+
+                    mainView.LoadPssg(null);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Could not import the model!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }

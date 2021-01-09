@@ -1,0 +1,360 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>EPE - Readme</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            margin-left: auto;
+            margin-right: auto;
+            width: 990px;
+            background: #000000;
+            color: #ebebeb;
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+        }
+
+        a {
+            color: #65CDEB;
+            text-decoration: none;
+        }
+
+            a:hover {
+                color: #FFFFFF;
+            }
+
+        div#top {
+            margin: 0;
+            margin-bottom: 10px;
+            padding: 10px;
+            width: auto;
+            background: #000000;
+            border: 2px solid #292929;
+            border-top: none;
+            text-align: center;
+        }
+
+        div.readme-main {
+            margin: 0;
+            margin-bottom: 10px;
+            padding: 10px;
+            width: auto;
+            background: #000000;
+            border: 1px solid #292929;
+        }
+
+        div.red {
+            margin: 0;
+            padding: 5px;
+            background: #900;
+            border: solid #c00;
+        }
+
+        div.yellow {
+            margin: 0;
+            padding: 5px;
+            background: #c90;
+            border: solid #fc0;
+        }
+
+        h1 {
+            margin: 0;
+            padding: 0;
+            color: #E2001A;
+            font-family: Georgia, "Times New Roman", Times, serif;
+        }
+
+        h2 {
+            margin: 0;
+            color: #E2001A;
+            font-family: Georgia, "Times New Roman", Times, serif;
+            font-size: 1.4em;
+        }
+
+        h3 {
+            margin: 0;
+            color: #E2001A;
+            font-family: Georgia, "Times New Roman", Times, serif;
+            font-size: 1.2em;
+        }
+
+        div.red + h2, h2 + div.yellow {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="top">
+        <h1>Ego PSSG Editor</h1>
+        version 12.0.0<br />
+        <p style="font-family: Georgia, 'Times New Roman', Times, serif;"><a href="https://petar.page/l/ego-epe-home" target="_blank">Application Website</a></p>
+    </div>
+    <div class="readme-main">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#Reqs">Requirements</a></li>
+            <li><a href="#Inst">Installation</a></li>
+            <li><a href="#EdIn">Editor Information</a></li>
+            <li><a href="#Usag">Usage</a></li>
+            <li><a href="#Supp">Support</a></li>
+            <li><a href="#Chan">Changelog</a></li>
+            <li><a href="#Cred">Credits</a></li>
+        </ol>
+    </div>
+    <div class="readme-main">
+        <h2><a name="Reqs"></a>Requirements</h2>
+        <ul>
+            <li>.NET 5.0 Desktop Runtime (x64 or x86 depending on your OS)</li>
+            <li>DDS Image/File Editor (with DX10 support)</li>
+        </ul>
+        <h2><a name="Inst"></a>Installation</h2>
+        <p>To install, simply <em>EXTRACT</em> everything from the zip file to a desired location, and run the <em>Ego PSSG Editor.exe</em> file.</p>
+    </div>
+    <div class="readme-main">
+        <h2><a name="EdIn"></a>Editor Information</h2>
+        <p>This tool will allow you to open and edit PSSG files for the EGO engine games.</p>
+
+        Features:
+        <ul>
+            <li><strong>Create from Scratch</strong> -- Build new PSSG files starting from zero.</li>
+            <li><strong>Edit Anything</strong> -- Now edit just about every part of the PSSG you please.</li>
+            <li><strong>Textures</strong> -- Special sections concentrated to help you edit PSSG textures.</li>
+            <li><strong>Models</strong> -- Ability to export and import car models to and from glTF files.</li>
+            <li><strong>Preview</strong> -- Lets you see any texture/cubemap from the PSSG before you have to export.</li>
+            <li><strong>DDS Conversion</strong> -- Complete dds conversion that lets you change many things such as format, resolution, and mip maps.</li>
+            <li><strong>Open With</strong> -- Allows you to choose "Open With" and select this program to open PSSG.</li>
+        </ul>
+        <h2><a name="Usag"></a>Usage</h2>
+        <p>After turning on the program simply click File -&gt; Open and select a PSSG to edit.</p>
+
+        Editing Textures:
+        <ol>
+            <li>In the <em>Textures</em> tab select a texture from the list.</li>
+            <li>Press <em>Export</em> to save the section as a new file to edit with another editor such as Photoshop.</li>
+            <li>OR Replacement Step 1 and 2: In the <em>Textures</em> tab press <em>Export All Textures</em>. A folder will be made with all texture files in the same directory as the pssg.</li>
+            <li>When finished editing dds file, if the texelFormat (see "Looking Up Texture Info") is <em>u8</em> use save option <em>8 L 8 bpp | Luminance</em>, and if it is <em>ui8x4</em> use option <em>8.8.8.8 ARGB 32 bpp | unsigned</em>.</li>
+            <li>After editing press <em>Import</em> and select your modified file.</li>
+            <li>Click File -&gt; Save to save your new PSSG.</li>
+        </ol>
+        Looking Up Texture Info:
+        <ol>
+            <li>In the <em>Textures</em> tab select a texture from the list.</li>
+            <li>Now switch to the <em>All Sections</em> tab.</li>
+            <li>You will see a bunch of info for the texture selected in the <em>Textures</em> tab.</li>
+            <li>Important info to look at: width, height, format, mipmaps</li>
+            <li>Switch back to the <em>Textures</em> tab to continue editing the texture.</li>
+        </ol>
+        Adding Textures:
+        <ol>
+            <li>In the <em>Textures</em> tab select a texture from the list for your new texture to be based on.</li>
+            <li>Press <em>Add</em> so that a new window pops up.</li>
+            <li>Type in a new name for your texture, make sure it is unique and press <em>OK</em>.</li>
+            <li>A new texture will be added and can be seen at the end of the list.</li>
+            <li>Click File -&gt; Save to save your new PSSG.</li>
+        </ol>
+        Removing Attribute/Attribute Info:
+        <ol>
+            <li>In the <em>data grid view</em> select a the row of the attribute that you would like to delete by pressing on the row header to its right.</li>
+            <li>Now just press the Remove button on the bottom. If no row is selected then a Node/Node Info will be removed instead.</li>
+            <li>Type in a new name for your texture, make sure it is unique and press <em>OK</em>.</li>
+        </ol>
+    </div>
+    <div class="readme-main">
+        <h2><a name="Supp"></a>Support</h2>
+        <p>You can get support by asking in the modding channels of the following communities:</p>
+        <ul>
+            <li><a href="https://discord.gg/5bCjMqS" target="_blank">Ego Engine Modding Discord</a></li>
+            <li><a href="https://www.racedepartment.com/" target="_blank">RaceDepartment Forums</a></li>
+        </ul>
+        <p>If you think you've found a bug, post an issue <a href="https://github.com/p2t5r/Ego-Engine-Modding/issues" target="_blank">here</a> with as much information as possible.</p>
+    </div>
+    <div class="readme-main">
+        <h2><a name="Chan"></a>Changelog</h2>
+        <ul>
+            <li>
+                <strong>12.0.0+20210122</strong>
+                <ul>
+                    <li>Added support for exporting and importing car models</li>
+                    <li>Added support for xml compressed pssg files</li>
+                    <li>Changed .NET Framework to .NET 5.0</li>
+                </ul>
+            </li>
+            <li>
+                <strong>11.1.2017.0802</strong>
+                <ul>
+                    <li>Added support for DX10 BC1-3 textures</li>
+                    <li>Fixed srgb textures being exported with the wrong settings</li>
+                    <li>Updated texture preview UI to conveniently show texture info</li>
+                </ul>
+            </li>
+            <li>
+                <strong>11.0.2017.0720</strong>
+                <ul>
+                    <li>Rewrote UI from scratch in WPF</li>
+                    <li>Added preview for u8 textures</li>
+                    <li>Added support for BC7 textures</li>
+                    <li>Dropped support for cube maps</li>
+                </ul>
+            </li>
+            <li>
+                <strong>10.3.2016.0322</strong>
+                <ul>
+                    <li>Ability to open really large pssg files (64 bit Windows)</li>
+                    <li>When (de)compressing files, a temp file is used first</li>
+                    <li>Ability to sort textures by name</li>
+                    <li>Byte data always represented by 2 chars, capitalized</li>
+                    <li>Now properly closes the save stream</li>
+                    <li>Fix for saving as xml that has an attribute starting with the number 2</li>
+                    <li>Attempts to delete any temp files that are created</li>
+                </ul>
+            </li>
+            <li>
+                <strong>10.2.2015.0806</strong>
+                <ul>
+                    <li>Support for Gimp 2.8 DDS Plugin</li>
+                </ul>
+            </li>
+            <li>
+                <strong>10.1.2015.0805</strong>
+                <ul>
+                    <li>Added two texeltypes for Dirt Rally</li>
+                    <li>Fixed bug when copying nodes</li>
+                </ul>
+            </li>
+            <li>
+                <strong>10.0.2014.1226</strong>
+                <ul>
+                    <li>Support for Compressed PSSG</li>
+                    <li>Support for Xml PSSG</li>
+                    <li>Support for Dirt Game</li>
+                    <li>Changed up User Interface</li>
+                    <li>New Version Numbering</li>
+                    <li>Use EgoEngineLibrary</li>
+                </ul>
+            </li>
+            <li>
+                <strong>2.0.2012.0919 (2.0.1)</strong>
+                <ul>
+                    <li>Fixed Occasional Save Error</li>
+                    <li>Small UI Improvements</li>
+                    <li>Cleaned Up Code/Reduced file size</li>
+                </ul>
+            </li>
+            <li>
+                <strong>2.0.2012.0530</strong>
+                <ul>
+                    <li>Added support for Textures with texelFormats "ui8x4" and "u8"</li>
+                    <li>Hogs less resources when browsing textures</li>
+                    <li>Improved All Sections Tab: Add/Remove, Import/Export, and Edit anything</li>
+                    <li>New Section: PSSG Backend</li>
+                    <li>New Feature: Create PSSGs from scratch</li>
+                </ul>
+            </li>
+            <li>
+                <strong>1.8.2011.0924</strong>
+                <ul>
+                    <li>Fixed a bug causing the game to crash when editing textures</li>
+                </ul>
+            </li>
+            <li>
+                <strong>1.8.2011.0919</strong>
+                <ul>
+                    <li>Rewrote most of the program based on Miek's PSSG base class</li>
+                    <li>Removed support for most PSSGs modded by previous editor versions</li>
+                    <li>Rewrote the DDS class for better conversions between textures and DDS files</li>
+                    <li>New Feature: Export/Import Cubemaps, Remove Textures, Import All Textures</li>
+                    <li>Improved UI, image preview</li>
+                </ul>
+            </li>
+            <li>
+                <strong>1.7.2011.0530</strong>
+                <ul>
+                    <li>Fixed Bug that caused some PSSG files to be unopenable</li>
+                </ul>
+            </li>
+            <li>
+                <strong>1.7.2011.0524</strong>
+                <ul>
+                    <li>Added support for Dirt 3</li>
+                    <li>Fixed error from having 0 mip maps</li>
+                    <li>Fixed pssg size updater</li>
+                    <li>NOTE: This is a quick release with minimal testing, may need more work</li>
+                </ul>
+            </li>
+            <li>
+                <strong>1.7.2011.0324</strong>
+                <ul>
+                    <li>Greatly Improved Speed</li>
+                    <li>New Feature: Add Texture</li>
+                    <li>Texture Resolution changes are done correctly</li>
+                    <li>Minor UI Changes</li>
+                </ul>
+            </li>
+            <li>
+                <strong>1.6.2010.1225</strong>
+                <ul>
+                    <li>Fixed Bug where you could only edit the first pssg that you open</li>
+                    <li>Improved Automatic Selection</li>
+                </ul>
+            </li>
+            <li>
+                <strong>1.6.2010.1219</strong>
+                <ul>
+                    <li>Fixed Export All Textures function</li>
+                    <li>Automatically Selects a Section based on Selected Texture</li>
+                </ul>
+            </li>
+            <li>
+                <strong>1.6.2010.1217</strong>
+                <ul>
+                    <li>Redesigned UI For Easier Texture Editing</li>
+                    <li>Added Export All Textures function</li>
+                    <li>Fixed Open With function</li>
+                </ul>
+            </li>
+            <li>
+                <strong>1.5.2010.1206</strong>
+                <ul>
+                    <li>Added Preview Area for TEXTURE sections</li>
+                    <li>Import any section, not just TEXTURES (For the Advanced)</li>
+                    <li>Made it faster for you to work with the program</li>
+                </ul>
+            </li>
+            <li>
+                <strong>1.4.2010.1204</strong>
+                <ul>
+                    <li>Added support for ALL PSSG FILES</li>
+                    <li>Redesigned Everything</li>
+                </ul>
+            </li>
+            <li>
+                <strong>1.3.2010.1128</strong>
+                <ul>
+                    <li>Added support for more pssg files (interior, RainBeads_textures, sky)</li>
+                    <li>Changed the way I do versions</li>
+                </ul>
+            </li>
+            <li>
+                <strong>3.0.2010.1031</strong>
+                <ul>
+                    <li>Fixed Major Bug that would destroy pssg files when importing new files</li>
+                    <li>Added support for games Grid and Dirt 2</li>
+                </ul>
+            </li>
+            <li>
+                <strong>1.0.2010.1030</strong>
+                <ul>
+                    <li>First Release</li>
+                </ul>
+            </li>
+        </ul>
+        <h2><a name="Cred"></a>Credits</h2>
+        <ul>
+            <li>Ryder25 - <small>For creating the program. (modding(at)ryder25(dot)com)</small></li>
+            <li>luh-koala - <small>For creating icon and other graphics</small></li>
+            <li>famfamfam.com - <small>For the "silk" menu icons.</small></li>
+        </ul>
+    </div>
+</body>
+</html>

@@ -10,21 +10,13 @@ using System.Text.RegularExpressions;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
-    // Starting with Dirt 2 and F1 2010:
-    // - the MatrixPaletteNode has MatrixPaletteRenderInstance instead of RenderStreamInstance
-    // - MatrixPaletteRenderInstance now holds the jointCount and MatrixPaletteSkinJoint instead
-    // - the MatrixPaletteJoinNode has MatrixPaletteJointRenderInstance instead of MatrixPaletteRenderInstance
-    // - MatrixPaletteJointRenderInstance now holds the jointId instead (jointId is now unique per shader instead of per MatrixPaletteBundleNode)
-    // - The DataBlocks are rearranged in how they hold the data, and ST is float4 instead of float2 (assuming this means 2 sets of tex coords)
-    // Starting with Dirt 3:
-    // - The DataBlocks with ST/Tangent/Binormal now use half4/half4/half4 instead of float4/float3/float3
-    public class GltfDirt2F1CarPssgConverter
+    public class GltfCarInteriorPssgConverter
     {
         private class ImportState : PssgModelWriterState
         {
-            public int LodNumber { get; set; }
+            public int RenderStreamInstanceCount { get; set; }
 
-            public int MpjriCount { get; set; }
+            public int SegmentSetCount { get; set; }
 
             public int RenderDataSourceCount { get; set; }
 
@@ -38,15 +30,12 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             public Dictionary<int, ShaderInstanceData> MatShaderMapping { get; }
 
-            public Regex LodMatcher { get; }
-
             public ImportState(PssgNode rdsLib, PssgNode ribLib, Dictionary<string, ShaderInputInfo> shaderGroupMap)
             {
                 RdsLib = rdsLib;
                 RibLib = ribLib;
                 ShaderGroupMap = shaderGroupMap;
                 MatShaderMapping = new Dictionary<int, ShaderInstanceData>();
-                LodMatcher = new Regex("^LOD([0-9]+)_$", RegexOptions.CultureInvariant);
 
                 if (rdsLib == ribLib)
                     IsF1 = true;
@@ -60,20 +49,17 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             public RenderDataSourceWriter Rds { get; }
 
-            public List<string> JointNames { get; }
-
             public ShaderInstanceData(string shaderInstanceName, string shaderGroupName, RenderDataSourceWriter rds)
             {
                 ShaderInstanceName = shaderInstanceName;
                 ShaderGroupName = shaderGroupName;
                 Rds = rds;
-                JointNames = new List<string>();
             }
         }
 
         public static bool SupportsPssg(PssgFile pssg)
         {
-            return pssg.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE").Any();
+            return pssg.FindNodes("RENDERNODE").Any();
         }
 
         public void Convert(ModelRoot gltf, PssgFile pssg)
@@ -89,7 +75,7 @@ namespace EgoEngineLibrary.Formats.Pssg
             PssgNode rdsLib; PssgNode ribLib;
             if (nodeLib is not null)
             {
-                rdsLib = pssg.FindNodes("LIBRARY", "type", "RENDERDATASOURCE").First();
+                rdsLib = pssg.FindNodes("LIBRARY", "type", "SEGMENTSET").First();
                 ribLib = pssg.FindNodes("LIBRARY", "type", "RENDERINTERFACEBOUND").First();
             }
             else
@@ -107,7 +93,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             // Clear out the libraries
             nodeLib.RemoveChildNodes(nodeLib.ChildNodes.Where(n => n.Name == "ROOTNODE"));
-            rdsLib.RemoveChildNodes(rdsLib.ChildNodes.Where(n => n.Name == "RENDERDATASOURCE"));
+            rdsLib.RemoveChildNodes(rdsLib.ChildNodes.Where(n => n.Name == "SEGMENTSET"));
             ribLib.RemoveChildNodes(ribLib.ChildNodes.Where(n => n.Name == "DATABLOCK"));
 
             // Write the scene graph, and collect mesh data
@@ -117,7 +103,6 @@ namespace EgoEngineLibrary.Formats.Pssg
         private static void ConvertSceneNodes(PssgFile pssg, PssgNode parent, Node gltfNode, ImportState state)
         {
             PssgNode node;
-            Match lodMatch;
             if (gltfNode.Name.StartsWith("Scene Root"))
             {
                 node = new PssgNode("ROOTNODE", parent.File, parent);
@@ -126,10 +111,9 @@ namespace EgoEngineLibrary.Formats.Pssg
                 node.AddAttribute("id", "Scene Root");
                 parent.ChildNodes.Add(node);
             }
-            else if ((lodMatch = state.LodMatcher.Match(gltfNode.Name)).Success)
+            else if (gltfNode.Mesh is not null)
             {
-                var lodNumber = int.Parse(lodMatch.Groups[1].Value);
-                node = CreateMatrixPaletteBundleNode(parent, gltfNode, lodNumber, state);
+                node = CreateRenderNode(parent, gltfNode, state);
                 return;
             }
             else
@@ -155,34 +139,18 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
         }
 
-        private static PssgNode CreateMatrixPaletteBundleNode(PssgNode parent, Node gltfNode, int lodNumber, ImportState state)
+        private static PssgNode CreateRenderNode(PssgNode parent, Node gltfNode, ImportState state)
         {
-            PssgNode node = new PssgNode("MATRIXPALETTEBUNDLENODE", parent.File, parent);
+            PssgNode node = new PssgNode("RENDERNODE", parent.File, parent);
             node.AddAttribute("stopTraversal", 0u);
-            node.AddAttribute("nickname", $"LOD{lodNumber}_");
-            node.AddAttribute("id", $"LOD{lodNumber}_");
+            node.AddAttribute("nickname", gltfNode.Name);
+            node.AddAttribute("id", gltfNode.Name);
             parent.ChildNodes.Add(node);
 
-            var transformNode = new PssgNode("TRANSFORM", node.File, node);
-            transformNode.Value = GetTransform(gltfNode.LocalMatrix);
-            node.ChildNodes.Add(transformNode);
-
-            var bboxNode = new PssgNode("BOUNDINGBOX", node.File, node);
-            bboxNode.Value = GetBoundingBoxData(Vector3.Zero, Vector3.Zero);
-            node.ChildNodes.Add(bboxNode);
-
-            state.LodNumber = lodNumber;
             state.MatShaderMapping.Clear();
 
-            foreach (var child in gltfNode.VisualChildren)
-            {
-                if (child.Mesh is null) continue;
-                if (child.Mesh.Primitives.Count == 0) continue;
-
-                CreateMatrixPaletteJointNode(node, child, state);
-            }
-
-            CreateMatrixPaletteNode(node, state);
+            // Now add a new mesh from mesh builder
+            ConvertMesh(node, gltfNode, state);
 
             // Write the mesh data
             WriteMeshData(state);
@@ -190,73 +158,22 @@ namespace EgoEngineLibrary.Formats.Pssg
             return node;
         }
 
-        private static void CreateMatrixPaletteNode(PssgNode parent, ImportState state)
-        {
-            var node = new PssgNode("MATRIXPALETTENODE", parent.File, parent);
-            node.AddAttribute("stopTraversal", 0u);
-            node.AddAttribute("id", $"x{state.LodNumber}_MPN");
-            parent.ChildNodes.Add(node);
-
-            var transformNode = new PssgNode("TRANSFORM", node.File, node);
-            transformNode.Value = GetTransform(Matrix4x4.Identity);
-            node.ChildNodes.Add(transformNode);
-
-            var bboxNode = new PssgNode("BOUNDINGBOX", node.File, node);
-            bboxNode.Value = GetBoundingBoxData(Vector3.Zero, Vector3.Zero);
-            node.ChildNodes.Add(bboxNode);
-
-            foreach (var shader in state.MatShaderMapping.Values)
-            {
-                var rsiNode = new PssgNode("MATRIXPALETTERENDERINSTANCE", node.File, node);
-                rsiNode.AddAttribute("jointCount", (uint)shader.JointNames.Count);
-                rsiNode.AddAttribute("sourceCount", 1u);
-                rsiNode.AddAttribute("indices", $"#{shader.Rds.Name}");
-                rsiNode.AddAttribute("streamCount", 0u);
-                rsiNode.AddAttribute("shader", $"#{shader.ShaderInstanceName}");
-                rsiNode.AddAttribute("id", shader.Rds.Name.Replace("RDS", "RSI"));
-                node.ChildNodes.Add(rsiNode);
-
-                var risNode = new PssgNode("RENDERINSTANCESOURCE", rsiNode.File, rsiNode);
-                risNode.AddAttribute("source", $"#{shader.Rds.Name}");
-                rsiNode.ChildNodes.Add(risNode);
-
-                foreach (var jointName in shader.JointNames)
-                {
-                    var mpsjNode = new PssgNode("MATRIXPALETTESKINJOINT", rsiNode.File, rsiNode);
-                    mpsjNode.AddAttribute("joint", $"#{jointName}");
-                    rsiNode.ChildNodes.Add(mpsjNode);
-                }
-            }
-        }
-
-        private static void CreateMatrixPaletteJointNode(PssgNode parent, Node gltfNode, ImportState state)
-        {
-            var node = new PssgNode("MATRIXPALETTEJOINTNODE", parent.File, parent);
-            node.AddAttribute("matrixPalette", $"#x{state.LodNumber}_MPN");
-            node.AddAttribute("stopTraversal", 0u);
-            node.AddAttribute("nickname", gltfNode.Name);
-            node.AddAttribute("id", gltfNode.Name);
-            parent.ChildNodes.Add(node);
-
-            // Now add a new mesh from mesh builder
-            ConvertMesh(node, gltfNode, state);
-        }
-
-        private static void ConvertMesh(PssgNode mpjnNode, Node gltfNode, ImportState state)
+        private static void ConvertMesh(PssgNode renderNode, Node gltfNode, ImportState state)
         {
             var mesh = gltfNode.Mesh;
-            if (mesh.Primitives.Any(p => p.Material == null)) throw new NotImplementedException($"The converter does not support primitives ({mesh.Name}) with a null material.");
+            if (mesh.Primitives.Any(p => p.Material == null))
+                throw new NotImplementedException($"The converter does not support primitives ({mesh.Name}) with a null material.");
 
-            var transformNode = new PssgNode("TRANSFORM", mpjnNode.File, mpjnNode);
+            var transformNode = new PssgNode("TRANSFORM", renderNode.File, renderNode);
             transformNode.Value = GetTransform(gltfNode.LocalMatrix);
-            mpjnNode.ChildNodes.Add(transformNode);
+            renderNode.ChildNodes.Add(transformNode);
 
-            var bboxNode = new PssgNode("BOUNDINGBOX", mpjnNode.File, mpjnNode);
-            mpjnNode.ChildNodes.Add(bboxNode);
+            var bboxNode = new PssgNode("BOUNDINGBOX", renderNode.File, renderNode);
+            renderNode.ChildNodes.Add(bboxNode);
 
             // Add to the material shader mapping
             var gltfMats = mesh.Primitives.Select(p => p.Material);
-            ConvertMaterials(gltfMats, mpjnNode.File, state);
+            ConvertMaterials(gltfMats, renderNode.File, state);
 
             // Export Vertices, Normals, TexCoords, VertexWeights and Faces
             Mesh gltfMesh = gltfNode.Mesh;
@@ -285,22 +202,17 @@ namespace EgoEngineLibrary.Formats.Pssg
                 var tris = p.TriangleIndices.ToArray();
                 var baseVertexIndex = rds.Positions.Count;
 
-                var mpriNode = new PssgNode("MATRIXPALETTEJOINTRENDERINSTANCE", mpjnNode.File, mpjnNode);
-                mpriNode.AddAttribute("streamOffset", (uint)(rds.Positions.Count));
-                mpriNode.AddAttribute("elementCountFromOffset", (uint)(p.VertexCount));
-                mpriNode.AddAttribute("indexOffset", (uint)(rds.Indices.Count));
-                mpriNode.AddAttribute("indicesCountFromOffset", (uint)(tris.Length * 3));
-                mpriNode.AddAttribute("jointID", (uint)shaderData.JointNames.Count);
-                mpriNode.AddAttribute("sourceCount", 1u);
-                mpriNode.AddAttribute("indices", $"#{rds.Name}");
-                mpriNode.AddAttribute("streamCount", 0u);
-                mpriNode.AddAttribute("shader", $"#{shaderData.ShaderInstanceName}");
-                mpriNode.AddAttribute("id", $"MPJRI{state.MpjriCount}"); state.MpjriCount++;
-                mpjnNode.ChildNodes.Add(mpriNode);
+                var rsiNode = new PssgNode("RENDERSTREAMINSTANCE", renderNode.File, renderNode);
+                rsiNode.AddAttribute("sourceCount", 1u);
+                rsiNode.AddAttribute("indices", $"#{rds.Name}");
+                rsiNode.AddAttribute("streamCount", 0u);
+                rsiNode.AddAttribute("shader", $"#{shaderData.ShaderInstanceName}");
+                rsiNode.AddAttribute("id", $"!RSI{state.RenderStreamInstanceCount}"); state.RenderStreamInstanceCount++;
+                renderNode.ChildNodes.Add(rsiNode);
 
-                var risNode = new PssgNode("RENDERINSTANCESOURCE", mpriNode.File, mpriNode);
+                var risNode = new PssgNode("RENDERINSTANCESOURCE", rsiNode.File, rsiNode);
                 risNode.AddAttribute("source", $"#{shaderData.Rds.Name}");
-                mpriNode.ChildNodes.Add(risNode);
+                rsiNode.ChildNodes.Add(risNode);
 
                 var texCoordSet0 = GetDiffuseBaseColorTexCoord(p.Material);
                 var texCoordSet1 = GetOcclusionTexCoord(p.Material);
@@ -340,7 +252,7 @@ namespace EgoEngineLibrary.Formats.Pssg
                     rds.TexCoords2.Add(p.GetTextureCoord(i, texCoordSet2));
                     rds.TexCoords3.Add(p.GetTextureCoord(i, texCoordSet3));
                     rds.Colors.Add(PackColor(color));
-                    rds.SkinIndices.Add(shaderData.JointNames.Count);
+                    rds.SkinIndices.Add(0);
                 }
 
                 foreach (var tri in p.TriangleIndices)
@@ -353,9 +265,6 @@ namespace EgoEngineLibrary.Formats.Pssg
                     rds.Indices.Add((ushort)b);
                     rds.Indices.Add((ushort)c);
                 }
-
-                // Add the matrixpalletejointnode id to the shader's joint list
-                shaderData.JointNames.Add(gltfNode.Name);
             }
 
             bboxNode.Value = GetBoundingBoxData(minExtent, maxExtent);
@@ -420,20 +329,26 @@ namespace EgoEngineLibrary.Formats.Pssg
                     new ShaderInstanceData(
                         shader.Attributes["id"].GetValue<string>(),
                         shader.Attributes["shaderGroup"].GetValue<string>().Substring(1),
-                        new RenderDataSourceWriter($"x{state.LodNumber}_RDS{state.RenderDataSourceCount}")));
+                        new RenderDataSourceWriter($"!RDS{state.RenderDataSourceCount}")));
                 state.RenderDataSourceCount++;
             }
         }
 
         private static void WriteMeshData(ImportState state)
         {
+            PssgNode ssNode = new PssgNode("SEGMENTSET", state.RdsLib.File, state.RdsLib);
+            ssNode.AddAttribute("segmentCount", (uint)state.MatShaderMapping.Count);
+            ssNode.AddAttribute("id", $"!SS{state.SegmentSetCount}");
+            state.SegmentSetCount++;
+            state.RdsLib.ChildNodes.Add(ssNode);
+
             foreach (var shader in state.MatShaderMapping.Values)
             {
                 var rds = shader.Rds;
                 if (!state.ShaderGroupMap.TryGetValue(shader.ShaderGroupName, out var shaderInputInfo))
                     throw new InvalidDataException($"The pssg does not have existing data blocks to model the layout of the input for shader {shader.ShaderGroupName}.");
 
-                rds.Write(shaderInputInfo, state.RdsLib, state.RibLib, state);
+                rds.Write(shaderInputInfo, ssNode, state.RibLib, state);
             }
         }
 

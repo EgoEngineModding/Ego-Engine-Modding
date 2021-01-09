@@ -23,6 +23,10 @@ namespace EgoEngineLibrary.Formats.Pssg
 
         public List<Vector2> TexCoords1 { get; }
 
+        public List<Vector2> TexCoords2 { get; }
+
+        public List<Vector2> TexCoords3 { get; }
+
         public List<uint> Colors { get; }
 
         public List<float> SkinIndices { get; }
@@ -37,6 +41,8 @@ namespace EgoEngineLibrary.Formats.Pssg
             Tangents = new List<Vector4>();
             TexCoords0 = new List<Vector2>();
             TexCoords1 = new List<Vector2>();
+            TexCoords2 = new List<Vector2>();
+            TexCoords3 = new List<Vector2>();
             Colors = new List<uint>();
             SkinIndices = new List<float>();
         }
@@ -213,11 +219,19 @@ namespace EgoEngineLibrary.Formats.Pssg
 
         private void WritePosition(ShaderVertexInputInfo vi, uint elementIndex, Span<byte> destination)
         {
-            if (vi.DataType != "float3")
-                throw new NotImplementedException($"Support for {vi.Name} data type {vi.DataType} is not implemented.");
-
             var value = Positions[(int)elementIndex];
-            WriteVector3(destination, value);
+
+            switch (vi.DataType)
+            {
+                case "float3":
+                    WriteVector3(destination, value);
+                    break;
+                case "half4":
+                    WriteVectorHalf4(destination, new Vector4(value, 1));
+                    break;
+                default:
+                    throw new NotImplementedException($"Support for {vi.Name} data type {vi.DataType} is not implemented.");
+            }
         }
 
         private void WriteNormal(ShaderVertexInputInfo vi, uint elementIndex, Span<byte> destination)
@@ -228,6 +242,9 @@ namespace EgoEngineLibrary.Formats.Pssg
             {
                 case "float3":
                     WriteVector3(destination, value);
+                    break;
+                case "half4":
+                    WriteVectorHalf4(destination, new Vector4(value, 1));
                     break;
                 default:
                     throw new NotImplementedException($"Support for {vi.Name} data type {vi.DataType} is not implemented.");
@@ -299,6 +316,8 @@ namespace EgoEngineLibrary.Formats.Pssg
             {
                 0 => TexCoords0,
                 1 => TexCoords1,
+                2 => TexCoords2,
+                3 => TexCoords3,
                 _ => TexCoords0
             };
 

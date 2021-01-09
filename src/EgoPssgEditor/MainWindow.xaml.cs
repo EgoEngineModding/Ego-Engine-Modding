@@ -1,20 +1,7 @@
-﻿using EgoEngineLibrary.Graphics;
-using EgoPssgEditor.ViewModel;
+﻿using EgoPssgEditor.ViewModel;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace EgoPssgEditor
 {
@@ -42,66 +29,14 @@ namespace EgoPssgEditor
             view = this.DataContext as MainViewModel;
         }
 
-        private void websiteMenuItem_Click(object sender, RoutedEventArgs e)
+        private void websiteMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("http://www.ryder25.com/") { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo("https://petar.page/l/ego-epe-home") { UseShellExecute = true });
         }
 
-        //private void termpToolStripMenuItem_Click(object sender, EventArgs e)
-        //{
-        //    // Dirt 2 to Grid
-        //    foreach (PssgNode mpjn in pssg.FindNodes("MATRIXPALETTEJOINTNODE"))
-        //    {
-        //        PssgAttribute jointId = new PssgAttribute(null, null, null, null);
-        //        foreach (PssgNode mpjri in mpjn.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE"))
-        //        {
-        //            mpjri.Rename("MATRIXPALETTERENDERINSTANCE");
-        //            jointId = mpjri.GetAttribute("jointID");
-        //            mpjri.RemoveAttribute(jointId.Name);
-        //        }
-        //        mpjn.AddAttribute(jointId.Name, jointId.Value);
-        //    }
-
-        //    foreach (PssgNode mpn in pssg.FindNodes("MATRIXPALETTENODE"))
-        //    {
-        //        PssgAttribute jointCount = new PssgAttribute(null, null, null, null);
-        //        UInt32 jointCountNum = 0;
-        //        List<PssgNode> mpriNodes = mpn.FindNodes("MATRIXPALETTERENDERINSTANCE");
-        //        foreach (PssgNode mpri in mpriNodes)
-        //        {
-        //            mpri.Rename("RENDERSTREAMINSTANCE");
-        //            jointCountNum += (UInt32)mpri.GetAttribute("jointCount").Value;
-        //            mpri.RemoveAttribute("jointCount");
-        //            foreach (PssgNode mpsj in mpri.FindNodes("MATRIXPALETTESKINJOINT"))
-        //            {
-        //                pssg.MoveNode(mpsj, mpn);
-        //            }
-        //        }
-        //        mpn.AddAttribute("jointCount", jointCountNum);
-        //    }
-
-        //    // Stuff below may not be needed
-        //    foreach (PssgNode rds in pssg.FindNodes("RENDERDATASOURCE"))
-        //    {
-        //        rds[3].GetAttribute("subStream").Value = 3u;
-        //        rds[3].GetAttribute("dataBlock").Value = rds[4].GetAttribute("dataBlock").Value;
-        //        PssgNode dBlock1 = pssg.FindNodes("DATABLOCK", "id", rds[2].GetAttribute("dataBlock").ToString().Substring(1))[0];
-        //        PssgNode dBlock2 = pssg.FindNodes("DATABLOCK", "id", rds[4].GetAttribute("dataBlock").ToString().Substring(1))[0];
-
-        //        dBlock1[0].GetAttribute("stride").Value = 16u;
-        //        dBlock1[1].GetAttribute("stride").Value = 16u;
-
-        //        dBlock1[2].GetAttribute("offset").Value = dBlock2[0].GetAttribute("stride").Value;
-        //        dBlock2[0].GetAttribute("stride").Value = (UInt32)dBlock2[0].GetAttribute("stride").Value + 12u;
-        //        dBlock2[1].GetAttribute("stride").Value = (UInt32)dBlock2[1].GetAttribute("stride").Value + 12u;
-        //        dBlock2[2].GetAttribute("stride").Value = (UInt32)dBlock2[2].GetAttribute("stride").Value + 12u;
-        //        dBlock1[2].GetAttribute("stride").Value = dBlock2[0].GetAttribute("stride").Value;
-
-        //        pssg.MoveNode(dBlock1[2], dBlock2);
-        //    }
-
-        //    clearVars(false);
-        //    setupEditor(MainTabs.Auto);
-        //}
+        private void sourceCodeMenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo("https://petar.page/l/ego-epe-code") { UseShellExecute = true });
+        }
     }
 }
