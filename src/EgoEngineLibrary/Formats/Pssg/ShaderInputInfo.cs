@@ -44,7 +44,10 @@ namespace EgoEngineLibrary.Formats.Pssg
                 if (shaderInstanceId is null)
                     return null;
 
-                var siNode = rdsNode.File.FindNodes("SHADERINSTANCE", "id", shaderInstanceId).First();
+                var siNode = rdsNode.File.FindNodes("SHADERINSTANCE", "id", shaderInstanceId).FirstOrDefault();
+                if (siNode is null)
+                    return null;
+
                 var shaderGroupId = siNode.Attributes["shaderGroup"].GetValue<string>().Substring(1);
                 var sgNode = rdsNode.File.FindNodes("SHADERGROUP", "id", shaderGroupId).FirstOrDefault();
                 if (sgNode is null)

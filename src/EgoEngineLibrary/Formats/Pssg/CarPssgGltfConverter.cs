@@ -15,15 +15,10 @@ namespace EgoEngineLibrary.Formats.Pssg
 {
     public class CarPssgGltfConverter : PssgGltfConverter
 	{
-		private class ExportState
+		private class ExportState : PssgModelReaderState
 		{
-			public bool IsF1 { get; set; }
-
-			public Dictionary<string, MaterialBuilder> ShaderMaterialMap { get; }
-
             public ExportState()
             {
-				ShaderMaterialMap = new Dictionary<string, MaterialBuilder>();
 			}
 		}
 
@@ -38,7 +33,6 @@ namespace EgoEngineLibrary.Formats.Pssg
 			var sceneBuilder = new SceneBuilder();
 
 			var state = new ExportState();
-			ConvertMaterials(pssg, state);
 
 			// F1 games use lib YYY
 			var parent = pssg.FindNodes("LIBRARY", "type", "NODE").FirstOrDefault();
@@ -104,103 +98,88 @@ namespace EgoEngineLibrary.Formats.Pssg
 			return node;
 		}
 
-        private static MeshBuilder<VertexPositionNormal, VertexColor1Texture4, VertexEmpty> ConvertMesh(PssgNode mpjnNode, ExportState state)
+        private static IMeshBuilder<MaterialBuilder> ConvertMesh(PssgNode mpjnNode, ExportState state)
 		{
-			string name = (string)mpjnNode.Attributes["id"].Value;
-			var mb = new MeshBuilder<VertexPositionNormal, VertexColor1Texture4, VertexEmpty>(name);
 			IEnumerable<PssgNode> primitives = mpjnNode.FindNodes("MATRIXPALETTERENDERINSTANCE"); // RD: Grid
 			primitives = primitives.Concat(mpjnNode.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE")); // Dirt 2 and beyond
 
+			var primitiveDatas = new List<PrimitiveData>();
+			var texCoordSets = 0;
 			foreach (var prim in primitives)
 			{
 				var shaderName = ((string)prim.Attributes["shader"].Value).Substring(1);
-				var material = state.ShaderMaterialMap[shaderName];
-				var pb = mb.UsePrimitive(material);
+				var material = CreateMaterialBuilder(shaderName, state, out var createdNew);
 
 				string rdsId = ((string)prim.Attributes["indices"].Value).Substring(1);
 				var rdsNode = prim.File.FindNodes("RENDERDATASOURCE", "id", rdsId).First();
 
 				var rds = new RenderDataSourceReader(rdsNode);
-				var indexOffset = prim.Attributes["indexOffset"].GetValue<uint>();
-				var indexCount = prim.Attributes["indicesCountFromOffset"].GetValue<uint>();
+				texCoordSets = Math.Max(texCoordSets, rds.TexCoordSetCount);
+
+				primitiveDatas.Add(new PrimitiveData(prim, material, createdNew, rds));
+			}
+
+			string name = (string)mpjnNode.Attributes["id"].Value;
+			var mb = CreateMeshBuilder(name, texCoordSets);
+			foreach (var prim in primitiveDatas)
+			{
+				if (prim.CreatedNewMaterial)
+					ConvertMaterial(prim.Node.File, prim.Material, texCoordSets);
+
+				var pb = mb.UsePrimitive(prim.Material);
+				var rds = prim.Rds;
+
+				var indexOffset = prim.Node.Attributes["indexOffset"].GetValue<uint>();
+				var indexCount = prim.Node.Attributes["indicesCountFromOffset"].GetValue<uint>();
 				var triangles = rds.GetTriangles((int)indexOffset, (int)indexCount);
 				foreach (var tri in triangles)
 				{
 					pb.AddTriangle(
-						GetVertexBuilder(rds, tri.A, state),
-						GetVertexBuilder(rds, tri.B, state),
-						GetVertexBuilder(rds, tri.C, state));
+						CreateVertexBuilder(rds, tri.A, state),
+						CreateVertexBuilder(rds, tri.B, state),
+						CreateVertexBuilder(rds, tri.C, state));
 				}
 			}
 
 			return mb;
 		}
 
-		private static VertexBuilder<VertexPositionNormal, VertexColor1Texture4, VertexEmpty> GetVertexBuilder(RenderDataSourceReader rds, uint index, ExportState state)
+		private static void ConvertMaterial(PssgFile pssg, MaterialBuilder mat, int texCoordSets)
 		{
-			var vb = new VertexBuilder<VertexPositionNormal, VertexColor1Texture4, VertexEmpty>();
-			vb.Geometry.Position = rds.GetPosition(index);
-			vb.Geometry.Normal = rds.GetNormal(index);
-			// Sometimes the normal would be NaNs, and the tangent/binormal zeros
-			// not sure what to do in this case so I just leave out the tangent
-			//vb.Geometry.Tangent = rds.GetTangent(index);
+			var shader = pssg.FindNodes("SHADERINSTANCE", "id", mat.Name).FirstOrDefault();
+			if (shader is null)
+				throw new InvalidDataException($"Could not find shader instance {mat.Name} referenced by the model.");
 
-			if (state.IsF1)
+			mat.WithMetallicRoughnessShader()
+				.WithMetallicRoughness(0.1f, 0.5f)
+				.WithBaseColor(new Vector4(1, 1, 1, 1));
+
+			if (texCoordSets > 0)
 			{
-				// F1 puts diffuse in 1 and spec occ in 0, swap it
-				vb.Material.TexCoord0 = rds.GetTexCoord(index, 1);
-				vb.Material.TexCoord1 = rds.GetTexCoord(index, 0);
-			}
-			else
-			{
-				vb.Material.TexCoord0 = rds.GetTexCoord(index, 0);
-				vb.Material.TexCoord1 = rds.GetTexCoord(index, 1);
-			}
-			vb.Material.TexCoord2 = rds.GetTexCoord(index, 2);
-			vb.Material.TexCoord3 = rds.GetTexCoord(index, 3);
-
-			var color = rds.GetColor(index);
-			vb.Material.Color = new Vector4(
-				((color >> 8) & 0xFF) / (float)byte.MaxValue,
-				((color >> 16) & 0xFF) / (float)byte.MaxValue,
-				((color >> 24) & 0xFF) / (float)byte.MaxValue,
-				((color >> 0) & 0xFF) / (float)byte.MaxValue);
-
-			//var vertWeight = mesh.VertexWeights[face.Indices[index]];
-			//var vws = vertWeight.BoneIndices.Zip(vertWeight.Weights, (First, Second) => (First, Second)).Where(vw => vw.Second > 0).ToArray();
-			//if (vws.Length > 4) throw new NotSupportedException("A vertex cannot be bound to more than 4 bones.");
-			//vb.Skinning.SetWeights(SparseWeight8.Create(vws));
-
-			return vb;
-		}
-
-		private void ConvertMaterials(PssgFile pssg, ExportState state)
-		{
-			var shaders = pssg.FindNodes("SHADERINSTANCE");
-
-			foreach (var shader in shaders)
-			{
-				var id = shader.Attributes["id"].GetValue<string>();
-				var mat = new MaterialBuilder(id);
-
-				mat.WithMetallicRoughnessShader()
-				    .WithMetallicRoughness(0.1f, 0.5f)
-					.WithBaseColor(new Vector4(0.5f, 0.5f, 0.5f, 1));
-
 				mat.UseChannel(KnownChannel.BaseColor).UseTexture()
 					.WithPrimaryImage(new MemoryImage(grayImageBytes))
 					.WithCoordinateSet(0);
+			}
+
+			if (texCoordSets > 1)
+			{
 				mat.UseChannel(KnownChannel.Occlusion).UseTexture()
 					.WithPrimaryImage(new MemoryImage(whiteImageBytes))
 					.WithCoordinateSet(1);
+			}
+
+			if (texCoordSets > 2)
+			{
 				mat.UseChannel(KnownChannel.Emissive).UseTexture()
 					.WithPrimaryImage(new MemoryImage(blackImageBytes))
 					.WithCoordinateSet(2);
+			}
+
+			if (texCoordSets > 3)
+			{
 				mat.UseChannel(KnownChannel.Normal).UseTexture()
 					.WithPrimaryImage(new MemoryImage(blackImageBytes))
 					.WithCoordinateSet(3);
-
-				state.ShaderMaterialMap.Add(id, mat);
 			}
 		}
 	}
