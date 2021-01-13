@@ -513,7 +513,7 @@ namespace EgoEngineLibrary.Graphics
                 case "ui8x4":
                 case "u8x4":
                     dds.header.flags |= DdsHeader.Flags.DDSD_PITCH;
-                    dds.header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value); // is this right?
+                    dds.header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value) * 4; // is this right?
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_ALPHAPIXELS | DdsPixelFormat.Flags.DDPF_RGB;
                     dds.header.ddspf.fourCC = 0;
                     dds.header.ddspf.rGBBitCount = 32;
@@ -549,59 +549,76 @@ namespace EgoEngineLibrary.Graphics
             }
 
             // Byte Data
-            var textureImageBlocks = node.FindNodes("TEXTUREIMAGEBLOCK");
-            if ((uint)node.Attributes["imageBlockCount"].Value > 1)
+
+            if (node.HasAttribute("imageBlockCount"))
             {
-                dds.bdata2 = new Dictionary<int, byte[]>();
-                foreach (var textureImageBlock in textureImageBlocks)
+                var textureImageBlocks = node.FindNodes("TEXTUREIMAGEBLOCK");
+                if ((uint)node.Attributes["imageBlockCount"].Value > 1)
                 {
-                    switch (textureImageBlock.Attributes["typename"].ToString())
+                    dds.bdata2 = new Dictionary<int, byte[]>();
+                    foreach (var textureImageBlock in textureImageBlocks)
                     {
-                        case "Raw":
-                            dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEX;
-                            dds.bdata2.Add(0, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
-                            break;
-                        case "RawNegativeX":
-                            dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEX;
-                            dds.bdata2.Add(1, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
-                            break;
-                        case "RawPositiveY":
-                            dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEY;
-                            dds.bdata2.Add(2, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
-                            break;
-                        case "RawNegativeY":
-                            dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEY;
-                            dds.bdata2.Add(3, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
-                            break;
-                        case "RawPositiveZ":
-                            dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEZ;
-                            dds.bdata2.Add(4, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
-                            break;
-                        case "RawNegativeZ":
-                            dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEZ;
-                            dds.bdata2.Add(5, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
-                            break;
+                        switch (textureImageBlock.Attributes["typename"].ToString())
+                        {
+                            case "Raw":
+                                dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEX;
+                                dds.bdata2.Add(0, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
+                                break;
+                            case "RawNegativeX":
+                                dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEX;
+                                dds.bdata2.Add(1, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
+                                break;
+                            case "RawPositiveY":
+                                dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEY;
+                                dds.bdata2.Add(2, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
+                                break;
+                            case "RawNegativeY":
+                                dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEY;
+                                dds.bdata2.Add(3, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
+                                break;
+                            case "RawPositiveZ":
+                                dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEZ;
+                                dds.bdata2.Add(4, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
+                                break;
+                            case "RawNegativeZ":
+                                dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEZ;
+                                dds.bdata2.Add(5, textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value);
+                                break;
+                        }
                     }
-                }
-                if (cubePreview == true)
-                {
-                    dds.header.caps2 = 0;
-                }
-                else if (dds.bdata2.Count == (uint)node.Attributes["imageBlockCount"].Value)
-                {
-                    dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP;
-                    dds.header.flags = dds.header.flags ^ DdsHeader.Flags.DDSD_LINEARSIZE;
-                    dds.header.pitchOrLinearSize = 0;
-                    dds.header.caps |= DdsHeader.Caps.DDSCAPS_COMPLEX;
+                    if (cubePreview == true)
+                    {
+                        dds.header.caps2 = 0;
+                    }
+                    else if (dds.bdata2.Count == (uint)node.Attributes["imageBlockCount"].Value)
+                    {
+                        dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP;
+                        dds.header.flags = dds.header.flags ^ DdsHeader.Flags.DDSD_LINEARSIZE;
+                        dds.header.pitchOrLinearSize = 0;
+                        dds.header.caps |= DdsHeader.Caps.DDSCAPS_COMPLEX;
+                    }
+                    else
+                    {
+                        throw new Exception("Loading cubemap failed because not all blocks were found. (Read)");
+                    }
                 }
                 else
                 {
-                    throw new Exception("Loading cubemap failed because not all blocks were found. (Read)");
+                    dds.bdata = textureImageBlocks.First().FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value;
                 }
             }
             else
             {
-                dds.bdata = textureImageBlocks.First().FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value;
+                var texImages = node.FindNodes("TEXTUREIMAGE");
+                if (texImages.Count() == 1)
+                {
+                    var texImage = texImages.First();
+                    dds.bdata = texImage.Value;
+                }
+                else
+                {
+                    throw new NotImplementedException("Support for exporting this texture is not implemented.");
+                }
             }
 
             return dds;
@@ -678,90 +695,107 @@ namespace EgoEngineLibrary.Graphics
             {
                 node.Attributes["texelFormat"].Value = Encoding.UTF8.GetString(BitConverter.GetBytes(dds.header.ddspf.fourCC)).ToLower();
             }
-            var textureImageBlocks = node.FindNodes("TEXTUREIMAGEBLOCK");
-            if (dds.bdata2 != null && dds.bdata2.Count > 0)
+
+            if (node.HasAttribute("imageBlockCount"))
             {
-                foreach (var textureImageBlock in textureImageBlocks)
+                var textureImageBlocks = node.FindNodes("TEXTUREIMAGEBLOCK");
+                if (dds.bdata2 != null && dds.bdata2.Count > 0)
                 {
-                    switch (textureImageBlock.Attributes["typename"].ToString())
+                    foreach (var textureImageBlock in textureImageBlocks)
                     {
-                        case "Raw":
-                            if (dds.bdata2.ContainsKey(0) == true)
-                            {
-                                textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[0];
-                                textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[0].Length;
-                            }
-                            else
-                            {
-                                throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
-                            }
-                            break;
-                        case "RawNegativeX":
-                            if (dds.bdata2.ContainsKey(1) == true)
-                            {
-                                textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[1];
-                                textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[1].Length;
-                            }
-                            else
-                            {
-                                throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
-                            }
-                            break;
-                        case "RawPositiveY":
-                            if (dds.bdata2.ContainsKey(2) == true)
-                            {
-                                textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[2];
-                                textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[2].Length;
-                            }
-                            else
-                            {
-                                throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
-                            }
-                            break;
-                        case "RawNegativeY":
-                            if (dds.bdata2.ContainsKey(3) == true)
-                            {
-                                textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[3];
-                                textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[3].Length;
-                            }
-                            else
-                            {
-                                throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
-                            }
-                            break;
-                        case "RawPositiveZ":
-                            if (dds.bdata2.ContainsKey(4) == true)
-                            {
-                                textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[4];
-                                textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[4].Length;
-                            }
-                            else
-                            {
-                                throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
-                            }
-                            break;
-                        case "RawNegativeZ":
-                            if (dds.bdata2.ContainsKey(5) == true)
-                            {
-                                textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[5];
-                                textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[5].Length;
-                            }
-                            else
-                            {
-                                throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
-                            }
-                            break;
+                        switch (textureImageBlock.Attributes["typename"].ToString())
+                        {
+                            case "Raw":
+                                if (dds.bdata2.ContainsKey(0) == true)
+                                {
+                                    textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[0];
+                                    textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[0].Length;
+                                }
+                                else
+                                {
+                                    throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
+                                }
+                                break;
+                            case "RawNegativeX":
+                                if (dds.bdata2.ContainsKey(1) == true)
+                                {
+                                    textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[1];
+                                    textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[1].Length;
+                                }
+                                else
+                                {
+                                    throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
+                                }
+                                break;
+                            case "RawPositiveY":
+                                if (dds.bdata2.ContainsKey(2) == true)
+                                {
+                                    textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[2];
+                                    textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[2].Length;
+                                }
+                                else
+                                {
+                                    throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
+                                }
+                                break;
+                            case "RawNegativeY":
+                                if (dds.bdata2.ContainsKey(3) == true)
+                                {
+                                    textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[3];
+                                    textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[3].Length;
+                                }
+                                else
+                                {
+                                    throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
+                                }
+                                break;
+                            case "RawPositiveZ":
+                                if (dds.bdata2.ContainsKey(4) == true)
+                                {
+                                    textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[4];
+                                    textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[4].Length;
+                                }
+                                else
+                                {
+                                    throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
+                                }
+                                break;
+                            case "RawNegativeZ":
+                                if (dds.bdata2.ContainsKey(5) == true)
+                                {
+                                    textureImageBlock.FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[5];
+                                    textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[5].Length;
+                                }
+                                else
+                                {
+                                    throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
+                                }
+                                break;
+                        }
                     }
+                }
+                else
+                {
+                    if ((uint)node.Attributes["imageBlockCount"].Value > 1)
+                    {
+                        throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
+                    }
+                    textureImageBlocks.First().FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata;
+                    textureImageBlocks.First().Attributes["size"].Value = (UInt32)dds.bdata.Length;
                 }
             }
             else
             {
-                if ((uint)node.Attributes["imageBlockCount"].Value > 1)
+                var texImages = node.FindNodes("TEXTUREIMAGE");
+                if (texImages.Count() == 1)
                 {
-                    throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
+                    var texImage = texImages.First();
+                    texImage.Value = dds.bdata;
                 }
-                textureImageBlocks.First().FindNodes("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata;
-                textureImageBlocks.First().Attributes["size"].Value = (UInt32)dds.bdata.Length;
+                else
+                {
+                    throw new NotImplementedException("Support for importing this texture is not implemented.");
+                }
             }
         }
     }

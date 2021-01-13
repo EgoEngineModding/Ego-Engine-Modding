@@ -61,7 +61,7 @@ namespace EgoPssgEditor.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ego PSSG Editor 12.0 Beta 8.
+        ///   Looks up a localized string similar to Ego PSSG Editor 12.0 Beta 9.
         /// </summary>
         internal static string AppTitleLong {
             get {
@@ -70,7 +70,7 @@ namespace EgoPssgEditor.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to EPE 12.0 Beta 8.
+        ///   Looks up a localized string similar to EPE 12.0 Beta 9.
         /// </summary>
         internal static string AppTitleShort {
             get {

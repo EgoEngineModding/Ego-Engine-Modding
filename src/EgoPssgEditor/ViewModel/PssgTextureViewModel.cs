@@ -40,7 +40,7 @@ namespace EgoPssgEditor.ViewModel
             get { return (int)(uint)Texture.Attributes["height"].Value; }
         }
         private string Format => (string)Texture.Attributes["texelFormat"].Value;
-        private uint MipMaps => (uint)Texture.Attributes["numberMipMapLevels"].Value;
+        private uint MipMaps => Texture.HasAttribute("numberMipMapLevels") ? Texture.Attributes["numberMipMapLevels"].GetValue<uint>() : 0u;
         public string TextureInfo => $"{Width}x{Height} MipMaps: {MipMaps} Format: {Format}";
 
         #region Presentation Props
@@ -95,6 +95,7 @@ namespace EgoPssgEditor.ViewModel
         public void GetPreview()
         {
             Image<Rgba32> image = null;
+            bool ddsReadSuccess = false;
             try
             {
                 Preview = null;
@@ -104,6 +105,7 @@ namespace EgoPssgEditor.ViewModel
                 {
                     var dds = Texture.ToDdsFile(false);
                     dds.Write(ms, -1);
+                    ddsReadSuccess = true;
                     ms.Seek(0, SeekOrigin.Begin);
 
                     BcDecoder decoder = new BcDecoder();
@@ -131,7 +133,10 @@ namespace EgoPssgEditor.ViewModel
             catch (Exception ex)
             {
                 Preview = null;
-                this.PreviewError = "Could not create preview! Export/Import may still work in certain circumstances." + Environment.NewLine + Environment.NewLine + ex.Message;
+                if (ddsReadSuccess)
+                    this.PreviewError = "Could not create preview! Export/Import may still work." + Environment.NewLine + Environment.NewLine + ex.Message;
+                else
+                    this.PreviewError = "Could not create preview! Failed to convert pssg texture to dds." + Environment.NewLine + Environment.NewLine + ex.Message;
                 this.PreviewErrorVisibility = Visibility.Visible;
             }
             finally
