@@ -60,7 +60,12 @@ namespace EgoEngineLibrary.Formats.Pssg
 			}
 		}
 
-		protected static Matrix4x4 getTransform(byte[] buffer)
+		protected static Matrix4x4 GetTransform(PssgNode sceneNode)
+		{
+			var transformNode = sceneNode.FindNodes("TRANSFORM").First();
+			return GetTransform(transformNode.Value);
+		}
+		private static Matrix4x4 GetTransform(byte[] buffer)
 		{
 			Matrix4x4 t = new Matrix4x4();
 			MiscUtil.Conversion.BigEndianBitConverter bc = new MiscUtil.Conversion.BigEndianBitConverter();

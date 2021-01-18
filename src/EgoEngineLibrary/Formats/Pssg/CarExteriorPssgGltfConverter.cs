@@ -13,7 +13,7 @@ using System.Numerics;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
-    public class CarPssgGltfConverter : PssgGltfConverter
+    public class CarExteriorPssgGltfConverter : PssgGltfConverter
 	{
 		private class ExportState : PssgModelReaderState
 		{
@@ -62,7 +62,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 			{
 				string name = (string)node.Attributes["id"].Value;
 				gltfNode = new NodeBuilder(name);
-				gltfNode.LocalTransform = getTransform((byte[])node.ChildNodes[0].Value);
+				gltfNode.LocalTransform = GetTransform(node);
 			}
 			else if (node.Name == "MATRIXPALETTEJOINTNODE")
 			{
@@ -77,7 +77,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 			{
 				string name = (string)node.Attributes["id"].Value;
 				gltfNode = parent.CreateNode(name);
-				gltfNode.LocalTransform = getTransform((byte[])node.ChildNodes[0].Value);
+				gltfNode.LocalTransform = GetTransform(node);
 			}
 
 			foreach (var child in node.ChildNodes)
@@ -90,7 +90,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 		{
 			string name = (string)mpjnNode.Attributes["id"].Value;
 			NodeBuilder node = parent.CreateNode(name);
-			node.LocalTransform = getTransform((byte[])mpjnNode.ChildNodes[0].Value);
+			node.LocalTransform = GetTransform(mpjnNode);
 
 			var mesh = ConvertMesh(mpjnNode, state);
 			sceneBuilder.AddRigidMesh(mesh, node);

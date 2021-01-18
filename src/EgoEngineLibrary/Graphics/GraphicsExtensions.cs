@@ -2,7 +2,6 @@
 using EgoEngineLibrary.Archive.Erp.Data;
 using EgoEngineLibrary.Graphics.Dds;
 using K4os.Compression.LZ4;
-using MiscUtil.Conversion;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -512,8 +511,8 @@ namespace EgoEngineLibrary.Graphics
                     break;
                 case "ui8x4":
                 case "u8x4":
-                    dds.header.flags |= DdsHeader.Flags.DDSD_PITCH;
-                    dds.header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value) * 4; // is this right?
+                    dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    dds.header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value) * 4;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_ALPHAPIXELS | DdsPixelFormat.Flags.DDPF_RGB;
                     dds.header.ddspf.fourCC = 0;
                     dds.header.ddspf.rGBBitCount = 32;
@@ -523,21 +522,19 @@ namespace EgoEngineLibrary.Graphics
                     dds.header.ddspf.aBitMask = 0xFF000000;
                     break;
                 case "u8":
-                    dds.header.flags |= DdsHeader.Flags.DDSD_PITCH;
-                    dds.header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value); // is this right?
-                    // Interchanging the commented values will both work, not sure which is better
+                    dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    dds.header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value);
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_LUMINANCE;
-                    //header.ddspf.flags |= DDS_PIXELFORMAT.Flags.DDPF_ALPHA;
                     dds.header.ddspf.fourCC = 0;
                     dds.header.ddspf.rGBBitCount = 8;
                     dds.header.ddspf.rBitMask = 0xFF;
-                    //header.ddspf.aBitMask = 0xFF;
                     break;
                 default:
                     throw new NotSupportedException("Texel format not supported.");
             }
 
             // Mip Maps
+            dds.header.mipMapCount = 1;
             if (node.HasAttribute("automipmap") == true && node.HasAttribute("numberMipMapLevels") == true)
             {
                 if ((uint)node.Attributes["automipmap"].Value == 0 && (uint)node.Attributes["numberMipMapLevels"].Value > 0)

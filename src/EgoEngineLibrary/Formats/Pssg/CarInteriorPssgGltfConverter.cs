@@ -61,7 +61,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 			{
 				string name = (string)node.Attributes["id"].Value;
 				gltfNode = new NodeBuilder(name);
-				gltfNode.LocalTransform = getTransform((byte[])node.ChildNodes[0].Value);
+				gltfNode.LocalTransform = GetTransform(node);
 			}
 			else if (node.Name == "RENDERNODE")
 			{
@@ -71,7 +71,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 			{
 				string name = (string)node.Attributes["id"].Value;
 				gltfNode = parent.CreateNode(name);
-				gltfNode.LocalTransform = getTransform((byte[])node.ChildNodes[0].Value);
+				gltfNode.LocalTransform = GetTransform(node);
 			}
 			else
 			{
@@ -88,7 +88,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 		{
 			string name = (string)renderNode.Attributes["id"].Value;
 			NodeBuilder node = parent.CreateNode(name);
-			node.LocalTransform = getTransform((byte[])renderNode.ChildNodes[0].Value);
+			node.LocalTransform = GetTransform(renderNode);
 
 			var mesh = ConvertMesh(renderNode, state);
 			sceneBuilder.AddRigidMesh(mesh, node);

@@ -85,7 +85,7 @@ namespace EgoPssgEditor.Models3d
         {
             try
             {
-                return _pssg != null && CarPssgGltfConverter.SupportsPssg(_pssg);
+                return _pssg != null && CarExteriorPssgGltfConverter.SupportsPssg(_pssg);
             }
             catch { return false; }
         }
@@ -105,7 +105,7 @@ namespace EgoPssgEditor.Models3d
             {
                 try
                 {
-                    CarPssgGltfConverter converter = new CarPssgGltfConverter();
+                    CarExteriorPssgGltfConverter converter = new CarExteriorPssgGltfConverter();
                     var model = converter.Convert(_pssg);
                     model.Save(dialog.FileName);
                 }
