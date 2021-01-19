@@ -12,8 +12,10 @@ namespace EgoEngineLibrary.Formats.Pssg
 {
     public class GltfCarInteriorPssgConverter
     {
-        private class ImportState : PssgModelWriterState
+        protected class ImportState : PssgModelWriterState
         {
+            public string RenderNodeName { get; protected set; }
+
             public int RenderStreamInstanceCount { get; set; }
 
             public int SegmentSetCount { get; set; }
@@ -32,6 +34,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             public ImportState(PssgNode rdsLib, PssgNode ribLib, Dictionary<string, ShaderInputInfo> shaderGroupMap)
             {
+                RenderNodeName = "RENDERNODE";
                 RdsLib = rdsLib;
                 RibLib = ribLib;
                 ShaderGroupMap = shaderGroupMap;
@@ -41,7 +44,7 @@ namespace EgoEngineLibrary.Formats.Pssg
                     IsF1 = true;
             }
         }
-        private class ShaderInstanceData
+        protected class ShaderInstanceData
         {
             public string ShaderInstanceName { get; }
 
@@ -60,6 +63,11 @@ namespace EgoEngineLibrary.Formats.Pssg
         public static bool SupportsPssg(PssgFile pssg)
         {
             return pssg.FindNodes("RENDERNODE").Any();
+        }
+
+        protected virtual ImportState CreateState(PssgNode rdsLib, PssgNode ribLib, Dictionary<string, ShaderInputInfo> shaderGroupMap)
+        {
+            return new ImportState(rdsLib, ribLib, shaderGroupMap);
         }
 
         public void Convert(ModelRoot gltf, PssgFile pssg)
@@ -89,7 +97,7 @@ namespace EgoEngineLibrary.Formats.Pssg
                 ribLib = nodeLib;
             }
 
-            var state = new ImportState(rdsLib, ribLib, ShaderInputInfo.CreateFromPssg(pssg).ToDictionary(si => si.ShaderGroupId));
+            var state = CreateState(rdsLib, ribLib, ShaderInputInfo.CreateFromPssg(pssg).ToDictionary(si => si.ShaderGroupId));
 
             // Clear out the libraries
             nodeLib.RemoveChildNodes(nodeLib.ChildNodes.Where(n => n.Name == "ROOTNODE"));
@@ -141,7 +149,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 
         private static PssgNode CreateRenderNode(PssgNode parent, Node gltfNode, ImportState state)
         {
-            PssgNode node = new PssgNode("RENDERNODE", parent.File, parent);
+            PssgNode node = new PssgNode(state.RenderNodeName, parent.File, parent);
             node.AddAttribute("stopTraversal", 0u);
             node.AddAttribute("nickname", gltfNode.Name);
             node.AddAttribute("id", gltfNode.Name);

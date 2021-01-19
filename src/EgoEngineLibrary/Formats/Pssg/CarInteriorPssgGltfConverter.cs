@@ -15,10 +15,13 @@ namespace EgoEngineLibrary.Formats.Pssg
 {
 	public class CarInteriorPssgGltfConverter : PssgGltfConverter
 	{
-		private class ExportState : PssgModelReaderState
+		protected class ExportState : PssgModelReaderState
 		{
+			public string RenderNodeName { get; protected set; }
+
 			public ExportState()
 			{
+				RenderNodeName = "RENDERNODE";
 			}
 		}
 
@@ -27,11 +30,16 @@ namespace EgoEngineLibrary.Formats.Pssg
 			return pssg.FindNodes("RENDERNODE").Any();
 		}
 
+		protected virtual ExportState CreateState()
+		{
+			return new ExportState();
+		}
+
 		public ModelRoot Convert(PssgFile pssg)
 		{
 			var sceneBuilder = new SceneBuilder();
 
-			var state = new ExportState();
+			var state = CreateState();
 
 			// F1 games use lib YYY
 			var parent = pssg.FindNodes("LIBRARY", "type", "NODE").FirstOrDefault();
@@ -63,7 +71,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 				gltfNode = new NodeBuilder(name);
 				gltfNode.LocalTransform = GetTransform(node);
 			}
-			else if (node.Name == "RENDERNODE")
+			else if (node.Name == state.RenderNodeName)
 			{
 				gltfNode = CreateMeshNode(sceneBuilder, node, parent, state);
 			}

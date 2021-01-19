@@ -63,6 +63,9 @@
             <MenuItem Header="_Models">
                 <MenuItem Header="_Export Car" Command="{Binding Path=ModelsWorkspace.Export}"></MenuItem>
                 <MenuItem Header="_Import Car" Command="{Binding Path=ModelsWorkspace.Import}"></MenuItem>
+                <Separator/>
+                <MenuItem Header="Export Di_rt Car" Command="{Binding Path=ModelsWorkspace.ExportDirt}"></MenuItem>
+                <MenuItem Header="Import _Dirt Car" Command="{Binding Path=ModelsWorkspace.ImportDirt}"></MenuItem>
                 <MenuItem Header="Import _Grid Car" Command="{Binding Path=ModelsWorkspace.ImportGrid}"></MenuItem>
                 <Separator/>
                 <MenuItem Header="Export _Car Interior" Command="{Binding Path=ModelsWorkspace.ExportCarInterior}"></MenuItem>

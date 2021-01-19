@@ -10,15 +10,7 @@ using System.Text.RegularExpressions;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
-    // Starting with Dirt 2 and F1 2010:
-    // - the MatrixPaletteNode has MatrixPaletteRenderInstance instead of RenderStreamInstance
-    // - MatrixPaletteRenderInstance now holds the jointCount and MatrixPaletteSkinJoint instead
-    // - the MatrixPaletteJoinNode has MatrixPaletteJointRenderInstance instead of MatrixPaletteRenderInstance
-    // - MatrixPaletteJointRenderInstance now holds the jointId instead (jointId is now unique per shader instead of per MatrixPaletteBundleNode)
-    // - The DataBlocks are rearranged in how they hold the data, and ST is float4 instead of float2 (assuming this means 2 sets of tex coords)
-    // Starting with Dirt 3:
-    // - The DataBlocks with ST/Tangent/Binormal now use half4/half4/half4 instead of float4/float3/float3
-    public class GltfDirt2F1CarPssgConverter
+    public class GltfGridCarExteriorPssgConverter
     {
         private class ImportState : PssgModelWriterState
         {
@@ -28,11 +20,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             public int RenderDataSourceCount { get; set; }
 
-            public PssgNode RdsLib { get; }
-
-            public PssgNode RibLib { get; }
-
-            public bool IsF1 { get; }
+            public uint JointId { get; set; }
 
             public Dictionary<string, ShaderInputInfo> ShaderGroupMap { get; }
 
@@ -40,16 +28,11 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             public Regex LodMatcher { get; }
 
-            public ImportState(PssgNode rdsLib, PssgNode ribLib, Dictionary<string, ShaderInputInfo> shaderGroupMap)
+            public ImportState(Dictionary<string, ShaderInputInfo> shaderGroupMap)
             {
-                RdsLib = rdsLib;
-                RibLib = ribLib;
                 ShaderGroupMap = shaderGroupMap;
                 MatShaderMapping = new Dictionary<int, ShaderInstanceData>();
                 LodMatcher = new Regex("^LOD([0-9]+)_$", RegexOptions.CultureInvariant);
-
-                if (rdsLib == ribLib)
-                    IsF1 = true;
             }
         }
         private class ShaderInstanceData
@@ -60,20 +43,18 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             public RenderDataSourceWriter Rds { get; }
 
-            public List<string> JointNames { get; }
-
             public ShaderInstanceData(string shaderInstanceName, string shaderGroupName, RenderDataSourceWriter rds)
             {
                 ShaderInstanceName = shaderInstanceName;
                 ShaderGroupName = shaderGroupName;
                 Rds = rds;
-                JointNames = new List<string>();
             }
         }
 
         public static bool SupportsPssg(PssgFile pssg)
         {
-            return pssg.FindNodes("MATRIXPALETTEJOINTRENDERINSTANCE").Any();
+            var rsiNodes = pssg.FindNodes("RENDERSTREAMINSTANCE");
+            return rsiNodes.Any() && rsiNodes.First().ParentNode?.Name == "MATRIXPALETTENODE";
         }
 
         public void Convert(ModelRoot gltf, PssgFile pssg)
@@ -85,25 +66,11 @@ namespace EgoEngineLibrary.Formats.Pssg
                 throw new InvalidDataException("The default scene must have node name starting with `Scene Root`.");
 
             // Determine libraries in which to store data
-            var nodeLib = pssg.FindNodes("LIBRARY", "type", "NODE").FirstOrDefault();
-            PssgNode rdsLib; PssgNode ribLib;
-            if (nodeLib is not null)
-            {
-                rdsLib = pssg.FindNodes("LIBRARY", "type", "RENDERDATASOURCE").First();
-                ribLib = pssg.FindNodes("LIBRARY", "type", "RENDERINTERFACEBOUND").First();
-            }
-            else
-            {
-                // F1 games use YYY, and put almost everything in this lib
-                nodeLib = pssg.FindNodes("LIBRARY", "type", "YYY").FirstOrDefault();
-                if (nodeLib is null)
-                    throw new InvalidDataException("Could not find library with scene nodes.");
+            var nodeLib = pssg.FindNodes("LIBRARY", "type", "NODE").First();
+            var rdsLib = pssg.FindNodes("LIBRARY", "type", "RENDERDATASOURCE").First();
+            var ribLib = pssg.FindNodes("LIBRARY", "type", "RENDERINTERFACEBOUND").First();
 
-                rdsLib = nodeLib;
-                ribLib = nodeLib;
-            }
-
-            var state = new ImportState(rdsLib, ribLib, ShaderInputInfo.CreateFromPssg(pssg).ToDictionary(si => si.ShaderGroupId));
+            var state = new ImportState(ShaderInputInfo.CreateFromPssg(pssg).ToDictionary(si => si.ShaderGroupId));
 
             // Clear out the libraries
             nodeLib.RemoveChildNodes(nodeLib.ChildNodes.Where(n => n.Name == "ROOTNODE"));
@@ -172,27 +139,33 @@ namespace EgoEngineLibrary.Formats.Pssg
             node.ChildNodes.Add(bboxNode);
 
             state.LodNumber = lodNumber;
+            state.JointId = 0;
             state.MatShaderMapping.Clear();
 
+            List<string> jointNames = new List<string>();
             foreach (var child in gltfNode.VisualChildren)
             {
                 if (child.Mesh is null) continue;
                 if (child.Mesh.Primitives.Count == 0) continue;
 
                 CreateMatrixPaletteJointNode(node, child, state);
+                jointNames.Add(node.ChildNodes.Last().Attributes["id"].GetValue<string>());
             }
 
-            CreateMatrixPaletteNode(node, state);
+            CreateMatrixPaletteNode(node, jointNames, state);
 
             // Write the mesh data
-            WriteMeshData(state);
+            var rdsLib = node.File.FindNodes("LIBRARY", "type", "RENDERDATASOURCE").First();
+            var ribLib = node.File.FindNodes("LIBRARY", "type", "RENDERINTERFACEBOUND").First();
+            WriteMeshData(rdsLib, ribLib, state);
 
             return node;
         }
 
-        private static void CreateMatrixPaletteNode(PssgNode parent, ImportState state)
+        private static void CreateMatrixPaletteNode(PssgNode parent, List<string> jointNames, ImportState state)
         {
             var node = new PssgNode("MATRIXPALETTENODE", parent.File, parent);
+            node.AddAttribute("jointCount", state.JointId);
             node.AddAttribute("stopTraversal", 0u);
             node.AddAttribute("id", $"x{state.LodNumber}_MPN");
             parent.ChildNodes.Add(node);
@@ -207,8 +180,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             foreach (var shader in state.MatShaderMapping.Values)
             {
-                var rsiNode = new PssgNode("MATRIXPALETTERENDERINSTANCE", node.File, node);
-                rsiNode.AddAttribute("jointCount", (uint)shader.JointNames.Count);
+                var rsiNode = new PssgNode("RENDERSTREAMINSTANCE", node.File, node);
                 rsiNode.AddAttribute("sourceCount", 1u);
                 rsiNode.AddAttribute("indices", $"#{shader.Rds.Name}");
                 rsiNode.AddAttribute("streamCount", 0u);
@@ -219,27 +191,30 @@ namespace EgoEngineLibrary.Formats.Pssg
                 var risNode = new PssgNode("RENDERINSTANCESOURCE", rsiNode.File, rsiNode);
                 risNode.AddAttribute("source", $"#{shader.Rds.Name}");
                 rsiNode.ChildNodes.Add(risNode);
+            }
 
-                foreach (var jointName in shader.JointNames)
-                {
-                    var mpsjNode = new PssgNode("MATRIXPALETTESKINJOINT", rsiNode.File, rsiNode);
-                    mpsjNode.AddAttribute("joint", $"#{jointName}");
-                    rsiNode.ChildNodes.Add(mpsjNode);
-                }
+            foreach (var jointName in jointNames)
+            {
+                var mpsjNode = new PssgNode("MATRIXPALETTESKINJOINT", node.File, node);
+                mpsjNode.AddAttribute("joint", $"#{jointName}");
+                node.ChildNodes.Add(mpsjNode);
             }
         }
 
         private static void CreateMatrixPaletteJointNode(PssgNode parent, Node gltfNode, ImportState state)
         {
             var node = new PssgNode("MATRIXPALETTEJOINTNODE", parent.File, parent);
-            node.AddAttribute("matrixPalette", $"#x{state.LodNumber}_MPN");
             node.AddAttribute("stopTraversal", 0u);
             node.AddAttribute("nickname", gltfNode.Name);
             node.AddAttribute("id", gltfNode.Name);
+            node.AddAttribute("jointID", state.JointId);
+            node.AddAttribute("matrixPalette", $"#x{state.LodNumber}_MPN");
             parent.ChildNodes.Add(node);
 
             // Now add a new mesh from mesh builder
             ConvertMesh(node, gltfNode, state);
+
+            state.JointId++;
         }
 
         private static void ConvertMesh(PssgNode mpjnNode, Node gltfNode, ImportState state)
@@ -285,12 +260,11 @@ namespace EgoEngineLibrary.Formats.Pssg
                 var tris = p.TriangleIndices.ToArray();
                 var baseVertexIndex = rds.Positions.Count;
 
-                var mpriNode = new PssgNode("MATRIXPALETTEJOINTRENDERINSTANCE", mpjnNode.File, mpjnNode);
+                var mpriNode = new PssgNode("MATRIXPALETTERENDERINSTANCE", mpjnNode.File, mpjnNode);
                 mpriNode.AddAttribute("streamOffset", (uint)(rds.Positions.Count));
                 mpriNode.AddAttribute("elementCountFromOffset", (uint)(p.VertexCount));
                 mpriNode.AddAttribute("indexOffset", (uint)(rds.Indices.Count));
                 mpriNode.AddAttribute("indicesCountFromOffset", (uint)(tris.Length * 3));
-                mpriNode.AddAttribute("jointID", (uint)shaderData.JointNames.Count);
                 mpriNode.AddAttribute("sourceCount", 1u);
                 mpriNode.AddAttribute("indices", $"#{rds.Name}");
                 mpriNode.AddAttribute("streamCount", 0u);
@@ -302,21 +276,13 @@ namespace EgoEngineLibrary.Formats.Pssg
                 risNode.AddAttribute("source", $"#{shaderData.Rds.Name}");
                 mpriNode.ChildNodes.Add(risNode);
 
-                var texCoordSet0 = GetDiffuseBaseColorTexCoord(p.Material);
-                var texCoordSet1 = GetOcclusionTexCoord(p.Material);
-                var texCoordSet2 = GetEmissiveTexCoord(p.Material);
-                var texCoordSet3 = GetNormalTexCoord(p.Material);
-
-                if (state.IsF1)
-                {
-                    // F1 stores spec occ first, then diffuse
-                    var temp = texCoordSet0;
-                    texCoordSet0 = texCoordSet1;
-                    texCoordSet1 = temp;
-                }
+                var texCoordSet = GetDiffuseBaseColorTexCoord(p.Material);
+                string texCoordAccessorName = $"TEXCOORD_{texCoordSet}";
 
                 // Make sure we have all the necessary data
                 if (p.VertexCount < 3) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have at least 3 positions.");
+
+                if (p.TexCoordsCount <= texCoordSet) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have tex coord set {texCoordSet}.");
 
                 // Grab the data
                 for (int i = 0; i < p.VertexCount; ++i)
@@ -335,12 +301,9 @@ namespace EgoEngineLibrary.Formats.Pssg
                     rds.Positions.Add(pos);
                     rds.Normals.Add(p.GetNormal(i));
                     rds.Tangents.Add(p.GetTangent(i));
-                    rds.TexCoords0.Add(p.GetTextureCoord(i, texCoordSet0));
-                    rds.TexCoords1.Add(p.GetTextureCoord(i, texCoordSet1));
-                    rds.TexCoords2.Add(p.GetTextureCoord(i, texCoordSet2));
-                    rds.TexCoords3.Add(p.GetTextureCoord(i, texCoordSet3));
+                    rds.TexCoords0.Add(p.GetTextureCoord(i, texCoordSet));
                     rds.Colors.Add(PackColor(color));
-                    rds.SkinIndices.Add(shaderData.JointNames.Count);
+                    rds.SkinIndices.Add(state.JointId);
                 }
 
                 foreach (var tri in p.TriangleIndices)
@@ -353,9 +316,6 @@ namespace EgoEngineLibrary.Formats.Pssg
                     rds.Indices.Add((ushort)b);
                     rds.Indices.Add((ushort)c);
                 }
-
-                // Add the matrixpalletejointnode id to the shader's joint list
-                shaderData.JointNames.Add(gltfNode.Name);
             }
 
             bboxNode.Value = GetBoundingBoxData(minExtent, maxExtent);
@@ -379,27 +339,6 @@ namespace EgoEngineLibrary.Formats.Pssg
                 if (channel.HasValue) return channel.Value.TextureCoordinate;
 
                 return 0;
-            }
-            static int GetOcclusionTexCoord(Material srcMaterial)
-            {
-                var channel = srcMaterial.FindChannel("Occlusion");
-                if (channel.HasValue) return channel.Value.TextureCoordinate;
-
-                return GetDiffuseBaseColorTexCoord(srcMaterial);
-            }
-            static int GetEmissiveTexCoord(Material srcMaterial)
-            {
-                var channel = srcMaterial.FindChannel("Emissive");
-                if (channel.HasValue) return channel.Value.TextureCoordinate;
-
-                return GetDiffuseBaseColorTexCoord(srcMaterial);
-            }
-            static int GetNormalTexCoord(Material srcMaterial)
-            {
-                var channel = srcMaterial.FindChannel("Normal");
-                if (channel.HasValue) return channel.Value.TextureCoordinate;
-
-                return GetDiffuseBaseColorTexCoord(srcMaterial);
             }
         }
 
@@ -425,15 +364,15 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
         }
 
-        private static void WriteMeshData(ImportState state)
+        private static void WriteMeshData(PssgNode rdsLib, PssgNode ribLib, ImportState state)
         {
             foreach (var shader in state.MatShaderMapping.Values)
             {
                 var rds = shader.Rds;
-                if (!state.ShaderGroupMap.TryGetValue(shader.ShaderGroupName, out var shaderInputInfo))
+                if (!state.ShaderGroupMap.TryGetValue(shader.ShaderGroupName, out var shaderInput))
                     throw new InvalidDataException($"The pssg does not have existing data blocks to model the layout of the input for shader {shader.ShaderGroupName}.");
 
-                rds.Write(shaderInputInfo, state.RdsLib, state.RibLib, state);
+                rds.Write(shaderInput, rdsLib, ribLib, state);
             }
         }
 

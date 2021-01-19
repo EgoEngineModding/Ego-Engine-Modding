@@ -39,8 +39,8 @@ namespace EgoEngineLibrary.Formats.Pssg
             static ShaderInputInfo? GetShaderInfo(PssgNode rdsNode, HashSet<string> visitedShaders)
             {
                 var rdsId = rdsNode.Attributes["id"].GetValue<string>();
-                var risNode = rdsNode.File.FindNodes("RENDERINSTANCESOURCE", "source", '#' + rdsId).First();
-                var shaderInstanceId = risNode.ParentNode?.Attributes["shader"].GetValue<string>().Substring(1);
+                var risNode = rdsNode.File.FindNodes("RENDERINSTANCESOURCE", "source", '#' + rdsId).FirstOrDefault();
+                var shaderInstanceId = risNode?.ParentNode?.Attributes["shader"].GetValue<string>().Substring(1);
                 if (shaderInstanceId is null)
                     return null;
 

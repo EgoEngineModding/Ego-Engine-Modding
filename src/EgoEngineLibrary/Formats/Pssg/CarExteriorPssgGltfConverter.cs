@@ -73,11 +73,15 @@ namespace EgoEngineLibrary.Formats.Pssg
 				// do nothing for this node
 				return;
 			}
-			else
+			else if (node.Name == "NODE" || node.Name == "MATRIXPALETTEBUNDLENODE")
 			{
 				string name = (string)node.Attributes["id"].Value;
 				gltfNode = parent.CreateNode(name);
 				gltfNode.LocalTransform = GetTransform(node);
+			}
+			else
+			{
+				throw new NotImplementedException($"Support for node {node.Name} not implemented.");
 			}
 
 			foreach (var child in node.ChildNodes)
