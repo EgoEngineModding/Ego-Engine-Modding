@@ -106,25 +106,17 @@
         <h2><a name="Reqs"></a>Requirements</h2>
         <ul>
             <li>.NET 5.0 Desktop Runtime (x64 or x86 depending on your OS)</li>
-            <li>DDS Image/File Editor (with DX10 support)</li>
         </ul>
         <h2><a name="Inst"></a>Installation</h2>
         <p>To install, simply <em>EXTRACT</em> everything from the zip file to a desired location, and run the <em>Ego PSSG Editor.exe</em> file.</p>
     </div>
     <div class="readme-main">
         <h2><a name="EdIn"></a>Editor Information</h2>
-        <p>This tool will allow you to open and edit PSSG files for the EGO engine games.</p>
-
-        Features:
-        <ul>
-            <li><strong>Create from Scratch</strong> -- Build new PSSG files starting from zero.</li>
-            <li><strong>Edit Anything</strong> -- Now edit just about every part of the PSSG you please.</li>
-            <li><strong>Textures</strong> -- Special sections concentrated to help you edit PSSG textures.</li>
-            <li><strong>Models</strong> -- Ability to export and import car models to and from glTF files.</li>
-            <li><strong>Preview</strong> -- Lets you see any texture/cubemap from the PSSG before you have to export.</li>
-            <li><strong>DDS Conversion</strong> -- Complete dds conversion that lets you change many things such as format, resolution, and mip maps.</li>
-            <li><strong>Open With</strong> -- Allows you to choose "Open With" and select this program to open PSSG.</li>
-        </ul>
+        <p>
+            This tool will allow you to open and edit PSSG files for the EGO engine games.
+            Textures can be previewed and modified through DDS conversion.
+            Car models can be modified through glTF conversion.
+        </p>
         <h2><a name="Usag"></a>Usage</h2>
         <p>After turning on the program simply click File -&gt; Open and select a PSSG to edit.</p>
 
@@ -159,6 +151,34 @@
             <li>Now just press the Remove button on the bottom. If no row is selected then a Node/Node Info will be removed instead.</li>
             <li>Type in a new name for your texture, make sure it is unique and press <em>OK</em>.</li>
         </ol>
+
+        <h3>Working with Car Models</h3>
+        <p>When a pssg file contains a car exterior or interior model, you can use the Models menu in the top bar to export or import the model. Models are converted as glTF files.</p>
+        <p>
+            glTF files are a common 3D model format supported by many 3D modelling applications such as 3ds Max, and Blender.
+            glTF files can be saved in two different formats or file extensions. They can be saved with the glb extension which contains all the data in a binary format.
+            They can also be saved with the gltf extension which will contain the structure of the model as JSON data, with a potential to also include separate ".bin"
+            and image files to store additional data.
+        </p>
+        <p>
+            Each mesh in the model is made up of several primitives where each primitive is tied to a different shader material (or shader instance).
+            Shader instances reference the shader used to render the model, and define the inputs to the shader. Each game uses many different shaders
+            which take various inputs. There is no easy way to export or import this shader data to another format. Because of this, the model importers
+            require the materials in your glTF model to be named the same as the existing ShaderInstances within the pssg.
+        </p>
+        <p>
+            Certain shaders take more than one UV map per mesh as an input. Unfortunately the pssg does not store which texture or purpose each UV map is used for.
+            Instead each UV map is mapped to an arbitrary texture in the glTF that may or may not be the actual purpose for the UV map. For example, I always map
+            the 2nd UV map tied to a mesh as the occlusion texture. The UV map may not be meant to be used as occlusion texture, but it is a way for the importer
+            to know how to figure out which UV map in the mesh to store at which position in the shader input. The following shows the expectation of the importer
+            for each UV map. Note that the importer supports up to 4 uv maps. Each mesh may use anywhere from 0-4 uv maps.
+        </p>
+        <ul>
+            <li>1st UV map in pssg is always mapped to the Diffuse/Base Color texture in the glTF</li>
+            <li>2nd UV map in pssg is always mapped to the Occlusion texture in the glTF</li>
+            <li>3rd UV map in pssg is always mapped to the Emissive texture in the glTF</li>
+            <li>4th UV map in pssg is always mapped to the Normal texture in the glTF</li>
+        </ul>
     </div>
     <div class="readme-main">
         <h2><a name="Supp"></a>Support</h2>
@@ -173,10 +193,10 @@
         <h2><a name="Chan"></a>Changelog</h2>
         <ul>
             <li>
-                <strong>12.0.0+20210122</strong>
+                <strong>12.0.0+20210118</strong>
                 <ul>
                     <li>Added support for exporting and importing car models</li>
-                    <li>Added support for xml compressed pssg files</li>
+                    <li>Added support for compressed xml pssg files</li>
                     <li>Changed .NET Framework to .NET 5.0</li>
                 </ul>
             </li>

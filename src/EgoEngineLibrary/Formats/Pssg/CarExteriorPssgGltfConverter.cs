@@ -128,7 +128,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 			foreach (var prim in primitiveDatas)
 			{
 				if (prim.CreatedNewMaterial)
-					ConvertMaterial(prim.Node.File, prim.Material, texCoordSets);
+					ConvertMaterial(prim.Node.File, prim.Material, prim.Rds.TexCoordSetCount);
 
 				var pb = mb.UsePrimitive(prim.Material);
 				var rds = prim.Rds;
