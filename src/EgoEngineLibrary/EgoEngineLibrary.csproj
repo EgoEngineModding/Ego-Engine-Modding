@@ -21,13 +21,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BCnEncoder.Net" Version="1.2.3" />
+    <PackageReference Include="BCnEncoder.Net.ImageSharp" Version="1.0.4" />
     <PackageReference Include="K4os.Compression.LZ4" Version="1.1.11" />
-    <PackageReference Include="Microsoft.Toolkit" Version="7.0.0-preview4" />
+    <PackageReference Include="Microsoft.Toolkit.Diagnostics" Version="7.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="SharpGLTF.Toolkit" Version="1.0.0-alpha0020" />
+    <PackageReference Include="SharpGLTF.Toolkit" Version="1.0.0-alpha0022" />
     <PackageReference Include="SharpZipLib" Version="1.2.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
     <PackageReference Include="System.IO.Packaging" Version="5.0.0" />
     <PackageReference Include="Zstandard.Net" Version="1.1.7" />
   </ItemGroup>

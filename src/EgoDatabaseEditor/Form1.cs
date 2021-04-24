@@ -26,7 +26,8 @@ namespace EgoDatabaseEditor
             InitializeComponent();
             tmppppToolStripMenuItem.Visible = false;
             this.Icon = Icon.ExtractAssociatedIcon(System.Reflection.Assembly.GetExecutingAssembly().Location);
-			dbFile = new DatabaseFile();
+			ClearInterface();
+
             // Load Schema List
             foreach (string schemaPath in Directory.GetFiles(Path.Combine(Application.StartupPath, "schema"), "schema*.xml", SearchOption.TopDirectoryOnly))
             {
@@ -43,7 +44,7 @@ namespace EgoDatabaseEditor
         }
 		private void Form1_FormClosing(object sender, FormClosingEventArgs e) {
 			if (dbFile.HasChanges() == true) {
-				if (MessageBox.Show("The data in the database has changed." + Environment.NewLine + Environment.NewLine + "Are you sure you want to quit?", "Ryder Database Editor", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel) {
+				if (MessageBox.Show("The data in the database has changed." + Environment.NewLine + Environment.NewLine + "Are you sure you want to quit?", Properties.Resources.AppTitleLong, MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.Cancel) {
 					e.Cancel = true;
 				}
 			}
@@ -132,11 +133,11 @@ namespace EgoDatabaseEditor
 								tableListBox.Items.Add(dbFile.Tables[j].TableName);
 							}
 							fileName = path;
-							this.Text = "Ego Database Editor - " + path;
+							this.Text = $"{Properties.Resources.AppTitleShort} - {path}";
 							break;
 						case 1:
 							dbFile.Write(File.Open(path, FileMode.Create, FileAccess.Write, FileShare.Read));
-                            this.Text = "Ego Database Editor - " + path;
+							this.Text = $"{Properties.Resources.AppTitleShort} - {path}";
 							break;
 						case 2:
 							ClearInterface();
@@ -146,11 +147,11 @@ namespace EgoDatabaseEditor
 								tableListBox.Items.Add(dbFile.Tables[j].TableName);
 							}
 							fileName = path;
-                            this.Text = "Ego Database Editor - " + path;
+							this.Text = $"{Properties.Resources.AppTitleShort} - {path}";
 							break;
 						case 3:
 							dbFile.WriteXML(path);
-                            this.Text = "Ego Database Editor - " + path;
+							this.Text = $"{Properties.Resources.AppTitleShort} - {path}";
 							break;
 						default:
 							MessageBox.Show("Incorrect Conversion Type! 0 - binToXml, 1 - xmlToBin", "Incorrect Conversion Type", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -158,7 +159,7 @@ namespace EgoDatabaseEditor
 					}
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 				if (conversionType == 0) {
 					openController(path, conversionType, i + 1);
@@ -377,7 +378,7 @@ namespace EgoDatabaseEditor
                     }
                 }
 				catch (Exception ex) {
-					MessageBox.Show("The program failed to compare the files:" + Environment.NewLine + Environment.NewLine + ex.Message, "Ryder Database Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					MessageBox.Show("The program failed to compare the files:" + Environment.NewLine + Environment.NewLine + ex.Message, Properties.Resources.AppTitleLong, MessageBoxButtons.OK, MessageBoxIcon.Error);
 				}
 			}
 		}
@@ -391,7 +392,7 @@ namespace EgoDatabaseEditor
 					dbFile.Merge(two);
 				}
 				catch (Exception ex) {
-					MessageBox.Show("The program failed to merge the files:" + Environment.NewLine + Environment.NewLine + ex.Message, "Ryder Database Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					MessageBox.Show("The program failed to merge the files:" + Environment.NewLine + Environment.NewLine + ex.Message, Properties.Resources.AppTitleLong, MessageBoxButtons.OK, MessageBoxIcon.Error);
 				}
 			}
 		}
@@ -399,7 +400,7 @@ namespace EgoDatabaseEditor
 
         public void ClearInterface()
         {
-            this.Text = "Ego Database Editor";
+            this.Text = Properties.Resources.AppTitleLong;
 			dbFile = new DatabaseFile();
             tabControl.TabPages.Clear();
             tableListBox.Items.Clear();

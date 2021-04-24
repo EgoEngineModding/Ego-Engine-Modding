@@ -1,12 +1,11 @@
 ﻿using BCnEncoder.Decoder;
+using BCnEncoder.ImageSharp;
 using EgoEngineLibrary.Graphics;
-using EgoEngineLibrary.Graphics.Dds;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -221,7 +220,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 				ms.Seek(0, SeekOrigin.Begin);
 
 				var bcDecode = new BcDecoder();
-				var img = bcDecode.Decode(ms);
+				var img = bcDecode.DecodeToImageRgba32(ms);
 				ms.Seek(0, SeekOrigin.Begin);
 
 				img.SaveAsPng(ms);

@@ -1,14 +1,11 @@
 ﻿using BCnEncoder.Decoder;
+using BCnEncoder.ImageSharp;
 using EgoEngineLibrary.Graphics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -109,7 +106,7 @@ namespace EgoPssgEditor.ViewModel
                     ms.Seek(0, SeekOrigin.Begin);
 
                     BcDecoder decoder = new BcDecoder();
-                    image = decoder.Decode(ms);
+                    image = decoder.DecodeToImageRgba32(ms);
                 }
 
                 // Copy pixels to WPF format
