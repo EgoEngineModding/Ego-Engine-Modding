@@ -84,7 +84,7 @@
                     foreach (ErpFragment res in entry.Fragments)
                     {
                         //writer.Write((UInt16)0xDA78);
-                        writer.Write(res._data);
+                        writer.Write(res.GetDataArray(false));
                     }
                 }
             }

@@ -2,13 +2,12 @@
 {
     using ICSharpCode.SharpZipLib.Zip.Compression;
     using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
+    using Microsoft.Toolkit.HighPerformance;
+    using Microsoft.Toolkit.HighPerformance.Buffers;
     using MiscUtil.Conversion;
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.IO.Compression;
-    using System.Linq;
-    using System.Text;
     using Zstandard.Net;
 
     public class ErpFragment
@@ -17,125 +16,107 @@
 
         public string Name { get; set; }
 
-        public UInt64 Offset { get; set; }
-        public UInt64 Size { get; set; }
-        public Int32 Flags { get; set; }
-        public UInt64 PackedSize { get; set; }
+        public ulong Offset { get; set; }
+        public ulong Size { get; private set; }
+        public int Flags { get; set; }
+        public ulong PackedSize { get; private set; }
 
-        public ErpCompressionAlgorithm Compression { get; set; }
+        public ErpCompressionAlgorithm Compression { get; private set; }
 
-        internal byte[] _data;
+        private byte[] _data;
 
         public ErpFragment(ErpFile parentFile)
         {
-            this.ParentFile = parentFile;
-            this.Name = "temp";
-            this.Flags = 16;
-            this.Compression = ErpCompressionAlgorithm.Zlib;
-            this._data = Array.Empty<byte>();
+            ParentFile = parentFile;
+            Name = "temp";
+            Flags = 16;
+            Compression = ErpCompressionAlgorithm.Zlib;
+            _data = Array.Empty<byte>();
         }
 
         public void Read(ErpBinaryReader reader)
         {
-            this.Name = reader.ReadString(4);
+            Name = reader.ReadString(4);
 
-            this.Offset = reader.ReadUInt64();
-            this.Size = reader.ReadUInt64();
-            this.Flags = reader.ReadInt32();
+            Offset = reader.ReadUInt64();
+            Size = reader.ReadUInt64();
+            Flags = reader.ReadInt32();
 
-            if (this.ParentFile.Version > 2)
+            if (ParentFile.Version > 2)
             {
-                this.Compression = (ErpCompressionAlgorithm)reader.ReadByte();
-                this.PackedSize = reader.ReadUInt64();
+                Compression = (ErpCompressionAlgorithm)reader.ReadByte();
+                PackedSize = reader.ReadUInt64();
             }
             else
             {
-                this.PackedSize = this.Size;
+                PackedSize = Size;
             }
 
-            int pos = (int)reader.BaseStream.Position;
-            reader.Seek((int)(this.ParentFile.ResourceOffset + this.Offset), SeekOrigin.Begin);
-            this._data = reader.ReadBytes((int)this.PackedSize);
+            var pos = Convert.ToInt32(reader.BaseStream.Position);
+            reader.Seek(Convert.ToInt32(ParentFile.ResourceOffset + Offset), SeekOrigin.Begin);
+            _data = reader.ReadBytes(Convert.ToInt32(PackedSize));
             reader.Seek(pos, SeekOrigin.Begin);
         }
 
         public void Write(ErpBinaryWriter writer)
         {
-            writer.Write(this.Name, 4);
+            writer.Write(Name, 4);
 
-            writer.Write(this.Offset);
-            writer.Write(this.Size);
-            writer.Write(this.Flags);
+            writer.Write(Offset);
+            writer.Write(Size);
+            writer.Write(Flags);
 
-            if (this.ParentFile.Version > 2)
+            if (ParentFile.Version > 2)
             {
-                writer.Write((byte)this.Compression);
-                writer.Write(this.PackedSize);
+                writer.Write((byte)Compression);
+                writer.Write(PackedSize);
             }
         }
 
         public void Export(Stream stream)
         {
-            using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, stream))
-            {
-                writer.Write(this.GetDataArray(true));
-            }
+            using var decompressStream = GetDataStream(true);
+            decompressStream.CopyTo(stream);
         }
 
         public void Import(Stream stream)
         {
-            using (ErpBinaryReader reader = new ErpBinaryReader(EndianBitConverter.Little, stream))
-            {
-                this.SetData(reader.ReadBytes((int)reader.BaseStream.Length));
-            }
+            using var reader = new ErpBinaryReader(EndianBitConverter.Little, stream);
+            SetData(reader.ReadBytes(Convert.ToInt32(reader.BaseStream.Length)));
         }
 
         public byte[] GetDataArray(bool decompress)
         {
-            byte[] data;
-
             if (decompress)
             {
-                switch (Compression)
-                {
-                    case ErpCompressionAlgorithm.None:
-                    case ErpCompressionAlgorithm.None2:
-                    case ErpCompressionAlgorithm.None3:
-                        data = this._data;
-                        break;
-                    case ErpCompressionAlgorithm.Zlib:
-                        using (var ms = new MemoryStream(this._data))
-                        using (var iis = new InflaterInputStream(ms))
-                        using (var mso = new MemoryStream())
-                        {
-                            iis.CopyTo(mso);
-                            data = mso.ToArray();
-                        }
-                        break;
-                    case ErpCompressionAlgorithm.ZStandard:
-                        using (var ms = new MemoryStream(this._data))
-                        using (var zss = new ZstandardStream(ms, CompressionMode.Decompress))
-                        using (var mso = new MemoryStream())
-                        {
-                            zss.CopyTo(mso);
-                            data = mso.ToArray();
-                        }
-                        break;
-                    case ErpCompressionAlgorithm.LZ4:
-                    default:
-                        throw new NotSupportedException($"{nameof(ErpFragment)} compression type {Compression} is not supported!");
-                }
+                using var bufferWriter = new ArrayPoolBufferWriter<byte>(Convert.ToInt32(Size));
+                using var decompressStream = GetDataStream(true);
+                decompressStream.CopyTo(bufferWriter.AsStream());
+                return bufferWriter.WrittenSpan.ToArray();
             }
             else
             {
-                data = this._data;
+                return _data;
             }
-
-            return data;
         }
-        public MemoryStream GetDataStream(bool decompress)
+        public Stream GetDataStream(bool decompress)
         {
-            return new MemoryStream(this.GetDataArray(decompress), true);
+            if (decompress)
+            {
+                return Compression switch
+                {
+                    ErpCompressionAlgorithm.None or
+                    ErpCompressionAlgorithm.None2 or
+                    ErpCompressionAlgorithm.None3 => _data.AsMemory().AsStream(),
+                    ErpCompressionAlgorithm.Zlib => new InflaterInputStream(_data.AsMemory().AsStream()),
+                    ErpCompressionAlgorithm.ZStandard => new ZstandardStream(_data.AsMemory().AsStream(), CompressionMode.Decompress),
+                    _ => throw new NotSupportedException($"{nameof(ErpFragment)} compression type {Compression} is not supported!"),
+                };
+            }
+            else
+            {
+                return _data.AsMemory().AsStream();
+            }
         }
 
         public void SetData(byte[] data, bool compress = true)
@@ -147,26 +128,26 @@
                     case ErpCompressionAlgorithm.None:
                     case ErpCompressionAlgorithm.None2:
                     case ErpCompressionAlgorithm.None3:
-                        this._data = data;
+                        _data = data;
                         break;
                     case ErpCompressionAlgorithm.Zlib:
-                        using (var mso = new MemoryStream())
-                        using (var dos = new DeflaterOutputStream(mso, new Deflater(Deflater.BEST_COMPRESSION)))
+                        using (var bufferWriter = new ArrayPoolBufferWriter<byte>())
+                        using (var dos = new DeflaterOutputStream(bufferWriter.AsStream(), new Deflater(Deflater.BEST_COMPRESSION)))
                         {
                             dos.Write(data, 0, data.Length);
                             dos.Flush();
                             dos.Finish();
-                            this._data = mso.ToArray();
+                            _data = bufferWriter.WrittenSpan.ToArray();
                         }
                         break;
                     case ErpCompressionAlgorithm.ZStandard:
-                        using (var mso = new MemoryStream())
-                        using (var zss = new ZstandardStream(mso, CompressionMode.Compress))
+                        using (var bufferWriter = new ArrayPoolBufferWriter<byte>())
+                        using (var zss = new ZstandardStream(bufferWriter.AsStream(), CompressionMode.Compress))
                         {
                             zss.CompressionLevel = 22;
                             zss.Write(data, 0, data.Length);
                             zss.Flush();
-                            this._data = mso.ToArray();
+                            _data = bufferWriter.WrittenSpan.ToArray();
                         }
                         break;
                     default:
@@ -175,11 +156,11 @@
             }
             else
             {
-                this._data = data;
+                _data = data;
             }
 
-            this.Size = (UInt64)data.Length;
-            this.PackedSize = (UInt64)this._data.Length;
+            Size = (ulong)data.Length;
+            PackedSize = (ulong)_data.Length;
         }
     }
 }
