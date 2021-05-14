@@ -73,8 +73,8 @@ namespace EgoEngineLibrary.Formats.Pssg
         public void Convert(ModelRoot gltf, PssgFile pssg)
         {
             // Get a list of nodes in the default scene as a flat list
-            Dictionary<int, int> nodeBoneIndexMap = new Dictionary<int, int>();
-            var rootNode = gltf.DefaultScene.FindNode(n => n.Name.StartsWith("Scene Root"));
+            var nodeBoneIndexMap = new Dictionary<int, int>();
+            var rootNode = gltf.DefaultScene.FindNode(n => n.Name.StartsWith("Scene Root", StringComparison.InvariantCulture));
             if (rootNode is null)
                 throw new InvalidDataException("The default scene must have node name starting with `Scene Root`.");
 
@@ -111,7 +111,7 @@ namespace EgoEngineLibrary.Formats.Pssg
         private static void ConvertSceneNodes(PssgFile pssg, PssgNode parent, Node gltfNode, ImportState state)
         {
             PssgNode node;
-            if (gltfNode.Name.StartsWith("Scene Root"))
+            if (gltfNode.Name.StartsWith("Scene Root", StringComparison.InvariantCulture))
             {
                 node = new PssgNode("ROOTNODE", parent.File, parent);
                 node.AddAttribute("stopTraversal", 0u);
@@ -121,7 +121,7 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
             else if (gltfNode.Mesh is not null)
             {
-                node = CreateRenderNode(parent, gltfNode, state);
+                _ = CreateRenderNode(parent, gltfNode, state);
                 return;
             }
             else
@@ -133,12 +133,16 @@ namespace EgoEngineLibrary.Formats.Pssg
                 parent.ChildNodes.Add(node);
             }
 
-            var transformNode = new PssgNode("TRANSFORM", node.File, node);
-            transformNode.Value = GetTransform(gltfNode.LocalMatrix);
+            var transformNode = new PssgNode("TRANSFORM", node.File, node)
+            {
+                Value = GetTransform(gltfNode.LocalMatrix)
+            };
             node.ChildNodes.Add(transformNode);
 
-            var bboxNode = new PssgNode("BOUNDINGBOX", node.File, node);
-            bboxNode.Value = GetBoundingBoxData(Vector3.Zero, Vector3.Zero);
+            var bboxNode = new PssgNode("BOUNDINGBOX", node.File, node)
+            {
+                Value = GetBoundingBoxData(Vector3.Zero, Vector3.Zero)
+            };
             node.ChildNodes.Add(bboxNode);
 
             foreach (var child in gltfNode.VisualChildren)
@@ -149,7 +153,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 
         private static PssgNode CreateRenderNode(PssgNode parent, Node gltfNode, ImportState state)
         {
-            PssgNode node = new PssgNode(state.RenderNodeName, parent.File, parent);
+            var node = new PssgNode(state.RenderNodeName, parent.File, parent);
             node.AddAttribute("stopTraversal", 0u);
             node.AddAttribute("nickname", gltfNode.Name);
             node.AddAttribute("id", gltfNode.Name);
@@ -172,8 +176,10 @@ namespace EgoEngineLibrary.Formats.Pssg
             if (mesh.Primitives.Any(p => p.Material == null))
                 throw new NotImplementedException($"The converter does not support primitives ({mesh.Name}) with a null material.");
 
-            var transformNode = new PssgNode("TRANSFORM", renderNode.File, renderNode);
-            transformNode.Value = GetTransform(gltfNode.LocalMatrix);
+            var transformNode = new PssgNode("TRANSFORM", renderNode.File, renderNode)
+            {
+                Value = GetTransform(gltfNode.LocalMatrix)
+            };
             renderNode.ChildNodes.Add(transformNode);
 
             var bboxNode = new PssgNode("BOUNDINGBOX", renderNode.File, renderNode);
@@ -184,10 +190,10 @@ namespace EgoEngineLibrary.Formats.Pssg
             ConvertMaterials(gltfMats, renderNode.File, state);
 
             // Export Vertices, Normals, TexCoords, VertexWeights and Faces
-            Mesh gltfMesh = gltfNode.Mesh;
+            var gltfMesh = gltfNode.Mesh;
             var meshDecoder = gltfMesh.Decode();
-            Vector3 minExtent = new Vector3(float.MaxValue);
-            Vector3 maxExtent = new Vector3(float.MinValue);
+            var minExtent = new Vector3(float.MaxValue);
+            var maxExtent = new Vector3(float.MinValue);
             foreach (var p in meshDecoder.Primitives)
             {
                 // skip primitives that aren't tris
@@ -195,7 +201,7 @@ namespace EgoEngineLibrary.Formats.Pssg
                     continue;
 
                 // Get the new material index in grn
-                int faceMatId = p.Material.LogicalIndex;
+                var faceMatId = p.Material.LogicalIndex;
                 ShaderInstanceData shaderData;
                 if (state.MatShaderMapping.ContainsKey(faceMatId))
                 {
@@ -239,7 +245,7 @@ namespace EgoEngineLibrary.Formats.Pssg
                 if (p.VertexCount < 3) throw new InvalidDataException($"Mesh ({gltfMesh.Name}) must have at least 3 positions.");
 
                 // Grab the data
-                for (int i = 0; i < p.VertexCount; ++i)
+                for (var i = 0; i < p.VertexCount; ++i)
                 {
                     var pos = p.GetPosition(i);
                     var color = p.GetColor(i, 0);
@@ -263,11 +269,11 @@ namespace EgoEngineLibrary.Formats.Pssg
                     rds.SkinIndices.Add(0);
                 }
 
-                foreach (var tri in p.TriangleIndices)
+                foreach (var (A, B, C) in p.TriangleIndices)
                 {
-                    var a = tri.A + baseVertexIndex;
-                    var b = tri.B + baseVertexIndex;
-                    var c = tri.C + baseVertexIndex;
+                    var a = A + baseVertexIndex;
+                    var b = B + baseVertexIndex;
+                    var c = C + baseVertexIndex;
 
                     rds.Indices.Add((ushort)a);
                     rds.Indices.Add((ushort)b);
@@ -279,8 +285,8 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             static uint PackColor(Vector4 vector)
             {
-                Vector4 MaxBytes = new Vector4(byte.MaxValue);
-                Vector4 Half = new Vector4(0.5f);
+                var MaxBytes = new Vector4(byte.MaxValue);
+                var Half = new Vector4(0.5f);
                 vector *= MaxBytes;
                 vector += Half;
                 vector = Vector4.Clamp(vector, Vector4.Zero, MaxBytes);
@@ -336,7 +342,7 @@ namespace EgoEngineLibrary.Formats.Pssg
                 state.MatShaderMapping.Add(gltfMat.LogicalIndex,
                     new ShaderInstanceData(
                         shader.Attributes["id"].GetValue<string>(),
-                        shader.Attributes["shaderGroup"].GetValue<string>().Substring(1),
+                        shader.Attributes["shaderGroup"].GetValue<string>()[1..],
                         new RenderDataSourceWriter($"!RDS{state.RenderDataSourceCount}")));
                 state.RenderDataSourceCount++;
             }
@@ -344,7 +350,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 
         private static void WriteMeshData(ImportState state)
         {
-            PssgNode ssNode = new PssgNode("SEGMENTSET", state.RdsLib.File, state.RdsLib);
+            var ssNode = new PssgNode("SEGMENTSET", state.RdsLib.File, state.RdsLib);
             ssNode.AddAttribute("segmentCount", (uint)state.MatShaderMapping.Count);
             ssNode.AddAttribute("id", $"!SS{state.SegmentSetCount}");
             state.SegmentSetCount++;
@@ -362,27 +368,26 @@ namespace EgoEngineLibrary.Formats.Pssg
 
         private static byte[] GetBoundingBoxData(Vector3 min, Vector3 max)
         {
-            byte[] buffer = new byte[6 * 4];
-            MiscUtil.Conversion.BigEndianBitConverter bc = new MiscUtil.Conversion.BigEndianBitConverter();
+            var buffer = new byte[6 * 4];
+            var bc = new MiscUtil.Conversion.BigEndianBitConverter();
 
-            int i = 0;
+            var i = 0;
             bc.CopyBytes(min.X, buffer, i); i += 4;
             bc.CopyBytes(min.Y, buffer, i); i += 4;
             bc.CopyBytes(min.Z, buffer, i); i += 4;
 
             bc.CopyBytes(max.X, buffer, i); i += 4;
             bc.CopyBytes(max.Y, buffer, i); i += 4;
-            bc.CopyBytes(max.Z, buffer, i); i += 4;
-
+            bc.CopyBytes(max.Z, buffer, i);
             return buffer;
         }
 
         private static byte[] GetTransform(Matrix4x4 t)
         {
-            byte[] buffer = new byte[16 * 4];
-            MiscUtil.Conversion.BigEndianBitConverter bc = new MiscUtil.Conversion.BigEndianBitConverter();
+            var buffer = new byte[16 * 4];
+            var bc = new MiscUtil.Conversion.BigEndianBitConverter();
 
-            int i = 0;
+            var i = 0;
             bc.CopyBytes(t.M11, buffer, i); i += 4;
             bc.CopyBytes(t.M12, buffer, i); i += 4;
             bc.CopyBytes(t.M13, buffer, i); i += 4;
@@ -401,8 +406,7 @@ namespace EgoEngineLibrary.Formats.Pssg
             bc.CopyBytes(t.M41, buffer, i); i += 4;
             bc.CopyBytes(t.M42, buffer, i); i += 4;
             bc.CopyBytes(t.M43, buffer, i); i += 4;
-            bc.CopyBytes(t.M44, buffer, i); i += 4;
-
+            bc.CopyBytes(t.M44, buffer, i);
             return buffer;
         }
     }

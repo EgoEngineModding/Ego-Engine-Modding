@@ -120,7 +120,7 @@ namespace EgoErpArchiver.ViewModel
             if (String.IsNullOrEmpty(FilterText))
                 return true;
             else
-                return ((item as ErpXmlFileViewModel).DisplayName.IndexOf(FilterText, StringComparison.OrdinalIgnoreCase) >= 0);
+                return ((item as ErpXmlFileViewModel).DisplayName.Contains(FilterText, StringComparison.OrdinalIgnoreCase));
         }
 
         #region Menu
@@ -153,10 +153,12 @@ namespace EgoErpArchiver.ViewModel
         private void Export_Execute(object parameter)
         {
             ErpXmlFileViewModel xmlView = (ErpXmlFileViewModel)parameter;
-            SaveFileDialog dialog = new SaveFileDialog();
-            dialog.Filter = "Xml files|*.xml|All files|*.*";
-            dialog.Title = "Select the xml save location and file name";
-            dialog.FileName = xmlView.DisplayName.Replace("?", "%3F") + ".xml";
+            var dialog = new SaveFileDialog
+            {
+                Filter = "Xml files|*.xml|All files|*.*",
+                Title = "Select the xml save location and file name",
+                FileName = xmlView.DisplayName.Replace("?", "%3F") + ".xml"
+            };
             if (dialog.ShowDialog() == true)
             {
                 try
@@ -177,10 +179,12 @@ namespace EgoErpArchiver.ViewModel
         private void Import_Execute(object parameter)
         {
             ErpXmlFileViewModel xmlView = (ErpXmlFileViewModel)parameter;
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "Xml files|*.xml|All files|*.*";
-            dialog.Title = "Select a xml file";
-            dialog.FileName = xmlView.DisplayName.Replace("?", "%3F") + ".xml";
+            var dialog = new OpenFileDialog
+            {
+                Filter = "Xml files|*.xml|All files|*.*",
+                Title = "Select a xml file",
+                FileName = xmlView.DisplayName.Replace("?", "%3F") + ".xml"
+            };
             if (dialog.ShowDialog() == true)
             {
                 try
@@ -207,10 +211,14 @@ namespace EgoErpArchiver.ViewModel
             {
                 int success = 0;
                 int fail = 0;
-                ProgressDialogViewModel progDialogVM = new ProgressDialogViewModel(out mainView.ErpFile.ProgressPercentage, out mainView.ErpFile.ProgressStatus);
-                progDialogVM.PercentageMax = xmlFiles.Count;
-                View.ProgressDialog progDialog = new View.ProgressDialog();
-                progDialog.DataContext = progDialogVM;
+                var progDialogVM = new ProgressDialogViewModel(out mainView.ErpFile.ProgressPercentage, out mainView.ErpFile.ProgressStatus)
+                {
+                    PercentageMax = xmlFiles.Count
+                };
+                var progDialog = new View.ProgressDialog
+                {
+                    DataContext = progDialogVM
+                };
 
                 var task = Task.Run(() =>
                 {
@@ -266,10 +274,14 @@ namespace EgoErpArchiver.ViewModel
                     int skip = 0;
                     bool found = false;
 
-                    ProgressDialogViewModel progDialogVM = new ProgressDialogViewModel(out mainView.ErpFile.ProgressPercentage, out mainView.ErpFile.ProgressStatus);
-                    progDialogVM.PercentageMax = xmlFiles.Count;
-                    View.ProgressDialog progDialog = new View.ProgressDialog();
-                    progDialog.DataContext = progDialogVM;
+                    var progDialogVM = new ProgressDialogViewModel(out mainView.ErpFile.ProgressPercentage, out mainView.ErpFile.ProgressStatus)
+                    {
+                        PercentageMax = xmlFiles.Count
+                    };
+                    var progDialog = new View.ProgressDialog
+                    {
+                        DataContext = progDialogVM
+                    };
 
                     var task = Task.Run(() =>
                     {

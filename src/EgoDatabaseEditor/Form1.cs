@@ -13,11 +13,11 @@ namespace EgoDatabaseEditor
 {
     public partial class Form1 : Form
     {
-		// 2.2 -- Open Populated Tables, Close All Tables, Open Linked Tables, Merge Databases, Compare Databases, Code Overhaul, Open LinkedTable of Column on Cell by MiddleMouseClick, BeginEdit on RightClick
+        // 2.2 -- Open Populated Tables, Close All Tables, Open Linked Tables, Merge Databases, Compare Databases, Code Overhaul, Open LinkedTable of Column on Cell by MiddleMouseClick, BeginEdit on RightClick
         // 2.2.1 -- Fixed Edit Row Form, Fixed Error When Pasting with Hidden Columns, Added F1 2012 support, Improve Open/SaveDlg
         // 11.0 -- Fixed Compare, F1 2013 Support, Minor UI Improvements, Pasting Change, Xml Internal Schema/Predict Schema, Dirt Import
         // ToDo -- Disable Constraints Button
-        List<string> schemaPaths = new List<string>();
+        readonly List<string> schemaPaths = new();
 		DatabaseFile dbFile;
         string fileName = "";
 
@@ -37,7 +37,7 @@ namespace EgoDatabaseEditor
             {
                 if (File.Exists(Args[0]) == true)
                 {
-                    openController(Args[0], 0, 0);
+                    OpenController(Args[0], 0, 0);
                     openFileDialog.FileName = fileName;
                 }
             }
@@ -51,7 +51,7 @@ namespace EgoDatabaseEditor
 		}
 
         #region MainMenu
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
         {
             openFileDialog.FilterIndex = 1;
             if (!string.IsNullOrEmpty(fileName))
@@ -62,13 +62,13 @@ namespace EgoDatabaseEditor
 			//openFileDialog.FileName = fileName;
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                openController(openFileDialog.FileName, 0, 0);
+                OpenController(openFileDialog.FileName, 0, 0);
 				//List<string[]> errors = new List<string[]>();
                 //convertToXML(openFileDialog.FileName, schemaPaths[3], errors);
                 openFileDialog.Dispose();
             }
         }
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SaveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             saveFileDialog.FilterIndex = 1;
             saveFileDialog.FileName = Path.GetFileNameWithoutExtension(fileName);
@@ -76,11 +76,11 @@ namespace EgoDatabaseEditor
             //saveFileDialog.FileName = fileName.Replace(".xml", ".bin");
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                openController(saveFileDialog.FileName, 1, 0);
+                OpenController(saveFileDialog.FileName, 1, 0);
                 saveFileDialog.Dispose();
             }
         }
-        private void importAsXMLToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ImportAsXMLToolStripMenuItem_Click(object sender, EventArgs e)
         {
             openFileDialog.FilterIndex = 2;
             if (!string.IsNullOrEmpty(fileName))
@@ -91,11 +91,11 @@ namespace EgoDatabaseEditor
 			//openFileDialog.FileName = fileName.Replace(".bin", ".xml");
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-				openController(openFileDialog.FileName, 2, 0);
+				OpenController(openFileDialog.FileName, 2, 0);
                 openFileDialog.Dispose();
             }
         }
-        private void exportAsXMLToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ExportAsXMLToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (tableListBox.Items.Count != 0)
             {
@@ -105,7 +105,7 @@ namespace EgoDatabaseEditor
                 //saveFileDialog.FileName = fileName.Replace(".bin", ".xml");
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
-					openController(saveFileDialog.FileName, 3, 0);
+					OpenController(saveFileDialog.FileName, 3, 0);
                     saveFileDialog.Dispose();
                 }
             }
@@ -114,7 +114,7 @@ namespace EgoDatabaseEditor
                 MessageBox.Show("There must already be an opened database in order to save it as an xml file!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Stop);
             }
         }
-        private void openController(string path, int conversionType, int i)
+        private void OpenController(string path, int conversionType, int i)
         {
             try
             {
@@ -162,9 +162,9 @@ namespace EgoDatabaseEditor
             catch (Exception)
             {
 				if (conversionType == 0) {
-					openController(path, conversionType, i + 1);
+					OpenController(path, conversionType, i + 1);
 				} else {
-					openController(string.Empty, -1, schemaPaths.Count);
+					OpenController(string.Empty, -1, schemaPaths.Count);
 				}
             }
         }
@@ -172,16 +172,22 @@ namespace EgoDatabaseEditor
 			if (errors.Count == 0) {
 				return;
 			}
-			TabPage tp = new TabPage("Error Log");
-			tp.Name = "errorLog";
-			DataGridView dgv = new DataGridView();
-			dgv.Visible = false;
-			TextBox tb = new TextBox();
-			tb.Multiline = true;
-			tb.ReadOnly = true;
-			tb.Dock = DockStyle.Fill;
-			tb.Text = "The following errors may or may not break the game. You can continue to edit the database regularly but if you don't fix the following errors you may get unwanted results. NOTE: The program only searches for errors when opening/importing a file." + Environment.NewLine + Environment.NewLine;
-			foreach (string[] error in errors) {
+            var tp = new TabPage("Error Log")
+            {
+                Name = "errorLog"
+            };
+            var dgv = new DataGridView
+            {
+                Visible = false
+            };
+            var tb = new TextBox
+            {
+                Multiline = true,
+                ReadOnly = true,
+                Dock = DockStyle.Fill,
+                Text = "The following errors may or may not break the game. You can continue to edit the database regularly but if you don't fix the following errors you may get unwanted results. NOTE: The program only searches for errors when opening/importing a file." + Environment.NewLine + Environment.NewLine
+            };
+            foreach (string[] error in errors) {
 				foreach (string line in error) {
 					tb.Text += line;
 					tb.Text += Environment.NewLine;
@@ -205,18 +211,18 @@ namespace EgoDatabaseEditor
 			//MessageBox.Show("The file opened successfully but has some data warnings/errors", "Data Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 		}
 
-		private void openTableToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void OpenTableToolStripMenuItem_Click(object sender, EventArgs e) {
 			// Display New Tab
 			OpenTable((string)tableListBox.SelectedItem);
 		}
-		private void openPopulatedTablesToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void OpenPopulatedTablesToolStripMenuItem_Click(object sender, EventArgs e) {
 			foreach (DataTable t in dbFile.Tables) {
 				if (t.Rows.Count > 0) {
 					OpenTable(t.TableName);
 				}
 			}
 		}
-		private void closeTabToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void CloseTabToolStripMenuItem_Click(object sender, EventArgs e) {
 			if (tabControl.SelectedIndex == -1) {
 				return;
 			}
@@ -273,14 +279,14 @@ namespace EgoDatabaseEditor
 				tabControl.TabPages.RemoveAt(tabControl.SelectedIndex);
 			}*/
 		}
-		private void closeAllTablesToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void CloseAllTablesToolStripMenuItem_Click(object sender, EventArgs e) {
 			foreach (TabPage tP in tabControl.TabPages) {
 				((DataGridView)tP.Controls[0]).DataBindings.Clear();
 				((DataGridView)tP.Controls[0]).DataSource = null;
 				tabControl.TabPages.Remove(tP);
 			}
 		}
-		private void addRowToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void AddRowToolStripMenuItem_Click(object sender, EventArgs e) {
 			if (tabControl.SelectedIndex == -1) {
 				return;
 			}
@@ -289,12 +295,12 @@ namespace EgoDatabaseEditor
 				return;
 			}
 			DataTable dT = (DataTable)dgv.DataSource;
-			RowEdit rE = new RowEdit(dbFile, dT, -1);
+			var rE = new RowEdit(dbFile, dT, -1);
 			if (rE.ShowDialog() == DialogResult.OK) {
 				dT.Rows.Add(rE.dr);
 			}
 		}
-		private void addMultipleRowsToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void AddMultipleRowsToolStripMenuItem_Click(object sender, EventArgs e) {
 			if (tabControl.SelectedIndex == -1) {
 				return;
 			}
@@ -303,7 +309,7 @@ namespace EgoDatabaseEditor
 				return;
 			}
 			DataTable dT = (DataTable)dgv.DataSource;
-			AddMultipleRows aMR = new AddMultipleRows();
+			var aMR = new AddMultipleRows();
 			if (aMR.ShowDialog() == DialogResult.OK) {
 				if (aMR.Amount != -1) {
 					for (int i = 0; i < aMR.Amount; i++) {
@@ -312,7 +318,7 @@ namespace EgoDatabaseEditor
 				}
 			}
 		}
-		private void editRowToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void EditRowToolStripMenuItem_Click(object sender, EventArgs e) {
 			if (tabControl.SelectedIndex == -1) {
 				return;
 			}
@@ -322,12 +328,12 @@ namespace EgoDatabaseEditor
 				MessageBox.Show("No rows were selected", "No Row Selected", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
-			RowEdit rE = new RowEdit(dbFile, dT, dgv.SelectedRows[0].Index);
+			var rE = new RowEdit(dbFile, dT, dgv.SelectedRows[0].Index);
 			if (rE.ShowDialog() == DialogResult.OK) {
 				dT.DefaultView[dgv.SelectedRows[0].Index].Row.ItemArray = rE.dr.ItemArray;
 			}
 		}
-		private void removeRowToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void RemoveRowToolStripMenuItem_Click(object sender, EventArgs e) {
 			if (tabControl.SelectedIndex == -1) {
 				return;
 			}
@@ -341,11 +347,11 @@ namespace EgoDatabaseEditor
 				dT.DefaultView[row.Index].Delete();
 			}
 		}
-		private void showHideSidebarToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void ShowHideSidebarToolStripMenuItem_Click(object sender, EventArgs e) {
 			leftPanel.Visible = !leftPanel.Visible;
 		}
 
-		private void openLinkedTablesToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void OpenLinkedTablesToolStripMenuItem_Click(object sender, EventArgs e) {
 			if (tabControl.SelectedIndex < 0) {
 				return;
 			}
@@ -361,13 +367,13 @@ namespace EgoDatabaseEditor
 				}
 			}
 		}
-		private void compareDatabasesToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void CompareDatabasesToolStripMenuItem_Click(object sender, EventArgs e) {
 			openFileDialog.FilterIndex = 1;
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
 				try
                 {
-                    DatabaseFile two = new DatabaseFile(openFileDialog.FileName, Path.Combine(Application.StartupPath, dbFile.Namespace));
+                    var two = new DatabaseFile(openFileDialog.FileName, Path.Combine(Application.StartupPath, dbFile.Namespace));
                     openFileDialog.Dispose();
                     saveFileDialog.FilterIndex = 2;
                     saveFileDialog.FileName = fileName.Replace(".bin", "Differences.xml");
@@ -382,12 +388,12 @@ namespace EgoDatabaseEditor
 				}
 			}
 		}
-		private void mergeDatabasesToolStripMenuItem_Click(object sender, EventArgs e) {
+		private void MergeDatabasesToolStripMenuItem_Click(object sender, EventArgs e) {
 			openFileDialog.FilterIndex = 2;
 			openFileDialog.FileName = fileName.Replace(".bin", "Differences.xml");
 			if (openFileDialog.ShowDialog() == DialogResult.OK) {
 				try {
-					DatabaseFile two = new DatabaseFile(openFileDialog.FileName);
+					var two = new DatabaseFile(openFileDialog.FileName);
 					openFileDialog.Dispose();
 					dbFile.Merge(two);
 				}
@@ -406,7 +412,7 @@ namespace EgoDatabaseEditor
             tableListBox.Items.Clear();
         }
 
-        private void searchMaskedTextBox_KeyDown(object sender, KeyEventArgs e)
+        private void SearchMaskedTextBox_KeyDown(object sender, KeyEventArgs e)
         {//OLD
             if (e.KeyCode == Keys.Enter)
             {
@@ -421,7 +427,7 @@ namespace EgoDatabaseEditor
                 }
             }
         }
-		private void searchTextBox_TextChanged(object sender, EventArgs e) {
+		private void SearchTextBox_TextChanged(object sender, EventArgs e) {
 			tableListBox.Items.Clear();
 
 			foreach (DataTable dt in dbFile.Tables) {
@@ -432,12 +438,12 @@ namespace EgoDatabaseEditor
 			}
 		}
 
-        private void tableListBox_DoubleClick(object sender, EventArgs e)
+        private void TableListBox_DoubleClick(object sender, EventArgs e)
         {
             // Display New Tab
 			OpenTable((string)tableListBox.SelectedItem);
         }
-		void dgv_CellDoubleClick(object sender, DataGridViewCellEventArgs e) {
+		void Dgv_CellDoubleClick(object sender, DataGridViewCellEventArgs e) {
 			// Display New Tab
 			if (e.ColumnIndex < 0 || e.RowIndex < 0 || ((DataGridView)sender).Columns.Count == 0) {
 				return;
@@ -450,7 +456,7 @@ namespace EgoDatabaseEditor
 				OpenTable((string)child.ExtendedProperties[((DataGridView)sender).Columns[e.ColumnIndex].Name]);
 			}
 		}
-		void dgv_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e) {
+		void Dgv_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e) {
 			if (e.ColumnIndex < 0 || e.RowIndex < 0 || ((DataGridView)sender).Columns.Count == 0) {
 				return;
 			}
@@ -467,38 +473,47 @@ namespace EgoDatabaseEditor
 				((DataGridView)sender).BeginEdit(true);
 			}
 		}
-		private void OpenTable(string tableName) {
+		private void OpenTable(string tableName)
+		{
 			// Display New Tab
-			if (tabControl.TabPages.ContainsKey(tableName) == true || tableListBox.SelectedIndex == -1) {
+			if (tabControl.TabPages.ContainsKey(tableName) == true || tableListBox.SelectedIndex == -1)
+			{
 				tabControl.SelectedTab = tabControl.TabPages[tableName];
 				return;
 			}
-			TabPage tp = new TabPage(tableName);
-			tp.Name = tableName;
+			var tp = new TabPage(tableName)
+			{
+				Name = tableName
+			};
 
-			DataGridView dgv = new DataGridView();
-			dgv.Dock = DockStyle.Fill;
+			var dgv = new DataGridView
+			{
+				Dock = DockStyle.Fill,
+				AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells,
+				ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText,
+				AllowUserToAddRows = false
+			};
 			dgv.AlternatingRowsDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#E8EDFF");//#E0E0E0
-			dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
-			dgv.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
-			dgv.AllowUserToAddRows = false;
-			dgv.KeyDown += new KeyEventHandler(dgv_KeyDown);
-			dgv.DataBindingComplete += new DataGridViewBindingCompleteEventHandler(dgv_DataBindingComplete);
-			dgv.DataError += new DataGridViewDataErrorEventHandler(dgv_DataError);
+			dgv.KeyDown += new KeyEventHandler(Dgv_KeyDown);
+			dgv.DataBindingComplete += new DataGridViewBindingCompleteEventHandler(Dgv_DataBindingComplete);
+			dgv.DataError += new DataGridViewDataErrorEventHandler(Dgv_DataError);
 			//dgv.CellDoubleClick += new DataGridViewCellEventHandler(dgv_CellDoubleClick);
-			dgv.CellMouseDown += new DataGridViewCellMouseEventHandler(dgv_CellMouseDown);
-			dgv.ColumnHeaderMouseClick += new DataGridViewCellMouseEventHandler(dgv_ColumnHeaderMouseClick);
-            dgv.MouseEnter += dgv_MouseEnter;
+			dgv.CellMouseDown += new DataGridViewCellMouseEventHandler(Dgv_CellMouseDown);
+			dgv.ColumnHeaderMouseClick += new DataGridViewCellMouseEventHandler(Dgv_ColumnHeaderMouseClick);
+			dgv.MouseEnter += Dgv_MouseEnter;
 			dgv.DataSource = dbFile.Tables[tableName];
-			DataGridViewColumnSelector dgvcs = new DataGridViewColumnSelector(dgv);
-			DgvFilterManager dgvfm = new DgvFilterManager(dgv);
+			var dgvcs = new DataGridViewColumnSelector(dgv);
+			var dgvfm = new DgvFilterManager(dgv);
 
 			tp.Controls.Add(dgv);
 			tabControl.TabPages.Add(tp);
-			foreach (DataColumn col in dbFile.Tables[tableName].Columns) {
-				if (col.DataType == typeof(string)) {
-					if (dgv.Columns[col.ColumnName] is DataGridViewTextBoxColumn && col.MaxLength >= 0) {
-						((DataGridViewTextBoxColumn)dgv.Columns[col.ColumnName]).MaxInputLength = col.MaxLength;
+			foreach (DataColumn col in dbFile.Tables[tableName].Columns)
+			{
+				if (col.DataType == typeof(string))
+				{
+					if (dgv.Columns[col.ColumnName] is DataGridViewTextBoxColumn tbCol && col.MaxLength >= 0)
+					{
+						tbCol.MaxInputLength = col.MaxLength;
 					}
 				}
 			}
@@ -506,8 +521,8 @@ namespace EgoDatabaseEditor
 			//tabControl.Focus();
 		}
 
-		private void dgv_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e) {
-			if (e.Button == System.Windows.Forms.MouseButtons.Right) {
+		private void Dgv_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e) {
+			if (e.Button == MouseButtons.Right) {
 				return;
 			}
 			DataGridView dgv = (DataGridView)sender;
@@ -534,7 +549,7 @@ namespace EgoDatabaseEditor
 			((object[])dt.ExtendedProperties["stopSort"])[0] = stopSort;
 			((object[])dt.ExtendedProperties["stopSort"])[1] = indexSort;
 		}
-        private void dgv_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        private void Dgv_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
             e.ThrowException = false;
 			MessageBox.Show("Incorrect data was entered into the cell!" + Environment.NewLine + Environment.NewLine +
@@ -561,10 +576,10 @@ namespace EgoDatabaseEditor
 				//MessageBox.Show("Incorrect value type, you must enter " + valType, "Bad Data", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}*/
         }
-        private void dgv_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        private void Dgv_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
         {
         }
-        private void dgv_KeyDown(object sender, KeyEventArgs e)
+        private void Dgv_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Control && e.KeyCode == Keys.C)
             {
@@ -624,12 +639,10 @@ namespace EgoDatabaseEditor
                 DataTable tableC = table.GetChanges();
                 if (tableC != null)
                     tableC.AcceptChanges();
-
-                // Add rows if necessary
-                DialogResult addRow = DialogResult.None;
                 if (rowsInClipboard.Length + r > grid.RowCount)
                 {
-                    addRow = MessageBox.Show("The data in the clipboard has more rows than the datagrid. You can choose to add these rows or ignore them." + Environment.NewLine + Environment.NewLine + "Do you want to add these rows?", "Add Rows?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    // Add rows if necessary
+                    DialogResult addRow = MessageBox.Show("The data in the clipboard has more rows than the datagrid. You can choose to add these rows or ignore them." + Environment.NewLine + Environment.NewLine + "Do you want to add these rows?", "Add Rows?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     if (addRow == DialogResult.Yes)
                     {
                         int startRowCount = grid.RowCount;
@@ -641,7 +654,7 @@ namespace EgoDatabaseEditor
                 }
 
                 // Get Visible Columns
-                List<string> visibleColumnNames = new List<string>();
+                var visibleColumnNames = new List<string>();
                 for (int i = c; i < grid.Columns.Count; i++)
                 {
                     if (grid.Columns[i].Visible)
@@ -651,7 +664,7 @@ namespace EgoDatabaseEditor
                 }
 
                 // Loop through the lines, split them into cells and place the values in the corresponding cell.
-                Dictionary<string[], string> cellIndexes = new Dictionary<string[], string>();
+                var cellIndexes = new Dictionary<string[], string>();
                 for (int iRow = 0; iRow < rowsInClipboard.Length; iRow++)
                 {
                     if (grid.RowCount - 1 >= r + iRow)
@@ -724,27 +737,34 @@ namespace EgoDatabaseEditor
                 e.Handled = true;
             }
         }
-        private void dgv_MouseEnter(object sender, EventArgs e)
+        private void Dgv_MouseEnter(object sender, EventArgs e)
         {
             this.ActiveControl = (DataGridView)sender;
         }
-		private DataRow CreateNewRow(DataTable dt) {
+		private DataRow CreateNewRow(DataTable dt)
+		{
 			DataRow dr;
-			List<object> items = new List<object>();
+			var items = new List<object>();
 			dr = dt.NewRow();
 			DataGridViewRow row;
 			DataGridViewCell cell;
 			DataColumn primaryKeyColumn = dt.PrimaryKey.Length == 0 ? null : dt.PrimaryKey[0];
-			for (int i = 0; i < dt.Columns.Count; i++) {
+			for (int i = 0; i < dt.Columns.Count; i++)
+			{
 				row = new DataGridViewRow();
-				foreach (DataRelation dataRel in dt.ParentRelations) {
-					if (dataRel.ChildColumns[0] == dt.Columns[i]) {
+				foreach (DataRelation dataRel in dt.ParentRelations)
+				{
+					if (dataRel.ChildColumns[0] == dt.Columns[i])
+					{
 						cell = new DataGridViewComboBoxCell();
-						foreach (DataRow drR in dbFile.Tables[dataRel.ParentColumns[0].Table.TableName].Rows) {
-							if (drR.RowState != DataRowState.Deleted) {
+						foreach (DataRow drR in dbFile.Tables[dataRel.ParentColumns[0].Table.TableName].Rows)
+						{
+							if (drR.RowState != DataRowState.Deleted)
+							{
 								((DataGridViewComboBoxCell)cell).Items.Add(drR.ItemArray[dataRel.ParentColumns[0].Ordinal]);
 							}
-							if (((DataGridViewComboBoxCell)cell).Items.Count > 0) {
+							if (((DataGridViewComboBoxCell)cell).Items.Count > 0)
+							{
 								break;
 							}
 						}
@@ -752,44 +772,63 @@ namespace EgoDatabaseEditor
 						break;
 					}
 				}
-				if (row.Cells.Count == 0) {
+				if (row.Cells.Count == 0)
+				{
 					row.Cells.Clear();
-					if (dt.Columns[i].DataType == typeof(bool)) {
+					if (dt.Columns[i].DataType == typeof(bool))
+					{
 						cell = new DataGridViewCheckBoxCell();
 						row.Cells.Add(cell);
-					} else if (dt.Columns[i].DataType == typeof(string)) {
+					}
+					else if (dt.Columns[i].DataType == typeof(string))
+					{
 						cell = new DataGridViewTextBoxCell();
 						row.Cells.Add(cell);
-					} else if (dt.Columns[i].DataType == typeof(int) || dt.Columns[i].DataType == typeof(float)) {
+					}
+					else if (dt.Columns[i].DataType == typeof(int) || dt.Columns[i].DataType == typeof(float))
+					{
 						cell = new DataGridViewTextBoxCell();
 						row.Cells.Add(cell);
-					} else {
+					}
+					else
+					{
 						cell = new DataGridViewTextBoxCell();
 						row.Cells.Add(cell);
 					}
 				}
-				if (row.Cells[0] is DataGridViewComboBoxCell) {
-					if (((DataGridViewComboBoxCell)row.Cells[0]).Items.Count > 0) {
-						((DataGridViewComboBoxCell)row.Cells[0]).Value = ((DataGridViewComboBoxCell)row.Cells[0]).Items[0];
-					} else {
-						((DataGridViewComboBoxCell)row.Cells[0]).Items.Add(dt.Columns[i].DefaultValue);
-						((DataGridViewComboBoxCell)row.Cells[0]).Value = dt.Columns[i].DefaultValue;
+				if (row.Cells[0] is DataGridViewComboBoxCell cbCell)
+				{
+					if (cbCell.Items.Count > 0)
+					{
+						cbCell.Value = cbCell.Items[0];
 					}
-				} else {
+					else
+					{
+						cbCell.Items.Add(dt.Columns[i].DefaultValue);
+						cbCell.Value = dt.Columns[i].DefaultValue;
+					}
+				}
+				else
+				{
 					row.Cells[0].Value = dt.Columns[i].DefaultValue;
 				}
 				row.Cells[0].ValueType = dt.Columns[i].DataType;
 				// Set Up PrimaryKey Row Values for Validation
-				if (dt.Columns[i] == primaryKeyColumn) {
+				if (dt.Columns[i] == primaryKeyColumn)
+				{
 					int largestIndex = 1;
-					foreach (DataRow dRPK in dt.Rows) {
-						if (dRPK.RowState != DataRowState.Deleted) {
-							if (dRPK.ItemArray[i] is int) {
-								largestIndex = Math.Max(largestIndex, (int)dRPK.ItemArray[i]);
+					foreach (DataRow dRPK in dt.Rows)
+					{
+						if (dRPK.RowState != DataRowState.Deleted)
+						{
+							if (dRPK.ItemArray[i] is int rowKey)
+							{
+								largestIndex = Math.Max(largestIndex, rowKey);
 							}
 						}
 					}
-					if (row.Cells[0].ValueType == typeof(int)) {
+					if (row.Cells[0].ValueType == typeof(int))
+					{
 						row.Cells[0].Value = largestIndex + 1;
 					}
 				}
@@ -800,7 +839,7 @@ namespace EgoDatabaseEditor
 			return dr;
 		}
 
-		private void tabControl_MouseDoubleClick(object sender, MouseEventArgs e) {
+		private void TabControl_MouseDoubleClick(object sender, MouseEventArgs e) {
 			if (tabControl.SelectedIndex < 0) {
 				return;
 			}
@@ -811,33 +850,33 @@ namespace EgoDatabaseEditor
 				tabControl.TabPages.RemoveAt(tabControl.SelectedIndex);
 			}
 		}
-        private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
+        private void TabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (tabControl.SelectedTab != null)
                 this.ActiveControl = tabControl.SelectedTab.Controls[0];
         }
-        private void tabControl_MouseEnter(object sender, EventArgs e)
+        private void TabControl_MouseEnter(object sender, EventArgs e)
         {
             this.ActiveControl = tabControl;
         }
 
-        private void tableListBox_MouseEnter(object sender, EventArgs e)
+        private void TableListBox_MouseEnter(object sender, EventArgs e)
         {
             this.ActiveControl = tableListBox;
             //if (!tableListBox.Focused)
                 //tableListBox.Focus();
         }
 
-        private void toggleConstraintsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ToggleConstraintsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             dbFile.EnforceConstraints = false;//!dbFile.EnforceConstraints;
         }
 
-        private void tmppppToolStripMenuItem_Click(object sender, EventArgs e)
+        private void TmppppToolStripMenuItem_Click(object sender, EventArgs e)
         {
             int[] count = new int[703];
-            List<int> teamId = new List<int>();
-            List<DataRow> dataRow = new List<DataRow>();
+            var teamId = new List<int>();
+            var dataRow = new List<DataRow>();
 
             foreach (DataRow dR in dbFile.Tables["driver"].Rows)
             {
@@ -856,7 +895,7 @@ namespace EgoDatabaseEditor
             }
 
             // Unused Teams
-            HashSet<int> usedTeam = new HashSet<int>();
+            var usedTeam = new HashSet<int>();
             string output = string.Empty;
             foreach (DataRow dR in dbFile.Tables["event_driver"].Rows)
             {
@@ -890,7 +929,7 @@ namespace EgoDatabaseEditor
             }
 
             // Unused Livery
-            HashSet<int> usedLivery = new HashSet<int>();
+            var usedLivery = new HashSet<int>();
             string output2 = string.Empty;
             foreach (DataRow dR in dbFile.Tables["event_driver"].Rows)
             {

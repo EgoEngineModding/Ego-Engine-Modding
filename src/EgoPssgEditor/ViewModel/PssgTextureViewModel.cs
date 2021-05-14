@@ -63,24 +63,24 @@ namespace EgoPssgEditor.ViewModel
                     {
                         Preview = null;
                     }
-                    OnPropertyChanged("IsSelected");
+                    OnPropertyChanged(nameof(IsSelected));
                 }
             }
         }
         public BitmapSource Preview
         {
             get { return preview; }
-            set { preview = value; OnPropertyChanged("Preview"); }
+            set { preview = value; OnPropertyChanged(nameof(Preview)); }
         }
         public string PreviewError
         {
             get { return previewError; }
-            set { previewError = value; OnPropertyChanged("PreviewError"); }
+            set { previewError = value; OnPropertyChanged(nameof(PreviewError)); }
         }
         public Visibility PreviewErrorVisibility
         {
             get { return previewErrorVisibility; }
-            set { previewErrorVisibility = value; OnPropertyChanged("PreviewErrorVisibility"); }
+            set { previewErrorVisibility = value; OnPropertyChanged(nameof(PreviewErrorVisibility)); }
         }
         #endregion
 
@@ -98,14 +98,14 @@ namespace EgoPssgEditor.ViewModel
                 Preview = null;
 
                 // Write and decode dds
-                using (MemoryStream ms = new MemoryStream())
+                using (var ms = new MemoryStream())
                 {
                     var dds = Texture.ToDdsFile(false);
                     dds.Write(ms, -1);
                     ddsReadSuccess = true;
                     ms.Seek(0, SeekOrigin.Begin);
 
-                    BcDecoder decoder = new BcDecoder();
+                    var decoder = new BcDecoder();
                     image = decoder.DecodeToImageRgba32(ms);
                 }
 

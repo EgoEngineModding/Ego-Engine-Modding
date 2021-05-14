@@ -95,7 +95,7 @@
             this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
             this.openToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
             this.openToolStripMenuItem.Text = "Open";
-            this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
+            this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
             // 
             // saveToolStripMenuItem
             // 
@@ -104,7 +104,7 @@
             this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
             this.saveToolStripMenuItem.Text = "Save";
-            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
@@ -118,7 +118,7 @@
             this.importAsXMLToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
             this.importAsXMLToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
             this.importAsXMLToolStripMenuItem.Text = "Import As XML";
-            this.importAsXMLToolStripMenuItem.Click += new System.EventHandler(this.importAsXMLToolStripMenuItem_Click);
+            this.importAsXMLToolStripMenuItem.Click += new System.EventHandler(this.ImportAsXMLToolStripMenuItem_Click);
             // 
             // exportAsXMLToolStripMenuItem
             // 
@@ -127,7 +127,7 @@
             this.exportAsXMLToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
             this.exportAsXMLToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
             this.exportAsXMLToolStripMenuItem.Text = "Export As XML";
-            this.exportAsXMLToolStripMenuItem.Click += new System.EventHandler(this.exportAsXMLToolStripMenuItem_Click);
+            this.exportAsXMLToolStripMenuItem.Click += new System.EventHandler(this.ExportAsXMLToolStripMenuItem_Click);
             // 
             // editToolStripMenuItem
             // 
@@ -154,7 +154,7 @@
             this.openTableToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.T)));
             this.openTableToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.openTableToolStripMenuItem.Text = "Open Table";
-            this.openTableToolStripMenuItem.Click += new System.EventHandler(this.openTableToolStripMenuItem_Click);
+            this.openTableToolStripMenuItem.Click += new System.EventHandler(this.OpenTableToolStripMenuItem_Click);
             // 
             // openPopulatedTablesToolStripMenuItem
             // 
@@ -162,7 +162,7 @@
             this.openPopulatedTablesToolStripMenuItem.Name = "openPopulatedTablesToolStripMenuItem";
             this.openPopulatedTablesToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.openPopulatedTablesToolStripMenuItem.Text = "Open Populated Tables";
-            this.openPopulatedTablesToolStripMenuItem.Click += new System.EventHandler(this.openPopulatedTablesToolStripMenuItem_Click);
+            this.openPopulatedTablesToolStripMenuItem.Click += new System.EventHandler(this.OpenPopulatedTablesToolStripMenuItem_Click);
             // 
             // closeTabToolStripMenuItem
             // 
@@ -171,7 +171,7 @@
             this.closeTabToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
             this.closeTabToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.closeTabToolStripMenuItem.Text = "Close Table";
-            this.closeTabToolStripMenuItem.Click += new System.EventHandler(this.closeTabToolStripMenuItem_Click);
+            this.closeTabToolStripMenuItem.Click += new System.EventHandler(this.CloseTabToolStripMenuItem_Click);
             // 
             // closeAllTablesToolStripMenuItem
             // 
@@ -179,7 +179,7 @@
             this.closeAllTablesToolStripMenuItem.Name = "closeAllTablesToolStripMenuItem";
             this.closeAllTablesToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.closeAllTablesToolStripMenuItem.Text = "Close All Tables";
-            this.closeAllTablesToolStripMenuItem.Click += new System.EventHandler(this.closeAllTablesToolStripMenuItem_Click);
+            this.closeAllTablesToolStripMenuItem.Click += new System.EventHandler(this.CloseAllTablesToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
@@ -193,7 +193,7 @@
             this.addRowToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
             this.addRowToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.addRowToolStripMenuItem.Text = "Add Row";
-            this.addRowToolStripMenuItem.Click += new System.EventHandler(this.addRowToolStripMenuItem_Click);
+            this.addRowToolStripMenuItem.Click += new System.EventHandler(this.AddRowToolStripMenuItem_Click);
             // 
             // addMultipleRowsToolStripMenuItem
             // 
@@ -201,7 +201,7 @@
             this.addMultipleRowsToolStripMenuItem.Name = "addMultipleRowsToolStripMenuItem";
             this.addMultipleRowsToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.addMultipleRowsToolStripMenuItem.Text = "Add Multiple Rows";
-            this.addMultipleRowsToolStripMenuItem.Click += new System.EventHandler(this.addMultipleRowsToolStripMenuItem_Click);
+            this.addMultipleRowsToolStripMenuItem.Click += new System.EventHandler(this.AddMultipleRowsToolStripMenuItem_Click);
             // 
             // editRowToolStripMenuItem
             // 
@@ -210,7 +210,7 @@
             this.editRowToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
             this.editRowToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.editRowToolStripMenuItem.Text = "Edit Row";
-            this.editRowToolStripMenuItem.Click += new System.EventHandler(this.editRowToolStripMenuItem_Click);
+            this.editRowToolStripMenuItem.Click += new System.EventHandler(this.EditRowToolStripMenuItem_Click);
             // 
             // removeRowToolStripMenuItem
             // 
@@ -219,7 +219,7 @@
             this.removeRowToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
             this.removeRowToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.removeRowToolStripMenuItem.Text = "Remove Row(s)";
-            this.removeRowToolStripMenuItem.Click += new System.EventHandler(this.removeRowToolStripMenuItem_Click);
+            this.removeRowToolStripMenuItem.Click += new System.EventHandler(this.RemoveRowToolStripMenuItem_Click);
             // 
             // toolStripSeparator3
             // 
@@ -233,7 +233,7 @@
             this.showHideSidebarToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.H)));
             this.showHideSidebarToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.showHideSidebarToolStripMenuItem.Text = "Toggle Sidebar";
-            this.showHideSidebarToolStripMenuItem.Click += new System.EventHandler(this.showHideSidebarToolStripMenuItem_Click);
+            this.showHideSidebarToolStripMenuItem.Click += new System.EventHandler(this.ShowHideSidebarToolStripMenuItem_Click);
             // 
             // advancedToolStripMenuItem
             // 
@@ -252,7 +252,7 @@
             this.openLinkedTablesToolStripMenuItem.Name = "openLinkedTablesToolStripMenuItem";
             this.openLinkedTablesToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
             this.openLinkedTablesToolStripMenuItem.Text = "Open Linked Tables";
-            this.openLinkedTablesToolStripMenuItem.Click += new System.EventHandler(this.openLinkedTablesToolStripMenuItem_Click);
+            this.openLinkedTablesToolStripMenuItem.Click += new System.EventHandler(this.OpenLinkedTablesToolStripMenuItem_Click);
             // 
             // compareDatabasesToolStripMenuItem1
             // 
@@ -260,7 +260,7 @@
             this.compareDatabasesToolStripMenuItem1.Name = "compareDatabasesToolStripMenuItem1";
             this.compareDatabasesToolStripMenuItem1.Size = new System.Drawing.Size(179, 22);
             this.compareDatabasesToolStripMenuItem1.Text = "Compare Databases";
-            this.compareDatabasesToolStripMenuItem1.Click += new System.EventHandler(this.compareDatabasesToolStripMenuItem_Click);
+            this.compareDatabasesToolStripMenuItem1.Click += new System.EventHandler(this.CompareDatabasesToolStripMenuItem_Click);
             // 
             // mergeDatabasesToolStripMenuItem
             // 
@@ -268,21 +268,21 @@
             this.mergeDatabasesToolStripMenuItem.Name = "mergeDatabasesToolStripMenuItem";
             this.mergeDatabasesToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
             this.mergeDatabasesToolStripMenuItem.Text = "Merge Databases";
-            this.mergeDatabasesToolStripMenuItem.Click += new System.EventHandler(this.mergeDatabasesToolStripMenuItem_Click);
+            this.mergeDatabasesToolStripMenuItem.Click += new System.EventHandler(this.MergeDatabasesToolStripMenuItem_Click);
             // 
             // toggleConstraintsToolStripMenuItem
             // 
             this.toggleConstraintsToolStripMenuItem.Name = "toggleConstraintsToolStripMenuItem";
             this.toggleConstraintsToolStripMenuItem.Size = new System.Drawing.Size(179, 22);
             this.toggleConstraintsToolStripMenuItem.Text = "Toggle Constraints";
-            this.toggleConstraintsToolStripMenuItem.Click += new System.EventHandler(this.toggleConstraintsToolStripMenuItem_Click);
+            this.toggleConstraintsToolStripMenuItem.Click += new System.EventHandler(this.ToggleConstraintsToolStripMenuItem_Click);
             // 
             // tmppppToolStripMenuItem
             // 
             this.tmppppToolStripMenuItem.Name = "tmppppToolStripMenuItem";
             this.tmppppToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
             this.tmppppToolStripMenuItem.Text = "tmpppp";
-            this.tmppppToolStripMenuItem.Click += new System.EventHandler(this.tmppppToolStripMenuItem_Click);
+            this.tmppppToolStripMenuItem.Click += new System.EventHandler(this.TmppppToolStripMenuItem_Click);
             // 
             // openFileDialog
             // 
@@ -312,8 +312,8 @@
             this.tableListBox.Name = "tableListBox";
             this.tableListBox.Size = new System.Drawing.Size(200, 489);
             this.tableListBox.TabIndex = 1;
-            this.tableListBox.DoubleClick += new System.EventHandler(this.tableListBox_DoubleClick);
-            this.tableListBox.MouseEnter += new System.EventHandler(this.tableListBox_MouseEnter);
+            this.tableListBox.DoubleClick += new System.EventHandler(this.TableListBox_DoubleClick);
+            this.tableListBox.MouseEnter += new System.EventHandler(this.TableListBox_MouseEnter);
             // 
             // searchTextBox
             // 
@@ -322,8 +322,8 @@
             this.searchTextBox.Name = "searchTextBox";
             this.searchTextBox.Size = new System.Drawing.Size(200, 20);
             this.searchTextBox.TabIndex = 2;
-            this.searchTextBox.TextChanged += new System.EventHandler(this.searchTextBox_TextChanged);
-            this.searchTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.searchMaskedTextBox_KeyDown);
+            this.searchTextBox.TextChanged += new System.EventHandler(this.SearchTextBox_TextChanged);
+            this.searchTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.SearchMaskedTextBox_KeyDown);
             // 
             // tabControl
             // 
@@ -333,9 +333,9 @@
             this.tabControl.SelectedIndex = 0;
             this.tabControl.Size = new System.Drawing.Size(432, 509);
             this.tabControl.TabIndex = 11;
-            this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_SelectedIndexChanged);
-            this.tabControl.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.tabControl_MouseDoubleClick);
-            this.tabControl.MouseEnter += new System.EventHandler(this.tabControl_MouseEnter);
+            this.tabControl.SelectedIndexChanged += new System.EventHandler(this.TabControl_SelectedIndexChanged);
+            this.tabControl.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.TabControl_MouseDoubleClick);
+            this.tabControl.MouseEnter += new System.EventHandler(this.TabControl_MouseEnter);
             // 
             // Form1
             // 

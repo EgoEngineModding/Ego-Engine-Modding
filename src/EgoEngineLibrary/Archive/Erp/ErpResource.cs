@@ -15,9 +15,9 @@
         public Int32 Unknown { get; set; }
         public Int16 Unknown2 { get; set; }
 
-        public List<ErpFragment> Fragments { get; set; }
+        public List<ErpFragment> Fragments { get; }
 
-        public byte[] Hash;
+        public byte[] Hash { get; private set; }
 
         public string FileName
         {

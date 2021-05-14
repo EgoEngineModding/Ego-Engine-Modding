@@ -42,11 +42,11 @@ namespace EgoErpArchiver.ViewModel
                     isSelected = value;
                     if (value)
                     {
-                        Task.Run(() => GetPreview()).Wait();
+                        GetPreview();
                         resView.Select();
                     }
                     else preview = string.Empty;
-                    OnPropertyChanged("IsSelected");
+                    OnPropertyChanged(nameof(IsSelected));
                 }
             }
         }
@@ -66,17 +66,17 @@ namespace EgoErpArchiver.ViewModel
         {
             try
             {
-                XmlFile xml = new XmlFile(XmlFile.Fragments[0].GetDataStream(true));
-                System.Xml.XmlWriterSettings set = new System.Xml.XmlWriterSettings();
-                set.Encoding = Encoding.UTF8;
-                set.Indent = true;
-                using (var stringWriter = new StringWriter())
-                using (var xmlTextWriter = System.Xml.XmlWriter.Create(stringWriter, set))
+                var xml = new XmlFile(XmlFile.Fragments[0].GetDataStream(true));
+                var set = new System.Xml.XmlWriterSettings
                 {
-                    xml.doc.WriteTo(xmlTextWriter);
-                    xmlTextWriter.Flush();
-                    Preview = stringWriter.GetStringBuilder().ToString();
-                }
+                    Encoding = Encoding.UTF8,
+                    Indent = true
+                };
+                using var stringWriter = new StringWriter();
+                using var xmlTextWriter = System.Xml.XmlWriter.Create(stringWriter, set);
+                xml.doc.WriteTo(xmlTextWriter);
+                xmlTextWriter.Flush();
+                Preview = stringWriter.GetStringBuilder().ToString();
             }
             catch (Exception ex)
             {
@@ -85,18 +85,16 @@ namespace EgoErpArchiver.ViewModel
         }
         public void ExportXML(Stream stream)
         {
-            XmlFile xml = new XmlFile(XmlFile.Fragments[0].GetDataStream(true));
+            var xml = new XmlFile(XmlFile.Fragments[0].GetDataStream(true));
             xml.Write(stream, XMLType.Text);
         }
         public void ImportXML(Stream stream)
         {
-            XmlFile xml = new XmlFile(stream);
-            using (MemoryStream xmlData = new MemoryStream())
-            {
-                xml.Write(xmlData);
+            var xml = new XmlFile(stream);
+            using var xmlData = new MemoryStream();
+            xml.Write(xmlData);
 
-                XmlFile.Fragments[0].SetData(xmlData.ToArray());
-            }
+            XmlFile.Fragments[0].SetData(xmlData.ToArray());
         }
     }
 }
