@@ -1,12 +1,7 @@
-﻿using EgoEngineLibrary.Archive.Erp;
-using EgoEngineLibrary.Graphics;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -16,7 +11,7 @@ namespace EgoErpArchiver.ViewModel
     public class XmlFilesWorkspaceViewModel : WorkspaceViewModel
     {
         #region Data
-        readonly ObservableCollection<ErpXmlFileViewModel> xmlFiles;
+        private readonly ObservableCollection<ErpXmlFileViewModel> xmlFiles;
 
         public ObservableCollection<ErpXmlFileViewModel> XmlFiles
         {
@@ -25,9 +20,9 @@ namespace EgoErpArchiver.ViewModel
         #endregion
 
         #region Presentation Data
-        string _displayName;
-        readonly CollectionView xmlFilesViewSource;
-        string filterText;
+        private string _displayName;
+        private readonly CollectionView xmlFilesViewSource;
+        private string filterText;
 
         public override string DisplayName
         {
@@ -117,17 +112,15 @@ namespace EgoErpArchiver.ViewModel
 
         private bool XmlFilesFilter(object item)
         {
-            if (String.IsNullOrEmpty(FilterText))
-                return true;
-            else
-                return ((item as ErpXmlFileViewModel).DisplayName.Contains(FilterText, StringComparison.OrdinalIgnoreCase));
+            return string.IsNullOrEmpty(FilterText) ||
+                (item as ErpXmlFileViewModel).DisplayName.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
         }
 
         #region Menu
-        readonly RelayCommand export;
-        readonly RelayCommand import;
-        readonly RelayCommand exportAll;
-        readonly RelayCommand importAll;
+        private readonly RelayCommand export;
+        private readonly RelayCommand import;
+        private readonly RelayCommand exportAll;
+        private readonly RelayCommand importAll;
 
         public RelayCommand Export
         {
@@ -152,7 +145,7 @@ namespace EgoErpArchiver.ViewModel
         }
         private void Export_Execute(object parameter)
         {
-            ErpXmlFileViewModel xmlView = (ErpXmlFileViewModel)parameter;
+            var xmlView = (ErpXmlFileViewModel)parameter;
             var dialog = new SaveFileDialog
             {
                 Filter = "Xml files|*.xml|All files|*.*",
@@ -178,7 +171,7 @@ namespace EgoErpArchiver.ViewModel
         }
         private void Import_Execute(object parameter)
         {
-            ErpXmlFileViewModel xmlView = (ErpXmlFileViewModel)parameter;
+            var xmlView = (ErpXmlFileViewModel)parameter;
             var dialog = new OpenFileDialog
             {
                 Filter = "Xml files|*.xml|All files|*.*",
@@ -209,8 +202,8 @@ namespace EgoErpArchiver.ViewModel
         {
             try
             {
-                int success = 0;
-                int fail = 0;
+                var success = 0;
+                var fail = 0;
                 var progDialogVM = new ProgressDialogViewModel(out mainView.ErpFile.ProgressPercentage, out mainView.ErpFile.ProgressStatus)
                 {
                     PercentageMax = xmlFiles.Count
@@ -222,17 +215,17 @@ namespace EgoErpArchiver.ViewModel
 
                 var task = Task.Run(() =>
                 {
-                    string outputFolder = mainView.FilePath.Replace(".", "_") + "_xmlfiles";
+                    var outputFolder = mainView.FilePath.Replace(".", "_") + "_xmlfiles";
                     Directory.CreateDirectory(outputFolder);
 
-                    for (int i = 0; i < xmlFiles.Count;)
+                    for (var i = 0; i < xmlFiles.Count;)
                     {
-                        string fileName = outputFolder + "\\" + Path.Combine(xmlFiles[i].XmlFile.Folder, xmlFiles[i].XmlFile.FileName).Replace("?", "%3F") + ".xml";
+                        var fileName = outputFolder + "\\" + Path.Combine(xmlFiles[i].XmlFile.Folder, xmlFiles[i].XmlFile.FileName).Replace("?", "%3F") + ".xml";
                         ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report("Exporting " + Path.GetFileName(fileName) + "... ");
 
                         try
                         {
-                            string directoryPath = Path.GetDirectoryName(fileName);
+                            var directoryPath = Path.GetDirectoryName(fileName);
                             if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
                             xmlFiles[i].ExportXML(File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read));
                             ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report("SUCCESS" + Environment.NewLine);
@@ -266,13 +259,13 @@ namespace EgoErpArchiver.ViewModel
         {
             try
             {
-                string directory = mainView.FilePath.Replace(".", "_") + "_xmlfiles";
+                var directory = mainView.FilePath.Replace(".", "_") + "_xmlfiles";
                 if (Directory.Exists(directory) == true)
                 {
-                    int success = 0;
-                    int fail = 0;
-                    int skip = 0;
-                    bool found = false;
+                    var success = 0;
+                    var fail = 0;
+                    var skip = 0;
+                    var found = false;
 
                     var progDialogVM = new ProgressDialogViewModel(out mainView.ErpFile.ProgressPercentage, out mainView.ErpFile.ProgressStatus)
                     {
@@ -285,14 +278,14 @@ namespace EgoErpArchiver.ViewModel
 
                     var task = Task.Run(() =>
                     {
-                        for (int i = 0; i < xmlFiles.Count;)
+                        for (var i = 0; i < xmlFiles.Count;)
                         {
-                            string fileName = directory + "\\" + Path.Combine(xmlFiles[i].XmlFile.Folder, xmlFiles[i].XmlFile.FileName).Replace("?", "%3F") + ".xml";
+                            var fileName = directory + "\\" + Path.Combine(xmlFiles[i].XmlFile.Folder, xmlFiles[i].XmlFile.FileName).Replace("?", "%3F") + ".xml";
                             ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report("Exporting " + Path.GetFileName(fileName) + "... ");
 
                             try
                             {
-                                foreach (string filePath in Directory.GetFiles(directory, "*.xml", SearchOption.AllDirectories))
+                                foreach (var filePath in Directory.GetFiles(directory, "*.xml", SearchOption.AllDirectories))
                                 {
                                     if (Path.Equals(filePath, fileName))
                                     {

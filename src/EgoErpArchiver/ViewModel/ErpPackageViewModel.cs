@@ -1,22 +1,15 @@
 ﻿using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Data.Pkg;
-using EgoEngineLibrary.Graphics;
-using Microsoft.Win32;
-using MiscUtil.Conversion;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media.Imaging;
 
 namespace EgoErpArchiver.ViewModel
 {
     public class ErpPackageViewModel : ViewModelBase
     {
-        readonly ErpResourceViewModel resView;
+        private readonly ErpResourceViewModel resView;
 
         public ErpResource Package
         {
@@ -28,8 +21,8 @@ namespace EgoErpArchiver.ViewModel
         }
 
         #region Presentation Props
-        bool isSelected;
-        string preview;
+        private bool isSelected;
+        private string preview;
 
         public bool IsSelected
         {
@@ -45,14 +38,14 @@ namespace EgoErpArchiver.ViewModel
                         resView.Select();
                     }
                     else preview = string.Empty;
-                    OnPropertyChanged("IsSelected");
+                    OnPropertyChanged(nameof(IsSelected));
                 }
             }
         }
         public string Preview
         {
             get { return preview; }
-            set { preview = value; OnPropertyChanged("Preview"); }
+            set { preview = value; OnPropertyChanged(nameof(Preview)); }
         }
         #endregion
 
@@ -65,13 +58,13 @@ namespace EgoErpArchiver.ViewModel
         {
             try
             {
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 ExportPkg(new StringWriter(sb));
-                this.Preview = sb.ToString();
+                Preview = sb.ToString();
             }
             catch (Exception ex)
             {
-                this.Preview = "Could not create preview!" + Environment.NewLine + Environment.NewLine + ex.Message;
+                Preview = "Could not create preview!" + Environment.NewLine + Environment.NewLine + ex.Message;
             }
         }
         public void ExportPkg(TextWriter textWriter)
@@ -96,24 +89,22 @@ namespace EgoErpArchiver.ViewModel
         }
         public void ImportPkg(Stream stream)
         {
-            PkgFile pkg = PkgFile.ReadJson(stream);
-            using (MemoryStream pkgData = new MemoryStream())
-            {
-                pkg.WritePkg(pkgData);
+            var pkg = PkgFile.ReadJson(stream);
+            using var pkgData = new MemoryStream();
+            pkg.WritePkg(pkgData);
 
-                switch (Package.ResourceType)
-                {
-                    case "AnimClip":
-                    case "AnimClipCrowd":
-                        Package.GetFragment("temp", 0).SetData(pkgData.ToArray());
-                        break;
-                    case "EventGraph":
-                        Package.GetFragment("node", 0).SetData(pkgData.ToArray());
-                        break;
-                    default:
-                        Package.Fragments[0].SetData(pkgData.ToArray());
-                        break;
-                }
+            switch (Package.ResourceType)
+            {
+                case "AnimClip":
+                case "AnimClipCrowd":
+                    Package.GetFragment("temp", 0).SetData(pkgData.ToArray());
+                    break;
+                case "EventGraph":
+                    Package.GetFragment("node", 0).SetData(pkgData.ToArray());
+                    break;
+                default:
+                    Package.Fragments[0].SetData(pkgData.ToArray());
+                    break;
             }
         }
     }

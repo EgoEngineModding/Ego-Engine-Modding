@@ -1,23 +1,14 @@
 ﻿using EgoEngineLibrary.Archive.Erp;
-using EgoEngineLibrary.Data.Pkg;
-using EgoEngineLibrary.Graphics;
 using EgoEngineLibrary.Xml;
-using Microsoft.Win32;
-using MiscUtil.Conversion;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media.Imaging;
 
 namespace EgoErpArchiver.ViewModel
 {
     public class ErpXmlFileViewModel : ViewModelBase
     {
-        readonly ErpResourceViewModel resView;
+        private readonly ErpResourceViewModel resView;
 
         public ErpResource XmlFile
         {
@@ -25,8 +16,8 @@ namespace EgoErpArchiver.ViewModel
         }
 
         #region Presentation Props
-        bool isSelected;
-        string preview;
+        private bool isSelected;
+        private string preview;
 
         public override string DisplayName
         {
@@ -80,7 +71,7 @@ namespace EgoErpArchiver.ViewModel
             }
             catch (Exception ex)
             {
-                this.Preview = "Could not create preview!" + Environment.NewLine + Environment.NewLine + ex.Message;
+                Preview = "Could not create preview!" + Environment.NewLine + Environment.NewLine + ex.Message;
             }
         }
         public void ExportXML(Stream stream)

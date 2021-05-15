@@ -4,111 +4,105 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
-    using System.Text;
 
     public class ErpFile
     {
-        public Int32 Version { get; set; }
+        public int Version { get; set; }
 
-        public UInt64 ResourceOffset { get; set; }
+        public ulong ResourceOffset { get; set; }
 
         public List<ErpResource> Resources { get; set; }
 
-        private UInt64 _resourceInfoTotalLength;
+        private ulong _resourceInfoTotalLength;
         public Progress<int>? ProgressPercentage;
         public Progress<string>? ProgressStatus;
 
         public ErpFile()
         {
-            this.Version = 4;
-            this.Resources = new List<ErpResource>();
+            Version = 4;
+            Resources = new List<ErpResource>();
         }
 
         public void Read(Stream stream)
         {
-            using (ErpBinaryReader reader = new ErpBinaryReader(EndianBitConverter.Little, stream))
+            using var reader = new ErpBinaryReader(EndianBitConverter.Little, stream);
+            var magic = reader.ReadUInt32();
+            if (magic != 1263555141)
             {
-                uint magic = reader.ReadUInt32();
-                if (magic != 1263555141)
-                {
-                    throw new Exception("This is not an ERP file!");
-                }
+                throw new Exception("This is not an ERP file!");
+            }
 
-                this.Version = reader.ReadInt32();
-                reader.ReadBytes(8); // padding
-                reader.ReadBytes(8); // info offset
-                reader.ReadBytes(8); // info size
+            Version = reader.ReadInt32();
+            reader.ReadBytes(8); // padding
+            reader.ReadBytes(8); // info offset
+            reader.ReadBytes(8); // info size
 
-                this.ResourceOffset = reader.ReadUInt64();
-                reader.ReadBytes(8); // padding
+            ResourceOffset = reader.ReadUInt64();
+            reader.ReadBytes(8); // padding
 
-                Int32 numFiles = reader.ReadInt32();
-                Int32 numTempFile = reader.ReadInt32();
+            var numFiles = reader.ReadInt32();
+            var numTempFile = reader.ReadInt32();
 
-                for (int i = 0; i < numFiles; ++i)
-                {
-                    ErpResource entry = new ErpResource(this);
-                    entry.Read(reader);
-                    this.Resources.Add(entry);
-                }
+            for (var i = 0; i < numFiles; ++i)
+            {
+                var entry = new ErpResource(this);
+                entry.Read(reader);
+                Resources.Add(entry);
             }
         }
 
         public void Write(Stream stream)
         {
-            using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, stream))
+            using var writer = new ErpBinaryWriter(EndianBitConverter.Little, stream);
+            var numTempFiles = UpdateOffsets();
+
+            writer.Write(1263555141);
+
+            writer.Write(Version);
+            writer.Write(0L);
+            writer.Write(48L);
+            writer.Write(_resourceInfoTotalLength);
+
+            writer.Write(ResourceOffset);
+            writer.Write(0L);
+
+            writer.Write(Resources.Count);
+            writer.Write(numTempFiles);
+
+            foreach (var entry in Resources)
             {
-                Int32 numTempFiles = this.UpdateOffsets();
+                entry.Write(writer);
+            }
 
-                writer.Write(1263555141);
-
-                writer.Write(this.Version);
-                writer.Write((Int64)0);
-                writer.Write((Int64)48);
-                writer.Write(this._resourceInfoTotalLength);
-
-                writer.Write(this.ResourceOffset);
-                writer.Write((Int64)0);
-
-                writer.Write(this.Resources.Count);
-                writer.Write(numTempFiles);
-
-                foreach (ErpResource entry in this.Resources)
+            foreach (var entry in Resources)
+            {
+                foreach (var frag in entry.Fragments)
                 {
-                    entry.Write(writer);
-                }
-
-                foreach (ErpResource entry in this.Resources)
-                {
-                    foreach (ErpFragment res in entry.Fragments)
-                    {
-                        //writer.Write((UInt16)0xDA78);
-                        writer.Write(res.GetDataArray(false));
-                    }
+                    //writer.Write((UInt16)0xDA78);
+                    writer.Write(frag.GetDataArray(false));
                 }
             }
         }
 
-        public Int32 UpdateOffsets()
+        public int UpdateOffsets()
         {
-            UInt64 resourceDataOffset = 0;
-            Int32 numTempFiles = 0;
+            ulong resourceDataOffset = 0;
+            var numTempFiles = 0;
 
-            this._resourceInfoTotalLength = (UInt64)this.Resources.Count * 4 + 8;
-            foreach (ErpResource entry in this.Resources)
+            _resourceInfoTotalLength = (ulong)Resources.Count * 4 + 8;
+            foreach (var entry in Resources)
             {
-                this._resourceInfoTotalLength += (UInt64)entry.UpdateOffsets();
+                _resourceInfoTotalLength += entry.UpdateOffsets();
 
-                foreach (ErpFragment res in entry.Fragments)
+                foreach (var frag in entry.Fragments)
                 {
                     ++numTempFiles;
-                    res.Offset = resourceDataOffset;
-                    resourceDataOffset += res.PackedSize;
+                    frag.Offset = resourceDataOffset;
+                    resourceDataOffset += frag.PackedSize;
                 }
             }
 
-            this.ResourceOffset = 48 + this._resourceInfoTotalLength;
+            ResourceOffset = 48 + _resourceInfoTotalLength;
             return numTempFiles;
         }
 
@@ -125,7 +119,7 @@
         }
         public ErpResource? TryFindResource(string fileName)
         {
-            foreach (ErpResource entry in this.Resources)
+            foreach (var entry in Resources)
             {
                 if (entry.Identifier == fileName)
                 {
@@ -138,10 +132,10 @@
 
         public void Export(string folderPath)
         {
-            int success = 0;
-            int fail = 0;
+            var success = 0;
+            var fail = 0;
 
-            for (int i = 0; i < Resources.Count;)
+            for (var i = 0; i < Resources.Count;)
             {
                 (ProgressStatus as IProgress<string>)?.Report("Exporting " + Path.Combine(Resources[i].Folder, Resources[i].FileName) + "... ");
 
@@ -166,11 +160,11 @@
 
         public void Import(string[] files)
         {
-            int success = 0;
-            int fail = 0;
-            int skip = 0;
+            var success = 0;
+            var fail = 0;
+            var skip = 0;
 
-            for (int i = 0; i < Resources.Count;)
+            for (var i = 0; i < Resources.Count;)
             {
                 (ProgressStatus as IProgress<string>)?.Report("Importing " + Path.Combine(Resources[i].Folder, Resources[i].FileName) + "... ");
 

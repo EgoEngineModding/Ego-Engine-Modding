@@ -1,13 +1,7 @@
-﻿using MiscUtil.IO;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Numerics;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace EgoEngineLibrary.Data.Pkg
 {
@@ -18,7 +12,7 @@ namespace EgoEngineLibrary.Data.Pkg
 
     public class PkgFile
     {
-        PkgRootObject rootItem;
+        private readonly PkgRootObject rootItem;
 
         public PkgRootObject RootItem
         {
@@ -35,10 +29,10 @@ namespace EgoEngineLibrary.Data.Pkg
 
         public static PkgFile Open(Stream stream)
         {
-            Byte[] header = new Byte[4];
+            var header = new byte[4];
             stream.Read(header, 0, 4);
             stream.Seek(0, SeekOrigin.Begin);
-            string magic = Encoding.UTF8.GetString(header);
+            var magic = Encoding.UTF8.GetString(header);
             
             if (magic == "!pkg")
             {
@@ -55,8 +49,8 @@ namespace EgoEngineLibrary.Data.Pkg
         }
         public static PkgFile ReadPkg(Stream stream)
         {
-            PkgFile file = new PkgFile();
-            using (PkgBinaryReader reader = new PkgBinaryReader(stream))
+            var file = new PkgFile();
+            using (var reader = new PkgBinaryReader(stream))
             {
                 file.RootItem.Read(reader);
             }
@@ -64,8 +58,8 @@ namespace EgoEngineLibrary.Data.Pkg
         }
         public static PkgFile ReadJson(Stream stream)
         {
-            PkgFile file = new PkgFile();
-            using (JsonTextReader reader = new JsonTextReader(new StreamReader(stream)))
+            var file = new PkgFile();
+            using (var reader = new JsonTextReader(new StreamReader(stream)))
             {
                 file.RootItem.FromJson(reader);
             }
@@ -88,10 +82,8 @@ namespace EgoEngineLibrary.Data.Pkg
         }
         public void WritePkg(Stream stream)
         {
-            using (PkgBinaryWriter writer = new PkgBinaryWriter(stream))
-            {
-                rootItem.Write(writer);
-            }
+            using var writer = new PkgBinaryWriter(stream);
+            rootItem.Write(writer);
         }
         public void WriteJson(Stream stream)
         {
@@ -99,11 +91,9 @@ namespace EgoEngineLibrary.Data.Pkg
         }
         public void WriteJson(TextWriter textWriter)
         {
-            using (JsonTextWriter writer = new JsonTextWriter(textWriter))
-            {
-                writer.Formatting = Formatting.Indented;
-                rootItem.ToJson(writer);
-            }
+            using var writer = new JsonTextWriter(textWriter);
+            writer.Formatting = Formatting.Indented;
+            rootItem.ToJson(writer);
         }
     }
 }

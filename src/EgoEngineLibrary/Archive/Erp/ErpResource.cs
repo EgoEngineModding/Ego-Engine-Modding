@@ -3,8 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
-    using System.Text;
 
     public class ErpResource
     {
@@ -12,8 +10,8 @@
         public string Identifier { get; private set; }
         public string ResourceType { get; set; }
 
-        public Int32 Unknown { get; set; }
-        public Int16 Unknown2 { get; set; }
+        public int Unknown { get; set; }
+        public short Unknown2 { get; set; }
 
         public List<ErpFragment> Fragments { get; }
 
@@ -25,7 +23,7 @@
             {
                 if (Identifier.StartsWith("eaid", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return Path.GetFileName(Identifier.Substring(7));
+                    return Path.GetFileName(Identifier[7..]);
                 }
                 else
                 {
@@ -39,11 +37,11 @@
             {
                 if (Identifier.StartsWith("eaid", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return Path.GetDirectoryName(Identifier.Substring(7))?.Replace('/', '\\') ?? string.Empty;
+                    return Path.GetDirectoryName(Identifier[7..])?.Replace('/', '\\') ?? string.Empty;
                 }
                 else
                 {
-                    string temp = Identifier;
+                    var temp = Identifier;
                     if (temp.Contains('/') || temp.Contains('\\'))
                     {
                         return Path.GetDirectoryName(temp)?.Replace('/', '\\') ?? string.Empty;
@@ -56,24 +54,24 @@
             }
         }
 
-        public UInt64 Size
+        public ulong Size
         {
             get
             {
-                UInt64 size = 0;
-                foreach (ErpFragment res in this.Fragments)
+                ulong size = 0;
+                foreach (var res in Fragments)
                 {
                     size += res.Size;
                 }
                 return size;
             }
         }
-        public UInt64 PackedSize
+        public ulong PackedSize
         {
             get
             {
-                UInt64 size = 0;
-                foreach (ErpFragment res in this.Fragments)
+                ulong size = 0;
+                foreach (var res in Fragments)
                 {
                     size += res.PackedSize;
                 }
@@ -81,108 +79,108 @@
             }
         }
 
-        private UInt32 _resourceInfoLength;
+        private uint _resourceInfoLength;
 
         public ErpResource(ErpFile parentFile)
         {
-            this.ParentFile = parentFile;
-            this.Identifier = string.Empty;
-            this.ResourceType = string.Empty;
-            this.Unknown = 1;
-            this.Unknown2 = 0;
-            this.Fragments = new List<ErpFragment>();
-            this.Hash = new byte[16];
+            ParentFile = parentFile;
+            Identifier = string.Empty;
+            ResourceType = string.Empty;
+            Unknown = 1;
+            Unknown2 = 0;
+            Fragments = new List<ErpFragment>();
+            Hash = new byte[16];
         }
 
         public void Read(ErpBinaryReader reader)
         {
             reader.ReadBytes(4); // entry info length
-            this.Identifier = reader.ReadString(reader.ReadInt16());
-            this.ResourceType = reader.ReadString(16);
+            Identifier = reader.ReadString(reader.ReadInt16());
+            ResourceType = reader.ReadString(16);
 
-            this.Unknown = reader.ReadInt32();
-            if (this.ParentFile.Version >= 4)
+            Unknown = reader.ReadInt32();
+            if (ParentFile.Version >= 4)
             {
-                this.Unknown2 = reader.ReadInt16();
+                Unknown2 = reader.ReadInt16();
             }
 
-            byte numResources = reader.ReadByte();
+            var numResources = reader.ReadByte();
 
             while (numResources-- > 0)
             {
-                ErpFragment res = new ErpFragment(this.ParentFile);
+                var res = new ErpFragment(ParentFile);
                 res.Read(reader);
-                this.Fragments.Add(res);
+                Fragments.Add(res);
             }
 
-            if (this.ParentFile.Version > 2)
+            if (ParentFile.Version > 2)
             {
-                this.Hash = reader.ReadBytes(16);
+                Hash = reader.ReadBytes(16);
             }
         }
 
         public void Write(ErpBinaryWriter writer)
         {
-            writer.Write(this._resourceInfoLength);
-            writer.Write((Int16)(this.Identifier.Length + 1));
-            writer.Write(this.Identifier);
-            writer.Write(this.ResourceType, 16);
-            writer.Write(this.Unknown);
-            if (this.ParentFile.Version >= 4)
+            writer.Write(_resourceInfoLength);
+            writer.Write((short)(Identifier.Length + 1));
+            writer.Write(Identifier);
+            writer.Write(ResourceType, 16);
+            writer.Write(Unknown);
+            if (ParentFile.Version >= 4)
             {
-                writer.Write(this.Unknown2);
+                writer.Write(Unknown2);
             }
-            writer.Write((byte)this.Fragments.Count);
+            writer.Write((byte)Fragments.Count);
 
-            foreach (ErpFragment res in this.Fragments)
+            foreach (var res in Fragments)
             {
                 res.Write(writer);
             }
 
-            if (this.ParentFile.Version > 2)
+            if (ParentFile.Version > 2)
             {
-                writer.Write(this.Hash);
+                writer.Write(Hash);
             }
         }
 
-        public UInt32 UpdateOffsets()
+        public uint UpdateOffsets()
         {
-            if (this.ParentFile.Version > 2)
+            if (ParentFile.Version > 2)
             {
-                this._resourceInfoLength = 33;
+                _resourceInfoLength = 33;
             }
             else
             {
-                this._resourceInfoLength = 24;
+                _resourceInfoLength = 24;
             }
 
-            this._resourceInfoLength *= (UInt32)this.Fragments.Count;
-            this._resourceInfoLength += (UInt32)this.Identifier.Length + 24;
+            _resourceInfoLength *= (uint)Fragments.Count;
+            _resourceInfoLength += (uint)Identifier.Length + 24;
 
-            if (this.ParentFile.Version >= 4)
+            if (ParentFile.Version >= 4)
             {
-                this._resourceInfoLength += 2;
+                _resourceInfoLength += 2;
             }
 
-            if (this.ParentFile.Version > 2)
+            if (ParentFile.Version > 2)
             {
-                this._resourceInfoLength += 16;
+                _resourceInfoLength += 16;
             }
 
-            return this._resourceInfoLength;
+            return _resourceInfoLength;
         }
 
         public void Export(string folder)
         {
-            string outputDir = Path.Combine(folder, this.Folder);
+            var outputDir = Path.Combine(folder, Folder);
             Directory.CreateDirectory(outputDir);
 
-            for (int i = 0; i < this.Fragments.Count; ++i)
+            for (var i = 0; i < Fragments.Count; ++i)
             {
-                string name = this.FileName;
+                var name = FileName;
                 name = name.Replace("?", "^^");
-                name = Path.GetFileNameWithoutExtension(name) + "!!!" + this.Fragments[i].Name + i.ToString("000") + Path.GetExtension(name);
-                this.Fragments[i].Export(File.Open(
+                name = Path.GetFileNameWithoutExtension(name) + "!!!" + Fragments[i].Name + i.ToString("000") + Path.GetExtension(name);
+                Fragments[i].Export(File.Open(
                     Path.Combine(outputDir, name)
                     , FileMode.Create, FileAccess.Write, FileShare.Read));
             }
@@ -190,21 +188,21 @@
 
         public bool Import(string[] files)
         {
-            int fragmentsImported = 0;
+            var fragmentsImported = 0;
 
-            foreach (string f in files)
+            foreach (var f in files)
             {
-                string extension = Path.GetExtension(f);
-                string name = Path.GetFileNameWithoutExtension(f);
-                int resTextIndex = name.LastIndexOf("!!!");
+                var extension = Path.GetExtension(f);
+                var name = Path.GetFileNameWithoutExtension(f);
+                var resTextIndex = name.LastIndexOf("!!!");
                 if (resTextIndex == -1)
                 {
                     continue;
                 }
 
-                int resIndex = Int32.Parse(name.Substring(resTextIndex + 7, 3));
+                var resIndex = int.Parse(name.Substring(resTextIndex + 7, 3));
                 name = Path.GetDirectoryName(f) + "\\" + (name.Remove(resTextIndex) + extension).Replace("^^", "?");
-                if (name.EndsWith(Path.Combine(this.Folder, this.FileName), StringComparison.InvariantCultureIgnoreCase))
+                if (name.EndsWith(Path.Combine(Folder, FileName), StringComparison.InvariantCultureIgnoreCase))
                 {
                     Fragments[resIndex].Import(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
                     ++fragmentsImported;
@@ -218,7 +216,7 @@
 
         public ErpFragment? TryGetFragment(string name, int count)
         {
-            foreach (ErpFragment fragment in Fragments)
+            foreach (var fragment in Fragments)
             {
                 if (fragment.Name == name)
                 {
