@@ -1,34 +1,25 @@
 ﻿using EgoEngineLibrary.Archive.Erp;
-using Microsoft.Win32;
+using EgoEngineLibrary.Formats.Erp;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Xml;
-using System.Xml.Linq;
 
 namespace EgoErpArchiver.ViewModel
 {
     public class ResourcesWorkspaceViewModel : WorkspaceViewModel
     {
-        #region Data
-        readonly ObservableCollection<ErpResourceViewModel> resources;
+        private readonly ErpResourceExporter resourceExporter;
 
+        private readonly ObservableCollection<ErpResourceViewModel> resources;
         public ObservableCollection<ErpResourceViewModel> Resources
         {
             get { return resources; }
         }
-        #endregion
 
-        #region Presentation Props        
-        string _displayName;
-        ErpResourceViewModel selectedItem;
-
+        private string _displayName;
         public override string DisplayName
         {
             get { return _displayName; }
@@ -38,7 +29,8 @@ namespace EgoErpArchiver.ViewModel
                 OnPropertyChanged(nameof(DisplayName));
             }
         }
-        
+
+        private ErpResourceViewModel selectedItem;
         public ErpResourceViewModel SelectedItem
         {
             get { return selectedItem; }
@@ -47,27 +39,32 @@ namespace EgoErpArchiver.ViewModel
                 if (!object.ReferenceEquals(value, selectedItem))
                 {
                     selectedItem = value;
-                    OnPropertyChanged("SelectedItem");
+                    OnPropertyChanged(nameof(SelectedItem));
                 }
             }
         }
-        #endregion
+
+        public RelayCommand Export { get; }
+        public RelayCommand Import { get; }
+        public RelayCommand ExportAll { get; }
+        public RelayCommand ImportAll { get; }
 
         public ResourcesWorkspaceViewModel(MainViewModel mainView)
             : base(mainView)
         {
+            resourceExporter = new ErpResourceExporter();
             resources = new ObservableCollection<ErpResourceViewModel>();
             _displayName = "All Resources";
 
-            export = new RelayCommand(Export_Execute, Export_CanExecute);
-            import = new RelayCommand(Import_Execute, Import_CanExecute);
-            exportAll = new RelayCommand(ExportAll_Execute, ExportAll_CanExecute);
-            importAll = new RelayCommand(ImportAll_Execute, ImportAll_CanExecute);
+            Export = new RelayCommand(Export_Execute, Export_CanExecute);
+            Import = new RelayCommand(Import_Execute, Import_CanExecute);
+            ExportAll = new RelayCommand(ExportAll_Execute, ExportAll_CanExecute);
+            ImportAll = new RelayCommand(ImportAll_Execute, ImportAll_CanExecute);
         }
 
         public override void LoadData(object data)
         {
-            foreach (ErpResource resource in ((ErpFile)data).Resources)
+            foreach (var resource in ((ErpFile)data).Resources)
             {
                 resources.Add(new ErpResourceViewModel(resource, this));
             }
@@ -79,54 +76,34 @@ namespace EgoErpArchiver.ViewModel
             resources.Clear();
         }
 
-        #region Menu
-        readonly RelayCommand export;
-        readonly RelayCommand import;
-        readonly RelayCommand exportAll;
-        readonly RelayCommand importAll;
-
-        public RelayCommand Export
-        {
-            get { return export; }
-        }
-        public RelayCommand Import
-        {
-            get { return import; }
-        }
-        public RelayCommand ExportAll
-        {
-            get { return exportAll; }
-        }
-        public RelayCommand ImportAll
-        {
-            get { return importAll; }
-        }
-
         private bool Export_CanExecute(object parameter)
         {
             return parameter != null;
         }
+
         private void Export_Execute(object parameter)
         {
-            ErpResourceViewModel resView = ((ErpResourceViewModel)parameter);
-            var dlg = new CommonOpenFileDialog();
-            dlg.Title = "Select a folder to export the resource:";
-            dlg.IsFolderPicker = true;
+            var resView = (ErpResourceViewModel)parameter;
+            var dlg = new CommonOpenFileDialog
+            {
+                Title = "Select a folder to export the resource:",
+                IsFolderPicker = true,
 
-            dlg.AddToMostRecentlyUsedList = false;
-            dlg.AllowNonFileSystemItems = false;
-            dlg.EnsureFileExists = true;
-            dlg.EnsurePathExists = true;
-            dlg.EnsureReadOnly = false;
-            dlg.EnsureValidNames = true;
-            dlg.Multiselect = false;
-            dlg.ShowPlacesList = true;
+                AddToMostRecentlyUsedList = false,
+                AllowNonFileSystemItems = false,
+                EnsureFileExists = true,
+                EnsurePathExists = true,
+                EnsureReadOnly = false,
+                EnsureValidNames = true,
+                Multiselect = false,
+                ShowPlacesList = true
+            };
 
             if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 try
                 {
-                    resView.Resource.Export(dlg.FileName);
+                    resourceExporter.ExportResource(resView.Resource, dlg.FileName);
                 }
                 catch (Exception ex)
                 {
@@ -135,32 +112,36 @@ namespace EgoErpArchiver.ViewModel
                 }
             }
         }
+
         private bool Import_CanExecute(object parameter)
         {
             return parameter != null;
         }
+
         private void Import_Execute(object parameter)
         {
-            ErpResourceViewModel resView = ((ErpResourceViewModel)parameter);
-            var dlg = new CommonOpenFileDialog();
-            dlg.Title = "Select a folder to import the resource from:";
-            dlg.IsFolderPicker = true;
+            var resView = (ErpResourceViewModel)parameter;
+            var dlg = new CommonOpenFileDialog
+            {
+                Title = "Select a folder to import the resource from:",
+                IsFolderPicker = true,
 
-            dlg.AddToMostRecentlyUsedList = false;
-            dlg.AllowNonFileSystemItems = false;
-            dlg.EnsureFileExists = true;
-            dlg.EnsurePathExists = true;
-            dlg.EnsureReadOnly = false;
-            dlg.EnsureValidNames = true;
-            dlg.Multiselect = false;
-            dlg.ShowPlacesList = true;
+                AddToMostRecentlyUsedList = false,
+                AllowNonFileSystemItems = false,
+                EnsureFileExists = true,
+                EnsurePathExists = true,
+                EnsureReadOnly = false,
+                EnsureValidNames = true,
+                Multiselect = false,
+                ShowPlacesList = true
+            };
 
             if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 try
                 {
-                    string[] files = Directory.GetFiles(dlg.FileName, "*", SearchOption.AllDirectories);
-                    resView.Resource.Import(files);
+                    var files = Directory.GetFiles(dlg.FileName, "*", SearchOption.AllDirectories);
+                    resourceExporter.ImportResource(resView.Resource, files);
                     resView.UpdateSize();
                 }
                 catch (Exception ex)
@@ -175,30 +156,38 @@ namespace EgoErpArchiver.ViewModel
         {
             return resources.Count > 0;
         }
+
         private void ExportAll_Execute(object parameter)
         {
-            var dlg = new CommonOpenFileDialog();
-            dlg.Title = "Select a folder to export the resources:";
-            dlg.IsFolderPicker = true;
+            var dlg = new CommonOpenFileDialog
+            {
+                Title = "Select a folder to export the resources:",
+                IsFolderPicker = true,
 
-            dlg.AddToMostRecentlyUsedList = false;
-            dlg.AllowNonFileSystemItems = false;
-            dlg.EnsureFileExists = true;
-            dlg.EnsurePathExists = true;
-            dlg.EnsureReadOnly = false;
-            dlg.EnsureValidNames = true;
-            dlg.Multiselect = false;
-            dlg.ShowPlacesList = true;
+                AddToMostRecentlyUsedList = false,
+                AllowNonFileSystemItems = false,
+                EnsureFileExists = true,
+                EnsurePathExists = true,
+                EnsureReadOnly = false,
+                EnsureValidNames = true,
+                Multiselect = false,
+                ShowPlacesList = true
+            };
 
             if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 try
                 {
-                    ProgressDialogViewModel progDialogVM = new ProgressDialogViewModel(out mainView.ErpFile.ProgressPercentage, out mainView.ErpFile.ProgressStatus);
-                    progDialogVM.PercentageMax = mainView.ErpFile.Resources.Count;
-                    View.ProgressDialog progDialog = new View.ProgressDialog();
-                    progDialog.DataContext = progDialogVM;
-                    var task = Task.Run(() => mainView.ErpFile.Export(dlg.FileName));
+                    var progDialogVM = new ProgressDialogViewModel()
+                    {
+                        PercentageMax = mainView.ErpFile.Resources.Count
+                    };
+                    var progDialog = new View.ProgressDialog
+                    {
+                        DataContext = progDialogVM
+                    };
+
+                    var task = Task.Run(() => resourceExporter.Export(mainView.ErpFile, dlg.FileName, progDialogVM.ProgressStatus, progDialogVM.ProgressPercentage));
                     progDialog.ShowDialog();
                     task.Wait();
                 }
@@ -209,38 +198,48 @@ namespace EgoErpArchiver.ViewModel
                 }
             }
         }
+
         private bool ImportAll_CanExecute(object parameter)
         {
             return resources.Count > 0;
         }
+
         private void ImportAll_Execute(object parameter)
         {
-            var dlg = new CommonOpenFileDialog();
-            dlg.Title = "Select a folder to import the resources from:";
-            dlg.IsFolderPicker = true;
+            var dlg = new CommonOpenFileDialog
+            {
+                Title = "Select a folder to import the resources from:",
+                IsFolderPicker = true,
 
-            dlg.AddToMostRecentlyUsedList = false;
-            dlg.AllowNonFileSystemItems = false;
-            dlg.EnsureFileExists = true;
-            dlg.EnsurePathExists = true;
-            dlg.EnsureReadOnly = false;
-            dlg.EnsureValidNames = true;
-            dlg.Multiselect = false;
-            dlg.ShowPlacesList = true;
+                AddToMostRecentlyUsedList = false,
+                AllowNonFileSystemItems = false,
+                EnsureFileExists = true,
+                EnsurePathExists = true,
+                EnsureReadOnly = false,
+                EnsureValidNames = true,
+                Multiselect = false,
+                ShowPlacesList = true
+            };
 
             if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 try
                 {
-                    ProgressDialogViewModel progDialogVM = new ProgressDialogViewModel(out mainView.ErpFile.ProgressPercentage, out mainView.ErpFile.ProgressStatus);
-                    progDialogVM.PercentageMax = mainView.ErpFile.Resources.Count;
-                    View.ProgressDialog progDialog = new View.ProgressDialog();
-                    progDialog.DataContext = progDialogVM;
-                    var task = Task.Run(() => mainView.ErpFile.Import(Directory.GetFiles(dlg.FileName, "*", SearchOption.AllDirectories)));
+                    var progDialogVM = new ProgressDialogViewModel()
+                    {
+                        PercentageMax = mainView.ErpFile.Resources.Count
+                    };
+                    var progDialog = new View.ProgressDialog
+                    {
+                        DataContext = progDialogVM
+                    };
+
+                    var files = Directory.GetFiles(dlg.FileName, "*", SearchOption.AllDirectories);
+                    var task = Task.Run(() => resourceExporter.Import(mainView.ErpFile, files, progDialogVM.ProgressStatus, progDialogVM.ProgressPercentage));
                     progDialog.ShowDialog();
                     task.Wait();
 
-                    foreach (ErpResourceViewModel child in resources)
+                    foreach (var child in resources)
                     {
                         child.UpdateSize();
                     }
@@ -252,6 +251,5 @@ namespace EgoErpArchiver.ViewModel
                 }
             }
         }
-        #endregion
     }
 }

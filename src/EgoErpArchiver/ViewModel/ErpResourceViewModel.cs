@@ -1,20 +1,13 @@
 ﻿using EgoEngineLibrary.Archive.Erp;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EgoErpArchiver.ViewModel
 {
     public class ErpResourceViewModel : TreeNodeViewModel
     {
-        #region Data Props
-        readonly ErpResource resource;
-        readonly ResourcesWorkspaceViewModel resourceWorkspace;
-        readonly ObservableCollection<ErpFragmentViewModel> fragments;
+        private readonly ErpResource resource;
+        private readonly ResourcesWorkspaceViewModel resourceWorkspace;
+        private readonly ObservableCollection<ErpFragmentViewModel> fragments;
 
         public ErpResource Resource
         {
@@ -24,10 +17,7 @@ namespace EgoErpArchiver.ViewModel
         {
             get { return fragments; }
         }
-        #endregion
 
-
-        #region Presentation Props
         public override string DisplayName
         {
             get
@@ -70,13 +60,13 @@ namespace EgoErpArchiver.ViewModel
         
         public bool IsSelected
         {
-            get { return object.ReferenceEquals(this, resourceWorkspace.SelectedItem); }
+            get { return ReferenceEquals(this, resourceWorkspace.SelectedItem); }
         }
+
         public void Select()
         {
             resourceWorkspace.SelectedItem = this;
         }
-        #endregion
 
         public ErpResourceViewModel(ErpResource resource, ResourcesWorkspaceViewModel resourceWorkspace)
         {
@@ -84,7 +74,7 @@ namespace EgoErpArchiver.ViewModel
             this.resourceWorkspace = resourceWorkspace;
             fragments = new ObservableCollection<ErpFragmentViewModel>();
 
-            foreach (ErpFragment fragment in resource.Fragments)
+            foreach (var fragment in resource.Fragments)
             {
                 fragments.Add(new ErpFragmentViewModel(fragment));
             }
@@ -92,7 +82,7 @@ namespace EgoErpArchiver.ViewModel
 
         public override void UpdateSize()
         {
-            foreach (ErpFragmentViewModel child in fragments)
+            foreach (var child in fragments)
             {
                 child.UpdateSize();
             }

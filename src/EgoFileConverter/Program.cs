@@ -3,12 +3,8 @@ using EgoEngineLibrary.Language;
 using EgoEngineLibrary.Xml;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace EgoFileConverter
@@ -57,7 +53,7 @@ namespace EgoFileConverter
         {
             string magic;
             string xmlMagic;
-            using (FileStream fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 PkgBinaryReader reader = new PkgBinaryReader(fs);
                 magic = reader.ReadString(4);
@@ -69,20 +65,26 @@ namespace EgoFileConverter
             
             if (xmlMagic == "\"Rr" || xmlMagic == "BXM")
             {
-                XmlFile file = new XmlFile(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                file.Write(File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read), XMLType.Text);
+                using var fsi = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var fso = File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read);
+                XmlFile file = new XmlFile(fsi);
+                file.Write(fso, XMLType.Text);
                 Console.WriteLine("Success! XML converted.");
             }
             else if (magic == "LNGT")
             {
-                LngFile file = new LngFile(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                file.WriteXml(File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read));
+                using var fsi = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var fso = File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read);
+                LngFile file = new LngFile(fsi);
+                file.WriteXml(fso);
                 Console.WriteLine("Success! Lng converted.");
             }
             else if (magic == "!pkg")
             {
-                PkgFile file = PkgFile.ReadPkg(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                file.WriteJson(File.Open(f + ".json", FileMode.Create, FileAccess.Write, FileShare.Read));
+                using var fsi = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var fso = File.Open(f + ".json", FileMode.Create, FileAccess.Write, FileShare.Read);
+                PkgFile file = PkgFile.ReadPkg(fsi);
+                file.WriteJson(fso);
                 Console.WriteLine("Success! Pkg converted.");
             }
             else
@@ -91,8 +93,10 @@ namespace EgoFileConverter
                 JsonException jsonEx = null;
                 try
                 {
-                    PkgFile pkgFile = PkgFile.ReadJson(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    pkgFile.WritePkg(File.Open(f + ".pkg", FileMode.Create, FileAccess.Write, FileShare.Read));
+                    using var fsi = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    using var fso = File.Open(f + ".pkg", FileMode.Create, FileAccess.Write, FileShare.Read);
+                    PkgFile pkgFile = PkgFile.ReadJson(fsi);
+                    pkgFile.WritePkg(fso);
                     Console.WriteLine("Success! JSON converted.");
                     isJSON = true;
                 }
@@ -115,16 +119,20 @@ namespace EgoFileConverter
 
                     if (xmlDoc.DocumentElement.Name == "language")
                     {
+                        using var fsi = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
+                        using var fso = File.Open(f + ".lng", FileMode.Create, FileAccess.Write, FileShare.Read);
                         DataSet dataSet = new DataSet("language");
-                        dataSet.ReadXml(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read), XmlReadMode.ReadSchema);
+                        dataSet.ReadXml(fsi, XmlReadMode.ReadSchema);
                         LngFile file = new LngFile(dataSet);
-                        file.Write(File.Open(f + ".lng", FileMode.Create, FileAccess.Write, FileShare.Read));
+                        file.Write(fso);
                         Console.WriteLine("Success! XML converted.");
                     }
                     else
                     {
-                        XmlFile file = new XmlFile(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                        file.Write(File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read));
+                        using var fsi = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
+                        using var fso = File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read);
+                        XmlFile file = new XmlFile(fsi);
+                        file.Write(fso);
                         Console.WriteLine("Success! XML converted.");
                     }
                 }

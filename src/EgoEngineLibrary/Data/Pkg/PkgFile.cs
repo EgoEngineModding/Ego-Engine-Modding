@@ -12,6 +12,7 @@ namespace EgoEngineLibrary.Data.Pkg
 
     public class PkgFile
     {
+        private const uint Magic = 1735094305; // !pkg
         private readonly PkgRootObject rootItem;
 
         public PkgRootObject RootItem
@@ -25,6 +26,14 @@ namespace EgoEngineLibrary.Data.Pkg
         public PkgFile()
         {
             rootItem = new PkgRootObject(this);
+        }
+
+        public static bool IsPkgFile(Stream stream)
+        {
+            var header = new byte[4];
+            stream.Read(header, 0, 4);
+            var magic = BitConverter.ToUInt32(header);
+            return magic == Magic;
         }
 
         public static PkgFile Open(Stream stream)

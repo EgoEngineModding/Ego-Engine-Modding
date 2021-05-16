@@ -3,16 +3,10 @@ using EgoEngineLibrary.Archive.Erp.Data;
 using EgoEngineLibrary.Graphics;
 using EgoEngineLibrary.Graphics.Dds;
 using Microsoft.Win32;
-using MiscUtil.Conversion;
 using Pfim;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -21,54 +15,50 @@ namespace EgoErpArchiver.ViewModel
 {
     public class ErpTextureViewModel : ViewModelBase
     {
-        readonly ErpResourceViewModel resView;
-        int _width;
-        int _height;
+        private readonly ErpResourceViewModel resView;
+        private IImage image;
+        private GCHandle imageDataHandle;
 
-        public ErpResource Texture
+        public ErpResource Resource
         {
             get { return resView.Resource; }
         }
+
         public override string DisplayName
         {
-            get { return Texture.FileName; }
+            get { return Resource.FileName; }
         }
+
+        private int _width;
         public int Width
         {
             get { return _width; }
             set
             {
                 _width = value;
-                OnPropertyChanged("Width");
+                OnPropertyChanged(nameof(Width));
             }
         }
+
+        private int _height;
         public int Height
         {
             get { return _height; }
             set
             {
                 _height = value;
-                OnPropertyChanged("Height");
+                OnPropertyChanged(nameof(Height));
             }
         }
-        private uint _texArraySize;
 
+        private uint _texArraySize;
         public uint TexArraySize
         {
             get { return _texArraySize; }
             set { _texArraySize = value; }
         }
 
-        #region Presentation Props
-        bool isSelected;
-        string _textureInfo;
-        uint _texArrayIndex;
-        IImage image;
-        GCHandle imageDataHandle;
-        BitmapSource preview;
-        string previewError;
-        Visibility previewErrorVisibility;
-
+        private uint _texArrayIndex;
         public uint TexArrayIndex
         {
             get { return _texArrayIndex; }
@@ -87,6 +77,7 @@ namespace EgoErpArchiver.ViewModel
             }
         }
 
+        private bool isSelected;
         public bool IsSelected
         {
             get { return isSelected; }
@@ -104,35 +95,46 @@ namespace EgoErpArchiver.ViewModel
                     {
                         CleanPreview();
                     }
-                    OnPropertyChanged("IsSelected");
+                    OnPropertyChanged(nameof(IsSelected));
                 }
             }
         }
+
+        private string _textureInfo;
         public string TextureInfo
         {
             get { return _textureInfo; }
             set
             {
                 _textureInfo = value;
-                OnPropertyChanged("TextureInfo");
+                OnPropertyChanged(nameof(TextureInfo));
             }
         }
+
+        private BitmapSource preview;
         public BitmapSource Preview
         {
             get { return preview; }
-            set { preview = value; OnPropertyChanged("Preview"); }
+            set { preview = value; OnPropertyChanged(nameof(Preview)); }
         }
+
+        private string previewError;
         public string PreviewError
         {
             get { return previewError; }
-            set { previewError = value; OnPropertyChanged("PreviewError"); }
+            set { previewError = value; OnPropertyChanged(nameof(PreviewError)); }
         }
+
+        private Visibility previewErrorVisibility;
         public Visibility PreviewErrorVisibility
         {
             get { return previewErrorVisibility; }
-            set { previewErrorVisibility = value; OnPropertyChanged("PreviewErrorVisibility"); }
+            set { previewErrorVisibility = value; OnPropertyChanged(nameof(PreviewErrorVisibility)); }
         }
-        #endregion
+
+        public RelayCommand TexArrayIndexDownCommand { get; }
+
+        public RelayCommand TexArrayIndexUpCommand { get; }
 
         public ErpTextureViewModel(ErpResourceViewModel resView)
         {
@@ -140,8 +142,8 @@ namespace EgoErpArchiver.ViewModel
             _width = 0;
             _height = 0;
 
-            _texArrayIndexDownCommand = new RelayCommand(TexArrayIndexDownCommand_Execute, TexArrayIndexDownCommand_CanExecute);
-            _texArrayIndexUpCommand = new RelayCommand(TexArrayIndexUpCommand_Execute, TexArrayIndexUpCommand_CanExecute);
+            TexArrayIndexDownCommand = new RelayCommand(TexArrayIndexDownCommand_Execute, TexArrayIndexDownCommand_CanExecute);
+            TexArrayIndexUpCommand = new RelayCommand(TexArrayIndexUpCommand_Execute, TexArrayIndexUpCommand_CanExecute);
         }
 
         public void GetPreview()
@@ -151,28 +153,28 @@ namespace EgoErpArchiver.ViewModel
             {
                 CleanPreview();
 
-                using (MemoryStream ms = new MemoryStream())
+                using (var ms = new MemoryStream())
                 {
                     dds = ExportDDS(ms, true, false);
                     ms.Seek(0, SeekOrigin.Begin);
                     image = Pfim.Pfim.FromStream(ms);
                 }
 
-                imageDataHandle = System.Runtime.InteropServices.GCHandle.Alloc(image.Data, System.Runtime.InteropServices.GCHandleType.Pinned);
+                imageDataHandle = GCHandle.Alloc(image.Data, GCHandleType.Pinned);
                 var addr = imageDataHandle.AddrOfPinnedObject(); 
                 var bsource = BitmapSource.Create(image.Width, image.Height, 96.0, 96.0,
                  PixelFormat(image), null, addr, image.DataLen, image.Stride);
 
                 Width = (int)dds.header.width;
                 Height = (int)dds.header.height;
-                this.Preview = bsource;
+                Preview = bsource;
 
-                this.PreviewErrorVisibility = Visibility.Collapsed;
+                PreviewErrorVisibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
-                this.PreviewError = "Could not create preview! Export/Import may still work in certain circumstances." + Environment.NewLine + Environment.NewLine + ex.Message;
-                this.PreviewErrorVisibility = Visibility.Visible;
+                PreviewError = "Could not create preview! Export/Import may still work in certain circumstances." + Environment.NewLine + Environment.NewLine + ex.Message;
+                PreviewErrorVisibility = Visibility.Visible;
 
                 CleanPreview();
             }
@@ -181,6 +183,7 @@ namespace EgoErpArchiver.ViewModel
                 dds = null;
             }
         }
+
         private void CleanPreview()
         {
             Preview = null;
@@ -188,35 +191,30 @@ namespace EgoErpArchiver.ViewModel
             image?.Dispose();
             image = null;
         }
-        private PixelFormat PixelFormat(IImage image)
+
+        private static PixelFormat PixelFormat(IImage image)
         {
-            switch (image.Format)
+            return image.Format switch
             {
-                case ImageFormat.Rgb24:
-                    return PixelFormats.Bgr24;
-                case ImageFormat.Rgba32:
-                    return PixelFormats.Bgra32;
-                case ImageFormat.Rgb8:
-                    return PixelFormats.Gray8;
-                case ImageFormat.R5g5b5a1:
-                case ImageFormat.R5g5b5:
-                    return PixelFormats.Bgr555;
-                case ImageFormat.R5g6b5:
-                    return PixelFormats.Bgr565;
-                default:
-                    throw new Exception($"Unsupported preview for {image.Format} PixelFormat");
-            }
+                ImageFormat.Rgb24 => PixelFormats.Bgr24,
+                ImageFormat.Rgba32 => PixelFormats.Bgra32,
+                ImageFormat.Rgb8 => PixelFormats.Gray8,
+                ImageFormat.R5g5b5a1 or ImageFormat.R5g5b5 => PixelFormats.Bgr555,
+                ImageFormat.R5g6b5 => PixelFormats.Bgr565,
+                _ => throw new Exception($"Unsupported preview for {image.Format} PixelFormat"),
+            };
         }
 
         public DdsFile ExportDDS(string fileName, bool isPreview, bool exportTexArray)
         {
-            using (FileStream fs = File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read))
-                return ExportDDS(fs, isPreview, exportTexArray);
+            using var fs = File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read);
+            return ExportDDS(fs, isPreview, exportTexArray);
         }
+
         private DdsFile ExportDDS(Stream stream, bool isPreview, bool exportTexArray)
         {
-            ErpGfxSRVResource srvRes = new ErpGfxSRVResource();
-            srvRes.FromResource(Texture);
+            var srvRes = new ErpGfxSRVResource();
+            srvRes.FromResource(Resource);
 
             _texArraySize = srvRes.SurfaceRes.Fragment0.ArraySize;
             _textureInfo = srvRes.SurfaceRes.Fragment0.Width + "x" + srvRes.SurfaceRes.Fragment0.Height + " Mips:" + (srvRes.SurfaceRes.Fragment0.MipMapCount) + " Format:" + srvRes.SurfaceRes.Fragment0.ImageType + ",";
@@ -268,17 +266,19 @@ namespace EgoErpArchiver.ViewModel
                     throw new Exception("Image format not supported!");
             }
 
-            string mipMapFullFileName = Path.Combine(Properties.Settings.Default.F12016Dir, srvRes.SurfaceRes.Frag2.MipMapFileName);
-            bool foundMipMapFile = File.Exists(mipMapFullFileName);
-            bool hasValidMips = srvRes.SurfaceRes.HasValidMips;
+            var mipMapFullFileName = Path.Combine(Properties.Settings.Default.F12016Dir, srvRes.SurfaceRes.Frag2.MipMapFileName);
+            var foundMipMapFile = File.Exists(mipMapFullFileName);
+            var hasValidMips = srvRes.SurfaceRes.HasValidMips;
             if (srvRes.SurfaceRes.HasMips)
             {
                 if (hasValidMips && !foundMipMapFile && !isPreview)
                 {
-                    OpenFileDialog odialog = new OpenFileDialog();
-                    odialog.Filter = "Mipmaps files|*.mipmaps|All files|*.*";
-                    odialog.Title = "Select a mipmaps file";
-                    odialog.FileName = Path.GetFileName(mipMapFullFileName);
+                    var odialog = new OpenFileDialog
+                    {
+                        Filter = "Mipmaps files|*.mipmaps|All files|*.*",
+                        Title = "Select a mipmaps file",
+                        FileName = Path.GetFileName(mipMapFullFileName)
+                    };
                     mipMapFullFileName = Path.GetDirectoryName(mipMapFullFileName);
                     if (Directory.Exists(mipMapFullFileName))
                     {
@@ -320,23 +320,26 @@ namespace EgoErpArchiver.ViewModel
             dds.Write(stream, -1);
             return dds;
         }
+
         public void ImportDDS(string fileName, string mipMapSaveLocation, bool importTexArray)
         {
-            DdsFile dds = new DdsFile(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read));
+            var dds = new DdsFile(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read));
 
-            ErpGfxSRVResource srvRes = new ErpGfxSRVResource();
-            srvRes.FromResource(Texture);
+            var srvRes = new ErpGfxSRVResource();
+            srvRes.FromResource(Resource);
 
-            bool foundMipMapSaveLocation = false;
+            var foundMipMapSaveLocation = false;
             if (srvRes.SurfaceRes.HasMips)
             {
                 if (string.IsNullOrEmpty(mipMapSaveLocation))
                 {
-                    SaveFileDialog sdialog = new SaveFileDialog();
-                    sdialog.Filter = "Mipmaps files|*.mipmaps|All files|*.*";
-                    sdialog.Title = "Select the mipmaps save location and file name";
-                    sdialog.FileName = Path.GetFileName(srvRes.SurfaceRes.Frag2.MipMapFileName);
-                    string mipFullPath = Path.GetDirectoryName(Path.Combine(Properties.Settings.Default.F12016Dir, srvRes.SurfaceRes.Frag2.MipMapFileName));
+                    var sdialog = new SaveFileDialog
+                    {
+                        Filter = "Mipmaps files|*.mipmaps|All files|*.*",
+                        Title = "Select the mipmaps save location and file name",
+                        FileName = Path.GetFileName(srvRes.SurfaceRes.Frag2.MipMapFileName)
+                    };
+                    var mipFullPath = Path.GetDirectoryName(Path.Combine(Properties.Settings.Default.F12016Dir, srvRes.SurfaceRes.Frag2.MipMapFileName));
                     if (Directory.Exists(mipFullPath))
                     {
                         sdialog.InitialDirectory = mipFullPath;
@@ -362,21 +365,7 @@ namespace EgoErpArchiver.ViewModel
                 dds.ToErpGfxSRVResource(srvRes, mipMapStream, importTexArray, _texArrayIndex);
             }
 
-            srvRes.ToResource(Texture);
-        }
-
-        #region Commands
-        private readonly RelayCommand _texArrayIndexDownCommand;
-        private readonly RelayCommand _texArrayIndexUpCommand;
-
-        public RelayCommand TexArrayIndexDownCommand
-        {
-            get { return _texArrayIndexDownCommand; }
-        }
-
-        public RelayCommand TexArrayIndexUpCommand
-        {
-            get { return _texArrayIndexUpCommand; }
+            srvRes.ToResource(Resource);
         }
 
         private bool TexArrayIndexDownCommand_CanExecute(object parameter)
@@ -386,10 +375,12 @@ namespace EgoErpArchiver.ViewModel
 
             return true;
         }
+
         private void TexArrayIndexDownCommand_Execute(object parameter)
         {
             --TexArrayIndex;
         }
+
         private bool TexArrayIndexUpCommand_CanExecute(object parameter)
         {
             if (TexArrayIndex == TexArraySize - 1)
@@ -397,10 +388,10 @@ namespace EgoErpArchiver.ViewModel
 
             return true;
         }
+
         private void TexArrayIndexUpCommand_Execute(object parameter)
         {
             ++TexArrayIndex;
         }
-        #endregion
     }
 }

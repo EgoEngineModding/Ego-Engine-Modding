@@ -2,7 +2,6 @@
 using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using Microsoft.Toolkit.HighPerformance;
 using Microsoft.Toolkit.HighPerformance.Buffers;
-using MiscUtil.Conversion;
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -80,18 +79,6 @@ namespace EgoEngineLibrary.Archive.Erp
                 writer.Write((byte)Compression);
                 writer.Write(PackedSize);
             }
-        }
-
-        public void Export(Stream stream)
-        {
-            using var decompressStream = GetDataStream(true);
-            decompressStream.CopyTo(stream);
-        }
-
-        public void Import(Stream stream)
-        {
-            using var reader = new ErpBinaryReader(EndianBitConverter.Little, stream);
-            SetData(reader.ReadBytes(Convert.ToInt32(reader.BaseStream.Length)));
         }
 
         public byte[] GetDataArray(bool decompress)

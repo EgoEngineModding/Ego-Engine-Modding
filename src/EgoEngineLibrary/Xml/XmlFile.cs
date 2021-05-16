@@ -1,13 +1,12 @@
-﻿namespace EgoEngineLibrary.Xml
-{
-    using MiscUtil.Conversion;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-    using System.Xml;
+﻿using MiscUtil.Conversion;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Xml;
 
+namespace EgoEngineLibrary.Xml
+{
     public enum XMLType
     {
         Text,
@@ -18,13 +17,28 @@
 
     public class XmlFile
     {
+        private const uint BinXmlMagic = 1917985306; // bytes 0-4 1A 22 52 72 (."Rr)
+        private const uint BxmlMagic = 1280137282; // bytes 1-5 42 58 4D 4C (BXML)
+
         public BinaryXmlString xmlStrings;
         public BinaryXmlElement[] xmlElements;
         public BinaryXmlAttribute[] xmlAttributes;
         public XMLType type;
         public XmlDocument doc;
 
-        public XmlFile(System.IO.Stream fileStream)
+        public static bool IsXmlFile(Stream stream)
+        {
+            var header = new byte[5];
+            stream.Read(header, 0, 5);
+            var binXmlMagic = BitConverter.ToUInt32(header);
+            var bxmlMagic = BitConverter.ToUInt32(header.AsSpan()[1..]);
+            return binXmlMagic == BinXmlMagic
+                || bxmlMagic == BxmlMagic
+                || (header[0] == '<' && header[1] == '?')
+                || (header[0] == '<' && Encoding.UTF8.GetCharCount(header, 1, 4) > 0 && XmlConvert.IsStartNCNameChar(Encoding.UTF8.GetChars(header, 1, 4)[0]));
+        }
+
+        public XmlFile(Stream fileStream)
         {
             // Test for XmlType
             try
@@ -153,18 +167,22 @@
                 }
             }
         }
-        public void Write(System.IO.Stream stream)
+
+        public void WriteXml(TextWriter textWriter)
+        {
+            doc.Save(textWriter);
+        }
+
+        public void Write(Stream stream)
         {
             Write(stream, type);
         }
-        public void Write(System.IO.Stream fileStream, XMLType convertType)
+
+        public void Write(Stream fileStream, XMLType convertType)
         {
             if (convertType == XMLType.Text)
             {
-                using (fileStream)
-                {
-                    doc.Save(fileStream);
-                }
+                doc.Save(fileStream);
             }
             else if (convertType == XMLType.BinXML)
             {
@@ -179,7 +197,7 @@
                 BuildBinXml(doc.DocumentElement, valuesToID, xmlElems, xmlAttrs);
                 valueLocations.Add(0);
 
-                using (XmlBinaryWriter writer = new XmlBinaryWriter(new LittleEndianBitConverter(), fileStream))
+                using (XmlBinaryWriter writer = new XmlBinaryWriter(EndianBitConverter.Little, fileStream))
                 {
                     writer.Write(0x7252221A);
                     writer.Write(0);

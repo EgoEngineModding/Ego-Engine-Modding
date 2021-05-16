@@ -1,9 +1,9 @@
-﻿namespace EgoEngineLibrary.Archive.Erp
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 
+namespace EgoEngineLibrary.Archive.Erp
+{
     public class ErpResource
     {
         public ErpFile ParentFile { get; set; }
@@ -168,50 +168,6 @@
             }
 
             return _resourceInfoLength;
-        }
-
-        public void Export(string folder)
-        {
-            var outputDir = Path.Combine(folder, Folder);
-            Directory.CreateDirectory(outputDir);
-
-            for (var i = 0; i < Fragments.Count; ++i)
-            {
-                var name = FileName;
-                name = name.Replace("?", "^^");
-                name = Path.GetFileNameWithoutExtension(name) + "!!!" + Fragments[i].Name + i.ToString("000") + Path.GetExtension(name);
-                Fragments[i].Export(File.Open(
-                    Path.Combine(outputDir, name)
-                    , FileMode.Create, FileAccess.Write, FileShare.Read));
-            }
-        }
-
-        public bool Import(string[] files)
-        {
-            var fragmentsImported = 0;
-
-            foreach (var f in files)
-            {
-                var extension = Path.GetExtension(f);
-                var name = Path.GetFileNameWithoutExtension(f);
-                var resTextIndex = name.LastIndexOf("!!!");
-                if (resTextIndex == -1)
-                {
-                    continue;
-                }
-
-                var resIndex = int.Parse(name.Substring(resTextIndex + 7, 3));
-                name = Path.GetDirectoryName(f) + "\\" + (name.Remove(resTextIndex) + extension).Replace("^^", "?");
-                if (name.EndsWith(Path.Combine(Folder, FileName), StringComparison.InvariantCultureIgnoreCase))
-                {
-                    Fragments[resIndex].Import(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    ++fragmentsImported;
-                }
-            }
-
-            if (fragmentsImported == Fragments.Count)
-                return true;
-            return false;
         }
 
         public ErpFragment? TryGetFragment(string name, int count)

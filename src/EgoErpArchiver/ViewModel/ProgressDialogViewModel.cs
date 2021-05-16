@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace EgoErpArchiver.ViewModel
 {
     public class ProgressDialogViewModel : ViewModelBase
     {
-        readonly StringBuilder _stringBuilder;
-        int _percentage;
-        int _percentageMax;
-        string _percentageText;
-        string _status;
+        private readonly StringBuilder _stringBuilder;
+        private int _percentage;
+        private int _percentageMax;
+        private string _percentageText;
+        private string _status;
 
         public override string DisplayName
         {
@@ -35,7 +31,7 @@ namespace EgoErpArchiver.ViewModel
             {
                 _percentage = value;
                 PercentageText = (value * 100 / _percentageMax) + "%";
-                OnPropertyChanged("Percentage");
+                OnPropertyChanged(nameof(Percentage));
             }
         }
 
@@ -45,7 +41,7 @@ namespace EgoErpArchiver.ViewModel
             set
             {
                 _percentageText = value;
-                OnPropertyChanged("PercentageText");
+                OnPropertyChanged(nameof(PercentageText));
             }
         }
 
@@ -55,7 +51,7 @@ namespace EgoErpArchiver.ViewModel
             set
             {
                 _status = value;
-                OnPropertyChanged("Status");
+                OnPropertyChanged(nameof(Status));
             }
         }
 
@@ -69,15 +65,19 @@ namespace EgoErpArchiver.ViewModel
             set
             {
                 _percentageMax = value;
-                OnPropertyChanged("PercentageMax");
+                OnPropertyChanged(nameof(PercentageMax));
             }
         }
 
-        public ProgressDialogViewModel(out Progress<int> progressPercentage, out Progress<string> progressStatus)
+        public IProgress<int> ProgressPercentage { get; }
+
+        public IProgress<string> ProgressStatus { get; }
+
+        public ProgressDialogViewModel()
         {
             _stringBuilder = new StringBuilder();
-            progressPercentage = new Progress<int>(percentage => Percentage = percentage);
-            progressStatus = new Progress<string>(status => 
+            ProgressPercentage = new Progress<int>(percentage => Percentage = percentage);
+            ProgressStatus = new Progress<string>(status => 
             {
                 _stringBuilder.Append(status);
                 Status = _stringBuilder.ToString();

@@ -1,10 +1,10 @@
-﻿namespace EgoEngineLibrary.Archive.Erp
-{
-    using MiscUtil.Conversion;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
+﻿using MiscUtil.Conversion;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
+namespace EgoEngineLibrary.Archive.Erp
+{
     public class ErpFile
     {
         public int Version { get; set; }
@@ -14,8 +14,6 @@
         public List<ErpResource> Resources { get; set; }
 
         private ulong _resourceInfoTotalLength;
-        public Progress<int>? ProgressPercentage;
-        public Progress<string>? ProgressStatus;
 
         public ErpFile()
         {
@@ -128,70 +126,6 @@
             }
 
             return null;
-        }
-
-        public void Export(string folderPath)
-        {
-            var success = 0;
-            var fail = 0;
-
-            for (var i = 0; i < Resources.Count;)
-            {
-                (ProgressStatus as IProgress<string>)?.Report("Exporting " + Path.Combine(Resources[i].Folder, Resources[i].FileName) + "... ");
-
-                try
-                {
-                    Resources[i].Export(folderPath);
-                    (ProgressStatus as IProgress<string>)?.Report("SUCCESS" + Environment.NewLine);
-                    ++success;
-                }
-                catch
-                {
-                    (ProgressStatus as IProgress<string>)?.Report("FAIL" + Environment.NewLine);
-                    ++fail;
-                }
-
-                ++i;
-                (ProgressPercentage as IProgress<int>)?.Report(i);
-            }
-
-            (ProgressStatus as IProgress<string>)?.Report(string.Format("{0} Succeeded, {1} Failed", success, fail));
-        }
-
-        public void Import(string[] files)
-        {
-            var success = 0;
-            var fail = 0;
-            var skip = 0;
-
-            for (var i = 0; i < Resources.Count;)
-            {
-                (ProgressStatus as IProgress<string>)?.Report("Importing " + Path.Combine(Resources[i].Folder, Resources[i].FileName) + "... ");
-
-                try
-                {
-                    if (Resources[i].Import(files))
-                    {
-                        (ProgressStatus as IProgress<string>)?.Report("SUCCESS" + Environment.NewLine);
-                        ++success;
-                    }
-                    else
-                    {
-                        (ProgressStatus as IProgress<string>)?.Report("SKIP" + Environment.NewLine);
-                        ++skip;
-                    }
-                }
-                catch
-                {
-                    (ProgressStatus as IProgress<string>)?.Report("FAIL" + Environment.NewLine);
-                    ++fail;
-                }
-
-                ++i;
-                (ProgressPercentage as IProgress<int>)?.Report(i);
-            }
-
-            (ProgressStatus as IProgress<string>)?.Report(string.Format("{0} Succeeded, {1} Skipped, {2} Failed", success, skip, fail));
         }
     }
 }

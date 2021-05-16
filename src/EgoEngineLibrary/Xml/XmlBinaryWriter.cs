@@ -11,7 +11,7 @@
     public class XmlBinaryWriter : EndianBinaryWriter
     {
         public XmlBinaryWriter(EndianBitConverter bitConverter, System.IO.Stream stream)
-            : base(bitConverter, stream)
+            : base(bitConverter, stream, true)
         {
         }
 

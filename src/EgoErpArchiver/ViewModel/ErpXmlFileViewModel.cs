@@ -1,8 +1,8 @@
 ﻿using EgoEngineLibrary.Archive.Erp;
+using EgoEngineLibrary.Formats.Erp;
 using EgoEngineLibrary.Xml;
 using System;
 using System.IO;
-using System.Text;
 
 namespace EgoErpArchiver.ViewModel
 {
@@ -10,19 +10,19 @@ namespace EgoErpArchiver.ViewModel
     {
         private readonly ErpResourceViewModel resView;
 
-        public ErpResource XmlFile
+        public ErpResource Resource
         {
             get { return resView.Resource; }
         }
 
-        #region Presentation Props
-        private bool isSelected;
-        private string preview;
+        public ErpFragment Fragment { get; }
 
         public override string DisplayName
         {
-            get { return XmlFile.FileName; }
+            get { return ErpResourceExporter.GetFragmentFileName(Resource, Fragment); }
         }
+
+        private bool isSelected;
         public bool IsSelected
         {
             get { return isSelected; }
@@ -41,51 +41,47 @@ namespace EgoErpArchiver.ViewModel
                 }
             }
         }
+
+        private string preview;
         public string Preview
         {
             get { return preview; }
             set { preview = value; OnPropertyChanged(nameof(Preview)); }
         }
-        #endregion
 
-        public ErpXmlFileViewModel(ErpResourceViewModel resView)
+        public ErpXmlFileViewModel(ErpResourceViewModel resView, ErpFragment fragment)
         {
             this.resView = resView;
+            Fragment = fragment;
         }
 
         public void GetPreview()
         {
             try
             {
-                var xml = new XmlFile(XmlFile.Fragments[0].GetDataStream(true));
-                var set = new System.Xml.XmlWriterSettings
-                {
-                    Encoding = Encoding.UTF8,
-                    Indent = true
-                };
-                using var stringWriter = new StringWriter();
-                using var xmlTextWriter = System.Xml.XmlWriter.Create(stringWriter, set);
-                xml.doc.WriteTo(xmlTextWriter);
-                xmlTextWriter.Flush();
-                Preview = stringWriter.GetStringBuilder().ToString();
+                using var sw = new StringWriter();
+                ExportXML(sw);
+                Preview = sw.GetStringBuilder().ToString();
             }
             catch (Exception ex)
             {
                 Preview = "Could not create preview!" + Environment.NewLine + Environment.NewLine + ex.Message;
             }
         }
-        public void ExportXML(Stream stream)
+
+        public void ExportXML(TextWriter textWriter)
         {
-            var xml = new XmlFile(XmlFile.Fragments[0].GetDataStream(true));
-            xml.Write(stream, XMLType.Text);
+            using var dataStream = Fragment.GetDataStream(true);
+            var xml = new XmlFile(dataStream);
+            xml.WriteXml(textWriter);
         }
+
         public void ImportXML(Stream stream)
         {
             var xml = new XmlFile(stream);
-            using var xmlData = new MemoryStream();
-            xml.Write(xmlData);
-
-            XmlFile.Fragments[0].SetData(xmlData.ToArray());
+            using var ms = new MemoryStream();
+            xml.Write(ms);
+            Fragment.SetData(ms.ToArray());
         }
     }
 }
