@@ -1,17 +1,19 @@
-﻿namespace EgoEngineLibrary.Archive.Erp
-{
-    using ICSharpCode.SharpZipLib.Zip.Compression;
-    using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
-    using Microsoft.Toolkit.HighPerformance;
-    using Microsoft.Toolkit.HighPerformance.Buffers;
-    using MiscUtil.Conversion;
-    using System;
-    using System.IO;
-    using System.IO.Compression;
-    using Zstandard.Net;
+﻿using ICSharpCode.SharpZipLib.Zip.Compression;
+using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
+using Microsoft.Toolkit.HighPerformance;
+using Microsoft.Toolkit.HighPerformance.Buffers;
+using MiscUtil.Conversion;
+using System;
+using System.IO;
+using System.IO.Compression;
+using Zstandard.Net;
 
+namespace EgoEngineLibrary.Archive.Erp
+{
     public class ErpFragment
     {
+        private byte[] _data;
+
         public ErpFile ParentFile { get; set; }
 
         public string Name { get; set; }
@@ -22,8 +24,15 @@
         public ulong PackedSize { get; private set; }
 
         public ErpCompressionAlgorithm Compression { get; private set; }
-
-        private byte[] _data;
+        public bool IsCompressed
+        {
+            get
+            {
+                return Compression is ErpCompressionAlgorithm.Zlib
+                    or ErpCompressionAlgorithm.ZStandard
+                    or ErpCompressionAlgorithm.LZ4;
+            }
+        }
 
         public ErpFragment(ErpFile parentFile)
         {
@@ -87,10 +96,10 @@
 
         public byte[] GetDataArray(bool decompress)
         {
-            if (decompress)
+            if (decompress && IsCompressed)
             {
                 using var bufferWriter = new ArrayPoolBufferWriter<byte>(Convert.ToInt32(Size));
-                using var decompressStream = GetDataStream(true);
+                using var decompressStream = GetDecompressDataStream(true);
                 decompressStream.CopyTo(bufferWriter.AsStream());
                 return bufferWriter.WrittenSpan.ToArray();
             }
@@ -99,9 +108,41 @@
                 return _data;
             }
         }
+
+        /// <summary>
+        /// Gets a stream of the data.
+        /// </summary>
+        /// <param name="decompress">Whether to fully decompress the raw data if it's compressed.</param>
+        /// <returns>a stream of the data.</returns>
         public Stream GetDataStream(bool decompress)
         {
-            if (decompress)
+            var stream = GetDecompressDataStream(decompress);
+
+            // the decompression streams don't support seek which is used by lots of other code
+            // we'll have to decompress the entire data by copying it into another stream.
+            if (IsCompressed)
+            {
+                var memStream = new MemoryStream();
+                using (stream)
+                {
+                    stream.CopyTo(memStream);
+                }
+                stream = memStream;
+                memStream.Seek(0, SeekOrigin.Begin);
+            }
+
+            return stream;
+        }
+
+        /// <summary>
+        /// Gets a stream that does the decompression of the raw data if the data is compressed,
+        /// otherwise the raw data is wrapped in a stream.
+        /// </summary>
+        /// <param name="decompress">Whether to wrap the data in a decompression stream if it is compressed.</param>
+        /// <returns>a stream wrapped around the raw data.</returns>
+        public Stream GetDecompressDataStream(bool decompress)
+        {
+            if (decompress && IsCompressed)
             {
                 return Compression switch
                 {
@@ -121,7 +162,7 @@
 
         public void SetData(byte[] data, bool compress = true)
         {
-            if (compress)
+            if (compress && IsCompressed)
             {
                 switch (Compression)
                 {

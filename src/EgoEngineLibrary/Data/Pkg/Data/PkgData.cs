@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace EgoEngineLibrary.Data.Pkg.Data
@@ -28,49 +24,34 @@ namespace EgoEngineLibrary.Data.Pkg.Data
 
         public static PkgData Create(PkgBinaryReader reader, PkgFile parentFile)
         {
-            return PkgData.Create(parentFile, reader.ReadString(4));
+            return Create(parentFile, reader.ReadString(4));
         }
         public static PkgData Create(PkgFile parentFile, string type)
         {
-            switch (type)
+            return type switch
             {
-                case "stri":
-                    return new PkgStringData(parentFile);
-                case "woid":
-                    return new PkgWoidData(parentFile);
-                case "mat4":
-                    return new PkgMat4Data(parentFile);
-                case "fp32":
-                    return new PkgFp32Data(parentFile);
-                case "bool":
-                    return new PkgBoolData(parentFile);
-                case "rgba":
-                    return new PkgRgbaData(parentFile);
-                case "shnm":
-                    return new PkgShnmData(parentFile);
-                case "vec3":
-                    return new PkgVec3Data(parentFile);
-                case "ui32":
-                    return new PkgUi32Data(parentFile);
-                case "si32":
-                    return new PkgSi32Data(parentFile);
-                case "ui64":
-                    return new PkgUi64Data(parentFile);
-                case "si64":
-                    return new PkgSi64Data(parentFile);
-                case "vec4":
-                    return new PkgVec4Data(parentFile);
-                case "quat":
-                    return new PkgQuatData(parentFile);
-                case "bbox":
-                    return new PkgBboxData(parentFile);
-                default:
-                    throw new Exception("Data type not supported! " + type);
-            }
+                "stri" => new PkgStringData(parentFile),
+                "woid" => new PkgWoidData(parentFile),
+                "mat4" => new PkgMat4Data(parentFile),
+                "fp32" => new PkgFp32Data(parentFile),
+                "bool" => new PkgBoolData(parentFile),
+                "rgba" => new PkgRgbaData(parentFile),
+                "shnm" => new PkgShnmData(parentFile),
+                "vec3" => new PkgVec3Data(parentFile),
+                "ui32" => new PkgUi32Data(parentFile),
+                "si32" => new PkgSi32Data(parentFile),
+                "ui64" => new PkgUi64Data(parentFile),
+                "si64" => new PkgSi64Data(parentFile),
+                "vec4" => new PkgVec4Data(parentFile),
+                "quat" => new PkgQuatData(parentFile),
+                "bbox" => new PkgBboxData(parentFile),
+                "ui16" => new PkgUi16Data(parentFile),
+                _ => throw new Exception("Data type not supported! " + type),
+            };
         }
 
-        public abstract string GetData(Int32 index);
-        public abstract Int32 SetData(string data);
+        public abstract string GetData(int index);
+        public abstract int SetData(string data);
 
         public override void ToJson(JsonTextWriter writer)
         {

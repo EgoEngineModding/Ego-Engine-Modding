@@ -1,10 +1,7 @@
 ﻿using MiscUtil.Conversion;
 using MiscUtil.IO;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace EgoEngineLibrary.Data.Pkg
 {
@@ -21,27 +18,27 @@ namespace EgoEngineLibrary.Data.Pkg
 
         public void Write(PkgOffsetType offsetType)
         {
-            UInt32 temp = (UInt32)offsetType.Type << 24;
-            temp += (UInt32)offsetType.Offset & 0x00FFFFFF;
+            var temp = (uint)offsetType.Type << 24;
+            temp += (uint)offsetType.Offset & 0x00FFFFFF;
             Write(temp);
         }
 
         public new void Write(string str)
         {
-            byte[] data = Encoding.GetBytes(str);
-            Write((Byte)data.Length);
-            this.Write(data);
-            this.Write((byte)0x0);
+            var data = Encoding.GetBytes(str);
+            Write(Convert.ToByte(data.Length));
+            Write(data);
+            Write((byte)0x0);
         }
         public void Write(string str, int length)
         {
-            byte[] data = Encoding.GetBytes(str);
-            this.Write(data);
+            var data = Encoding.GetBytes(str);
+            Write(data);
 
-            length = length - data.Length;
+            length -= data.Length;
             if (length > 0)
             {
-                this.Write(new byte[length]);
+                Write(new byte[length]);
             }
         }
     }

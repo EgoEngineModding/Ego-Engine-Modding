@@ -232,6 +232,10 @@ typedef struct
             uint32 data[numData];
             //byte padding[-(numData*bytePerData) & 3];
         }
+        else if (type == "ui16")
+        {
+            uint16 data[numData];
+        }
         else if (type == "si32")
         {
             int32 data[numData];

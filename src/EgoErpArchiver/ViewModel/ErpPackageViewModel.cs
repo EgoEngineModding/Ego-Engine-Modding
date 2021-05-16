@@ -3,7 +3,6 @@ using EgoEngineLibrary.Data.Pkg;
 using System;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace EgoErpArchiver.ViewModel
 {
@@ -34,7 +33,7 @@ namespace EgoErpArchiver.ViewModel
                     isSelected = value;
                     if (value)
                     {
-                        Task.Run(() => GetPreview()).Wait();
+                        GetPreview();
                         resView.Select();
                     }
                     else preview = string.Empty;
@@ -59,7 +58,8 @@ namespace EgoErpArchiver.ViewModel
             try
             {
                 var sb = new StringBuilder();
-                ExportPkg(new StringWriter(sb));
+                using var sw = new StringWriter(sb);
+                ExportPkg(sw);
                 Preview = sb.ToString();
             }
             catch (Exception ex)

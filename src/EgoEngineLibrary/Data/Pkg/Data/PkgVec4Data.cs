@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EgoEngineLibrary.Data.Pkg.Data
 {
@@ -41,15 +36,17 @@ namespace EgoEngineLibrary.Data.Pkg.Data
 
         public override void Read(PkgBinaryReader reader)
         {
-            UInt32 numData = ReadHeader(reader);
+            var numData = ReadHeader(reader);
 
-            for (int i = 0; i < numData; ++i)
+            for (var i = 0; i < numData; ++i)
             {
-                Vector4 vec3 = new Vector4();
-                vec3.X = reader.ReadSingle();
-                vec3.Y = reader.ReadSingle();
-                vec3.Z = reader.ReadSingle();
-                vec3.W = reader.ReadSingle();
+                var vec3 = new Vector4
+                {
+                    X = reader.ReadSingle(),
+                    Y = reader.ReadSingle(),
+                    Z = reader.ReadSingle(),
+                    W = reader.ReadSingle()
+                };
                 values.Add(vec3);
             }
         }
@@ -57,7 +54,7 @@ namespace EgoEngineLibrary.Data.Pkg.Data
         {
             WriteHeader(writer);
 
-            foreach (Vector4 val in values)
+            foreach (var val in values)
             {
                 writer.Write(val.X);
                 writer.Write(val.Y);
@@ -66,18 +63,18 @@ namespace EgoEngineLibrary.Data.Pkg.Data
             }
         }
 
-        public override string GetData(Int32 index)
+        public override string GetData(int index)
         {
-            Vector4 vec3 = values[index];
+            var vec3 = values[index];
             return Type + " " + string.Format(CultureInfo.InvariantCulture, "{0:0.##################},{1:0.##################},{2:0.##################},{3:0.##################}", vec3.X, vec3.Y, vec3.Z, vec3.W);
         }
-        public override Int32 SetData(string data)
+        public override int SetData(string data)
         {
-            string[] vec3s = data.Split(',');
-            Vector4 res = new Vector4(
+            var vec3s = data.Split(',');
+            var res = new Vector4(
                 float.Parse(vec3s[0], CultureInfo.InvariantCulture), float.Parse(vec3s[1], CultureInfo.InvariantCulture), 
                 float.Parse(vec3s[2], CultureInfo.InvariantCulture), float.Parse(vec3s[3], CultureInfo.InvariantCulture));
-            int index = values.IndexOf(res);
+            var index = values.IndexOf(res);
 
             if (index >= 0)
             {

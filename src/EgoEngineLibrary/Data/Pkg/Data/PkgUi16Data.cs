@@ -1,12 +1,12 @@
 ﻿namespace EgoEngineLibrary.Data.Pkg.Data
 {
-    public class PkgBoolData : PkgDataList<bool>
+    public class PkgUi16Data : PkgDataList<ushort>
     {
         public override string Type
         {
             get
             {
-                return "bool";
+                return "ui16";
             }
         }
 
@@ -14,7 +14,7 @@
         {
             get
             {
-                return 1;
+                return 2;
             }
         }
 
@@ -26,7 +26,7 @@
             }
         }
 
-        public PkgBoolData(PkgFile parentFile)
+        public PkgUi16Data(PkgFile parentFile)
             : base(parentFile)
         {
         }
@@ -37,7 +37,7 @@
 
             for (var i = 0; i < numData; ++i)
             {
-                values.Add(reader.ReadBoolean());
+                values.Add(reader.ReadUInt16());
             }
         }
         public override void Write(PkgBinaryWriter writer)
@@ -56,7 +56,7 @@
         }
         public override int SetData(string data)
         {
-            var res = bool.Parse(data);
+            var res = ushort.Parse(data);
             var index = values.IndexOf(res);
 
             if (index >= 0)

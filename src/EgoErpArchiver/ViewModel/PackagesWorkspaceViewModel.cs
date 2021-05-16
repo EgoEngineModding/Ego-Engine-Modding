@@ -153,7 +153,9 @@ namespace EgoErpArchiver.ViewModel
             {
                 try
                 {
-                    pkgView.ExportPkg(new StreamWriter(File.Open(dialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read)));
+                    using var fs = File.Open(dialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read);
+                    using var sw = new StreamWriter(fs);
+                    pkgView.ExportPkg(sw);
                 }
                 catch (Exception ex)
                 {
@@ -177,7 +179,8 @@ namespace EgoErpArchiver.ViewModel
             {
                 try
                 {
-                    pkgView.ImportPkg(File.Open(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read));
+                    using var fs = File.Open(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    pkgView.ImportPkg(fs);
                     pkgView.IsSelected = false;
                     pkgView.IsSelected = true;
                 }
@@ -218,7 +221,11 @@ namespace EgoErpArchiver.ViewModel
                         {
                             string directoryPath = Path.GetDirectoryName(fileName);
                             if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
-                            packages[i].ExportPkg(new StreamWriter(File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read)));
+
+                            using var fs = File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read);
+                            using var sw = new StreamWriter(fs);
+                            packages[i].ExportPkg(sw);
+
                             ((IProgress<string>)mainView.ErpFile.ProgressStatus).Report("SUCCESS" + Environment.NewLine);
                             ++success;
                         }
@@ -276,7 +283,8 @@ namespace EgoErpArchiver.ViewModel
                                 {
                                     if (Path.Equals(filePath, fileName))
                                     {
-                                        packages[i].ImportPkg(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+                                        using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                                        packages[i].ImportPkg(fs);
                                         if (packages[i].IsSelected)
                                         {
                                             packages[i].IsSelected = false;

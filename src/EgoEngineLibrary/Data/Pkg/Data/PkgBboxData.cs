@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Numerics;
-using System.Text;
 
 namespace EgoEngineLibrary.Data.Pkg.Data
 {
@@ -40,19 +38,23 @@ namespace EgoEngineLibrary.Data.Pkg.Data
 
         public override void Read(PkgBinaryReader reader)
         {
-            UInt32 numData = ReadHeader(reader);
+            var numData = ReadHeader(reader);
 
-            for (int i = 0; i < numData; ++i)
+            for (var i = 0; i < numData; ++i)
             {
-                Vector3 vec3 = new Vector3();
-                vec3.X = reader.ReadSingle();
-                vec3.Y = reader.ReadSingle();
-                vec3.Z = reader.ReadSingle();
+                var vec3 = new Vector3
+                {
+                    X = reader.ReadSingle(),
+                    Y = reader.ReadSingle(),
+                    Z = reader.ReadSingle()
+                };
                 reader.Seek(4, SeekOrigin.Current);
-                Vector3 vec32 = new Vector3();
-                vec32.X = reader.ReadSingle();
-                vec32.Y = reader.ReadSingle();
-                vec32.Z = reader.ReadSingle();
+                var vec32 = new Vector3
+                {
+                    X = reader.ReadSingle(),
+                    Y = reader.ReadSingle(),
+                    Z = reader.ReadSingle()
+                };
                 reader.Seek(4, SeekOrigin.Current);
                 values.Add((vec3, vec32));
             }
@@ -61,34 +63,34 @@ namespace EgoEngineLibrary.Data.Pkg.Data
         {
             WriteHeader(writer);
 
-            foreach ((Vector3,Vector3) val in values)
+            foreach (var val in values)
             {
                 writer.Write(val.Item1.X);
                 writer.Write(val.Item1.Y);
                 writer.Write(val.Item1.Z);
-                writer.Write((UInt32)0);
+                writer.Write((uint)0);
                 writer.Write(val.Item2.X);
                 writer.Write(val.Item2.Y);
                 writer.Write(val.Item2.Z);
-                writer.Write((UInt32)0);
+                writer.Write((uint)0);
             }
         }
 
-        public override string GetData(Int32 index)
+        public override string GetData(int index)
         {
-            (Vector3,Vector3) val = values[index];
+            var val = values[index];
             return Type + " " + string.Format(
                 CultureInfo.InvariantCulture, $"{val.Item1.X:0.##################},{val.Item1.Y:0.##################},{val.Item1.Z:0.##################};{val.Item2.X:0.##################},{val.Item2.Y:0.##################},{val.Item2.Z:0.##################}");
         }
-        public override Int32 SetData(string data)
+        public override int SetData(string data)
         {
-            string[] vec3s = data.Split(',', ';');
-            Vector3 vec1 = new Vector3(
+            var vec3s = data.Split(',', ';');
+            var vec1 = new Vector3(
                 float.Parse(vec3s[0], CultureInfo.InvariantCulture), float.Parse(vec3s[1], CultureInfo.InvariantCulture), float.Parse(vec3s[2], CultureInfo.InvariantCulture));
-            Vector3 vec2 = new Vector3(
+            var vec2 = new Vector3(
                 float.Parse(vec3s[3], CultureInfo.InvariantCulture), float.Parse(vec3s[4], CultureInfo.InvariantCulture), float.Parse(vec3s[5], CultureInfo.InvariantCulture));
             (Vector3, Vector3) res = (vec1, vec2);
-            int index = values.IndexOf(res);
+            var index = values.IndexOf(res);
 
             if (index >= 0)
             {

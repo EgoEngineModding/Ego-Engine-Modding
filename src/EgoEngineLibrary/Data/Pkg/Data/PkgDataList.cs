@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace EgoEngineLibrary.Data.Pkg.Data
 {
@@ -10,7 +6,7 @@ namespace EgoEngineLibrary.Data.Pkg.Data
     {
         protected readonly List<T> values;
 
-        protected abstract UInt32 DataByteSize { get; }
+        protected abstract uint DataByteSize { get; }
 
         public PkgDataList(PkgFile parentFile)
             : base(parentFile)
@@ -18,25 +14,25 @@ namespace EgoEngineLibrary.Data.Pkg.Data
             values = new List<T>();
         }
 
-        protected UInt32 ReadHeader(PkgBinaryReader reader)
+        protected uint ReadHeader(PkgBinaryReader reader)
         {
-            UInt32 numData = reader.ReadUInt32();
-            UInt32 bytesPerData = reader.ReadUInt32();
+            var numData = reader.ReadUInt32();
+            _ = reader.ReadUInt32(); // bytesPerData
             return numData;
         }
         protected void WriteHeader(PkgBinaryWriter writer)
         {
-            writer.Write(new byte[GetPaddingLength((Int32)writer.BaseStream.Position)]);
+            writer.Write(new byte[GetPaddingLength((int)writer.BaseStream.Position)]);
             writer.Write(ChunkType, 4);
             writer.Write(Type, 4);
 
-            writer.Write((UInt32)values.Count);
+            writer.Write((uint)values.Count);
             writer.Write(DataByteSize);
         }
 
         internal override void UpdateOffsets()
         {
-            PkgValue._offset += 16 + values.Count * (Int32)DataByteSize;
+            PkgValue._offset += 16 + values.Count * (int)DataByteSize;
         }
     }
 }

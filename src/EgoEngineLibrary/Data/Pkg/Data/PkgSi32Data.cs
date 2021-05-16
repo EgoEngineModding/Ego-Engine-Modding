@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EgoEngineLibrary.Data.Pkg.Data
+﻿namespace EgoEngineLibrary.Data.Pkg.Data
 {
-    public class PkgSi32Data : PkgDataList<Int32>
+    public class PkgSi32Data : PkgDataList<int>
     {
         public override string Type
         {
@@ -39,9 +33,9 @@ namespace EgoEngineLibrary.Data.Pkg.Data
 
         public override void Read(PkgBinaryReader reader)
         {
-            UInt32 numData = ReadHeader(reader);
+            var numData = ReadHeader(reader);
 
-            for (int i = 0; i < numData; ++i)
+            for (var i = 0; i < numData; ++i)
             {
                 values.Add(reader.ReadInt32());
             }
@@ -50,20 +44,20 @@ namespace EgoEngineLibrary.Data.Pkg.Data
         {
             WriteHeader(writer);
 
-            foreach (Int32 val in values)
+            foreach (var val in values)
             {
                 writer.Write(val);
             }
         }
 
-        public override string GetData(Int32 index)
+        public override string GetData(int index)
         {
             return Type + " " + values[index];
         }
-        public override Int32 SetData(string data)
+        public override int SetData(string data)
         {
-            Int32 res = Int32.Parse(data);
-            int index = values.IndexOf(res);
+            var res = int.Parse(data);
+            var index = values.IndexOf(res);
 
             if (index >= 0)
             {
