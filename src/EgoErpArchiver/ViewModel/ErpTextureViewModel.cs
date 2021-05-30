@@ -1,9 +1,12 @@
-﻿using EgoEngineLibrary.Archive.Erp;
+﻿using BCnEncoder.Decoder;
+using BCnEncoder.ImageSharp;
+using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Archive.Erp.Data;
 using EgoEngineLibrary.Graphics;
 using EgoEngineLibrary.Graphics.Dds;
 using Microsoft.Win32;
-using Pfim;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -16,8 +19,6 @@ namespace EgoErpArchiver.ViewModel
     public class ErpTextureViewModel : ViewModelBase
     {
         private readonly ErpResourceViewModel resView;
-        private IImage image;
-        private GCHandle imageDataHandle;
 
         public ErpResource Resource
         {
@@ -91,9 +92,9 @@ namespace EgoErpArchiver.ViewModel
                         GetPreview();
                         resView.Select();
                     }
-                    else 
+                    else
                     {
-                        CleanPreview();
+                        Preview = null;
                     }
                     OnPropertyChanged(nameof(IsSelected));
                 }
@@ -148,61 +149,52 @@ namespace EgoErpArchiver.ViewModel
 
         public void GetPreview()
         {
-            DdsFile dds;
+            Image<Rgba32> image = null;
+            bool ddsReadSuccess = false;
             try
             {
-                CleanPreview();
+                Preview = null;
 
                 using (var ms = new MemoryStream())
                 {
-                    dds = ExportDDS(ms, true, false);
+                    var dds = ExportDDS(ms, true, false);
+                    ddsReadSuccess = true;
+
                     ms.Seek(0, SeekOrigin.Begin);
-                    image = Pfim.Pfim.FromStream(ms);
+                    var decoder = new BcDecoder();
+                    image = decoder.DecodeToImageRgba32(ms);
                 }
 
-                imageDataHandle = GCHandle.Alloc(image.Data, GCHandleType.Pinned);
-                var addr = imageDataHandle.AddrOfPinnedObject(); 
-                var bsource = BitmapSource.Create(image.Width, image.Height, 96.0, 96.0,
-                 PixelFormat(image), null, addr, image.DataLen, image.Stride);
+                // Copy pixels to WPF format
+                var pixels = new byte[image.Width * image.Height * 4];
+                var pixelsSpan = MemoryMarshal.Cast<byte, Bgra32>(pixels);
+                for (int r = 0; r < image.Height; ++r)
+                {
+                    var destRow = pixelsSpan.Slice(r * image.Width, image.Width);
+                    var sorcRow = image.GetPixelRowSpan(r);
+                    PixelOperations<Rgba32>.Instance.ToBgra32(Configuration.Default, sorcRow, destRow);
 
-                Width = (int)dds.header.width;
-                Height = (int)dds.header.height;
-                Preview = bsource;
+                }
+                var bmSource = BitmapSource.Create(image.Width, image.Height, 96.0, 96.0, PixelFormats.Bgra32, null, pixels, image.Width * 4);
 
+                Preview = bmSource;
+                Width = image.Width;
+                Height = image.Height;
                 PreviewErrorVisibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
-                PreviewError = "Could not create preview! Export/Import may still work in certain circumstances." + Environment.NewLine + Environment.NewLine + ex.Message;
+                Preview = null;
+                if (ddsReadSuccess)
+                    PreviewError = "Could not create preview! Export/Import may still work." + Environment.NewLine + Environment.NewLine + ex.Message;
+                else
+                    PreviewError = "Could not create preview! Failed to convert texture to dds." + Environment.NewLine + Environment.NewLine + ex.Message;
                 PreviewErrorVisibility = Visibility.Visible;
-
-                CleanPreview();
             }
             finally
             {
-                dds = null;
+                image?.Dispose();
             }
-        }
-
-        private void CleanPreview()
-        {
-            Preview = null;
-            if (imageDataHandle.IsAllocated) imageDataHandle.Free();
-            image?.Dispose();
-            image = null;
-        }
-
-        private static PixelFormat PixelFormat(IImage image)
-        {
-            return image.Format switch
-            {
-                ImageFormat.Rgb24 => PixelFormats.Bgr24,
-                ImageFormat.Rgba32 => PixelFormats.Bgra32,
-                ImageFormat.Rgb8 => PixelFormats.Gray8,
-                ImageFormat.R5g5b5a1 or ImageFormat.R5g5b5 => PixelFormats.Bgr555,
-                ImageFormat.R5g6b5 => PixelFormats.Bgr565,
-                _ => throw new Exception($"Unsupported preview for {image.Format} PixelFormat"),
-            };
         }
 
         public DdsFile ExportDDS(string fileName, bool isPreview, bool exportTexArray)

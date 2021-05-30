@@ -8,55 +8,54 @@
 //--------------------------------------
 LittleEndian();
 
+uint32 magic;
+int32 version;
+int64 padding;
+int64 infoOffset;
+int64 infoSize;
+int64 filesOffset;
+int64 padding;
+int32 numFiles;
+int32 numTempFiles;
+
 struct
 {
-    uint32 magic;
-    int32 version;
-    int64 padding;
-    int64 infoOffset;
-    int64 infoSize;
-    int64 filesOffset;
-    int64 padding;
-    int32 numFiles;
-    int32 numTempFiles;
+    int32 fileInfoLength;
+    int16 fileNameSize;
+    char fileName[fileNameSize];
+    char fileType[16];
+    int32 unk;
+    if (version >= 4)
+    {
+        int16 unk2;
+    }
+    byte numTempFiles;
 
     struct
     {
-        int32 fileInfoLength;
-        int16 fileNameSize;
-        char fileName[fileNameSize];
-        char fileType[16];
-        int32 unk;
-        if (version >= 4)
+        char name[4];
+        int64 offset;
+        int64 size;
+        int32 flags;
+        local int64 dataSize;
+        if (version <= 2)
         {
-            int16 unk2;
+            dataSize = size;
         }
-        byte numTempFiles;
-        struct
+        else
         {
-            char name[4];
-            int64 offset;
-            int64 size;
-            int32 flags;
-            local int64 compressedSize;
-            if (version <= 2)
-            {
-                compressedSize = size;
-            }
-            else
-            {
-                byte compression; // 0x01=zlib, 0x81=no, 0x00=no
-                compressedSize = ReadInt64();
-                FSkip(8);
-            }
-            local int64 currPos = FTell();
-            FSeek(offset + filesOffset);
-            byte data[compressedSize];
-            FSeek(currPos);
-        } tempFile[numTempFiles] <optimize=false>;
-        if (version > 2)
-        {
-            char hash[16];
+            byte compression; // 0x01=zlib, 0x81=no, 0x00=no
+            int64 compressedSize;
+            dataSize = compressedSize;
         }
-    } files[numFiles] <optimize=false>;
-} file;
+        local int64 currPos = FTell();
+        FSeek(offset + filesOffset);
+        byte data[dataSize];
+        FSeek(currPos);
+    } tempFile[numTempFiles] <optimize=false>;
+
+    if (version > 2)
+    {
+        char hash[16];
+    }
+} files[numFiles] <optimize=false>;

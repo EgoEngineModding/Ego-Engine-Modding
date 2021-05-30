@@ -263,7 +263,7 @@ namespace EgoErpArchiver.ViewModel
                             var folderPath = Path.Combine(directory, resource.Folder);
                             var fileName = ErpResourceExporter.GetFragmentFileName(resource, fragment);
                             var expFilePath = Path.Combine(folderPath, fileName) + ".xml";
-                            progDialogVM.ProgressStatus.Report("Exporting " + fileName + "... ");
+                            progDialogVM.ProgressStatus.Report("Importing " + fileName + "... ");
 
                             try
                             {

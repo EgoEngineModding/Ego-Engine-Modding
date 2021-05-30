@@ -241,7 +241,7 @@ namespace EgoErpArchiver.ViewModel
                             var folderPath = Path.Combine(directory, resource.Folder);
                             var fileName = resource.FileName.Replace("?", "%3F");
                             var expFilePath = Path.Combine(folderPath, fileName) + ".dds";
-                            progDialogVM.ProgressStatus.Report("Exporting " + fileName + "... ");
+                            progDialogVM.ProgressStatus.Report("Importing " + fileName + "... ");
 
                             try
                             {
