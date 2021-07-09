@@ -46,6 +46,7 @@ namespace EgoEngineLibrary.Data.Pkg.Data
                 "quat" => new PkgQuatData(parentFile),
                 "bbox" => new PkgBboxData(parentFile),
                 "ui16" => new PkgUi16Data(parentFile),
+                "ui08" => new PkgUi08Data(parentFile),
                 _ => throw new Exception("Data type not supported! " + type),
             };
         }

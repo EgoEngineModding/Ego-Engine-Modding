@@ -1,19 +1,13 @@
 ﻿using EgoEngineLibrary.Data.Pkg.Data;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EgoEngineLibrary.Data.Pkg
 {
     public class PkgValue : PkgChunk
     {
         internal static Int32 _offset;
-        PkgOffsetType valueOffsetType;
-        PkgComplexValue complexValueData;
 
         protected override string ChunkType
         {
@@ -23,92 +17,69 @@ namespace EgoEngineLibrary.Data.Pkg
             }
         }
 
-        public PkgOffsetType ValueOffsetType
-        {
-            get
-            {
-                return valueOffsetType;
-            }
+        public PkgOffsetType ValueOffsetType { get; set; }
 
-            set
-            {
-                valueOffsetType = value;
-            }
-        }
-
-        public PkgComplexValue ComplexValueData
-        {
-            get
-            {
-                return complexValueData;
-            }
-
-            set
-            {
-                complexValueData = value;
-            }
-        }
+        public PkgComplexValue ComplexValueData { get; set; }
 
         public bool HasComplexValueData
         {
-            get { return complexValueData != null; }
+            get { return ValueOffsetType.Type == 128; }
         }
 
         public string ValueData
         {
             get
             {
-                return ParentFile.RootItem.DataArray.GetData(valueOffsetType);
+                return ParentFile.RootItem.DataArray.GetData(ValueOffsetType);
             }
             set
             {
-                ParentFile.RootItem.DataArray.SetData(value, valueOffsetType);
+                ParentFile.RootItem.DataArray.SetData(value, ValueOffsetType);
             }
         }
 
         public PkgValue(PkgFile parentFile)
             : base(parentFile)
         {
-            valueOffsetType = new PkgOffsetType();
-            complexValueData = new PkgObject(parentFile);
+            ValueOffsetType = new PkgOffsetType();
+            ComplexValueData = new PkgObject(parentFile);
         }
 
         public override void Read(PkgBinaryReader reader)
         {
-            valueOffsetType = reader.ReadOffsetType();
+            ValueOffsetType = reader.ReadOffsetType();
 
-
-            if (valueOffsetType.Type == 128)
+            if (ValueOffsetType.Type == 128)
             {
                 long pos = reader.BaseStream.Position;
-                reader.Seek(valueOffsetType.Offset, SeekOrigin.Begin);
+                reader.Seek(ValueOffsetType.Offset, SeekOrigin.Begin);
 
                 string chunkType = reader.ReadString(4);
                 switch (chunkType)
                 {
                     case "!idi":
-                        complexValueData = new PkgObject(ParentFile);
-                        complexValueData.Read(reader);
+                        ComplexValueData = new PkgObject(ParentFile);
+                        ComplexValueData.Read(reader);
                         break;
                     case "!ili":
-                        complexValueData = new PkgArray(ParentFile);
-                        complexValueData.Read(reader);
+                        ComplexValueData = new PkgArray(ParentFile);
+                        ComplexValueData.Read(reader);
                         break;
                     case "!iar":
-                        complexValueData = new PkgDataArrayReference(ParentFile);
-                        complexValueData.Read(reader);
+                        ComplexValueData = new PkgDataArrayReference(ParentFile);
+                        ComplexValueData.Read(reader);
                         break;
                     case "!vca":
-                        complexValueData = new PkgDataArray(ParentFile);
-                        complexValueData.Read(reader);
+                        ComplexValueData = new PkgDataArray(ParentFile);
+                        ComplexValueData.Read(reader);
                         break;
                     case "!sbi":
-                        complexValueData = PkgData.Create(ParentFile, "stri");
-                        complexValueData.Read(reader);
+                        ComplexValueData = PkgData.Create(ParentFile, "stri");
+                        ComplexValueData.Read(reader);
                         break;
                     case "!vbi":
-                        complexValueData = PkgData.Create(reader, ParentFile);
-                        complexValueData.Read(reader);
+                        ComplexValueData = PkgData.Create(reader, ParentFile);
+                        ComplexValueData.Read(reader);
                         break;
                     default:
                         throw new Exception("Chunk type not supported! " + chunkType);
@@ -117,27 +88,28 @@ namespace EgoEngineLibrary.Data.Pkg
                 reader.Seek((int)pos, SeekOrigin.Begin);
             }
         }
+
         public override void Write(PkgBinaryWriter writer)
         {
-            writer.Write(valueOffsetType);
+            writer.Write(ValueOffsetType);
         }
         public void WriteComplexValue(PkgBinaryWriter writer)
         {
             if (HasComplexValueData)
             {
-                complexValueData.Write(writer);
+                ComplexValueData.Write(writer);
             }
         }
         internal override void UpdateOffsets()
         {
-            if (valueOffsetType.Type == 128)
+            if (ValueOffsetType.Type == 128)
             {
-                valueOffsetType.Offset = PkgValue._offset;
+                ValueOffsetType.Offset = PkgValue._offset;
             }
 
             if (HasComplexValueData)
             {
-                complexValueData.UpdateOffsets();
+                ComplexValueData.UpdateOffsets();
             }
         }
 
@@ -149,9 +121,9 @@ namespace EgoEngineLibrary.Data.Pkg
                     string val = (string?)reader.Value ?? string.Empty;
                     if (val.StartsWith("!iar "))
                     {
-                        valueOffsetType.Type = 128;
-                        complexValueData = new PkgDataArrayReference(ParentFile);
-                        complexValueData.FromJson(reader);
+                        ValueOffsetType.Type = 128;
+                        ComplexValueData = new PkgDataArrayReference(ParentFile);
+                        ComplexValueData.FromJson(reader);
                     }
                     else
                     {
@@ -159,14 +131,14 @@ namespace EgoEngineLibrary.Data.Pkg
                     }
                     break;
                 case JsonToken.StartObject:
-                    valueOffsetType.Type = 128;
-                    complexValueData = new PkgObject(ParentFile);
-                    complexValueData.FromJson(reader);
+                    ValueOffsetType.Type = 128;
+                    ComplexValueData = new PkgObject(ParentFile);
+                    ComplexValueData.FromJson(reader);
                     break;
                 case JsonToken.StartArray:
-                    valueOffsetType.Type = 128;
-                    complexValueData = new PkgArray(ParentFile);
-                    complexValueData.FromJson(reader);
+                    ValueOffsetType.Type = 128;
+                    ComplexValueData = new PkgArray(ParentFile);
+                    ComplexValueData.FromJson(reader);
                     break;
                 default:
                     new Exception("Unexpected token type! " + reader.TokenType);
@@ -175,9 +147,9 @@ namespace EgoEngineLibrary.Data.Pkg
         }
         public override void ToJson(JsonTextWriter writer)
         {
-            if (valueOffsetType.Type == 128)
+            if (ValueOffsetType.Type == 128)
             {
-                complexValueData.ToJson(writer);
+                ComplexValueData.ToJson(writer);
             }
             else
             {

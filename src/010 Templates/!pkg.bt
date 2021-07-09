@@ -165,11 +165,15 @@ typedef struct
     }
     else if (magic == "!idi")
     {
-        uint32 numElements <hidden=true>;
+        OffsetData numElements <hidden=true>;
         struct PkgPair
         {
             OffsetData data1 <hidden=true>;
             OffsetData data2 <hidden=true>;
+            if (numElements.type == 1)
+            {
+                uint32 unknown;
+            }
 
             local int64 currOffset = FTell();
             if (data2.type == 128)
@@ -178,7 +182,7 @@ typedef struct
                 struct Chunk children;
             }
             FSeek(currOffset);
-        } members[numElements] <optimize=false, read=dispIdiElement>;
+        } members[numElements.offset] <optimize=false, read=dispIdiElement>;
     }
     else if (magic == "!ili")
     {

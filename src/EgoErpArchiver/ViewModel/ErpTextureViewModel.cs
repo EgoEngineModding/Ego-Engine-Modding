@@ -150,7 +150,7 @@ namespace EgoErpArchiver.ViewModel
         public void GetPreview()
         {
             Image<Rgba32> image = null;
-            bool ddsReadSuccess = false;
+            var ddsReadSuccess = false;
             try
             {
                 Preview = null;
@@ -168,7 +168,7 @@ namespace EgoErpArchiver.ViewModel
                 // Copy pixels to WPF format
                 var pixels = new byte[image.Width * image.Height * 4];
                 var pixelsSpan = MemoryMarshal.Cast<byte, Bgra32>(pixels);
-                for (int r = 0; r < image.Height; ++r)
+                for (var r = 0; r < image.Height; ++r)
                 {
                     var destRow = pixelsSpan.Slice(r * image.Width, image.Width);
                     var sorcRow = image.GetPixelRowSpan(r);
