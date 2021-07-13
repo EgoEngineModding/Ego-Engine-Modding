@@ -72,46 +72,17 @@ namespace EgoErpArchiver
 
         private void websiteMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            OpenBrowser("https://www.ryder25.com/modding/ego-engine/#EgoERPArchiver");
+            _ = Process.Start(new ProcessStartInfo("https://petar.page/l/ego-eea-home") { UseShellExecute = true });
         }
 
-        private void issuesMenuItem_Click(object sender, RoutedEventArgs e)
+        private void sourceCodeMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            OpenBrowser("https://github.com/ptasev/Ego-Engine-Modding/issues");
+            _ = Process.Start(new ProcessStartInfo("https://petar.page/l/ego-eea-code") { UseShellExecute = true });
         }
 
         private void moddingDiscordMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            OpenBrowser("https://discord.gg/5bCjMqS");
-        }
-
-        private void OpenBrowser(string url)
-        {
-            try
-            {
-                Process.Start(url);
-            }
-            catch
-            {
-                // hack because of this: https://github.com/dotnet/corefx/issues/10361
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    url = url.Replace("&", "^&");
-                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    Process.Start("xdg-open", url);
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    Process.Start("open", url);
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            _ = Process.Start(new ProcessStartInfo("https://discord.gg/5bCjMqS") { UseShellExecute = true });
         }
 
         private void mainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)

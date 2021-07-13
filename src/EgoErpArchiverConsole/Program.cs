@@ -1,4 +1,5 @@
 ﻿using EgoEngineLibrary.Archive.Erp;
+using EgoEngineLibrary.Formats.Erp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -67,27 +68,34 @@ namespace EgoErpArchiverConsole
         static void Export(string file, string folder)
         {
             ErpFile erp = new ErpFile();
-            erp.Read(File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read));
-            erp.ProgressStatus = new Progress<string>(status =>
+            using (var fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+                erp.Read(fs);
+
+            var statuProgress = new Progress<string>(status =>
             {
                 _stringBuilder.Append(status);
             });
 
-            Task.Run(() => erp.Export(folder)).Wait();
+            var resourceExporter = new ErpResourceExporter();
+            resourceExporter.Export(erp, folder, statuProgress, null);
         }
 
         static void Import(string file, string folder)
         {
             ErpFile erp = new ErpFile();
-            erp.Read(File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read));
-            erp.ProgressStatus = new Progress<string>(status =>
+            using (var fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+                erp.Read(fs);
+
+            var progressStatus = new Progress<string>(status =>
             {
                 _stringBuilder.Append(status);
             });
 
-            Task.Run(() => erp.Import(Directory.GetFiles(folder, "*", SearchOption.AllDirectories))).Wait();
+            var resourceExporter = new ErpResourceExporter();
+            resourceExporter.Import(erp, Directory.GetFiles(folder, "*", SearchOption.AllDirectories), progressStatus, null);
 
-            Task.Run(() => erp.Write(File.Open(file, FileMode.Create, FileAccess.Write, FileShare.Read))).Wait();
+            using (var fs = File.Open(file, FileMode.Create, FileAccess.Write, FileShare.Read))
+                erp.Write(fs);
         }
     }
 }

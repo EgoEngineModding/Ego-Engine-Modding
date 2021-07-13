@@ -4,12 +4,15 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
-    <RootNamespace>EgoErpArchiver</RootNamespace>
     <AssemblyName>Ego ERP Archiver</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <ApplicationIcon>Resources\Ryder25.ico</ApplicationIcon>
+    <Copyright>Copyright © Petar Tasev 2017 - 2021</Copyright>
     <Authors>Petar Tasev</Authors>
-    <Version>7.1.0</Version>
-    <Copyright>Copyright © Petar Tasev 2017</Copyright>
+    <Description>Opens Ego Engine erp files</Description>
+    <Version>8.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AvalonEdit" Version="6.1.1" />
+    <PackageReference Include="AvalonEdit" Version="6.1.2.30" />
     <PackageReference Include="WindowsAPICodePack-Shell" Version="1.1.1" />
   </ItemGroup>
 

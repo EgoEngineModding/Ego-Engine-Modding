@@ -10,17 +10,17 @@
             margin-right: auto;
             width: 990px;
             background: #000000;
-            color: #ebebeb;
+            color: #dddddd;
             font-family: Verdana, Arial, Helvetica, sans-serif;
         }
 
         a {
-            color: #65CDEB;
+            color: #5B9BD5;
             text-decoration: none;
         }
 
         a:hover {
-            color: #FFFFFF;
+            color: #E6E6E6;
         }
 
         div#top {
@@ -60,20 +60,20 @@
         h1 {
             margin: 0;
             padding: 0;
-            color: #E2001A;
+            color: #CC1B1B;
             font-family: Georgia, "Times New Roman", Times, serif;
         }
 
         h2 {
             margin: 0;
-            color: #E2001A;
+            color: #CC1B1B;
             font-family: Georgia, "Times New Roman", Times, serif;
             font-size: 1.4em;
         }
 
         h3 {
             margin: 0;
-            color: #E2001A;
+            color: #CC1B1B;
             font-family: Georgia, "Times New Roman", Times, serif;
             font-size: 1.2em;
         }
@@ -87,8 +87,8 @@
 <body>
     <div id="top">
         <h1>Ego ERP Archiver</h1>
-        version 7.1.0+20200710<br />
-        <p style="font-family:Georgia, 'Times New Roman', Times, serif;"><a href="http://www.ryder25.com">Application Website</a></p>
+        version 8.0.0<br />
+        <p style="font-family:Georgia, 'Times New Roman', Times, serif;"><a href="https://petar.page/l/ego-eea-home" target="_blank">Application Website</a></p>
     </div>
     <div class="readme-main">
         <h2>Contents</h2>
@@ -97,7 +97,7 @@
             <li><a href="#Inst">Installation</a></li>
             <li><a href="#ApIn">Application Information</a></li>
             <li><a href="#Usag">Usage</a></li>
-            <li><a href="#Issu">Issues</a></li>
+            <li><a href="#Supp">Support</a></li>
             <li><a href="#Chan">Changelog</a></li>
             <li><a href="#Cred">Credits</a></li>
         </ol>
@@ -105,48 +105,39 @@
     <div class="readme-main">
         <h2><a name="Reqs"></a>Requirements</h2>
         <ul>
-            <li>.NET Core 3.1</li>
+            <li>.NET 5.0 Desktop Runtime (x64 or x86 depending on your OS)</li>
         </ul>
         <h2><a name="Inst"></a>Installation</h2>
-        <ol>
-            <li>Extract everything from the zip file.</li>
-            <li>Open <em>Ego ERP Archiver.exe</em>.</li>
-            <li>Enjoy! :)</li>
-        </ol>
+        <p>To install, simply <em>EXTRACT</em> everything from the zip file to a desired location, and run the <em>Ego ERP Archiver.exe</em> file.</p>
     </div>
     <div class="readme-main">
         <h2><a name="ApIn"></a>Application Information</h2>
-        <p>This program lets you export and import resources from ERP archives for EGO engine games. Resources include various xml, pkg, and texture files. Supported texture types:</p>
-        <ul>
-            <li>ABGR8</li>
-            <li>DXT1</li>
-            <li>DXT5</li>
-            <li>ATI1</li>
-            <li>ATI2/3Dc</li>
-            <li>BC1-7 (and SRGB)</li>
-            <li>TexArray for above (Note: Currently not supported by Photoshop or GIMP)</li>
-        </ul>
+        <p>This program lets you export and import resources from ERP archives for EGO engine games. Resources include various xml, pkg, and texture files.</p>
         <h2><a name="Usag"></a>Usage</h2>
         <p>After turning on the program simply click File -&gt; Open and select a ERP file. When importing resources make sure to select the same folder that you exported into. The program will search for the same exact resource folder and file name as when the resource was exported.</p>
-        <p>If you have F1 2016/'17, make sure to set the directory from the Settings menu. Some textures in this game have mipmaps counterparts that get exported into a single dds. When importing these textures, you will be prompted to save a new mipmap file. Changes are made to the texture inside the erp during import as well, so make sure to save your erp file too.</p>
+        <p>If you have F1 2016 and newer, make sure to set the directory from the Settings menu. Some textures in this game have mipmaps counterparts that get exported into a single dds. When importing these textures, you will be prompted to save a new mipmap file. Changes are made to the texture inside the erp during import as well, so make sure to save your erp file too.</p>
     </div>
     <div class="readme-main">
-        <h2><a name="Issu"></a>Issues</h2>
+        <h2><a name="Supp"></a>Support</h2>
+        <p>You can get support by asking in the modding channels of the following communities:</p>
         <ul>
-            <li>
-                If you get errors try one of the following:
-                <ul>
-                    <li>Make sure the folder that you put the files in is not readonly.</li>
-                    <li>Run the exe as an administrator or give it administrator rights.</li>
-                    <li>Put the files in a folder on the desktop.</li>
-                    <li>Create an issue <a href="https://github.com/ptasev/Ego-Engine-Modding/issues" target="_blank">here</a>.</li>
-                </ul>
-            </li>
+            <li><a href="https://discord.gg/5bCjMqS" target="_blank">Ego Engine Modding Discord</a></li>
+            <li><a href="https://www.racedepartment.com/" target="_blank">RaceDepartment Forums</a></li>
         </ul>
+        <p>If you think you've found a bug, post an issue <a href="https://petar.page/l/ego-eea-code" target="_blank">here</a> with as much information as possible.</p>
     </div>
     <div class="readme-main">
         <h2><a name="Chan"></a>Changelog</h2>
         <ul>
+            <li>
+                <strong>8.0.0+20210712</strong>
+                <ul>
+                    <li>Added support for pkg format in F1 2021 and data types ui16 and ui08</li>
+                    <li>Changed how pkg and xml files are detected</li>
+                    <li>Changed texture preview library</li>
+                    <li>Changed .NET framework to .NET 5.0</li>
+                </ul>
+            </li>
             <li>
                 <strong>7.1.0+20200710</strong>
                 <ul>
@@ -280,7 +271,7 @@
         </ul>
         <h2><a name="Cred"></a>Credits</h2>
         <ul>
-            <li>Ryder25 - <small>For creating the program.</small></li>
+            <li>Petar Tasev - <small>For creating the program.</small></li>
             <li>luh-koala - <small>For creating icon and other graphics</small></li>
             <li>famfamfam.com - <small>For the "silk" menu icons.</small></li>
         </ul>
