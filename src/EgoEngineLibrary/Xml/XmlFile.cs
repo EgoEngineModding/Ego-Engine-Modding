@@ -182,6 +182,7 @@ namespace EgoEngineLibrary.Xml
         {
             if (convertType == XMLType.Text)
             {
+                // use text writer since by default it doesn't output the Encoding BOM
                 using (var textWriter = new StreamWriter(fileStream, leaveOpen: true))
                 {
                     var xmlTextWriter = new XmlTextWriter(textWriter);
