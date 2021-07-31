@@ -182,7 +182,11 @@ namespace EgoEngineLibrary.Xml
         {
             if (convertType == XMLType.Text)
             {
-                doc.Save(fileStream);
+                using (var textWriter = new StreamWriter(fileStream, leaveOpen: true))
+                {
+                    var xmlTextWriter = new XmlTextWriter(textWriter);
+                    doc.Save(xmlTextWriter);
+                }
             }
             else if (convertType == XMLType.BinXML)
             {

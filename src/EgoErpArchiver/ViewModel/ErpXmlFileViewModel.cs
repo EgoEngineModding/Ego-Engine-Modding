@@ -3,6 +3,7 @@ using EgoEngineLibrary.Formats.Erp;
 using EgoEngineLibrary.Xml;
 using System;
 using System.IO;
+using System.Text;
 
 namespace EgoErpArchiver.ViewModel
 {
@@ -10,17 +11,11 @@ namespace EgoErpArchiver.ViewModel
     {
         private readonly ErpResourceViewModel resView;
 
-        public ErpResource Resource
-        {
-            get { return resView.Resource; }
-        }
+        public ErpResource Resource => resView.Resource;
 
         public ErpFragment Fragment { get; }
 
-        public override string DisplayName
-        {
-            get { return ErpResourceExporter.GetFragmentFileName(Resource, Fragment); }
-        }
+        public override string DisplayName => ErpResourceExporter.GetFragmentFileName(Resource, Fragment);
 
         private bool isSelected;
         public bool IsSelected
@@ -59,7 +54,7 @@ namespace EgoErpArchiver.ViewModel
         {
             try
             {
-                using var sw = new StringWriter();
+                using var sw = new Utf8StringWriter();
                 ExportXML(sw);
                 Preview = sw.GetStringBuilder().ToString();
             }
@@ -82,6 +77,16 @@ namespace EgoErpArchiver.ViewModel
             using var ms = new MemoryStream();
             xml.Write(ms);
             Fragment.SetData(ms.ToArray());
+        }
+
+        private class Utf8StringWriter : StringWriter
+        {
+            public override Encoding Encoding => Encoding.UTF8;
+
+            public Utf8StringWriter()
+                : base()
+            {
+            }
         }
     }
 }
