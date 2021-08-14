@@ -1,26 +1,19 @@
-﻿namespace EgoEngineLibrary.Graphics
-{
-    using EgoEngineLibrary.Helper;
-    using MiscUtil.Conversion;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Xml.Linq;
+﻿using EgoEngineLibrary.Helper;
+using MiscUtil.Conversion;
+using System;
+using System.Globalization;
+using System.Text;
+using System.Xml.Linq;
 
+namespace EgoEngineLibrary.Graphics
+{
     public class PssgAttribute
     {
         private int size;
         private object data;
 
-        public string Name
-        {
-            get { return AttributeInfo.Name; }
-        }
-        public int Size
-        {
-            get { return size; }
-        }
+        public string Name => AttributeInfo.Name;
+        public int Size => size;
         public object Value
         {
             get { return data; }
@@ -74,7 +67,7 @@
             }
             else if (valueType == typeof(Single))
             {
-                return Convert.ToSingle(value);
+                return Convert.ToSingle(value, CultureInfo.InvariantCulture);
             }
             else if (valueType == typeof(bool))
             {

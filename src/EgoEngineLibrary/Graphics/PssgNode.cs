@@ -1,13 +1,14 @@
-﻿namespace EgoEngineLibrary.Graphics
-{
-    using EgoEngineLibrary.Helper;
-    using System;
-    using System.Buffers.Binary;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Xml.Linq;
+﻿using EgoEngineLibrary.Helper;
+using System;
+using System.Buffers.Binary;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Xml.Linq;
 
+namespace EgoEngineLibrary.Graphics
+{
     public class PssgNode
     {
         // id, size, and attributeSize are only used during Reading/Writing
@@ -560,7 +561,7 @@
             Type valueType = this.GetValueType();
             if (valueType == typeof(float[]))
             {
-                return FromString<float>(value, (s, d) => BinaryPrimitives.WriteSingleBigEndian(d, Convert.ToSingle(s)));
+                return FromString<float>(value, (s, d) => BinaryPrimitives.WriteSingleBigEndian(d, Convert.ToSingle(s, CultureInfo.InvariantCulture)));
             }
             else if (valueType == typeof(ushort[]))
             {
