@@ -4,8 +4,7 @@ using Microsoft.Toolkit.HighPerformance;
 using Microsoft.Toolkit.HighPerformance.Buffers;
 using System;
 using System.IO;
-using System.IO.Compression;
-using Zstandard.Net;
+using ZstdNet;
 
 namespace EgoEngineLibrary.Archive.Erp
 {
@@ -137,7 +136,7 @@ namespace EgoEngineLibrary.Archive.Erp
                     ErpCompressionAlgorithm.None2 or
                     ErpCompressionAlgorithm.None3 => _data.AsMemory().AsStream(),
                     ErpCompressionAlgorithm.Zlib => new InflaterInputStream(_data.AsMemory().AsStream()),
-                    ErpCompressionAlgorithm.ZStandard => new ZstandardStream(_data.AsMemory().AsStream(), CompressionMode.Decompress),
+                    ErpCompressionAlgorithm.ZStandard => new DecompressionStream(_data.AsMemory().AsStream()),
                     _ => throw new NotSupportedException($"{nameof(ErpFragment)} compression type {Compression} is not supported!"),
                 };
             }
@@ -170,9 +169,8 @@ namespace EgoEngineLibrary.Archive.Erp
                         break;
                     case ErpCompressionAlgorithm.ZStandard:
                         using (var bufferWriter = new ArrayPoolBufferWriter<byte>())
-                        using (var zss = new ZstandardStream(bufferWriter.AsStream(), CompressionMode.Compress))
+                        using (var zss = new CompressionStream(bufferWriter.AsStream(), new CompressionOptions(CompressionOptions.MaxCompressionLevel)))
                         {
-                            zss.CompressionLevel = 22;
                             zss.Write(data, 0, data.Length);
                             zss.Flush();
                             _data = bufferWriter.WrittenSpan.ToArray();
