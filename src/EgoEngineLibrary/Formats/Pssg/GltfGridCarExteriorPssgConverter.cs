@@ -302,7 +302,7 @@ namespace EgoEngineLibrary.Formats.Pssg
                     rds.Normals.Add(p.GetNormal(i));
                     rds.Tangents.Add(p.GetTangent(i));
                     rds.TexCoords0.Add(p.GetTextureCoord(i, texCoordSet));
-                    rds.Colors.Add(PackColor(color));
+                    rds.Colors.Add(color);
                     rds.SkinIndices.Add(state.JointId);
                 }
 
@@ -320,16 +320,6 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             bboxNode.Value = GetBoundingBoxData(minExtent, maxExtent);
 
-            static uint PackColor(Vector4 vector)
-            {
-                Vector4 MaxBytes = new Vector4(byte.MaxValue);
-                Vector4 Half = new Vector4(0.5f);
-                vector *= MaxBytes;
-                vector += Half;
-                vector = Vector4.Clamp(vector, Vector4.Zero, MaxBytes);
-
-                return (uint)((((byte)vector.W) << 0) | (((byte)vector.X) << 8) | (((byte)vector.Y) << 16) | (((byte)vector.Z) << 24));
-            }
             static int GetDiffuseBaseColorTexCoord(Material srcMaterial)
             {
                 var channel = srcMaterial.FindChannel("Diffuse");

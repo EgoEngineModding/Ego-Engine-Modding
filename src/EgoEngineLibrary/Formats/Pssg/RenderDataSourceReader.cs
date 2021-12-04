@@ -337,7 +337,7 @@ namespace EgoEngineLibrary.Formats.Pssg
             }
         }
 
-        public uint GetColor(uint index)
+        public Vector4 GetColor(uint index)
         {
             bool found = _vertexAttributes.TryGetValue("Color", out var attribute);
 
@@ -349,14 +349,23 @@ namespace EgoEngineLibrary.Formats.Pssg
                 switch (attribute.DataType)
                 {
                     case "uint_color_argb":
-                        return BinaryPrimitives.ReadUInt32BigEndian(data);
+                        return UnpackArgbColor(BinaryPrimitives.ReadUInt32BigEndian(data));
                     default:
                         throw new NotImplementedException($"Support for {attribute.Name} data type {attribute.DataType} is not implemented.");
                 }
             }
             else
             {
-                return uint.MaxValue;
+                return Vector4.One;
+            }
+
+            static Vector4 UnpackArgbColor(uint color)
+            {
+                return new Vector4(
+                ((color >> 8) & 0xFF) / (float)byte.MaxValue,
+                ((color >> 16) & 0xFF) / (float)byte.MaxValue,
+                ((color >> 24) & 0xFF) / (float)byte.MaxValue,
+                ((color >> 0) & 0xFF) / (float)byte.MaxValue);
             }
         }
 

@@ -129,12 +129,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 			vb.Material.TexCoord2 = rds.GetTexCoord(index, 2);
 			vb.Material.TexCoord3 = rds.GetTexCoord(index, 3);
 
-			var color = rds.GetColor(index);
-			vb.Material.Color = new Vector4(
-				((color >> 8) & 0xFF) / (float)byte.MaxValue,
-				((color >> 16) & 0xFF) / (float)byte.MaxValue,
-				((color >> 24) & 0xFF) / (float)byte.MaxValue,
-				((color >> 0) & 0xFF) / (float)byte.MaxValue);
+			vb.Material.Color = rds.GetColor(index);
 
 			return vb;
 		}
