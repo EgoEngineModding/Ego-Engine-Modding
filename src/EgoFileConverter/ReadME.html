@@ -1,0 +1,178 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>EFC - Readme</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            margin-left: auto;
+            margin-right: auto;
+            width: 990px;
+            background: #000000;
+            color: #e2e2e2;
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+        }
+
+        a {
+            color: #5B9BD5;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #E6E6E6;
+        }
+
+        div#top {
+            margin: 0;
+            margin-bottom: 10px;
+            padding: 10px;
+            width: auto;
+            background: #000000;
+            border: 2px solid #292929;
+            border-top: none;
+            text-align: center;
+        }
+
+        div.readme-main {
+            margin: 0;
+            margin-bottom: 10px;
+            padding: 10px;
+            width: auto;
+            background: #000000;
+            border: 1px solid #292929;
+        }
+
+        div.red {
+            margin: 0;
+            padding: 5px;
+            background: #900;
+            border: solid #c00;
+        }
+
+        div.yellow {
+            margin: 0;
+            padding: 5px;
+            background: #c90;
+            border: solid #fc0;
+        }
+
+        h1 {
+            margin: 0;
+            padding: 0;
+            color: #CC1B1B;
+            font-family: Georgia, "Times New Roman", Times, serif;
+        }
+
+        h2 {
+            margin: 0;
+            color: #CC1B1B;
+            font-family: Georgia, "Times New Roman", Times, serif;
+            font-size: 1.4em;
+        }
+
+        h3 {
+            margin: 0;
+            color: #CC1B1B;
+            font-family: Georgia, "Times New Roman", Times, serif;
+            font-size: 1.2em;
+        }
+
+        div.red + h2, h2 + div.yellow {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="top">
+        <h1>Ego File Converter</h1>
+        version 3.0.0<br />
+        <p style="font-family: Georgia, 'Times New Roman', Times, serif;"><a href="https://petar.page/l/ego-efc-home" target="_blank">Application Website</a></p>
+    </div>
+    <div class="readme-main">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#Reqs">Requirements</a></li>
+            <li><a href="#Inst">Installation</a></li>
+            <li><a href="#ApIn">Application Information</a></li>
+            <li><a href="#Usag">Usage</a></li>
+            <li><a href="#Supp">Support</a></li>
+            <li><a href="#Chan">Changelog</a></li>
+            <li><a href="#Cred">Credits</a></li>
+        </ol>
+    </div>
+    <div class="readme-main">
+        <h2><a name="Reqs"></a>Requirements</h2>
+        <ul>
+            <li>.NET 6.0 Desktop Runtime (x64 or x86 depending on your OS)</li>
+        </ul>
+        <h2><a name="Inst"></a>Installation</h2>
+        <p>To install, simply <em>EXTRACT</em> everything from the zip file to a desired location, and run the <em>Ego File Converter.exe</em> file.</p>
+    </div>
+    <div class="readme-main">
+        <h2><a name="ApIn"></a>Application Information</h2>
+        <p>This program lets you convert binary XML, Lng, Tpk, and Pkg files for EGO engine games.</p>
+        <h2><a name="Usag"></a>Usage</h2>
+        <p>Drag and drop a file on the exe to convert it. Alternatively, you can right click a file, click "Open With", and choose the exe.</p>
+        <p>Possible conversions:</p>
+        <ul>
+            <li>Binary XML &lt-&gt XML</li>
+            <li>Pkg &lt-&gt JSON</li>
+            <li>Lng &lt-&gt XML (<em>DO NOT</em> change the "info" section)</li>
+            <li>Tpk &lt-&gt DDS (file name ending with .tpk.dds)</li>
+        </ul>
+        <p>When converting a tpk, the app will display the internal name and image format. When converting dds back to tpk make sure to set the file name to the internal tpk name.</p>
+        <p>Note: After conversion, the output file will overwrite any existing file. Output file names are the input file + ".xml", ".json", ".lng", ".dds", ".tpk" or ".pkg"</p>
+    </div>
+    <div class="readme-main">
+        <h2><a name="Supp"></a>Support</h2>
+        <p>You can get support by asking in the modding channels of the following communities:</p>
+        <ul>
+            <li><a href="https://discord.gg/5bCjMqS" target="_blank">Ego Engine Modding Discord</a></li>
+            <li><a href="https://www.racedepartment.com/" target="_blank">RaceDepartment Forums</a></li>
+        </ul>
+        <p>If you think you've found a bug, post an issue <a href="https://petar.page/l/ego-efc-code" target="_blank">here</a> with as much information as possible.</p>
+    </div>
+    <div class="readme-main">
+        <h2><a name="Chan"></a>Changelog</h2>
+        <ul>
+            <li>
+                <strong>3.0.0+20220215</strong>
+                <ul>
+                    <li>Added support for tpk files</li>
+                    <li>Added support for latest pkg files</li>
+                    <li>Changed .NET framework to .NET 6.0</li>
+                </ul>
+            </li>
+            <li>
+                <strong>2.1.2016.1119</strong>
+                <ul>
+                    <li>Fixed crash when converting BXML big files (ex: surface_materials.xml)</li>
+                </ul>
+            </li>
+            <li>
+                <strong>2.0.2016.0905</strong>
+                <ul>
+                    <li>Added support for converting Lng files to XML</li>
+                    <li>Added ability to auto-detect original binary xml type</li>
+                    <li>Fixed importing rgba data from JSON file</li>
+                    <li>Fixed reading and writing strings longer than 127 bytes in Pkg files</li>
+                    <li>Added support for Pkg files with !iar chunk</li>
+                </ul>
+            </li>
+            <li>
+                <strong>1.0.2016.0902</strong>
+                <ul>
+                    <li>First Release</li>
+                </ul>
+            </li>
+        </ul>
+        <h2><a name="Cred"></a>Credits</h2>
+        <ul>
+            <li>Petar Tasev - <small>For creating the program.</small></li>
+            <li>luh-koala - <small>For creating the icon.</small></li>
+        </ul>
+    </div>
+</body>
+</html>
