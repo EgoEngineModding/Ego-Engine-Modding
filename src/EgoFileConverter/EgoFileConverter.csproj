@@ -1,13 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <AssemblyName>Ego File Converter</AssemblyName>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   
   <PropertyGroup>
     <ApplicationIcon>Resources\Ryder25.ico</ApplicationIcon>
+    <Copyright>Copyright © Petar Tasev 2016 - 2022</Copyright>
+    <Authors>Petar Tasev</Authors>
+    <Company>Petar Tasev</Company>
+    <Version>3.0.0</Version>
   </PropertyGroup>
   
   <ItemGroup>

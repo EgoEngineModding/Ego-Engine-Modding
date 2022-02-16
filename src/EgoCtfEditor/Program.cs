@@ -11,8 +11,7 @@ namespace EgoCtfEditor
         [STAThread]
         static void Main(string[] args)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            ApplicationConfiguration.Initialize();
             System.Collections.Generic.List<string> a = new System.Collections.Generic.List<string>(args);
             if (args.Length > 0)
             {

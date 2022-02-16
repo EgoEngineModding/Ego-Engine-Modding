@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace EgoDatabaseEditor
@@ -13,8 +11,7 @@ namespace EgoDatabaseEditor
         [STAThread]
         static void Main(string[] Args)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            ApplicationConfiguration.Initialize();
             Application.Run(new Form1(Args));
         }
     }
