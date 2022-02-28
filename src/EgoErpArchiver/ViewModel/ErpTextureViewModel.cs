@@ -1,5 +1,4 @@
 ﻿using BCnEncoder.Decoder;
-using BCnEncoder.ImageSharp;
 using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Archive.Erp.Data;
 using EgoEngineLibrary.Graphics;
@@ -149,37 +148,42 @@ namespace EgoErpArchiver.ViewModel
 
         public void GetPreview()
         {
-            Image<Rgba32> image = null;
             var ddsReadSuccess = false;
             try
             {
                 Preview = null;
-
+                BCnEncoder.Shared.ImageFiles.DdsFile bcDds;
                 using (var ms = new MemoryStream())
                 {
                     var dds = ExportDDS(ms, true, false);
                     ddsReadSuccess = true;
 
                     ms.Seek(0, SeekOrigin.Begin);
-                    var decoder = new BcDecoder();
-                    image = decoder.DecodeToImageRgba32(ms);
+                    bcDds = BCnEncoder.Shared.ImageFiles.DdsFile.Load(ms);
                 }
 
-                // Copy pixels to WPF format
-                var pixels = new byte[image.Width * image.Height * 4];
-                var pixelsSpan = MemoryMarshal.Cast<byte, Bgra32>(pixels);
-                for (var r = 0; r < image.Height; ++r)
+                var width = (int)bcDds.header.dwWidth;
+                var height = (int)bcDds.header.dwHeight;
+                var decoder = new BcDecoder();
+                if (decoder.IsHdrFormat(bcDds))
                 {
-                    var destRow = pixelsSpan.Slice(r * image.Width, image.Width);
-                    var sorcRow = image.GetPixelRowSpan(r);
-                    PixelOperations<Rgba32>.Instance.ToBgra32(Configuration.Default, sorcRow, destRow);
-
+                    var pixels = new byte[width * height * 3];
+                    var pixelsSpan = MemoryMarshal.Cast<byte, Bgr24>(pixels);
+                    decoder.DecodeDdsToPixels(bcDds, pixelsSpan);
+                    var bmSource = BitmapSource.Create(width, height, 96.0, 96.0, PixelFormats.Bgr24, null, pixels, width * 3);
+                    Preview = bmSource;
                 }
-                var bmSource = BitmapSource.Create(image.Width, image.Height, 96.0, 96.0, PixelFormats.Bgra32, null, pixels, image.Width * 4);
+                else
+                {
+                    var pixels = new byte[width * height * 4];
+                    var pixelsSpan = MemoryMarshal.Cast<byte, Bgra32>(pixels);
+                    decoder.DecodeDdsToPixels(bcDds, pixelsSpan);
+                    var bmSource = BitmapSource.Create(width, height, 96.0, 96.0, PixelFormats.Bgra32, null, pixels, width * 4);
+                    Preview = bmSource;
+                }
 
-                Preview = bmSource;
-                Width = image.Width;
-                Height = image.Height;
+                Width = width;
+                Height = height;
                 PreviewErrorVisibility = Visibility.Collapsed;
             }
             catch (Exception ex)
@@ -190,10 +194,6 @@ namespace EgoErpArchiver.ViewModel
                 else
                     PreviewError = "Could not create preview! Failed to convert texture to dds." + Environment.NewLine + Environment.NewLine + ex.Message;
                 PreviewErrorVisibility = Visibility.Visible;
-            }
-            finally
-            {
-                image?.Dispose();
             }
         }
 

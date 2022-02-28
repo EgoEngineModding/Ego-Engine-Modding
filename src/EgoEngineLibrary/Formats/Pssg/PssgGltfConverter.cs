@@ -1,5 +1,4 @@
 ﻿using BCnEncoder.Decoder;
-using BCnEncoder.ImageSharp;
 using EgoEngineLibrary.Graphics;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
@@ -212,12 +211,16 @@ namespace EgoEngineLibrary.Formats.Pssg
 			{
 				var dds = textureNode.ToDdsFile(false);
 				dds.Write(ms, -1);
-				ms.Seek(0, SeekOrigin.Begin);
 
-				var bcDecode = new BcDecoder();
-				var img = bcDecode.DecodeToImageRgba32(ms);
 				ms.Seek(0, SeekOrigin.Begin);
+                var bcDds = BCnEncoder.Shared.ImageFiles.DdsFile.Load(ms);
 
+                var bcDecode = new BcDecoder();
+                var pixels = new Rgba32[dds.header.width * dds.header.height];
+                bcDecode.DecodeDdsToPixels<Rgba32>(bcDds, pixels);
+
+                using var img = Image.WrapMemory<Rgba32>(pixels, (int)dds.header.width, (int)dds.header.height);
+				ms.Seek(0, SeekOrigin.Begin);
 				img.SaveAsPng(ms);
 				return ms.ToArray();
 			}
