@@ -495,6 +495,13 @@ namespace EgoEngineLibrary.Graphics
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
                     dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB;
                     break;
+                case "bc6h_uf":
+                    dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
+                    dds.header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value);
+                    dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
+                    dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
+                    dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC6H_UF16;
+                    break;
                 case "BC7":
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
                     dds.header.pitchOrLinearSize = ((uint)node.Attributes["height"].Value * (uint)node.Attributes["width"].Value);
@@ -682,6 +689,11 @@ namespace EgoEngineLibrary.Graphics
                 else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB)
                 {
                     node.Attributes["texelFormat"].Value = "dxt5_srgb";
+                }
+                else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC6H_TYPELESS ||
+                    dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC6H_UF16)
+                {
+                    node.Attributes["texelFormat"].Value = "bc6h_uf";
                 }
                 else
                 {

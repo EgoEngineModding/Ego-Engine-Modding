@@ -215,12 +215,13 @@ namespace EgoPssgEditor.ViewModel
         {
             try
             {
-                Directory.CreateDirectory(mainView.FilePath.Replace(".", "_") + "_textures");
+                var texDir = mainView.FilePath + "_textures";
+                Directory.CreateDirectory(texDir);
                 DdsFile dds;
                 foreach (PssgTextureViewModel texView in Textures)
                 {
                     dds = texView.Texture.ToDdsFile(false);
-                    string filePath = mainView.FilePath.Replace(".", "_") + "_textures" + "\\" + texView.Texture.Attributes["id"].DisplayValue + ".dds";
+                    string filePath = texDir + "\\" + texView.Texture.Attributes["id"].DisplayValue + ".dds";
                     using (var fs = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                         dds.Write(fs, -1);
                 }
@@ -239,7 +240,7 @@ namespace EgoPssgEditor.ViewModel
         {
             try
             {
-                string directory = mainView.FilePath.Replace(".", "_") + "_textures";
+                string directory = mainView.FilePath + "_textures";
                 if (Directory.Exists(directory) == true)
                 {
                     DdsFile dds;
