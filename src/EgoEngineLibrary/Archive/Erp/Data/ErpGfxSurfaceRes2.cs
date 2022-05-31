@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EgoEngineLibrary.Archive.Erp.Data
 {
@@ -17,16 +14,20 @@ namespace EgoEngineLibrary.Archive.Erp.Data
 
     public class ErpGfxSurfaceRes2 : ErpFragmentData
     {
-        private bool hasTwoUnknowns;
+        private bool _hasTwoUnknowns;
+        private bool _hasGridLegUnknown;
+
         public string MipMapFileName { get; set; }
         public List<ErpGfxSurfaceRes2Mips> Mips { get; set; }
         public float Unknown { get; set; }
         public float Unknown2 { get; set; }
+        public byte Unknown3 { get; set; }
 
         public ErpGfxSurfaceRes2()
         {
             MipMapFileName = string.Empty;
             Mips = new List<ErpGfxSurfaceRes2Mips>();
+            Unknown3 = 0;
             Unknown = 25;
             Unknown2 = 1;
         }
@@ -51,10 +52,19 @@ namespace EgoEngineLibrary.Archive.Erp.Data
                 }
 
                 long leftoverBytes = reader.BaseStream.Length - reader.BaseStream.Position;
-                if (leftoverBytes == 8)
+                if (leftoverBytes == 9)
+                {
+                    // This part was introduced in Grid Legends
+                    _hasTwoUnknowns = true;
+                    _hasGridLegUnknown = true;
+                    Unknown3 = reader.ReadByte();
+                    Unknown = reader.ReadSingle();
+                    Unknown2 = reader.ReadSingle();
+                }
+                else if (leftoverBytes == 8)
                 {
                     // This part was introduced in F1 2017
-                    hasTwoUnknowns = true;
+                    _hasTwoUnknowns = true;
                     Unknown = reader.ReadSingle();
                     Unknown2 = reader.ReadSingle();
                 }
@@ -82,7 +92,12 @@ namespace EgoEngineLibrary.Archive.Erp.Data
                     writer.Write(Mips[i].Size);
                 }
 
-                if (hasTwoUnknowns)
+                if (_hasGridLegUnknown)
+                {
+                    writer.Write(Unknown3);
+                }
+
+                if (_hasTwoUnknowns)
                 {
                     writer.Write(Unknown);
                     writer.Write(Unknown2);

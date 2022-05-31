@@ -133,11 +133,13 @@ namespace EgoEngineLibrary.Archive.Erp
                 return Compression switch
                 {
                     ErpCompressionAlgorithm.None or
-                    ErpCompressionAlgorithm.None2 or
-                    ErpCompressionAlgorithm.None3 => _data.AsMemory().AsStream(),
+                        ErpCompressionAlgorithm.None2 or
+                        ErpCompressionAlgorithm.None3 => _data.AsMemory().AsStream(),
                     ErpCompressionAlgorithm.Zlib => new InflaterInputStream(_data.AsMemory().AsStream()),
-                    ErpCompressionAlgorithm.ZStandard => new DecompressionStream(_data.AsMemory().AsStream()),
-                    _ => throw new NotSupportedException($"{nameof(ErpFragment)} compression type {Compression} is not supported!"),
+                    ErpCompressionAlgorithm.ZStandard or
+                        ErpCompressionAlgorithm.ZStandard2 => new DecompressionStream(_data.AsMemory().AsStream()),
+                    _ => throw new NotSupportedException(
+                        $"{nameof(ErpFragment)} compression type {Compression} is not supported!"),
                 };
             }
             else
@@ -168,6 +170,7 @@ namespace EgoEngineLibrary.Archive.Erp
                         }
                         break;
                     case ErpCompressionAlgorithm.ZStandard:
+                    case ErpCompressionAlgorithm.ZStandard2:
                         using (var bufferWriter = new ArrayPoolBufferWriter<byte>())
                         using (var zss = new CompressionStream(bufferWriter.AsStream(), new CompressionOptions(CompressionOptions.MaxCompressionLevel)))
                         {
