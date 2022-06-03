@@ -1,12 +1,14 @@
-﻿using EgoEngineLibrary.Archive.Erp;
-using EgoEngineLibrary.Archive.Erp.Data;
+﻿using EgoEngineLibrary.Archive.Erp.Data;
 using EgoEngineLibrary.Graphics.Dds;
 using K4os.Compression.LZ4;
+using Microsoft.Toolkit.HighPerformance;
+using Microsoft.Toolkit.HighPerformance.Buffers;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using ZstdNet;
 
 namespace EgoEngineLibrary.Graphics
 {
@@ -152,10 +154,10 @@ namespace EgoEngineLibrary.Graphics
 
                         switch (mip.Compression)
                         {
-                            case ErpCompressionAlgorithm.None:
+                            case ErpGfxSurfaceResMipCompressionAlgorithm.None:
                                 output.Write(mipData, 0, mipData.Length);
                                 break;
-                            case ErpCompressionAlgorithm.LZ4:
+                            case ErpGfxSurfaceResMipCompressionAlgorithm.LZ4:
                                 byte[] decompressedMipData = new byte[(int)mip.Size];
                                 int decompSize = LZ4Codec.Decode(mipData, 0, mipData.Length, decompressedMipData, 0, decompressedMipData.Length);
                                 if (decompSize < 0)
@@ -164,6 +166,14 @@ namespace EgoEngineLibrary.Graphics
                                 }
                                 output.Write(decompressedMipData, 0, decompSize);
                                 break;
+                            case ErpGfxSurfaceResMipCompressionAlgorithm.ZStandard:
+                                {
+                                    var decompressedData = new byte[Convert.ToInt32(mip.Size)];
+                                    using var zs = new Decompressor();
+                                    var ddSize = zs.Unwrap(mipData, decompressedData);
+                                    output.Write(decompressedData, 0, ddSize);
+                                    break;
+                                }
                             default:
                                 throw new NotSupportedException($"MipMap compression type {mip.Compression} is not supported");
                         }
@@ -253,7 +263,10 @@ namespace EgoEngineLibrary.Graphics
                 dds.header.height /= div;
 
                 UInt64 offset = 0;
-                bool compress2017 = srvRes.SurfaceRes.Frag2.Mips.Exists(x => x.Compression != ErpCompressionAlgorithm.None);
+                var compressZStd = srvRes.SurfaceRes.Frag2.Mips.Any(x =>
+                    x.Compression == ErpGfxSurfaceResMipCompressionAlgorithm.ZStandard);
+                bool compress2017 = !compressZStd && srvRes.SurfaceRes.Frag2.Mips.Exists(x =>
+                    x.Compression != ErpGfxSurfaceResMipCompressionAlgorithm.None);
                 List<ErpGfxSurfaceRes2Mips> newMips = new List<ErpGfxSurfaceRes2Mips>(mipCount);
                 using (MemoryStream ddsDataStream = new MemoryStream(dds.bdata, false))
                 using (BinaryReader reader = new BinaryReader(ddsDataStream))
@@ -267,13 +280,23 @@ namespace EgoEngineLibrary.Graphics
                         {
                             mip.Compression = srvRes.SurfaceRes.Frag2.Mips[i].Compression;
                         }
+                        else if (compressZStd)
+                        {
+                            // ZStd for mips introduced in Grid Legends
+                            // if it's used in any mip, just assume we need to apply to all (for no good reason)
+                            mip.Compression = ErpGfxSurfaceResMipCompressionAlgorithm.ZStandard;
+                        }
                         else if (compress2017)
                         {
-                            mip.Compression = i % 2 == 0 ? ErpCompressionAlgorithm.LZ4 : ErpCompressionAlgorithm.None;
+                            // Not sure how to decide which mip levels should be compressed or not
+                            // I can't remember why I chose this scheme
+                            mip.Compression = i % 2 == 0
+                                ? ErpGfxSurfaceResMipCompressionAlgorithm.LZ4
+                                : ErpGfxSurfaceResMipCompressionAlgorithm.None;
                         }
                         else
                         {
-                            mip.Compression = ErpCompressionAlgorithm.None;
+                            mip.Compression = ErpGfxSurfaceResMipCompressionAlgorithm.None;
                         }
                         mip.Offset = offset;
 
@@ -281,13 +304,25 @@ namespace EgoEngineLibrary.Graphics
                         ulong mipPackedSize = (ulong)mipData.Length;
                         switch (mip.Compression)
                         {
-                            case ErpCompressionAlgorithm.LZ4:
+                            case ErpGfxSurfaceResMipCompressionAlgorithm.ZStandard:
+                                using (var bufferWriter = new ArrayPoolBufferWriter<byte>())
+                                using (var zss = new CompressionStream(bufferWriter.AsStream(), new CompressionOptions(CompressionOptions.MaxCompressionLevel)))
+                                {
+                                    zss.Write(mipData, 0, mipData.Length);
+                                    zss.Flush();
+                                    var compData = bufferWriter.WrittenSpan.ToArray();
+                                    writer.Write(compData);
+                                    mipPackedSize = (ulong)compData.Length;
+                                }
+
+                                break;
+                            case ErpGfxSurfaceResMipCompressionAlgorithm.LZ4:
                                 byte[] compressedMipData = new byte[LZ4Codec.MaximumOutputSize(mipData.Length)];
                                 int compSize = LZ4Codec.Encode(mipData, 0, mipData.Length, compressedMipData, 0, compressedMipData.Length, LZ4Level.L12_MAX);
                                 writer.Write(compressedMipData, 0, compSize);
                                 mipPackedSize = (ulong)compSize;
                                 break;
-                            case ErpCompressionAlgorithm.None:
+                            case ErpGfxSurfaceResMipCompressionAlgorithm.None:
                                 writer.Write(mipData);
                                 break;
                             default:

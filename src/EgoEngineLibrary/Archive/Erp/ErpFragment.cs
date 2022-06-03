@@ -28,7 +28,7 @@ namespace EgoEngineLibrary.Archive.Erp
             {
                 return Compression is ErpCompressionAlgorithm.Zlib
                     or ErpCompressionAlgorithm.ZStandard
-                    or ErpCompressionAlgorithm.LZ4;
+                    or ErpCompressionAlgorithm.ZStandard2;
             }
         }
 

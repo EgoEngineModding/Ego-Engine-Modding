@@ -8,13 +8,7 @@ namespace EgoEngineLibrary.Archive.Erp
     {
         None,
         Zlib = 0x01,
-        
-        /// <summary>
-        /// This is only use for mip compression.
-        /// TODO: Split out mip compression algorithms into new enum.
-        /// </summary>
-        LZ4 = 0x03,
-        
+
         /// <summary>
         /// This was introduced in Grid Legends.
         /// </summary>

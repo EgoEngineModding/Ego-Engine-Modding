@@ -4,9 +4,16 @@ using System.IO;
 
 namespace EgoEngineLibrary.Archive.Erp.Data
 {
+    public enum ErpGfxSurfaceResMipCompressionAlgorithm : byte
+    {
+        None,
+        LZ4 = 0x03,
+        ZStandard = 0x04,
+    }
+    
     public struct ErpGfxSurfaceRes2Mips
     {
-        public ErpCompressionAlgorithm Compression { get; set; }
+        public ErpGfxSurfaceResMipCompressionAlgorithm Compression { get; set; }
         public UInt64 Offset { get; set; }
         public UInt64 PackedSize { get; set; }
         public UInt64 Size { get; set; }
@@ -44,7 +51,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
                 for (int i = 0; i < mipMapCount; ++i)
                 {
                     ErpGfxSurfaceRes2Mips mip = new ErpGfxSurfaceRes2Mips();
-                    mip.Compression = (ErpCompressionAlgorithm)reader.ReadByte();
+                    mip.Compression = (ErpGfxSurfaceResMipCompressionAlgorithm)reader.ReadByte();
                     mip.Offset = reader.ReadUInt64();
                     mip.PackedSize = reader.ReadUInt64();
                     mip.Size = reader.ReadUInt64();
