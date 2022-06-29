@@ -4,7 +4,7 @@ using Microsoft.Toolkit.HighPerformance;
 using Microsoft.Toolkit.HighPerformance.Buffers;
 using System;
 using System.IO;
-using ZstdNet;
+using ZstdSharp;
 
 namespace EgoEngineLibrary.Archive.Erp
 {
@@ -172,7 +172,7 @@ namespace EgoEngineLibrary.Archive.Erp
                     case ErpCompressionAlgorithm.ZStandard:
                     case ErpCompressionAlgorithm.ZStandard2:
                         using (var bufferWriter = new ArrayPoolBufferWriter<byte>())
-                        using (var zss = new CompressionStream(bufferWriter.AsStream(), new CompressionOptions(CompressionOptions.MaxCompressionLevel)))
+                        using (var zss = new CompressionStream(bufferWriter.AsStream(), Compressor.MaxCompressionLevel))
                         {
                             zss.Write(data, 0, data.Length);
                             zss.Flush();
