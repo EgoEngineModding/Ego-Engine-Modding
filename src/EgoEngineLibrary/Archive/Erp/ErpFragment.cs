@@ -172,7 +172,7 @@ namespace EgoEngineLibrary.Archive.Erp
                     case ErpCompressionAlgorithm.ZStandard:
                     case ErpCompressionAlgorithm.ZStandard2:
                         using (var bufferWriter = new ArrayPoolBufferWriter<byte>())
-                        using (var zss = new CompressionStream(bufferWriter.AsStream(), Compressor.MaxCompressionLevel))
+                        using (var zss = new CompressionStream(bufferWriter.AsStream(), ZstdSharp.Unsafe.Methods.ZSTD_defaultCLevel()))
                         {
                             zss.Write(data, 0, data.Length);
                             zss.Flush();

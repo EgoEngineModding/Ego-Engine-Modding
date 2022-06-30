@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using ZstdNet;
+using ZstdSharp;
 
 namespace EgoEngineLibrary.Graphics
 {
@@ -305,17 +305,13 @@ namespace EgoEngineLibrary.Graphics
                         switch (mip.Compression)
                         {
                             case ErpGfxSurfaceResMipCompressionAlgorithm.ZStandard:
-                                using (var bufferWriter = new ArrayPoolBufferWriter<byte>())
-                                using (var zss = new CompressionStream(bufferWriter.AsStream(), new CompressionOptions(CompressionOptions.MaxCompressionLevel)))
                                 {
-                                    zss.Write(mipData, 0, mipData.Length);
-                                    zss.Flush();
-                                    var compData = bufferWriter.WrittenSpan.ToArray();
+                                    using var zs = new Compressor(ZstdSharp.Unsafe.Methods.ZSTD_defaultCLevel());
+                                    var compData = zs.Wrap(mipData);
                                     writer.Write(compData);
                                     mipPackedSize = (ulong)compData.Length;
+                                    break;
                                 }
-
-                                break;
                             case ErpGfxSurfaceResMipCompressionAlgorithm.LZ4:
                                 byte[] compressedMipData = new byte[LZ4Codec.MaximumOutputSize(mipData.Length)];
                                 int compSize = LZ4Codec.Encode(mipData, 0, mipData.Length, compressedMipData, 0, compressedMipData.Length, LZ4Level.L12_MAX);
