@@ -1,13 +1,10 @@
-﻿namespace EgoEngineLibrary.Xml
-{
-    using MiscUtil.Conversion;
-    using MiscUtil.IO;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Xml;
+﻿using MiscUtil.Conversion;
+using MiscUtil.IO;
+using System.Text;
+using System.Xml;
 
+namespace EgoEngineLibrary.Xml
+{
     public class XmlBinaryWriter : EndianBinaryWriter
     {
         public XmlBinaryWriter(EndianBitConverter bitConverter, System.IO.Stream stream)
@@ -15,9 +12,9 @@
         {
         }
 
-        public int WriteTerminatedString(string s, byte terminator = new byte())
+        public int WriteTerminatedString(string s, byte terminator = new())
         {
-            byte[] sBytes = Encoding.UTF8.GetBytes(s);
+            var sBytes = Encoding.UTF8.GetBytes(s);
             this.Write(sBytes);
             this.Write(terminator);
             return sBytes.Length;
@@ -25,14 +22,14 @@
 
         public void WriteBxmlElement(XmlElement elem)
         {
-            int elemLength = 4;
+            var elemLength = 4;
 
             // Element Length, Place Holder for Now
-            this.Write((Int16)0);
+            this.Write((short)0);
             // Pad/Special Case byte for signaling end of element or file
-            this.Write((Int16)0);
+            this.Write((short)0);
             // Attribute Count
-            this.Write((Int16)elem.Attributes.Count);
+            this.Write((short)elem.Attributes.Count);
 
             elemLength += this.WriteTerminatedString(elem.Name) + 1;
 
@@ -44,7 +41,7 @@
 
             // Go back, Update Element Length, and Come Back to Continue Writing
             this.Seek(-2 - elemLength, System.IO.SeekOrigin.Current);
-            this.Write((Int16)elemLength);
+            this.Write((short)elemLength);
             this.Seek(elemLength, System.IO.SeekOrigin.Current);
 
             foreach (XmlNode childNode in elem.ChildNodes)
@@ -54,17 +51,17 @@
                     elemLength = 4;
 
                     // Element Length, Place Holder for Now
-                    this.Write((Int16)0);
+                    this.Write((short)0);
                     // Pad/Special Case byte for signaling end of element or file
-                    this.Write((Int16)1);
+                    this.Write((short)1);
                     // Attribute Count
-                    this.Write((Int16)0);
+                    this.Write((short)0);
 
                     elemLength += this.WriteTerminatedString(childNode.Value ?? string.Empty) + 1;
 
                     // Go back, Update Element Length, and Come Back to Continue Writing
                     this.Seek(-2 - elemLength, System.IO.SeekOrigin.Current);
-                    this.Write((Int16)elemLength);
+                    this.Write((short)elemLength);
                     this.Seek(elemLength, System.IO.SeekOrigin.Current);
                 }
                 else if (childNode is XmlElement)
@@ -74,26 +71,26 @@
             }
 
             // Closing Tag of the Element (</XX>) 00BXML: "0004 05000000" 01BXML: "0400 05000000"
-            this.Write((Int16)0x0004);
+            this.Write((short)0x0004);
             if (this.BitConverter.Endianness == Endianness.BigEndian)
             {
-                this.Write((Int16)0x0500);
+                this.Write((short)0x0500);
             }
             else
             {
-                this.Write((Int16)0x0005);
+                this.Write((short)0x0005);
             }
-            this.Write((Int16)0);
+            this.Write((short)0);
         }
 
         public void WriteBinaryXmlElement(BinaryXmlElement binElem)
         {
-            this.Write(binElem.elementNameID);
-            this.Write(binElem.elementValueID);
+            this.Write(binElem.elementNameId);
+            this.Write(binElem.elementValueId);
             this.Write(binElem.attributeCount);
-            this.Write(binElem.attributeStartID);
+            this.Write(binElem.attributeStartId);
             this.Write(binElem.childElementCount);
-            this.Write(binElem.childElementStartID);
+            this.Write(binElem.childElementStartId);
         }
         public void WriteBinaryXmlAttribute(BinaryXmlAttribute binAttr)
         {

@@ -1,41 +1,36 @@
-﻿namespace EgoEngineLibrary.Xml
+﻿using System.Xml;
+
+namespace EgoEngineLibrary.Xml;
+
+public struct BinaryXmlElement
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Xml;
+    public int elementNameId;
+    public int elementValueId;
+    public int attributeCount;
+    public int attributeStartId;
+    public int childElementCount;
+    public int childElementStartId;
 
-    public struct BinaryXmlElement
+    public XmlElement CreateElement(XmlDocument doc, BinaryXmlString strings, BinaryXmlElement[] elements,
+        BinaryXmlAttribute[] attributes)
     {
-        public int elementNameID;
-        public int elementValueID;
-        public int attributeCount;
-        public int attributeStartID;
-        public int childElementCount;
-        public int childElementStartID;
-
-        public XmlElement CreateElement(XmlDocument doc, BinaryXmlString strings, BinaryXmlElement[] elements,
-            BinaryXmlAttribute[] attributes)
+        var element = doc.CreateElement(strings[elementNameId]);
+        for (var i = attributeStartId; i < attributeStartId + attributeCount; i++)
         {
-            XmlElement element = doc.CreateElement(strings[elementNameID]);
-            for (int i = attributeStartID; i < attributeStartID + attributeCount; i++)
-            {
-                element.Attributes.Append(attributes[i].CreateAttribute(doc, strings));
-            }
-
-            for (int i = childElementStartID; i < childElementStartID + childElementCount; i++)
-            {
-                element.AppendChild(elements[i].CreateElement(doc, strings, elements, attributes));
-            }
-
-            // Don't allow TextNode if the Element has ChildElements
-            if (elementValueID > 0 && childElementCount == 0)
-            {
-                element.AppendChild(doc.CreateTextNode(strings[elementValueID]));
-            }
-
-            return element;
+            element.Attributes.Append(attributes[i].CreateAttribute(doc, strings));
         }
+
+        for (var i = childElementStartId; i < childElementStartId + childElementCount; i++)
+        {
+            element.AppendChild(elements[i].CreateElement(doc, strings, elements, attributes));
+        }
+
+        // Don't allow TextNode if the Element has ChildElements
+        if (elementValueId > 0 && childElementCount == 0)
+        {
+            element.AppendChild(doc.CreateTextNode(strings[elementValueId]));
+        }
+
+        return element;
     }
 }

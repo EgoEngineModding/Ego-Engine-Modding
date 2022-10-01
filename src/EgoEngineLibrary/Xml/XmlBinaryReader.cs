@@ -1,13 +1,12 @@
-﻿namespace EgoEngineLibrary.Xml
-{
-    using MiscUtil.Conversion;
-    using MiscUtil.IO;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Xml;
+﻿using MiscUtil.Conversion;
+using MiscUtil.IO;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Xml;
 
+namespace EgoEngineLibrary.Xml
+{
     public class XmlBinaryReader : EndianBinaryReader
     {
         public XmlBinaryReader(EndianBitConverter bitConverter, System.IO.Stream stream)
@@ -17,11 +16,11 @@
 
         public string ReadTerminatedString(byte terminator = new byte())
         {
-            List<byte> strBytes = new List<byte>();
+            var strBytes = new List<byte>();
             do
             {
                 strBytes.Add(ReadByte());
-            } while (strBytes[strBytes.Count - 1] != terminator);
+            } while (strBytes[^1] != terminator);
             strBytes.RemoveAt(strBytes.Count - 1);
             return Encoding.UTF8.GetString(strBytes.ToArray());
         }
@@ -45,8 +44,7 @@
                 }
 
                 // Keep Reading Child Elements until the current element ends
-                XmlNode? childNode;
-                while ((childNode = ReadBxmlElement(doc)) != null)
+                while (ReadBxmlElement(doc) is { } childNode)
                 {
                     element.AppendChild(childNode);
                 }

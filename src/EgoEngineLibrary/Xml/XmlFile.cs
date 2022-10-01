@@ -9,34 +9,27 @@ using System.Xml;
 
 namespace EgoEngineLibrary.Xml
 {
-    public enum XMLType
-    {
-        Text,
-        BinXML,
-        BXMLBig,
-        BXMLLittle
-    }
-
     public class XmlFile
     {
-        private const uint BinXmlMagic = 1917985306; // bytes 0-3 1A 22 52 72 (."Rr)
-        private const uint BxmlMagic = 1280137282; // bytes 1-4 42 58 4D 4C (BXML)
+        private static ReadOnlySpan<byte> BinXmlMagic => new byte[] { 0x1A, 0x22, 0x52, 0x72 }; // ASCII ."Rr
+        private static ReadOnlySpan<byte> BxmlMagic => new byte[] { 0x42, 0x58, 0x4D, 0x4C }; // ASCII BXML
 
-        public XMLType type { get; }
+        public XmlType Type { get; }
         
-        public XmlDocument doc { get; }
+        public XmlDocument Document { get; }
 
-        public static XMLType GetXmlType(Stream stream)
+        public static XmlType GetXmlType(Stream stream)
         {
             var pos = stream.Position;
             Span<byte> header = stackalloc byte[5];
             stream.ReadExactly(header);
             try
             {
-                var binXmlMagic = BitConverter.ToUInt32(header);
-                var bxmlMagic = BitConverter.ToUInt32(header[1..]);
-                return binXmlMagic == BinXmlMagic ? XMLType.BinXML :
-                    bxmlMagic == BxmlMagic ? header[0] == 0 ? XMLType.BXMLBig : XMLType.BXMLLittle : XMLType.Text;
+                var binXmlMagic = header[..4];
+                var bxmlMagic = header[1..];
+                return binXmlMagic.SequenceEqual(BinXmlMagic) ? XmlType.BinXml :
+                    bxmlMagic.SequenceEqual(BxmlMagic) ? header[0] == 0 ? XmlType.BxmlBig : XmlType.BxmlLittle :
+                    XmlType.Text;
             }
             finally
             {
@@ -51,10 +44,10 @@ namespace EgoEngineLibrary.Xml
             stream.ReadExactly(header);
             try
             {
-                var binXmlMagic = BitConverter.ToUInt32(header);
-                var bxmlMagic = BitConverter.ToUInt32(header[1..]);
-                return binXmlMagic == BinXmlMagic
-                       || bxmlMagic == BxmlMagic
+                var binXmlMagic = header[..4];
+                var bxmlMagic = header[1..];
+                return binXmlMagic.SequenceEqual(BinXmlMagic)
+                       || bxmlMagic.SequenceEqual(BxmlMagic)
                        || IsValidXmlText(header, stream, pos);
             }
             finally
@@ -118,137 +111,130 @@ namespace EgoEngineLibrary.Xml
 
         public XmlFile(Stream fileStream)
         {
-            type = GetXmlType(fileStream);
-            doc = new XmlDocument();
+            Type = GetXmlType(fileStream);
+            Document = new XmlDocument();
 
-            if (type == XMLType.Text)
+            if (Type == XmlType.Text)
             {
-                doc.Load(fileStream);
-                foreach (XmlNode child in doc.ChildNodes)
+                Document.Load(fileStream);
+                foreach (XmlNode child in Document.ChildNodes)
                 {
                     if (child.NodeType == XmlNodeType.Comment)
                     {
-                        if (Enum.TryParse<XMLType>(child.Value ?? string.Empty, out var pt) && Enum.IsDefined(pt))
+                        if (Enum.TryParse<XmlType>(child.Value ?? string.Empty, out var pt) && Enum.IsDefined(pt))
                         {
-                            type = pt;
+                            Type = pt;
                             break;
                         }
                     }
                 }
             }
-            else if (type == XMLType.BinXML)
+            else if (Type == XmlType.BinXml)
             {
-                using (XmlBinaryReader reader = new XmlBinaryReader(EndianBitConverter.Little, fileStream))
+                using var reader = new XmlBinaryReader(EndianBitConverter.Little, fileStream);
+                
+                // Section 1
+                reader.ReadByte(); // Unique Byte
+                reader.ReadBytes(3); // Same Magic
+                reader.ReadInt32(); // File Length/Size
+
+                // Section 2
+                reader.ReadByte(); // Unique Byte
+                reader.ReadBytes(3); // Same Magic
+                reader.ReadInt32(); // Section 3 and 4 Total Length/Size
+
+                // Section 3 and 4
+                var xmlStrings = new BinaryXmlString();
+                xmlStrings.Read(reader);
+
+                // Section 5
+                reader.ReadInt32();
+                var xmlElements = new BinaryXmlElement[reader.ReadInt32() / 24];
+                for (var i = 0; i < xmlElements.Length; i++)
                 {
-                    // Section 1
-                    reader.ReadByte(); // Unique Byte
-                    reader.ReadBytes(3); // Same Magic
-                    reader.ReadInt32(); // File Length/Size
-
-                    // Section 2
-                    reader.ReadByte(); // Unique Byte
-                    reader.ReadBytes(3); // Same Magic
-                    reader.ReadInt32(); // Section 3 and 4 Total Length/Size
-
-                    // Section 3 and 4
-                    var xmlStrings = new BinaryXmlString();
-                    xmlStrings.Read(reader);
-
-                    // Section 5
-                    reader.ReadInt32();
-                    var xmlElements = new BinaryXmlElement[reader.ReadInt32() / 24];
-                    for (int i = 0; i < xmlElements.Length; i++)
-                    {
-                        xmlElements[i].elementNameID = reader.ReadInt32();
-                        xmlElements[i].elementValueID = reader.ReadInt32();
-                        xmlElements[i].attributeCount = reader.ReadInt32();
-                        xmlElements[i].attributeStartID = reader.ReadInt32();
-                        xmlElements[i].childElementCount = reader.ReadInt32();
-                        xmlElements[i].childElementStartID = reader.ReadInt32();
-                    }
-
-                    // Section 6
-                    reader.ReadInt32();
-                    var xmlAttributes = new BinaryXmlAttribute[reader.ReadInt32() / 8];
-                    for (int i = 0; i < xmlAttributes.Length; i++)
-                    {
-                        xmlAttributes[i].nameID = reader.ReadInt32();
-                        xmlAttributes[i].valueID = reader.ReadInt32();
-                    }
-
-                    // Build XML
-                    doc = new XmlDocument();
-                    doc.AppendChild(doc.CreateXmlDeclaration("1.0", "UTF-8", "yes"));
-                    doc.AppendChild(doc.CreateComment(type.ToString()));
-                    doc.AppendChild(xmlElements[0].CreateElement(doc, xmlStrings, xmlElements, xmlAttributes));
+                    xmlElements[i].elementNameId = reader.ReadInt32();
+                    xmlElements[i].elementValueId = reader.ReadInt32();
+                    xmlElements[i].attributeCount = reader.ReadInt32();
+                    xmlElements[i].attributeStartId = reader.ReadInt32();
+                    xmlElements[i].childElementCount = reader.ReadInt32();
+                    xmlElements[i].childElementStartId = reader.ReadInt32();
                 }
+
+                // Section 6
+                reader.ReadInt32();
+                var xmlAttributes = new BinaryXmlAttribute[reader.ReadInt32() / 8];
+                for (var i = 0; i < xmlAttributes.Length; i++)
+                {
+                    xmlAttributes[i].nameID = reader.ReadInt32();
+                    xmlAttributes[i].valueID = reader.ReadInt32();
+                }
+
+                // Build XML
+                Document = new XmlDocument();
+                Document.AppendChild(Document.CreateXmlDeclaration("1.0", "UTF-8", "yes"));
+                Document.AppendChild(Document.CreateComment(Type.ToString()));
+                Document.AppendChild(xmlElements[0].CreateElement(Document, xmlStrings, xmlElements, xmlAttributes));
             }
             else
             {
-                if (type == XMLType.BXMLBig)
+                if (Type == XmlType.BxmlBig)
                 {
-                    using (XmlBinaryReader reader = new XmlBinaryReader(EndianBitConverter.Big, fileStream))
-                    {
-                        reader.ReadBytes(5);
-                        doc = new XmlDocument();
-                        doc.AppendChild(doc.CreateXmlDeclaration("1.0", "UTF-8", "yes"));
-                        doc.AppendChild(doc.CreateComment(type.ToString()));
-                        var rootElem = reader.ReadBxmlElement(doc);
-                        if (rootElem is not null)
-                            doc.AppendChild(rootElem);
-                    }
+                    using var reader = new XmlBinaryReader(EndianBitConverter.Big, fileStream);
+                    reader.ReadBytes(5);
+                    Document = new XmlDocument();
+                    Document.AppendChild(Document.CreateXmlDeclaration("1.0", "UTF-8", "yes"));
+                    Document.AppendChild(Document.CreateComment(Type.ToString()));
+                    var rootElem = reader.ReadBxmlElement(Document);
+                    if (rootElem is not null)
+                        Document.AppendChild(rootElem);
                 }
-                else if (type == XMLType.BXMLLittle)
+                else if (Type == XmlType.BxmlLittle)
                 {
-                    using (XmlBinaryReader reader = new XmlBinaryReader(EndianBitConverter.Little, fileStream))
-                    {
-                        reader.ReadBytes(5);
-                        doc = new XmlDocument();
-                        doc.AppendChild(doc.CreateXmlDeclaration("1.0", "UTF-8", "yes"));
-                        doc.AppendChild(doc.CreateComment(type.ToString()));
-                        var rootElem = reader.ReadBxmlElement(doc);
-                        if (rootElem is not null)
-                            doc.AppendChild(rootElem);
-                    }
+                    using var reader = new XmlBinaryReader(EndianBitConverter.Little, fileStream);
+                    reader.ReadBytes(5);
+                    Document = new XmlDocument();
+                    Document.AppendChild(Document.CreateXmlDeclaration("1.0", "UTF-8", "yes"));
+                    Document.AppendChild(Document.CreateComment(Type.ToString()));
+                    var rootElem = reader.ReadBxmlElement(Document);
+                    if (rootElem is not null)
+                        Document.AppendChild(rootElem);
                 }
             }
         }
 
         public void WriteXml(TextWriter textWriter)
         {
-            doc.Save(textWriter);
+            Document.Save(textWriter);
         }
 
         public void Write(Stream stream)
         {
-            Write(stream, type);
+            Write(stream, Type);
         }
 
-        public void Write(Stream fileStream, XMLType convertType)
+        public void Write(Stream fileStream, XmlType convertType)
         {
-            if (convertType == XMLType.Text)
+            if (convertType == XmlType.Text)
             {
                 // use text writer since by default it doesn't output the Encoding BOM
-                using (var textWriter = new StreamWriter(fileStream, leaveOpen: true))
-                {
-                    var xmlTextWriter = new XmlTextWriter(textWriter);
-                    doc.Save(xmlTextWriter);
-                }
+                using var textWriter = new StreamWriter(fileStream, leaveOpen: true);
+                var xmlTextWriter = new XmlTextWriter(textWriter);
+                Document.Save(xmlTextWriter);
             }
-            else if (convertType == XMLType.BinXML)
+            else if (convertType == XmlType.BinXml)
             {
-                Dictionary<string, int> valuesToID = new Dictionary<string, int>();
-                List<BinaryXmlElement> xmlElems = new List<BinaryXmlElement>();
-                List<BinaryXmlAttribute> xmlAttrs = new List<BinaryXmlAttribute>();
-                List<int> valueLocations = new List<int>();
+                var valuesToId = new Dictionary<string, int>();
+                var xmlElems = new List<BinaryXmlElement>();
+                var xmlAttrs = new List<BinaryXmlAttribute>();
+                var valueLocations = new List<int>();
 
-                if (doc.DocumentElement is null)
+                if (Document.DocumentElement is null)
                     throw new InvalidDataException("The root xml element does not exist.");
 
-                BuildBinXml(doc.DocumentElement, valuesToID, xmlElems, xmlAttrs);
+                BuildBinXml(Document.DocumentElement, valuesToId, xmlElems, xmlAttrs);
                 valueLocations.Add(0);
 
-                using (XmlBinaryWriter writer = new XmlBinaryWriter(EndianBitConverter.Little, fileStream))
+                using (var writer = new XmlBinaryWriter(EndianBitConverter.Little, fileStream))
                 {
                     writer.Write(0x7252221A);
                     writer.Write(0);
@@ -260,19 +246,19 @@ namespace EgoEngineLibrary.Xml
                     // Section 3: Values/Strings
                     writer.Write(0x7252221D);
                     writer.Write(0);
-                    foreach (string s in valuesToID.Keys)
+                    foreach (var s in valuesToId.Keys)
                     {
-                        valueLocations.Add(writer.WriteTerminatedString(s) + valueLocations[valueLocations.Count - 1] + 1);
+                        valueLocations.Add(writer.WriteTerminatedString(s) + valueLocations[^1] + 1);
                     }
                     // Write zero bytes to make length the same way CM made it
-                    int remainder = (int)writer.BaseStream.Position % 16;
-                    byte[] pad = new byte[remainder > 8 ? 24 - remainder : 8 - remainder];
+                    var remainder = (int)writer.BaseStream.Position % 16;
+                    var pad = new byte[remainder > 8 ? 24 - remainder : 8 - remainder];
                     writer.Write(pad);
 
                     // Section 4: Value/String Locations
                     writer.Write(0x7252221E);
-                    writer.Write(4 * valuesToID.Count);
-                    for (int i = 0; i < valueLocations.Count - 1; i++)
+                    writer.Write(4 * valuesToId.Count);
+                    for (var i = 0; i < valueLocations.Count - 1; i++)
                     {
                         writer.Write(valueLocations[i]);
                     }
@@ -280,7 +266,7 @@ namespace EgoEngineLibrary.Xml
                     // Section 5: Element Definitions
                     writer.Write(0x7252221B);
                     writer.Write(24 * xmlElems.Count);
-                    for (int i = 0; i < xmlElems.Count; i++)
+                    for (var i = 0; i < xmlElems.Count; i++)
                     {
                         writer.WriteBinaryXmlElement(xmlElems[i]);
                     }
@@ -288,112 +274,110 @@ namespace EgoEngineLibrary.Xml
                     // Section 6: Attribute Definitions
                     writer.Write(0x7252221C);
                     writer.Write(8 * xmlAttrs.Count);
-                    for (int i = 0; i < xmlAttrs.Count; i++)
+                    for (var i = 0; i < xmlAttrs.Count; i++)
                     {
                         writer.WriteBinaryXmlAttribute(xmlAttrs[i]);
                     }
 
-                    // Update Section Lenghts/Sizes
-                    writer.Seek(4, System.IO.SeekOrigin.Begin);
+                    // Update Section Lengths/Sizes
+                    writer.Seek(4, SeekOrigin.Begin);
                     writer.Write((int)writer.BaseStream.Length - 8); // Section 1: Total File
 
-                    writer.Seek(12, System.IO.SeekOrigin.Begin);
-                    writer.Write(valueLocations[valueLocations.Count - 1] + 4 * valuesToID.Count + 16 + pad.Length); // Section 2
+                    writer.Seek(12, SeekOrigin.Begin);
+                    writer.Write(valueLocations[^1] + 4 * valuesToId.Count + 16 + pad.Length); // Section 2
 
-                    writer.Seek(20, System.IO.SeekOrigin.Begin);
-                    writer.Write(valueLocations[valueLocations.Count - 1] + pad.Length); // Section 3
+                    writer.Seek(20, SeekOrigin.Begin);
+                    writer.Write(valueLocations[^1] + pad.Length); // Section 3
                 }
             }
-            else if (convertType == XMLType.BXMLBig)
+            else if (convertType == XmlType.BxmlBig)
             {
-                using (XmlBinaryWriter writer = new XmlBinaryWriter(EndianBitConverter.Big, fileStream))
-                {
-                    writer.Write((byte)0);
-                    writer.Write(Encoding.UTF8.GetBytes("BXML"));
+                using var writer = new XmlBinaryWriter(EndianBitConverter.Big, fileStream);
+                writer.Write((byte)0);
+                writer.Write(BxmlMagic);
 
-                    if (doc.DocumentElement is null)
-                        throw new InvalidDataException("The root xml element does not exist.");
+                if (Document.DocumentElement is null)
+                    throw new InvalidDataException("The root xml element does not exist.");
 
-                    writer.WriteBxmlElement(doc.DocumentElement);
+                writer.WriteBxmlElement(Document.DocumentElement);
 
-                    // File Ending: "0004 06000000" x2
-                    writer.Write((Int16)0x0004);
-                    writer.Write((Int16)0x0600);
-                    writer.Write((Int16)0);
-                    writer.Write((Int16)0x0004);
-                    writer.Write((Int16)0x0600);
-                    writer.Write((Int16)0);
-                }
+                // File Ending: "0004 06000000" x2
+                writer.Write((short)0x0004);
+                writer.Write((short)0x0600);
+                writer.Write((short)0);
+                writer.Write((short)0x0004);
+                writer.Write((short)0x0600);
+                writer.Write((short)0);
             }
-            else if (convertType == XMLType.BXMLLittle)
+            else if (convertType == XmlType.BxmlLittle)
             {
-                using (XmlBinaryWriter writer = new XmlBinaryWriter(EndianBitConverter.Little, fileStream))
-                {
-                    writer.Write((byte)1);
-                    writer.Write(Encoding.UTF8.GetBytes("BXML"));
+                using var writer = new XmlBinaryWriter(EndianBitConverter.Little, fileStream);
+                writer.Write((byte)1);
+                writer.Write(BxmlMagic);
 
-                    if (doc.DocumentElement is null)
-                        throw new InvalidDataException("The root xml element does not exist.");
+                if (Document.DocumentElement is null)
+                    throw new InvalidDataException("The root xml element does not exist.");
 
-                    writer.WriteBxmlElement(doc.DocumentElement);
+                writer.WriteBxmlElement(Document.DocumentElement);
 
-                    // File Ending: "0004 06000000" x2
-                    writer.Write((Int16)0x0004);
-                    writer.Write((Int16)0x0006);
-                    writer.Write((Int16)0);
-                    writer.Write((Int16)0x0004);
-                    writer.Write((Int16)0x0006);
-                    writer.Write((Int16)0);
-                }
+                // File Ending: "0004 06000000" x2
+                writer.Write((short)0x0004);
+                writer.Write((short)0x0006);
+                writer.Write((short)0);
+                writer.Write((short)0x0004);
+                writer.Write((short)0x0006);
+                writer.Write((short)0);
             }
         }
 
-        public void BuildBinXml(XmlElement elem, Dictionary<string, int> valuesToID, List<BinaryXmlElement> xmlElems, List<BinaryXmlAttribute> xmlAttrs, int childElemIndex = 0)
+        private static void BuildBinXml(XmlElement elem, Dictionary<string, int> valuesToId,
+            List<BinaryXmlElement> xmlElems, List<BinaryXmlAttribute> xmlAttrs, int childElemIndex = 0)
         {
             if (childElemIndex == 0)
             {
                 xmlElems.Add(new BinaryXmlElement());
             }
-            BinaryXmlElement binElem = new BinaryXmlElement();
-            int currentIndex = xmlElems.Count - 1;
+
+            var binElem = new BinaryXmlElement();
+            var currentIndex = xmlElems.Count - 1;
 
             // Element Name String
-            if (!valuesToID.ContainsKey(elem.Name))
+            if (!valuesToId.ContainsKey(elem.Name))
             {
-                binElem.elementNameID = valuesToID.Count;
-                valuesToID.Add(elem.Name, valuesToID.Count);
+                binElem.elementNameId = valuesToId.Count;
+                valuesToId.Add(elem.Name, valuesToId.Count);
             }
             else
             {
-                binElem.elementNameID = valuesToID[elem.Name];
+                binElem.elementNameId = valuesToId[elem.Name];
             }
 
-            binElem.attributeStartID = elem.Attributes.Count > 0 ? xmlAttrs.Count : 0;
+            binElem.attributeStartId = elem.Attributes.Count > 0 ? xmlAttrs.Count : 0;
             binElem.attributeCount = elem.Attributes.Count;
             foreach (XmlAttribute attr in elem.Attributes)
             {
-                BinaryXmlAttribute binAttr = new BinaryXmlAttribute();
+                var binAttr = new BinaryXmlAttribute();
 
                 // Attribute Name String
-                if (!valuesToID.ContainsKey(attr.Name))
+                if (!valuesToId.ContainsKey(attr.Name))
                 {
-                    binAttr.nameID = valuesToID.Count;
-                    valuesToID.Add(attr.Name, valuesToID.Count);
+                    binAttr.nameID = valuesToId.Count;
+                    valuesToId.Add(attr.Name, valuesToId.Count);
                 }
                 else
                 {
-                    binAttr.nameID = valuesToID[attr.Name];
+                    binAttr.nameID = valuesToId[attr.Name];
                 }
 
                 // Attribute Value String
-                if (!valuesToID.ContainsKey(attr.Value))
+                if (!valuesToId.ContainsKey(attr.Value))
                 {
-                    binAttr.valueID = valuesToID.Count;
-                    valuesToID.Add(attr.Value, valuesToID.Count);
+                    binAttr.valueID = valuesToId.Count;
+                    valuesToId.Add(attr.Value, valuesToId.Count);
                 }
                 else
                 {
-                    binAttr.valueID = valuesToID[attr.Value];
+                    binAttr.valueID = valuesToId[attr.Value];
                 }
 
                 xmlAttrs.Add(binAttr);
@@ -402,37 +386,36 @@ namespace EgoEngineLibrary.Xml
             // Element Value or Child Elements
             // Set its childElementStartID to the next available index for binary xml elements 
             // AKA the current count, will be overwritten if element actually has child nodes
-            binElem.childElementStartID = xmlElems.Count;
+            binElem.childElementStartId = xmlElems.Count;
             if (elem.HasChildNodes)
             {
                 // Values inside of an element are considered child nodes like <element>ThisValue</element>
                 // More Specifically they're called "XmlText" or Text Nodes
                 if (elem.ChildNodes[0] is XmlText textNode)
                 {
-                    //System.Windows.Forms.MessageBox.Show("daasda22222222222222222");
                     if (textNode.Value != null)
                     {
-                        if (!valuesToID.ContainsKey(textNode.Value))
+                        if (!valuesToId.ContainsKey(textNode.Value))
                         {
-                            binElem.elementValueID = valuesToID.Count;
-                            valuesToID.Add(textNode.Value, valuesToID.Count);
+                            binElem.elementValueId = valuesToId.Count;
+                            valuesToId.Add(textNode.Value, valuesToId.Count);
                         }
                         else
                         {
-                            binElem.elementValueID = valuesToID[textNode.Value];
+                            binElem.elementValueId = valuesToId[textNode.Value];
                         }
                     }
                 }
                 else
                 {
-                    binElem.childElementStartID = xmlElems.Count;
+                    binElem.childElementStartId = xmlElems.Count;
                     binElem.childElementCount = elem.ChildNodes.Count;
 
                     xmlElems.AddRange(new BinaryXmlElement[elem.ChildNodes.Count]);
-                    int i = binElem.childElementStartID;
+                    var i = binElem.childElementStartId;
                     foreach (XmlElement childElem in elem.ChildNodes)
                     {
-                        BuildBinXml(childElem, valuesToID, xmlElems, xmlAttrs, i);
+                        BuildBinXml(childElem, valuesToId, xmlElems, xmlAttrs, i);
                         i++;
                     }
                 }

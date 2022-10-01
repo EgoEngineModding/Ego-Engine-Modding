@@ -291,13 +291,22 @@ namespace MiscUtil.IO
 			WriteInternal(value, value.Length);
 		}
 
+        /// <summary>
+        /// Writes an array of bytes to the stream.
+        /// </summary>
+        /// <param name="value">The values to write</param>
+        public void Write(ReadOnlySpan<byte> value)
+        {
+            WriteInternal(value);
+        }
+
 		/// <summary>
 		/// Writes a portion of an array of bytes to the stream.
 		/// </summary>
 		/// <param name="value">An array containing the bytes to write</param>
 		/// <param name="offset">The index of the first byte to write within the array</param>
 		/// <param name="count">The number of bytes to write</param>
-		public void Write (byte[] value, int offset, int count)
+		public void Write(byte[] value, int offset, int count)
 		{
 			CheckDisposed();
 			stream.Write(value, offset, count);
@@ -375,7 +384,7 @@ namespace MiscUtil.IO
 		/// <summary>
 		/// Checks whether or not the writer has been disposed, throwing an exception if so.
 		/// </summary>
-		void CheckDisposed()
+        private void CheckDisposed()
 		{
 			if (disposed)
 			{
@@ -389,11 +398,17 @@ namespace MiscUtil.IO
 		/// </summary>
 		/// <param name="bytes">The array of bytes to write from</param>
 		/// <param name="length">The number of bytes to write</param>
-		void WriteInternal (byte[] bytes, int length)
+        private void WriteInternal(byte[] bytes, int length)
 		{
 			CheckDisposed();
 			stream.Write(bytes, 0, length);
 		}
+
+        private void WriteInternal(ReadOnlySpan<byte> bytes)
+        {
+            CheckDisposed();
+            stream.Write(bytes);
+        }
 		#endregion
 
 		#region IDisposable Members

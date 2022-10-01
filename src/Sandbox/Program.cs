@@ -26,7 +26,7 @@ internal class Program
                 var xml = new XmlFile(fs);
                 //Console.WriteLine(xml.type);
 
-                if (xml.type != XMLType.Text)
+                if (xml.Type != XmlType.Text)
                 {
                     using var ms = new MemoryStream();
                     xml.Write(ms);
@@ -48,7 +48,7 @@ internal class Program
             {
                 using var fs = new FileStream(f, FileMode.Open, FileAccess.Read, FileShare.Read);
                 var type = XmlFile.GetXmlType(fs);
-                if (type != XMLType.Text)
+                if (type != XmlType.Text)
                 {
                     Console.WriteLine(e);
                 }

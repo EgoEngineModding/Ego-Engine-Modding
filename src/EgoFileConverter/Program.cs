@@ -72,7 +72,7 @@ namespace EgoFileConverter
                 using var fsi = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
                 XmlFile file = new XmlFile(fsi);
                 using var fso = File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read);
-                file.Write(fso, XMLType.Text);
+                file.Write(fso, XmlType.Text);
                 Console.WriteLine("Success! XML converted.");
             }
             else if (magic == "LNGT")
