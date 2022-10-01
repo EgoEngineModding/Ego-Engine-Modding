@@ -15,22 +15,26 @@
         public int childElementCount;
         public int childElementStartID;
 
-        public XmlElement CreateElement(XmlDocument doc, XmlFile file)
+        public XmlElement CreateElement(XmlDocument doc, BinaryXmlString strings, BinaryXmlElement[] elements,
+            BinaryXmlAttribute[] attributes)
         {
-            XmlElement element = doc.CreateElement(file.xmlStrings[elementNameID]);
+            XmlElement element = doc.CreateElement(strings[elementNameID]);
             for (int i = attributeStartID; i < attributeStartID + attributeCount; i++)
             {
-                element.Attributes.Append(file.xmlAttributes[i].CreateAttribute(doc, file));
+                element.Attributes.Append(attributes[i].CreateAttribute(doc, strings));
             }
+
             for (int i = childElementStartID; i < childElementStartID + childElementCount; i++)
             {
-                element.AppendChild(file.xmlElements[i].CreateElement(doc, file));
+                element.AppendChild(elements[i].CreateElement(doc, strings, elements, attributes));
             }
+
             // Don't allow TextNode if the Element has ChildElements
             if (elementValueID > 0 && childElementCount == 0)
             {
-                element.AppendChild(doc.CreateTextNode(file.xmlStrings[elementValueID]));
+                element.AppendChild(doc.CreateTextNode(strings[elementValueID]));
             }
+
             return element;
         }
     }

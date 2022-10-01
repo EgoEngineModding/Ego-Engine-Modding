@@ -11,7 +11,7 @@
     public class XmlBinaryReader : EndianBinaryReader
     {
         public XmlBinaryReader(EndianBitConverter bitConverter, System.IO.Stream stream)
-            : base(bitConverter, stream)
+            : base(bitConverter, stream, true)
         {
         }
 
@@ -28,17 +28,18 @@
 
         public XmlNode? ReadBxmlElement(XmlDocument doc)
         {
-            int nodeLength = this.ReadInt16();
-            int nodeType = this.ReadInt16(); // pad
-            int attribCount = this.ReadInt16();
+            var nodeLength = this.ReadInt16();
+            var nodeType = this.ReadByte();
+            this.ReadByte(); // pad
+            var attribCount = this.ReadInt16();
 
             if (nodeType == 0)
             {
                 // Read Element
-                XmlElement element = doc.CreateElement(this.ReadTerminatedString());
-                for (int i = 0; i < attribCount; i++)
+                var element = doc.CreateElement(this.ReadTerminatedString());
+                for (var i = 0; i < attribCount; i++)
                 {
-                    XmlAttribute attr = doc.CreateAttribute(this.ReadTerminatedString());
+                    var attr = doc.CreateAttribute(this.ReadTerminatedString());
                     attr.Value = this.ReadTerminatedString();
                     element.Attributes.Append(attr);
                 }

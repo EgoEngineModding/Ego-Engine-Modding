@@ -1,21 +1,16 @@
-﻿namespace EgoEngineLibrary.Xml
+﻿using System.Xml;
+
+namespace EgoEngineLibrary.Xml;
+
+public struct BinaryXmlAttribute
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Xml;
+    public int nameID;
+    public int valueID;
 
-    public struct BinaryXmlAttribute
+    public XmlAttribute CreateAttribute(XmlDocument doc, BinaryXmlString strings)
     {
-        public int nameID;
-        public int valueID;
-
-        public XmlAttribute CreateAttribute(XmlDocument doc, XmlFile file)
-        {
-            XmlAttribute attr = doc.CreateAttribute(file.xmlStrings[nameID]);
-            attr.Value = file.xmlStrings[valueID];
-            return attr;
-        }
+        var attr = doc.CreateAttribute(strings[nameID]);
+        attr.Value = strings[valueID];
+        return attr;
     }
 }

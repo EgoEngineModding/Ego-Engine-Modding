@@ -21,42 +21,43 @@ else if (endianness == 0x01)
 }
 
 char magic[4];
-    struct XmlElementInfo
-    {
-        int16 elemLength;
-        int16 unk;
-        int16 attribCount;
-    };
-struct XmlData
+struct XmlElementInfo
 {
-    string value;
+    int16 elemLength;
+    byte unk;
+    byte pad;
+    int16 attribCount;
 };
 
-struct XmlElementInfo info;
-struct XmlElement(struct XmlElementInfo& info)
+struct XmlElement
 {
-    string name;
+    struct XmlElementInfo elemInfo <hidden=true>;
 
-    struct XmlAttributes
+    if (elemInfo.unk == 0)
     {
         string name;
-        string value;
-    } attributes[info.attribCount] <optimize=false>;
-
-    while (1)
-    {
-        struct XmlElementInfo childInfo <hidden=true>;
-        if (childInfo.unk == 0)
+    
+        struct XmlAttributes
         {
-            struct XmlElement children(childInfo);
-        }
-        else if (childInfo.unk == 5)
-        {
-            break;
-        }
-        else if (childInfo.unk == 1)
-        {
+            string name;
             string value;
+        } attributes[elemInfo.attribCount] <optimize=false>;
+
+        while (1)
+        {
+            struct XmlElement children;
+            if (children.elemInfo.unk == 5)
+            {
+                break;
+            }
         }
     }
-} root(info);
+    else if (elemInfo.unk == 1)
+    {
+        string value;
+    }
+    else if (elemInfo.unk == 5)
+    {
+        // end of element
+    }
+} root;
