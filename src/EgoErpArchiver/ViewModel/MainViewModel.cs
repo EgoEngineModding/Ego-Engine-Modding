@@ -98,34 +98,63 @@ namespace EgoErpArchiver.ViewModel
 
         private void OpenCommand_Execute(object parameter)
         {
+            string filename;
+            if (OpenERPFileDialog(out filename))
+                Open(filename);
+        }
+
+        private bool OpenERPFileDialog(out string filename)
+        {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Erp files|*.erp|All files|*.*";
             openFileDialog.FilterIndex = 1;
-            if (!string.IsNullOrEmpty(filePath))
+
+            // If a file is already open, set the dialog to the current file's location
+            if (!string.IsNullOrEmpty(filepath))
             {
-                openFileDialog.FileName = Path.GetFileNameWithoutExtension(filePath);
-                openFileDialog.InitialDirectory = Path.GetDirectoryName(filePath);
+                openFileDialog.FileName = Path.GetFileNameWithoutExtension(filepath);
+                openFileDialog.InitialDirectory = Path.GetDirectoryName(filepath);
             }
 
-            if (openFileDialog.ShowDialog() == true)
-            {
-                Open(openFileDialog.FileName);
-            }
+            bool result = openFileDialog.ShowDialog() ?? false;
+            filename = openFileDialog.FileName;
+
+            return result;
         }
-        private void Open(string fileName)
+
+        /// <summary>
+        /// Load data into the workspace.
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="workspace"></param>
+        private void LoadData(ErpFile file, ResourcesWorkspaceViewModel workspace)
+        {
+            resourcesWorkspace.LoadData(file);
+            packagesWorkspace.LoadData(resourcesWorkspace);
+            texturesWorkspace.LoadData(resourcesWorkspace);
+            xmlFilesWorkspace.LoadData(resourcesWorkspace);
+        }
+
+        private void Merge(string filename, bool overwrite = true)
+        {
+
+        }
+
+        private void Open(string filename)
         {
             try
             {
-                filePath = fileName;
                 ClearVars();
-                this.file = new ErpFile();
-                Task.Run(() => this.file.Read(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))).Wait();
-                resourcesWorkspace.LoadData(file);
-                packagesWorkspace.LoadData(resourcesWorkspace);
-                texturesWorkspace.LoadData(resourcesWorkspace);
-                xmlFilesWorkspace.LoadData(resourcesWorkspace);
+                file = new ErpFile();
+
+                using (FileStream fin = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    Task.Run(() => file.Read(fin)).Wait();
+
+                LoadData(file, resourcesWorkspace);
                 SelectTab(Properties.Settings.Default.StartingTab);
-                DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
+                DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filename);
+
+                filepath = filename;
             }
             catch (Exception ex)
             {
