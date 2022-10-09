@@ -57,8 +57,8 @@
                 <MenuItem Header="I_mport All" Command="{Binding Path=XmlFilesWorkspace.ImportAll}"></MenuItem>
             </MenuItem>
             <MenuItem x:Name="mi_Merge" Header="Merge">
-                <MenuItem x:Name="mi_MrgPreserve" Header="Merge + Preserve"/>
-                <MenuItem x:Name="mi_MrgOverwrite" Header="Merge + Overwrite"/>
+                <MenuItem x:Name="mi_MrgPreserve" Header="Merge + Preserve" Command="{Binding MergePreserveCommand}"/>
+                <MenuItem x:Name="mi_MrgOverwrite" Header="Merge + Overwrite" Command="{Binding MergeOverwriteCommand}"/>
             </MenuItem>
             <MenuItem x:Name="mi_Settings" Header="_Settings">
                 <MenuItem Header="Game _Directory">

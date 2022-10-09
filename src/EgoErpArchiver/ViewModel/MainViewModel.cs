@@ -52,7 +52,7 @@ namespace EgoErpArchiver.ViewModel
         #endregion
 
         #region Presentation Data
-        int selectedTabIndex;
+        private int selectedTabIndex;
 
         public int SelectedTabIndex
         {
@@ -60,7 +60,7 @@ namespace EgoErpArchiver.ViewModel
             set
             {
                 selectedTabIndex = value;
-                OnPropertyChanged("SelectedTabIndex");
+                OnPropertyChanged(nameof(SelectedTabIndex));
             }
         }
         #endregion
@@ -78,6 +78,8 @@ namespace EgoErpArchiver.ViewModel
             // Commands
             OpenCommand = new RelayCommand(OpenCommand_Execute);
             SaveCommand = new RelayCommand(SaveCommand_Execute, SaveCommand_CanExecute);
+            MergePreserveCommand = new RelayCommand(MergePreserve_Execute, SaveCommand_CanExecute);
+            MergeOverwriteCommand = new RelayCommand(MergeOverwrite_Execute, SaveCommand_CanExecute);
 
             if (string.IsNullOrEmpty(Properties.Settings.Default.F12016Dir))
             {
@@ -88,6 +90,8 @@ namespace EgoErpArchiver.ViewModel
         #region MainMenu
         public RelayCommand OpenCommand { get; init; }
         public RelayCommand SaveCommand { get; init; }
+        public RelayCommand MergePreserveCommand { get; init; }
+        public RelayCommand MergeOverwriteCommand { get; init; }
 
         public void ParseCommandLineArguments()
         {
@@ -128,7 +132,7 @@ namespace EgoErpArchiver.ViewModel
         /// </summary>
         /// <param name="file"></param>
         /// <param name="workspace"></param>
-        private void LoadData(ErpFile file, ResourcesWorkspaceViewModel workspace)
+        private void UpdateWorkspace()
         {
             ResourcesWorkspace.LoadData(file);
             PackagesWorkspace.LoadData(ResourcesWorkspace);
@@ -136,9 +140,56 @@ namespace EgoErpArchiver.ViewModel
             XmlFilesWorkspace.LoadData(ResourcesWorkspace);
         }
 
-        private void Merge(string filename, bool overwrite = true)
+        private void MergePreserve_Execute(object parameter)
         {
+            string filename;
+            if (OpenERPFileDialog(out filename))
+                Merge(filename, overwrite: false);
+        }
 
+        private void MergeOverwrite_Execute(object parameter)
+        {
+            string filename;
+            if (OpenERPFileDialog(out filename))
+                Merge(filename, overwrite: true);
+        }
+
+        /// <summary>
+        /// Merge a new file's data with the existing loading file.
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <param name="overwrite"></param>
+        private void Merge(string filename, bool overwrite = false)
+        {
+            // This shouldn't ever happen
+            if (file == null)
+            {
+                MessageBox.Show($"Before a merge operation, a file must be opened!",
+                   Properties.Resources.AppTitleLong,
+                   MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            try
+            {
+                mergeFile = new ErpFile();
+                using FileStream fin = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                Task.Run(() => mergeFile.Read(fin)).Wait();
+            }
+            catch (Exception ex)
+            {
+                // Fail
+                DisplayName = Properties.Resources.AppTitleLong;
+                MessageBox.Show($"The program could not open this file for merging!{NL + NL}{filename}{NL + NL}{ex.Message}",
+                    Properties.Resources.AppTitleLong,
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            file.Resources.AddRange(mergeFile.Resources);
+            file.UpdateOffsets();
+
+            ResourcesWorkspace.ClearData();
+            TexturesWorkspace.ClearData();
+            UpdateWorkspace();
         }
 
         private void Open(string filename)
@@ -148,10 +199,10 @@ namespace EgoErpArchiver.ViewModel
                 ClearVars();
                 file = new ErpFile();
 
-                using (FileStream fin = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    Task.Run(() => file.Read(fin)).Wait();
+                using FileStream fin = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                Task.Run(() => file.Read(fin)).Wait();
 
-                LoadData(file, ResourcesWorkspace);
+                UpdateWorkspace();
                 SelectTab(Properties.Settings.Default.StartingTab);
                 DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filename);
 
