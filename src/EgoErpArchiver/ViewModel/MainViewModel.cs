@@ -49,10 +49,6 @@ namespace EgoErpArchiver.ViewModel
         }
         public string FilePath => filepath;
         public ErpFile ErpFile => file;
-        public ResourcesWorkspaceViewModel ResourcesWorkspace { get; init; }
-        public PackagesWorkspaceViewModel PackagesWorkspace { get; init; }
-        public TexturesWorkspaceViewModel TexturesWorkspace { get; init; }
-        public XmlFilesWorkspaceViewModel XmlFilesWorkspace { get; init; }
         #endregion
 
         #region Presentation Data
