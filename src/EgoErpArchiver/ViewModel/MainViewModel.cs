@@ -19,7 +19,7 @@ namespace EgoErpArchiver.ViewModel
     {
         #region Data
         private string windowTitle;
-        private string filePath;
+        private string filepath;
         private ErpFile file;
 
         /// <summary>
@@ -28,10 +28,10 @@ namespace EgoErpArchiver.ViewModel
         /// </summary>
         private ErpFile mergeFile;
 
-        readonly ResourcesWorkspaceViewModel resourcesWorkspace;
-        readonly PackagesWorkspaceViewModel packagesWorkspace;
-        readonly TexturesWorkspaceViewModel texturesWorkspace;
-        readonly XmlFilesWorkspaceViewModel xmlFilesWorkspace;
+        private readonly ResourcesWorkspaceViewModel resourcesWorkspace;
+        private readonly PackagesWorkspaceViewModel packagesWorkspace;
+        private readonly TexturesWorkspaceViewModel texturesWorkspace;
+        private readonly XmlFilesWorkspaceViewModel xmlFilesWorkspace;
 
         public override string DisplayName
         {
@@ -39,34 +39,15 @@ namespace EgoErpArchiver.ViewModel
             protected set
             {
                 windowTitle = value;
-                OnPropertyChanged("DisplayName");
+                OnPropertyChanged(nameof(DisplayName));
             }
         }
-        public string FilePath
-        {
-            get { return filePath; }
-        }
-
-        public ErpFile ErpFile
-        {
-            get { return file; }
-        }
-        public ResourcesWorkspaceViewModel ResourcesWorkspace
-        {
-            get { return resourcesWorkspace; }
-        }
-        public PackagesWorkspaceViewModel PackagesWorkspace
-        {
-            get { return packagesWorkspace; }
-        }
-        public TexturesWorkspaceViewModel TexturesWorkspace
-        {
-            get { return texturesWorkspace; }
-        }
-        public XmlFilesWorkspaceViewModel XmlFilesWorkspace
-        {
-            get { return xmlFilesWorkspace; }
-        }
+        public string FilePath => filepath;
+        public ErpFile ErpFile => file;
+        public ResourcesWorkspaceViewModel ResourcesWorkspace { get; init; }
+        public PackagesWorkspaceViewModel PackagesWorkspace { get; init; }
+        public TexturesWorkspaceViewModel TexturesWorkspace { get; init; }
+        public XmlFilesWorkspaceViewModel XmlFilesWorkspace { get; init; }
         #endregion
 
         #region Presentation Data
@@ -94,8 +75,8 @@ namespace EgoErpArchiver.ViewModel
             xmlFilesWorkspace = new XmlFilesWorkspaceViewModel(this);
 
             // Commands
-            openCommand = new RelayCommand(OpenCommand_Execute);
-            saveCommand = new RelayCommand(SaveCommand_Execute, SaveCommand_CanExecute);
+            OpenCommand = new RelayCommand(OpenCommand_Execute);
+            SaveCommand = new RelayCommand(SaveCommand_Execute, SaveCommand_CanExecute);
 
             if (string.IsNullOrEmpty(Properties.Settings.Default.F12016Dir))
             {
@@ -104,26 +85,15 @@ namespace EgoErpArchiver.ViewModel
         }
 
         #region MainMenu
-        readonly RelayCommand openCommand;
-        readonly RelayCommand saveCommand;
-
-        public RelayCommand OpenCommand
-        {
-            get { return openCommand; }
-        }
-        public RelayCommand SaveCommand
-        {
-            get { return saveCommand; }
-        }
+        public RelayCommand OpenCommand { get; init; }
+        public RelayCommand SaveCommand { get; init; }
 
         public void ParseCommandLineArguments()
         {
             string[] args = (string[])Application.Current.Resources["CommandLineArgs"];
 
             if (args.Length > 0)
-            {
                 Open(args[0]);
-            }
         }
 
         private void OpenCommand_Execute(object parameter)
@@ -157,13 +127,16 @@ namespace EgoErpArchiver.ViewModel
                 SelectTab(Properties.Settings.Default.StartingTab);
                 DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
             }
-            catch (Exception excp)
+            catch (Exception ex)
             {
                 // Fail
                 DisplayName = Properties.Resources.AppTitleLong;
-                MessageBox.Show("The program could not open this file!" + Environment.NewLine + Environment.NewLine + excp.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"The program could not open this file!\n\n{ex.Message}",
+                    Properties.Resources.AppTitleLong,
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private void SelectTab(int index)
         {
             switch (index)
@@ -171,23 +144,37 @@ namespace EgoErpArchiver.ViewModel
                 case 0:
                     SelectedTabIndex = 0;
                     break;
+
                 case 1:
-                    if (packagesWorkspace.Packages.Count > 0) SelectedTabIndex = 1;
-                    else SelectTab(-1);
+                    if (packagesWorkspace.Packages.Count > 0)
+                        SelectedTabIndex = 1;
+                    else
+                        SelectTab(-1);
                     break;
+
                 case 2:
-                    if (texturesWorkspace.Textures.Count > 0) SelectedTabIndex = 2;
-                    else SelectTab(-1);
+                    if (texturesWorkspace.Textures.Count > 0)
+                        SelectedTabIndex = 2;
+                    else
+                        SelectTab(-1);
                     break;
+
                 case 3:
-                    if (xmlFilesWorkspace.XmlFiles.Count > 0) SelectedTabIndex = 3;
-                    else SelectTab(-1);
+                    if (xmlFilesWorkspace.XmlFiles.Count > 0)
+                        SelectedTabIndex = 3;
+                    else
+                        SelectTab(-1);
                     break;
+
                 default:
-                    if (texturesWorkspace.Textures.Count > 0) SelectedTabIndex = 2;
-                    else if (packagesWorkspace.Packages.Count > 0) SelectedTabIndex = 1;
-                    else if (xmlFilesWorkspace.XmlFiles.Count > 0) SelectedTabIndex = 3;
-                    else SelectedTabIndex = 0;
+                    if (texturesWorkspace.Textures.Count > 0)
+                        SelectedTabIndex = 2;
+                    else if (packagesWorkspace.Packages.Count > 0)
+                        SelectedTabIndex = 1;
+                    else if (xmlFilesWorkspace.XmlFiles.Count > 0)
+                        SelectedTabIndex = 3;
+                    else
+                        SelectedTabIndex = 0;
                     break;
             }
         }
@@ -195,31 +182,36 @@ namespace EgoErpArchiver.ViewModel
         {
             return file != null;
         }
+
         private void SaveCommand_Execute(object parameter)
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Erp files|*.erp|All files|*.*";
             saveFileDialog.FilterIndex = 1;
-            saveFileDialog.FileName = Path.GetFileNameWithoutExtension(filePath);
-            saveFileDialog.InitialDirectory = Path.GetDirectoryName(filePath);
+            saveFileDialog.FileName = Path.GetFileNameWithoutExtension(filepath);
+            saveFileDialog.InitialDirectory = Path.GetDirectoryName(filepath);
 
-            if (saveFileDialog.ShowDialog() == true)
+            if (saveFileDialog.ShowDialog() ?? false)
             {
                 try
                 {
-                    Task.Run(() => file.Write(File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read))).Wait();
-                    filePath = saveFileDialog.FileName;
-                    DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
+                    using (FileStream fout = File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read))
+                        Task.Run(() => file.Write(fout)).Wait();
+                    filepath = saveFileDialog.FileName;
+                    DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filepath);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("The program could not save this file! The error is displayed below:" + Environment.NewLine + Environment.NewLine + ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"The program could not save this file!\n\n{ex.Message}",
+                        Properties.Resources.AppTitleLong,
+                        MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
         private void ClearVars()
         {
-            if (file == null) return;
+            if (file == null)
+                return;
 
             resourcesWorkspace.ClearData();
             texturesWorkspace.ClearData();
