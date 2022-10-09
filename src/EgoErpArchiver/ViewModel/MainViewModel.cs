@@ -23,6 +23,11 @@ namespace EgoErpArchiver.ViewModel
         private ErpFile file;
 
         /// <summary>
+        /// Environment-specific newline.
+        /// </summary>
+        private readonly string NL = Environment.NewLine;
+
+        /// <summary>
         /// A temporary file object, used only for reading
         /// and merging data into the primary file.
         /// </summary>
@@ -160,7 +165,7 @@ namespace EgoErpArchiver.ViewModel
             {
                 // Fail
                 DisplayName = Properties.Resources.AppTitleLong;
-                MessageBox.Show($"The program could not open this file!\n\n{ex.Message}",
+                MessageBox.Show($"The program could not open this file!{NL+NL}{ex.Message}",
                     Properties.Resources.AppTitleLong,
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -231,7 +236,7 @@ namespace EgoErpArchiver.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"The program could not save this file!\n\n{ex.Message}",
+                    MessageBox.Show($"The program could not save this file!{NL+NL}{ex.Message}",
                         Properties.Resources.AppTitleLong,
                         MessageBoxButton.OK, MessageBoxImage.Error);
                 }
