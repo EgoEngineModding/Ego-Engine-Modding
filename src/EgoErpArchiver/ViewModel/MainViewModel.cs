@@ -27,12 +27,6 @@ namespace EgoErpArchiver.ViewModel
         /// </summary>
         private readonly string NL = Environment.NewLine;
 
-        /// <summary>
-        /// A temporary file object, used only for reading
-        /// and merging data into the primary file.
-        /// </summary>
-        private ErpFile mergeFile;
-
         public ResourcesWorkspaceViewModel ResourcesWorkspace { get; init; }
         public PackagesWorkspaceViewModel PackagesWorkspace { get; init; }
         public TexturesWorkspaceViewModel TexturesWorkspace { get; init; }
@@ -167,11 +161,13 @@ namespace EgoErpArchiver.ViewModel
                 MessageBox.Show($"Before a merge operation, a file must be opened!",
                    Properties.Resources.AppTitleLong,
                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
+
+            ErpFile mergeFile = new ErpFile();
 
             try
             {
-                mergeFile = new ErpFile();
                 using FileStream fin = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
                 Task.Run(() => mergeFile.Read(fin)).Wait();
             }
@@ -184,9 +180,25 @@ namespace EgoErpArchiver.ViewModel
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            file.Resources.AddRange(mergeFile.Resources);
-            file.UpdateOffsets();
+            foreach (ErpResource resource in mergeFile.Resources)
+            {
+                string id = resource.Identifier;
+                ErpResource orig = file.Resources.Find(x => x.Identifier == id);
+                bool foundOrig = orig != null;
 
+                if (!overwrite && !foundOrig)
+                {
+                    file.Resources.Add(resource);
+                }
+                else if (overwrite)
+                {
+                    if (foundOrig)
+                        file.Resources.Remove(orig);
+                    file.Resources.Add(resource);
+                }
+            }
+
+            file.UpdateOffsets();
             ResourcesWorkspace.ClearData();
             TexturesWorkspace.ClearData();
             UpdateWorkspace();
@@ -299,7 +311,6 @@ namespace EgoErpArchiver.ViewModel
 
             DisplayName = Properties.Resources.AppTitleLong;
             file = null;
-            mergeFile = null;
         }
         #endregion
     }

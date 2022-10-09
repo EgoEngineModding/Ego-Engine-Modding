@@ -104,28 +104,16 @@ namespace EgoEngineLibrary.Archive.Erp
             return numTempFiles;
         }
 
-        public ErpResource FindResource(string fileName)
+        public ErpResource FindResource(string identifier)
         {
-            var res = TryFindResource(fileName);
+            var res = Resources.Find(x => x.Identifier == identifier);
 
             if (res == null)
             {
-                throw new InvalidOperationException($"Could not find resource: {fileName}");
+                throw new InvalidOperationException($"Could not find resource: {identifier}");
             }
 
             return res;
-        }
-        public ErpResource? TryFindResource(string fileName)
-        {
-            foreach (var entry in Resources)
-            {
-                if (entry.Identifier == fileName)
-                {
-                    return entry;
-                }
-            }
-
-            return null;
         }
     }
 }
