@@ -18,9 +18,16 @@ namespace EgoErpArchiver.ViewModel
     public class MainViewModel : ViewModelBase
     {
         #region Data
-        string windowTitle;
-        string filePath;
-        ErpFile file;
+        private string windowTitle;
+        private string filePath;
+        private ErpFile file;
+
+        /// <summary>
+        /// A temporary file object, used only for reading
+        /// and merging data into the primary file.
+        /// </summary>
+        private ErpFile mergeFile;
+
         readonly ResourcesWorkspaceViewModel resourcesWorkspace;
         readonly PackagesWorkspaceViewModel packagesWorkspace;
         readonly TexturesWorkspaceViewModel texturesWorkspace;
@@ -79,7 +86,7 @@ namespace EgoErpArchiver.ViewModel
 
         public MainViewModel()
         {
-            this.DisplayName = Properties.Resources.AppTitleLong;
+            DisplayName = Properties.Resources.AppTitleLong;
 
             resourcesWorkspace = new ResourcesWorkspaceViewModel(this);
             texturesWorkspace = new TexturesWorkspaceViewModel(this);
@@ -219,6 +226,7 @@ namespace EgoErpArchiver.ViewModel
 
             DisplayName = Properties.Resources.AppTitleLong;
             file = null;
+            mergeFile = null;
         }
         #endregion
     }

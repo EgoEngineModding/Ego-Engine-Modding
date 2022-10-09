@@ -18,18 +18,20 @@ namespace EgoErpArchiver
 
         private void setDirectoryF12016MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var dlg = new CommonOpenFileDialog();
-            dlg.Title = "Select the location of your F1 game:";
-            dlg.IsFolderPicker = true;
+            var dlg = new CommonOpenFileDialog
+            {
+                Title = "Select the location of your F1 game:",
+                IsFolderPicker = true,
 
-            dlg.AddToMostRecentlyUsedList = false;
-            dlg.AllowNonFileSystemItems = false;
-            dlg.EnsureFileExists = true;
-            dlg.EnsurePathExists = true;
-            dlg.EnsureReadOnly = false;
-            dlg.EnsureValidNames = true;
-            dlg.Multiselect = false;
-            dlg.ShowPlacesList = true;
+                AddToMostRecentlyUsedList = false,
+                AllowNonFileSystemItems = false,
+                EnsureFileExists = true,
+                EnsurePathExists = true,
+                EnsureReadOnly = false,
+                EnsureValidNames = true,
+                Multiselect = false,
+                ShowPlacesList = true
+            };
 
             if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
             {
