@@ -33,10 +33,10 @@ namespace EgoErpArchiver.ViewModel
         /// </summary>
         private ErpFile mergeFile;
 
-        private readonly ResourcesWorkspaceViewModel resourcesWorkspace;
-        private readonly PackagesWorkspaceViewModel packagesWorkspace;
-        private readonly TexturesWorkspaceViewModel texturesWorkspace;
-        private readonly XmlFilesWorkspaceViewModel xmlFilesWorkspace;
+        public ResourcesWorkspaceViewModel ResourcesWorkspace { get; init; }
+        public PackagesWorkspaceViewModel PackagesWorkspace { get; init; }
+        public TexturesWorkspaceViewModel TexturesWorkspace { get; init; }
+        public XmlFilesWorkspaceViewModel XmlFilesWorkspace { get; init; }
 
         public override string DisplayName
         {
@@ -70,10 +70,10 @@ namespace EgoErpArchiver.ViewModel
         {
             DisplayName = Properties.Resources.AppTitleLong;
 
-            resourcesWorkspace = new ResourcesWorkspaceViewModel(this);
-            texturesWorkspace = new TexturesWorkspaceViewModel(this);
-            packagesWorkspace = new PackagesWorkspaceViewModel(this);
-            xmlFilesWorkspace = new XmlFilesWorkspaceViewModel(this);
+            ResourcesWorkspace = new ResourcesWorkspaceViewModel(this);
+            TexturesWorkspace = new TexturesWorkspaceViewModel(this);
+            PackagesWorkspace = new PackagesWorkspaceViewModel(this);
+            XmlFilesWorkspace = new XmlFilesWorkspaceViewModel(this);
 
             // Commands
             OpenCommand = new RelayCommand(OpenCommand_Execute);
@@ -130,10 +130,10 @@ namespace EgoErpArchiver.ViewModel
         /// <param name="workspace"></param>
         private void LoadData(ErpFile file, ResourcesWorkspaceViewModel workspace)
         {
-            resourcesWorkspace.LoadData(file);
-            packagesWorkspace.LoadData(resourcesWorkspace);
-            texturesWorkspace.LoadData(resourcesWorkspace);
-            xmlFilesWorkspace.LoadData(resourcesWorkspace);
+            ResourcesWorkspace.LoadData(file);
+            PackagesWorkspace.LoadData(ResourcesWorkspace);
+            TexturesWorkspace.LoadData(ResourcesWorkspace);
+            XmlFilesWorkspace.LoadData(ResourcesWorkspace);
         }
 
         private void Merge(string filename, bool overwrite = true)
@@ -151,7 +151,7 @@ namespace EgoErpArchiver.ViewModel
                 using (FileStream fin = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
                     Task.Run(() => file.Read(fin)).Wait();
 
-                LoadData(file, resourcesWorkspace);
+                LoadData(file, ResourcesWorkspace);
                 SelectTab(Properties.Settings.Default.StartingTab);
                 DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filename);
 
@@ -176,32 +176,32 @@ namespace EgoErpArchiver.ViewModel
                     break;
 
                 case 1:
-                    if (packagesWorkspace.Packages.Count > 0)
+                    if (PackagesWorkspace.Packages.Count > 0)
                         SelectedTabIndex = 1;
                     else
                         SelectTab(-1);
                     break;
 
                 case 2:
-                    if (texturesWorkspace.Textures.Count > 0)
+                    if (TexturesWorkspace.Textures.Count > 0)
                         SelectedTabIndex = 2;
                     else
                         SelectTab(-1);
                     break;
 
                 case 3:
-                    if (xmlFilesWorkspace.XmlFiles.Count > 0)
+                    if (XmlFilesWorkspace.XmlFiles.Count > 0)
                         SelectedTabIndex = 3;
                     else
                         SelectTab(-1);
                     break;
 
                 default:
-                    if (texturesWorkspace.Textures.Count > 0)
+                    if (TexturesWorkspace.Textures.Count > 0)
                         SelectedTabIndex = 2;
-                    else if (packagesWorkspace.Packages.Count > 0)
+                    else if (PackagesWorkspace.Packages.Count > 0)
                         SelectedTabIndex = 1;
-                    else if (xmlFilesWorkspace.XmlFiles.Count > 0)
+                    else if (XmlFilesWorkspace.XmlFiles.Count > 0)
                         SelectedTabIndex = 3;
                     else
                         SelectedTabIndex = 0;
@@ -243,8 +243,8 @@ namespace EgoErpArchiver.ViewModel
             if (file == null)
                 return;
 
-            resourcesWorkspace.ClearData();
-            texturesWorkspace.ClearData();
+            ResourcesWorkspace.ClearData();
+            TexturesWorkspace.ClearData();
 
             DisplayName = Properties.Resources.AppTitleLong;
             file = null;
