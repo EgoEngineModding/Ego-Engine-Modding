@@ -33,10 +33,11 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem x:Name="mi_Resources" Header="_Resources">
-                <MenuItem Header="_Export" Command="{Binding Path=ResourcesWorkspace.Export}" CommandParameter="{Binding ElementName=resourcesDataGrid, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="_Import" Command="{Binding Path=ResourcesWorkspace.Import}" CommandParameter="{Binding ElementName=resourcesDataGrid, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="E_xport All" Command="{Binding Path=ResourcesWorkspace.ExportAll}"></MenuItem>
-                <MenuItem Header="I_mport All" Command="{Binding Path=ResourcesWorkspace.ImportAll}"></MenuItem>
+                <MenuItem x:Name="mi_Export" Header="_Export" Command="{Binding ResourcesWorkspace.Export}" CommandParameter="{Binding SelectedItem, ElementName=resourcesDataGrid}"/>
+                <MenuItem x:Name="mi_Import" Header="_Import" Command="{Binding ResourcesWorkspace.Import}" CommandParameter="{Binding SelectedItem, ElementName=resourcesDataGrid}"/>
+                <MenuItem x:Name="mi_ExportAllFilter" Header="Export All (Filter)" Command="{Binding ResourcesWorkspace.ExportAllFilter}"/>
+                <MenuItem x:Name="mi_ExportAll" Header="E_xport All" Command="{Binding ResourcesWorkspace.ExportAll}"/>
+                <MenuItem x:Name="mi_ImportAll" Header="I_mport All" Command="{Binding ResourcesWorkspace.ImportAll}"/>
             </MenuItem>
             <MenuItem x:Name="mi_PkgFiles" Header="_Pkg Files">
                 <MenuItem Header="_Export" Command="{Binding Path=PackagesWorkspace.Export}" CommandParameter="{Binding ElementName=packagesListView, Path=SelectedItem}"></MenuItem>

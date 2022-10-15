@@ -10,7 +10,9 @@ namespace EgoEngineLibrary.Formats.Erp
         private const string FragNameDelim = "!!!";
         private static readonly int FragNameDelimLength = 4 + FragNameDelim.Length; // frag name always 4 chars
 
-        public void Export(ErpFile erp, string folderPath, IProgress<string>? progressStatus, IProgress<int>? progressPercentage)
+        public void Export(ErpFile erp, string folderPath,
+                           IProgress<string>? progressStatus, IProgress<int>? progressPercentage,
+                           string filter="")
         {
             var success = 0;
             var fail = 0;
@@ -22,9 +24,12 @@ namespace EgoEngineLibrary.Formats.Erp
 
                 try
                 {
-                    ExportResource(resource, folderPath);
-                    progressStatus?.Report("SUCCESS" + Environment.NewLine);
-                    ++success;
+                    if (string.IsNullOrWhiteSpace(filter) || resource.FileName.EndsWith(filter))
+                    {
+                        ExportResource(resource, folderPath);
+                        progressStatus?.Report("SUCCESS" + Environment.NewLine);
+                        ++success;
+                    }
                 }
                 catch
                 {

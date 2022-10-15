@@ -1,11 +1,14 @@
 ﻿using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Formats.Erp;
+using Microsoft.VisualBasic;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Xml.XPath;
 
 namespace EgoErpArchiver.ViewModel
 {
@@ -47,6 +50,7 @@ namespace EgoErpArchiver.ViewModel
         public RelayCommand Export { get; }
         public RelayCommand Import { get; }
         public RelayCommand ExportAll { get; }
+        public RelayCommand ExportAllFilter { get; }
         public RelayCommand ImportAll { get; }
 
         public ResourcesWorkspaceViewModel(MainViewModel mainView)
@@ -59,6 +63,7 @@ namespace EgoErpArchiver.ViewModel
             Export = new RelayCommand(Export_Execute, Export_CanExecute);
             Import = new RelayCommand(Import_Execute, Import_CanExecute);
             ExportAll = new RelayCommand(ExportAll_Execute, ExportAll_CanExecute);
+            ExportAllFilter = new RelayCommand(ExportAllFilter_Execute, ExportAll_CanExecute);
             ImportAll = new RelayCommand(ImportAll_Execute, ImportAll_CanExecute);
         }
 
@@ -152,13 +157,23 @@ namespace EgoErpArchiver.ViewModel
             }
         }
 
-        private bool ExportAll_CanExecute(object parameter)
+        /// <summary>
+        /// Prompt user to enter a file filter.
+        /// </summary>
+        /// <param name="promptFilter"></param>
+        private void ExportAllFunc(bool promptFilter)
         {
-            return resources.Count > 0;
-        }
+            string filter = "";
 
-        private void ExportAll_Execute(object parameter)
-        {
+            if (promptFilter)
+            {
+                filter = Interaction.InputBox(
+                    Prompt: "Enter a suffix filter, e.g. '.material' for all files\n" +
+                    "with the .material extension",
+                    Title: "Filter");
+                if (string.IsNullOrWhiteSpace(filter))
+                    return;
+            }
             var dlg = new CommonOpenFileDialog
             {
                 Title = "Select a folder to export the resources:",
@@ -187,7 +202,9 @@ namespace EgoErpArchiver.ViewModel
                         DataContext = progDialogVM
                     };
 
-                    var task = Task.Run(() => resourceExporter.Export(mainView.ErpFile, dlg.FileName, progDialogVM.ProgressStatus, progDialogVM.ProgressPercentage));
+                    var task = Task.Run(() => resourceExporter.Export(mainView.ErpFile, dlg.FileName,
+                        progDialogVM.ProgressStatus, progDialogVM.ProgressPercentage,
+                        filter: filter));
                     progDialog.ShowDialog();
                     task.Wait();
                 }
@@ -197,6 +214,21 @@ namespace EgoErpArchiver.ViewModel
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
+        }
+
+        private bool ExportAll_CanExecute(object parameter)
+        {
+            return resources.Count > 0;
+        }
+
+        private void ExportAllFilter_Execute(object parameter)
+        {
+            ExportAllFunc(promptFilter: true);
+        }
+
+        private void ExportAll_Execute(object parameter)
+        {
+            ExportAllFunc(promptFilter: false);
         }
 
         private bool ImportAll_CanExecute(object parameter)

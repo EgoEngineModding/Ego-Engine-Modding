@@ -1,4 +1,5 @@
-﻿using ICSharpCode.AvalonEdit.Folding;
+﻿using EgoErpArchiver.ViewModel;
+using ICSharpCode.AvalonEdit.Folding;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Diagnostics;
 using System.Windows;
