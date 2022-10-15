@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace EgoEngineLibrary.Archive.Erp
@@ -7,7 +8,7 @@ namespace EgoEngineLibrary.Archive.Erp
     public class ErpResource
     {
         public ErpFile ParentFile { get; set; }
-        public string Identifier { get; private set; }
+        public string Identifier { get; set; }
         public string ResourceType { get; set; }
 
         public int Unknown { get; set; }
@@ -29,6 +30,18 @@ namespace EgoEngineLibrary.Archive.Erp
                 {
                     return Path.GetFileName(Identifier);
                 }
+            }
+            set
+            {
+                string basePath = Identifier;
+                bool eaid = basePath.StartsWith("eaid://", ignoreCase: true, culture: null);
+                if (eaid)
+                    basePath = basePath[7..];
+                basePath = Path.GetDirectoryName(basePath)!;
+
+                Identifier = basePath.Replace('\\', '/') + "/" + value;
+                if (eaid)
+                    Identifier = "eaid://" + Identifier;
             }
         }
         public string Folder

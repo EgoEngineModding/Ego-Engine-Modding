@@ -47,6 +47,8 @@ namespace EgoErpArchiver.ViewModel
             }
         }
 
+        public RelayCommand Rename { get; }
+        public RelayCommand Repath { get; }
         public RelayCommand Export { get; }
         public RelayCommand Import { get; }
         public RelayCommand ExportAll { get; }
@@ -60,6 +62,8 @@ namespace EgoErpArchiver.ViewModel
             resources = new ObservableCollection<ErpResourceViewModel>();
             _displayName = "All Resources";
 
+            Rename = new RelayCommand(Rename_Execute, Rename_CanExecute);
+            Repath = new RelayCommand(Repath_Execute, Rename_CanExecute);
             Export = new RelayCommand(Export_Execute, Export_CanExecute);
             Import = new RelayCommand(Import_Execute, Import_CanExecute);
             ExportAll = new RelayCommand(ExportAll_Execute, ExportAll_CanExecute);
@@ -79,6 +83,47 @@ namespace EgoErpArchiver.ViewModel
         public override void ClearData()
         {
             resources.Clear();
+        }
+
+        private bool Rename_CanExecute(object parameter)
+        {
+            return parameter != null;
+        }
+
+        private void Rename_Execute(object parameter)
+        {
+            var resView = (ErpResourceViewModel)parameter;
+            var res = resView.Resource;
+
+            string result = Interaction.InputBox(
+                Prompt: "Enter a new name for this resource:",
+                Title: "Rename resource",
+                DefaultResponse: res.FileName);
+
+            if (string.IsNullOrWhiteSpace(result))
+                return;
+
+            res.FileName = result;
+            mainView.ErpFile.UpdateOffsets();
+            mainView.UpdateWorkspace();
+        }
+
+        private void Repath_Execute(object parameter)
+        {
+            var resView = (ErpResourceViewModel)parameter;
+            var res = resView.Resource;
+
+            string result = Interaction.InputBox(
+                Prompt: "Enter a new URI for this resource:",
+                Title: "Change resource URI",
+                DefaultResponse: res.Identifier);
+
+            if (string.IsNullOrWhiteSpace(result))
+                return;
+
+            res.Identifier = result;
+            mainView.ErpFile.UpdateOffsets();
+            mainView.UpdateWorkspace();
         }
 
         private bool Export_CanExecute(object parameter)

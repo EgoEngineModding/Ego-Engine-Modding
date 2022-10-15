@@ -126,8 +126,11 @@ namespace EgoErpArchiver.ViewModel
         /// </summary>
         /// <param name="file"></param>
         /// <param name="workspace"></param>
-        private void UpdateWorkspace()
+        internal void UpdateWorkspace()
         {
+            ResourcesWorkspace.ClearData();
+            TexturesWorkspace.ClearData();
+
             ResourcesWorkspace.LoadData(file);
             PackagesWorkspace.LoadData(ResourcesWorkspace);
             TexturesWorkspace.LoadData(ResourcesWorkspace);
@@ -199,8 +202,6 @@ namespace EgoErpArchiver.ViewModel
             }
 
             file.UpdateOffsets();
-            ResourcesWorkspace.ClearData();
-            TexturesWorkspace.ClearData();
             UpdateWorkspace();
         }
 
