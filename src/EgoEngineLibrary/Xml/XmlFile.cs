@@ -11,6 +11,7 @@ namespace EgoEngineLibrary.Xml
 {
     public class XmlFile
     {
+        private static ReadOnlySpan<byte> WhitespaceChars => new byte[] { 0x9, 0xA, 0xB, 0xC, 0xD, 0x20, 0x85, 0xA0 };
         private static ReadOnlySpan<byte> BinXmlMagic => new byte[] { 0x1A, 0x22, 0x52, 0x72 }; // ASCII ."Rr
         private static ReadOnlySpan<byte> BxmlMagic => new byte[] { 0x42, 0x58, 0x4D, 0x4C }; // ASCII BXML
 
@@ -18,6 +19,11 @@ namespace EgoEngineLibrary.Xml
         
         public XmlDocument Document { get; }
 
+        /// <summary>
+        /// Gets the binary xml type represented by the stream, otherwise assumes it is text xml.
+        /// </summary>
+        /// <param name="stream">A seekable, readable stream.</param>
+        /// <returns></returns>
         public static XmlType GetXmlType(Stream stream)
         {
             var pos = stream.Position;
@@ -39,7 +45,7 @@ namespace EgoEngineLibrary.Xml
 
         public static bool IsXmlFile(Stream stream)
         {
-            var pos = stream.Position;
+            var pos = stream.CanSeek ? stream.Position : 0;
             Span<byte> header = stackalloc byte[5];
             stream.ReadExactly(header);
             try
@@ -52,7 +58,10 @@ namespace EgoEngineLibrary.Xml
             }
             finally
             {
-                stream.Seek(pos, SeekOrigin.Begin);
+                if (stream.CanSeek)
+                {
+                    stream.Seek(pos, SeekOrigin.Begin);
+                }
             }
 
             static bool IsValidXmlText(ReadOnlySpan<byte> buffer, Stream stream, long startPos)
@@ -72,8 +81,8 @@ namespace EgoEngineLibrary.Xml
                     }
 
                     // Check valid xml element name
-                    buffer = buffer[1..];
-                    var charCount = Encoding.UTF8.GetCharCount(buffer);
+                    var xmlNameBuffer = buffer[1..];
+                    var charCount = Encoding.UTF8.GetCharCount(xmlNameBuffer);
                     if (charCount <= 0)
                     {
                         return false;
@@ -82,7 +91,7 @@ namespace EgoEngineLibrary.Xml
                     var chars = ArrayPool<char>.Shared.Rent(charCount);
                     try
                     {
-                        Encoding.UTF8.GetChars(buffer, chars);
+                        Encoding.UTF8.GetChars(xmlNameBuffer, chars);
                         if (XmlConvert.IsStartNCNameChar(chars[0]))
                         {
                             return true;
@@ -94,16 +103,56 @@ namespace EgoEngineLibrary.Xml
                     }
                 }
 
-                // Last effort - see if we can read beginning.
-                stream.Seek(startPos, SeekOrigin.Begin);
-                var xmlReader = XmlReader.Create(stream);
-                do
+                // Last effort - see if we can read beginning with xml reader if starts with whitespace.
+                var noWhitespaceBuffer = buffer.TrimStart(WhitespaceChars);
+                if (noWhitespaceBuffer.Length == buffer.Length ||
+                    (noWhitespaceBuffer.Length > 0 && noWhitespaceBuffer[0] != '<'))
                 {
-                    if (!xmlReader.Read())
+                    // We didn't find any starting whitespace chars, assume not xml
+                    // or found whitespace chars, but no xml start tag
+                    return false;
+                }
+
+                Stream finalStream;
+                Stream? tempStream = null;
+                if (stream.CanSeek)
+                {
+                    stream.Seek(startPos, SeekOrigin.Begin);
+                    finalStream = stream;
+                }
+                else
+                {
+                    // Copy starting bytes into temporary stream
+                    tempStream = new MemoryStream(noWhitespaceBuffer.ToArray());
+                    finalStream = new ConcatenatedStream(new[] { tempStream, stream });
+                }
+
+                try
+                {
+                    var xmlReader = XmlReader.Create(finalStream);
+                    do
                     {
-                        return false;
+                        try
+                        {
+                            if (!xmlReader.Read())
+                            {
+                                return false;
+                            }
+                        }
+                        catch (XmlException)
+                        {
+                            return false;
+                        }
+                    } while (xmlReader.NodeType is XmlNodeType.Whitespace or XmlNodeType.SignificantWhitespace);
+                }
+                finally
+                {
+                    if (!stream.CanSeek)
+                    {
+                        tempStream?.Dispose();
+                        finalStream.Dispose();
                     }
-                } while (xmlReader.NodeType is XmlNodeType.Whitespace or XmlNodeType.SignificantWhitespace);
+                }
 
                 return true;
             }
