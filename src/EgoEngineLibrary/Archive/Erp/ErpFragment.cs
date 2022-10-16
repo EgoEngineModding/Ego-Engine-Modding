@@ -1,9 +1,8 @@
-﻿using ICSharpCode.SharpZipLib.Zip.Compression;
-using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
-using Microsoft.Toolkit.HighPerformance;
+﻿using Microsoft.Toolkit.HighPerformance;
 using Microsoft.Toolkit.HighPerformance.Buffers;
 using System;
 using System.IO;
+using System.IO.Compression;
 using ZstdSharp;
 
 namespace EgoEngineLibrary.Archive.Erp
@@ -135,7 +134,8 @@ namespace EgoEngineLibrary.Archive.Erp
                     ErpCompressionAlgorithm.None or
                         ErpCompressionAlgorithm.None2 or
                         ErpCompressionAlgorithm.None3 => _data.AsMemory().AsStream(),
-                    ErpCompressionAlgorithm.Zlib => new InflaterInputStream(_data.AsMemory().AsStream()),
+                    ErpCompressionAlgorithm.Zlib => new ZLibStream(_data.AsMemory().AsStream(),
+                        CompressionMode.Decompress),
                     ErpCompressionAlgorithm.ZStandard or
                         ErpCompressionAlgorithm.ZStandard2 => new DecompressionStream(_data.AsMemory().AsStream()),
                     _ => throw new NotSupportedException(
@@ -161,11 +161,10 @@ namespace EgoEngineLibrary.Archive.Erp
                         break;
                     case ErpCompressionAlgorithm.Zlib:
                         using (var bufferWriter = new ArrayPoolBufferWriter<byte>())
-                        using (var dos = new DeflaterOutputStream(bufferWriter.AsStream(), new Deflater(Deflater.BEST_COMPRESSION)))
+                        using (var dos = new ZLibStream(bufferWriter.AsStream(), CompressionLevel.Optimal))
                         {
                             dos.Write(data, 0, data.Length);
                             dos.Flush();
-                            dos.Finish();
                             _data = bufferWriter.WrittenSpan.ToArray();
                         }
                         break;
