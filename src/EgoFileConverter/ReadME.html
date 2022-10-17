@@ -1,13 +1,11 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <title>EFC - Readme</title>
-    <style type="text/css">
+    <style>
         body {
-            margin: 0;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0 auto;
             width: 990px;
             background: #000000;
             color: #e2e2e2;
@@ -24,8 +22,7 @@
         }
 
         div#top {
-            margin: 0;
-            margin-bottom: 10px;
+            margin: 0 0 10px;
             padding: 10px;
             width: auto;
             background: #000000;
@@ -35,8 +32,7 @@
         }
 
         div.readme-main {
-            margin: 0;
-            margin-bottom: 10px;
+            margin: 0 0 10px;
             padding: 10px;
             width: auto;
             background: #000000;
@@ -87,7 +83,7 @@
 <body>
     <div id="top">
         <h1>Ego File Converter</h1>
-        version 3.0.0<br />
+        version 3.0.1<br />
         <p style="font-family: Georgia, 'Times New Roman', Times, serif;"><a href="https://petar.page/l/ego-efc-home" target="_blank">Application Website</a></p>
     </div>
     <div class="readme-main">
@@ -103,17 +99,17 @@
         </ol>
     </div>
     <div class="readme-main">
-        <h2><a name="Reqs"></a>Requirements</h2>
+        <h2><a id="Reqs"></a>Requirements</h2>
         <ul>
             <li>.NET 6.0 Desktop Runtime (x64 or x86 depending on your OS)</li>
         </ul>
-        <h2><a name="Inst"></a>Installation</h2>
+        <h2><a id="Inst"></a>Installation</h2>
         <p>To install, simply <em>EXTRACT</em> everything from the zip file to a desired location, and run the <em>Ego File Converter.exe</em> file.</p>
     </div>
     <div class="readme-main">
-        <h2><a name="ApIn"></a>Application Information</h2>
+        <h2><a id="ApIn"></a>Application Information</h2>
         <p>This program lets you convert binary XML, Lng, Tpk, and Pkg files for EGO engine games.</p>
-        <h2><a name="Usag"></a>Usage</h2>
+        <h2><a id="Usag"></a>Usage</h2>
         <p>Drag and drop a file on the exe to convert it. Alternatively, you can right click a file, click "Open With", and choose the exe.</p>
         <p>Possible conversions:</p>
         <ul>
@@ -126,7 +122,7 @@
         <p>Note: After conversion, the output file will overwrite any existing file. Output file names are the input file + ".xml", ".json", ".lng", ".dds", ".tpk" or ".pkg"</p>
     </div>
     <div class="readme-main">
-        <h2><a name="Supp"></a>Support</h2>
+        <h2><a id="Supp"></a>Support</h2>
         <p>You can get support by asking in the modding channels of the following communities:</p>
         <ul>
             <li><a href="https://discord.gg/5bCjMqS" target="_blank">Ego Engine Modding Discord</a></li>
@@ -135,8 +131,14 @@
         <p>If you think you've found a bug, post an issue <a href="https://petar.page/l/ego-efc-code" target="_blank">here</a> with as much information as possible.</p>
     </div>
     <div class="readme-main">
-        <h2><a name="Chan"></a>Changelog</h2>
+        <h2><a id="Chan"></a>Changelog</h2>
         <ul>
+            <li>
+                <strong>3.0.1+20221016</strong>
+                <ul>
+                    <li>Fixed bug converting BXML big-endian files</li>
+                </ul>
+            </li>
             <li>
                 <strong>3.0.0+20220215</strong>
                 <ul>
@@ -168,7 +170,7 @@
                 </ul>
             </li>
         </ul>
-        <h2><a name="Cred"></a>Credits</h2>
+        <h2><a id="Cred"></a>Credits</h2>
         <ul>
             <li>Petar Tasev - <small>For creating the program.</small></li>
             <li>luh-koala - <small>For creating the icon.</small></li>

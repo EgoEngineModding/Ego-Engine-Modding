@@ -47,7 +47,11 @@ namespace EgoEngineLibrary.Xml
         {
             var pos = stream.CanSeek ? stream.Position : 0;
             Span<byte> header = stackalloc byte[5];
-            stream.ReadExactly(header);
+            if (!stream.TryReadExactly(header))
+            {
+                return false;
+            }
+            
             try
             {
                 var binXmlMagic = header[..4];
@@ -106,10 +110,10 @@ namespace EgoEngineLibrary.Xml
                 // Last effort - see if we can read beginning with xml reader if starts with whitespace.
                 var noWhitespaceBuffer = buffer.TrimStart(WhitespaceChars);
                 if (noWhitespaceBuffer.Length == buffer.Length ||
-                    (noWhitespaceBuffer.Length > 0 && noWhitespaceBuffer[0] != '<'))
+                    (noWhitespaceBuffer.Length > 0 && noWhitespaceBuffer[0] != '<' && noWhitespaceBuffer[0] != 0xEF))
                 {
                     // We didn't find any starting whitespace chars, assume not xml
-                    // or found whitespace chars, but no xml start tag
+                    // or found whitespace chars, but no xml start tag and no BOM start
                     return false;
                 }
 
@@ -267,7 +271,7 @@ namespace EgoEngineLibrary.Xml
             {
                 // use text writer since by default it doesn't output the Encoding BOM
                 using var textWriter = new StreamWriter(fileStream, leaveOpen: true);
-                var xmlTextWriter = new XmlTextWriter(textWriter);
+                var xmlTextWriter = new XmlTextWriter(textWriter) { Formatting = Formatting.Indented };
                 Document.Save(xmlTextWriter);
             }
             else if (convertType == XmlType.BinXml)
