@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -65,13 +66,17 @@ namespace EgoErpArchiver.ViewModel
         public override void LoadData(object data)
         {
             ClearData();
+            List<ErpTextureViewModel> searchResults = new();
             foreach (var resView in ((ResourcesWorkspaceViewModel)data).Resources)
             {
                 if (resView.Resource.ResourceType == "GfxSRVResource")
                 {
-                    Textures.Add(new ErpTextureViewModel(resView));
+                    searchResults.Add(new ErpTextureViewModel(resView));
                 }
             }
+            searchResults.Sort((x, y) => string.Compare(x.DisplayName, y.DisplayName) );
+            foreach (ErpTextureViewModel rv in searchResults)
+                textures.Add(rv);
             DisplayName = "Textures " + textures.Count;
         }
 
