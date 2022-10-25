@@ -47,6 +47,7 @@ namespace EgoErpArchiver.ViewModel
             }
         }
 
+        public RelayCommand RenameAll { get; }
         public RelayCommand Rename { get; }
         public RelayCommand Repath { get; }
         public RelayCommand Export { get; }
@@ -62,6 +63,7 @@ namespace EgoErpArchiver.ViewModel
             resources = new ObservableCollection<ErpResourceViewModel>();
             _displayName = "All Resources";
 
+            RenameAll = new RelayCommand(RenameAll_Execute, ExportAll_CanExecute);
             Rename = new RelayCommand(Rename_Execute, Rename_CanExecute);
             Repath = new RelayCommand(Repath_Execute, Rename_CanExecute);
             Export = new RelayCommand(Export_Execute, Export_CanExecute);
@@ -83,6 +85,25 @@ namespace EgoErpArchiver.ViewModel
         public override void ClearData()
         {
             resources.Clear();
+        }
+
+        private void RenameAll_Execute(object parameter)
+        {
+            string src = Interaction.InputBox("Enter string to find:");
+            if (string.IsNullOrWhiteSpace(src))
+                return;
+
+            string dest = Interaction.InputBox("Enter string to replace:");
+            if (string.IsNullOrWhiteSpace(dest))
+                return;
+
+            foreach (ErpResource res in mainView.ErpFile.Resources)
+                res.Identifier = res.Identifier.Replace(src, dest);
+
+            mainView.ErpFile.UpdateOffsets();
+            mainView.UpdateWorkspace();
+
+            MessageBox.Show("Names updated!");
         }
 
         private bool Rename_CanExecute(object parameter)
