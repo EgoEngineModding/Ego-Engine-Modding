@@ -32,12 +32,12 @@
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
-            <MenuItem x:Name="mi_XForm" Header="Quick Rename">
-                <MenuItem x:Name="mi_ReplaceAll" Header="Rename All" Command="{Binding ResourcesWorkspace.RenameAll, Mode=OneWay}"/>
-            </MenuItem>
-            <MenuItem x:Name="mi_Resources" Header="_Resources">
+            <MenuItem x:Name="mi_XForm" Header="Rename">
                 <MenuItem x:Name="mi_Rename" Header="Change Filename" Command="{Binding ResourcesWorkspace.Rename}" CommandParameter="{Binding SelectedItem, ElementName=resourcesDataGrid}"/>
                 <MenuItem x:Name="mi_Repath" Header="Change URI" Command="{Binding ResourcesWorkspace.Repath}" CommandParameter="{Binding SelectedItem, ElementName=resourcesDataGrid}"/>
+                <MenuItem x:Name="mi_RenameAll" Header="Rename All" Command="{Binding ResourcesWorkspace.RenameAll, Mode=OneWay}"/>
+            </MenuItem>
+            <MenuItem x:Name="mi_Resources" Header="_Resources">
                 <MenuItem x:Name="mi_Export" Header="_Export" Command="{Binding ResourcesWorkspace.Export}" CommandParameter="{Binding SelectedItem, ElementName=resourcesDataGrid}"/>
                 <MenuItem x:Name="mi_Import" Header="_Import" Command="{Binding ResourcesWorkspace.Import}" CommandParameter="{Binding SelectedItem, ElementName=resourcesDataGrid}"/>
                 <MenuItem x:Name="mi_ExportAllFilter" Header="Export All (Filter)" Command="{Binding ResourcesWorkspace.ExportAllFilter}"/>
