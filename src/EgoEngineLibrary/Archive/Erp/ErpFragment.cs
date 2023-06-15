@@ -186,6 +186,8 @@ namespace EgoEngineLibrary.Archive.Erp
                         {
                             zss.Write(data, 0, data.Length);
                             zss.Flush();
+                            // Must dispose to write "end of stream" marker
+                            zss.Dispose();
                             _data = bufferWriter.WrittenSpan.ToArray();
                         }
                         break;
