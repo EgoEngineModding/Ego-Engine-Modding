@@ -7,7 +7,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
     public enum ErpGfxSurfaceResMipCompressionAlgorithm : byte
     {
         None,
-        LZ4 = 0x03,
+        Lz4 = 0x03,
         ZStandard = 0x04,
     }
     

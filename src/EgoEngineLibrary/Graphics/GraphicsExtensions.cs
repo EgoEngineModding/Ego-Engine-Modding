@@ -157,7 +157,7 @@ namespace EgoEngineLibrary.Graphics
                             case ErpGfxSurfaceResMipCompressionAlgorithm.None:
                                 output.Write(mipData, 0, mipData.Length);
                                 break;
-                            case ErpGfxSurfaceResMipCompressionAlgorithm.LZ4:
+                            case ErpGfxSurfaceResMipCompressionAlgorithm.Lz4:
                                 {
                                     byte[] decompressedMipData = new byte[(int)mip.Size];
                                     int decompSize = LZ4Codec.Decode(mipData, 0, mipData.Length, decompressedMipData, 0,
@@ -297,7 +297,7 @@ namespace EgoEngineLibrary.Graphics
                             // Not sure how to decide which mip levels should be compressed or not
                             // I can't remember why I chose this scheme
                             mip.Compression = i % 2 == 0
-                                ? ErpGfxSurfaceResMipCompressionAlgorithm.LZ4
+                                ? ErpGfxSurfaceResMipCompressionAlgorithm.Lz4
                                 : ErpGfxSurfaceResMipCompressionAlgorithm.None;
                         }
                         else
@@ -318,7 +318,7 @@ namespace EgoEngineLibrary.Graphics
                                     mipPackedSize = (ulong)compData.Length;
                                     break;
                                 }
-                            case ErpGfxSurfaceResMipCompressionAlgorithm.LZ4:
+                            case ErpGfxSurfaceResMipCompressionAlgorithm.Lz4:
                                 byte[] compressedMipData = new byte[LZ4Codec.MaximumOutputSize(mipData.Length)];
                                 int compSize = LZ4Codec.Encode(mipData, 0, mipData.Length, compressedMipData, 0, compressedMipData.Length, LZ4Level.L12_MAX);
                                 writer.Write(compressedMipData, 0, compSize);

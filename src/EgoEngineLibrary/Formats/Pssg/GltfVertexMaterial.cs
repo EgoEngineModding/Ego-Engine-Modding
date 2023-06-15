@@ -1,4 +1,4 @@
-﻿using Microsoft.Toolkit.Diagnostics;
+﻿using CommunityToolkit.Diagnostics;
 using SharpGLTF.Geometry.VertexTypes;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
@@ -38,6 +38,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="ObjectListView.Official" Version="2.8.1" />
+    <PackageReference Include="ObjectListView.Official" />
   </ItemGroup>
 </Project>
