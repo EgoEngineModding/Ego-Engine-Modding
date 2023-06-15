@@ -1,5 +1,5 @@
 ﻿using ICSharpCode.AvalonEdit.Folding;
-using Microsoft.WindowsAPICodePack.Dialogs;
+using Ookii.Dialogs.Wpf;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,22 +18,15 @@ namespace EgoErpArchiver
 
         private void setDirectoryF12016MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var dlg = new CommonOpenFileDialog();
-            dlg.Title = "Select the location of your F1 game:";
-            dlg.IsFolderPicker = true;
-
-            dlg.AddToMostRecentlyUsedList = false;
-            dlg.AllowNonFileSystemItems = false;
-            dlg.EnsureFileExists = true;
-            dlg.EnsurePathExists = true;
-            dlg.EnsureReadOnly = false;
-            dlg.EnsureValidNames = true;
-            dlg.Multiselect = false;
-            dlg.ShowPlacesList = true;
-
-            if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
+            var dlg = new VistaFolderBrowserDialog
             {
-                Properties.Settings.Default.F12016Dir = dlg.FileName + "\\";
+                Description = "Select the location of your game:",
+                Multiselect = false
+            };
+
+            if (dlg.ShowDialog() == true)
+            {
+                Properties.Settings.Default.F12016Dir = dlg.SelectedPath + "\\";
                 Properties.Settings.Default.Save();
             }
         }

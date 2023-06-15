@@ -1,6 +1,6 @@
 ﻿using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Formats.Erp;
-using Microsoft.WindowsAPICodePack.Dialogs;
+using Ookii.Dialogs.Wpf;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -84,26 +84,17 @@ namespace EgoErpArchiver.ViewModel
         private void Export_Execute(object parameter)
         {
             var resView = (ErpResourceViewModel)parameter;
-            var dlg = new CommonOpenFileDialog
+            var dlg = new VistaFolderBrowserDialog
             {
-                Title = "Select a folder to export the resource:",
-                IsFolderPicker = true,
-
-                AddToMostRecentlyUsedList = false,
-                AllowNonFileSystemItems = false,
-                EnsureFileExists = true,
-                EnsurePathExists = true,
-                EnsureReadOnly = false,
-                EnsureValidNames = true,
-                Multiselect = false,
-                ShowPlacesList = true
+                Description = "Select a folder to export the resource:",
+                Multiselect = false
             };
 
-            if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
+            if (dlg.ShowDialog() == true)
             {
                 try
                 {
-                    resourceExporter.ExportResource(resView.Resource, dlg.FileName);
+                    resourceExporter.ExportResource(resView.Resource, dlg.SelectedPath);
                 }
                 catch (Exception ex)
                 {
@@ -121,26 +112,17 @@ namespace EgoErpArchiver.ViewModel
         private void Import_Execute(object parameter)
         {
             var resView = (ErpResourceViewModel)parameter;
-            var dlg = new CommonOpenFileDialog
+            var dlg = new VistaFolderBrowserDialog
             {
-                Title = "Select a folder to import the resource from:",
-                IsFolderPicker = true,
-
-                AddToMostRecentlyUsedList = false,
-                AllowNonFileSystemItems = false,
-                EnsureFileExists = true,
-                EnsurePathExists = true,
-                EnsureReadOnly = false,
-                EnsureValidNames = true,
-                Multiselect = false,
-                ShowPlacesList = true
+                Description = "Select a folder to import the resource from:",
+                Multiselect = false
             };
 
-            if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
+            if (dlg.ShowDialog() == true)
             {
                 try
                 {
-                    var files = Directory.GetFiles(dlg.FileName, "*", SearchOption.AllDirectories);
+                    var files = Directory.GetFiles(dlg.SelectedPath, "*", SearchOption.AllDirectories);
                     resourceExporter.ImportResource(resView.Resource, files);
                     resView.UpdateSize();
                 }
@@ -159,22 +141,13 @@ namespace EgoErpArchiver.ViewModel
 
         private void ExportAll_Execute(object parameter)
         {
-            var dlg = new CommonOpenFileDialog
+            var dlg = new VistaFolderBrowserDialog
             {
-                Title = "Select a folder to export the resources:",
-                IsFolderPicker = true,
-
-                AddToMostRecentlyUsedList = false,
-                AllowNonFileSystemItems = false,
-                EnsureFileExists = true,
-                EnsurePathExists = true,
-                EnsureReadOnly = false,
-                EnsureValidNames = true,
-                Multiselect = false,
-                ShowPlacesList = true
+                Description = "Select a folder to export the resources:",
+                Multiselect = false
             };
 
-            if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
+            if (dlg.ShowDialog() == true)
             {
                 try
                 {
@@ -187,7 +160,7 @@ namespace EgoErpArchiver.ViewModel
                         DataContext = progDialogVM
                     };
 
-                    var task = Task.Run(() => resourceExporter.Export(mainView.ErpFile, dlg.FileName, progDialogVM.ProgressStatus, progDialogVM.ProgressPercentage));
+                    var task = Task.Run(() => resourceExporter.Export(mainView.ErpFile, dlg.SelectedPath, progDialogVM.ProgressStatus, progDialogVM.ProgressPercentage));
                     progDialog.ShowDialog();
                     task.Wait();
                 }
@@ -206,22 +179,13 @@ namespace EgoErpArchiver.ViewModel
 
         private void ImportAll_Execute(object parameter)
         {
-            var dlg = new CommonOpenFileDialog
+            var dlg = new VistaFolderBrowserDialog
             {
-                Title = "Select a folder to import the resources from:",
-                IsFolderPicker = true,
-
-                AddToMostRecentlyUsedList = false,
-                AllowNonFileSystemItems = false,
-                EnsureFileExists = true,
-                EnsurePathExists = true,
-                EnsureReadOnly = false,
-                EnsureValidNames = true,
-                Multiselect = false,
-                ShowPlacesList = true
+                Description = "Select a folder to import the resources from:",
+                Multiselect = false
             };
 
-            if (dlg.ShowDialog() == CommonFileDialogResult.Ok)
+            if (dlg.ShowDialog() == true)
             {
                 try
                 {
@@ -234,7 +198,7 @@ namespace EgoErpArchiver.ViewModel
                         DataContext = progDialogVM
                     };
 
-                    var files = Directory.GetFiles(dlg.FileName, "*", SearchOption.AllDirectories);
+                    var files = Directory.GetFiles(dlg.SelectedPath, "*", SearchOption.AllDirectories);
                     var task = Task.Run(() => resourceExporter.Import(mainView.ErpFile, files, progDialogVM.ProgressStatus, progDialogVM.ProgressPercentage));
                     progDialog.ShowDialog();
                     task.Wait();
