@@ -1,8 +1,6 @@
 ﻿using EgoEngineLibrary.Archive.Erp.Data;
 using EgoEngineLibrary.Graphics.Dds;
 using K4os.Compression.LZ4;
-using Microsoft.Toolkit.HighPerformance;
-using Microsoft.Toolkit.HighPerformance.Buffers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -285,6 +283,12 @@ namespace EgoEngineLibrary.Graphics
                         {
                             mip.Unknown = srvRes.SurfaceRes.Frag2.Mips[i].Unknown;
                             mip.Compression = srvRes.SurfaceRes.Frag2.Mips[i].Compression;
+                            
+                            // Hack to allow changing to a known compression
+                            if (mip.Compression.IsUnknown())
+                            {
+                                mip.Compression = ErpGfxSurfaceResMipCompressionAlgorithm.Lz4;
+                            }
                         }
                         else if (compressZStd)
                         {

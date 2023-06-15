@@ -9,6 +9,19 @@ namespace EgoEngineLibrary.Archive.Erp.Data
         None,
         Lz4 = 0x03,
         ZStandard = 0x04,
+        
+        /// <summary>
+        /// Introduced in F1 23.
+        /// </summary>
+        Unknown7 = 0x07
+    }
+    
+    public static class ErpGfxSurfaceResMipCompressionAlgorithmExtensions
+    {
+        public static bool IsUnknown(this ErpGfxSurfaceResMipCompressionAlgorithm compression)
+        {
+            return compression is ErpGfxSurfaceResMipCompressionAlgorithm.Unknown7;
+        }
     }
     
     public struct ErpGfxSurfaceRes2Mips
