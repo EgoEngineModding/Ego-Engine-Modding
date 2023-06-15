@@ -10,17 +10,49 @@
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
+local byte hasF12017 = 1;
+local byte hasGridLegends = 1;
+local byte hasF123 = 1;
+if (hasGridLegends)
+{
+    hasF12017 = 1;
+}
+
+if (hasF123)
+{
+    hasGridLegends = 0;
+}
+
+// Actual data start
 byte strLength;
 char path[strLength];
+if (hasF123)
+{
+    byte unknown4;
+}
+
 uint32 mipCount;
 
 struct
 {
+    if (hasF123)
+    {
+        byte unknown;
+    }
+
     byte compression;
     uint64 offset;
     uint64 packedSize;
     uint64 size;
-} mips[mipCount];
+} mips[mipCount] <optimize=true>;
 
-float unknown;
-float unknown2;
+if (hasGridLegends)
+{
+    byte unknown3;
+}
+
+if (hasF12017)
+{
+    float unknown;
+    float unknown2;
+}

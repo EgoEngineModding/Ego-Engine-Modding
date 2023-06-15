@@ -7,6 +7,8 @@ namespace EgoEngineLibrary.Archive.Erp
 {
     public class ErpFile
     {
+        private const int SupportedVersion = 4;
+        
         public int Version { get; set; }
 
         public ulong ResourceOffset { get; set; }
@@ -17,7 +19,7 @@ namespace EgoEngineLibrary.Archive.Erp
 
         public ErpFile()
         {
-            Version = 4;
+            Version = SupportedVersion;
             Resources = new List<ErpResource>();
         }
 
@@ -27,10 +29,15 @@ namespace EgoEngineLibrary.Archive.Erp
             var magic = reader.ReadUInt32();
             if (magic != 1263555141)
             {
-                throw new Exception("This is not an ERP file!");
+                throw new FileFormatException("This is not an ERP file!");
             }
 
             Version = reader.ReadInt32();
+            if (Version is < 0 or > SupportedVersion)
+            {
+                throw new NotSupportedException($"Erp version {Version} is not supported.");
+            }
+                
             reader.ReadBytes(8); // padding
             reader.ReadBytes(8); // info offset
             reader.ReadBytes(8); // info size

@@ -158,14 +158,19 @@ namespace EgoEngineLibrary.Graphics
                                 output.Write(mipData, 0, mipData.Length);
                                 break;
                             case ErpGfxSurfaceResMipCompressionAlgorithm.LZ4:
-                                byte[] decompressedMipData = new byte[(int)mip.Size];
-                                int decompSize = LZ4Codec.Decode(mipData, 0, mipData.Length, decompressedMipData, 0, decompressedMipData.Length);
-                                if (decompSize < 0)
                                 {
-                                    throw new InvalidDataException($"The mipmaps file, and erp data do not match. (uncompressed size)");
+                                    byte[] decompressedMipData = new byte[(int)mip.Size];
+                                    int decompSize = LZ4Codec.Decode(mipData, 0, mipData.Length, decompressedMipData, 0,
+                                        decompressedMipData.Length);
+                                    if (decompSize < 0)
+                                    {
+                                        throw new InvalidDataException(
+                                            $"The mipmaps file, and erp data do not match. (uncompressed size)");
+                                    }
+
+                                    output.Write(decompressedMipData, 0, decompSize);
+                                    break;
                                 }
-                                output.Write(decompressedMipData, 0, decompSize);
-                                break;
                             case ErpGfxSurfaceResMipCompressionAlgorithm.ZStandard:
                                 {
                                     var decompressedData = new byte[Convert.ToInt32(mip.Size)];
@@ -278,6 +283,7 @@ namespace EgoEngineLibrary.Graphics
 
                         if (identicalMipCount)
                         {
+                            mip.Unknown = srvRes.SurfaceRes.Frag2.Mips[i].Unknown;
                             mip.Compression = srvRes.SurfaceRes.Frag2.Mips[i].Compression;
                         }
                         else if (compressZStd)

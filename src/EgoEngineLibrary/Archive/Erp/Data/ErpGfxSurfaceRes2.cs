@@ -13,18 +13,21 @@ namespace EgoEngineLibrary.Archive.Erp.Data
     
     public struct ErpGfxSurfaceRes2Mips
     {
+        public byte Unknown { get; set; }
         public ErpGfxSurfaceResMipCompressionAlgorithm Compression { get; set; }
         public UInt64 Offset { get; set; }
         public UInt64 PackedSize { get; set; }
         public UInt64 Size { get; set; }
     }
 
-    public class ErpGfxSurfaceRes2 : ErpFragmentData
+    public sealed class ErpGfxSurfaceRes2 : ErpFragmentData
     {
         private bool _hasTwoUnknowns;
         private bool _hasGridLegUnknown;
+        private bool _hasF123Data;
 
         public string MipMapFileName { get; set; }
+        public byte Unknown4 { get; set; }
         public List<ErpGfxSurfaceRes2Mips> Mips { get; set; }
         public float Unknown { get; set; }
         public float Unknown2 { get; set; }
@@ -33,6 +36,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
         public ErpGfxSurfaceRes2()
         {
             MipMapFileName = string.Empty;
+            Unknown4 = 0;
             Mips = new List<ErpGfxSurfaceRes2Mips>();
             Unknown3 = 0;
             Unknown = 25;
@@ -44,13 +48,28 @@ namespace EgoEngineLibrary.Archive.Erp.Data
             using (var memData = fragment.GetDataStream(true))
             using (ErpBinaryReader reader = new ErpBinaryReader(memData))
             {
-                MipMapFileName = reader.ReadString(reader.ReadByte());
+                var fileNameLength = reader.ReadByte();
+                MipMapFileName = reader.ReadString(fileNameLength);
+
+                Unknown4 = reader.ReadByte();
                 UInt32 mipMapCount = reader.ReadUInt32();
+                _hasF123Data = reader.BaseStream.Length == fileNameLength + 6 + 26 * mipMapCount + 8;
+                if (!_hasF123Data)
+                {
+                    reader.Seek(-5, SeekOrigin.Current);
+                    Unknown4 = 0;
+                    mipMapCount = reader.ReadUInt32();
+                }
 
                 Mips = new List<ErpGfxSurfaceRes2Mips>((int)mipMapCount);
                 for (int i = 0; i < mipMapCount; ++i)
                 {
                     ErpGfxSurfaceRes2Mips mip = new ErpGfxSurfaceRes2Mips();
+                    if (_hasF123Data)
+                    {
+                        mip.Unknown = reader.ReadByte();
+                    }
+
                     mip.Compression = (ErpGfxSurfaceResMipCompressionAlgorithm)reader.ReadByte();
                     mip.Offset = reader.ReadUInt64();
                     mip.PackedSize = reader.ReadUInt64();
@@ -89,10 +108,20 @@ namespace EgoEngineLibrary.Archive.Erp.Data
             {
                 writer.Write((byte)MipMapFileName.Length);
                 writer.Write(MipMapFileName, MipMapFileName.Length);
+                if (_hasF123Data)
+                {
+                    writer.Write(Unknown4);
+                }
+                
                 writer.Write((UInt32)Mips.Count);
 
                 for (int i = 0; i < Mips.Count; ++i)
                 {
+                    if (_hasF123Data)
+                    {
+                        writer.Write(Mips[i].Unknown);
+                    }
+
                     writer.Write((byte)Mips[i].Compression);
                     writer.Write(Mips[i].Offset);
                     writer.Write(Mips[i].PackedSize);

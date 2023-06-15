@@ -15,7 +15,18 @@ namespace EgoEngineLibrary.Archive.Erp
         ZStandard2 = 0x03,
         
         ZStandard = 0x10,
+        
+        /// <summary>
+        /// This was introduced in F1 23.
+        /// </summary>
+        ZStandard3 = 0x11,
+        
         None2 = 0x81,
-        None3 = 0x90
+        None3 = 0x90,
+        
+        /// <summary>
+        /// This was introduced in F1 23.
+        /// </summary>
+        None4 = 0x91
     }
 }

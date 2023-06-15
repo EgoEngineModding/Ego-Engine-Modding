@@ -27,7 +27,8 @@ namespace EgoEngineLibrary.Archive.Erp
             {
                 return Compression is ErpCompressionAlgorithm.Zlib
                     or ErpCompressionAlgorithm.ZStandard
-                    or ErpCompressionAlgorithm.ZStandard2;
+                    or ErpCompressionAlgorithm.ZStandard2
+                    or ErpCompressionAlgorithm.ZStandard3;
             }
         }
 
@@ -51,6 +52,12 @@ namespace EgoEngineLibrary.Archive.Erp
             if (ParentFile.Version > 2)
             {
                 Compression = (ErpCompressionAlgorithm)reader.ReadByte();
+                if (!Enum.IsDefined(Compression))
+                {
+                    throw new NotSupportedException(
+                        $"{nameof(ErpFragment)} compression type {Compression} is not supported!");
+                }
+
                 PackedSize = reader.ReadUInt64();
             }
             else
@@ -105,7 +112,7 @@ namespace EgoEngineLibrary.Archive.Erp
 
             // the decompression streams don't support seek which is used by lots of other code
             // we'll have to decompress the entire data by copying it into another stream.
-            if (IsCompressed)
+            if (decompress && IsCompressed)
             {
                 var memStream = new MemoryStream();
                 using (stream)
@@ -133,11 +140,13 @@ namespace EgoEngineLibrary.Archive.Erp
                 {
                     ErpCompressionAlgorithm.None or
                         ErpCompressionAlgorithm.None2 or
-                        ErpCompressionAlgorithm.None3 => _data.AsMemory().AsStream(),
+                        ErpCompressionAlgorithm.None3 or
+                        ErpCompressionAlgorithm.None4 => _data.AsMemory().AsStream(),
                     ErpCompressionAlgorithm.Zlib => new ZLibStream(_data.AsMemory().AsStream(),
                         CompressionMode.Decompress),
                     ErpCompressionAlgorithm.ZStandard or
-                        ErpCompressionAlgorithm.ZStandard2 => new DecompressionStream(_data.AsMemory().AsStream()),
+                        ErpCompressionAlgorithm.ZStandard2 or
+                        ErpCompressionAlgorithm.ZStandard3 => new DecompressionStream(_data.AsMemory().AsStream()),
                     _ => throw new NotSupportedException(
                         $"{nameof(ErpFragment)} compression type {Compression} is not supported!"),
                 };
@@ -157,6 +166,7 @@ namespace EgoEngineLibrary.Archive.Erp
                     case ErpCompressionAlgorithm.None:
                     case ErpCompressionAlgorithm.None2:
                     case ErpCompressionAlgorithm.None3:
+                    case ErpCompressionAlgorithm.None4:
                         _data = data;
                         break;
                     case ErpCompressionAlgorithm.Zlib:
@@ -170,6 +180,7 @@ namespace EgoEngineLibrary.Archive.Erp
                         break;
                     case ErpCompressionAlgorithm.ZStandard:
                     case ErpCompressionAlgorithm.ZStandard2:
+                    case ErpCompressionAlgorithm.ZStandard3:
                         using (var bufferWriter = new ArrayPoolBufferWriter<byte>())
                         using (var zss = new CompressionStream(bufferWriter.AsStream(), ZstdSharp.Unsafe.Methods.ZSTD_defaultCLevel()))
                         {
