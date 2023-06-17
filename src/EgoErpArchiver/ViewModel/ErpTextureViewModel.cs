@@ -8,6 +8,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
@@ -298,7 +299,20 @@ namespace EgoErpArchiver.ViewModel
                 }
                 else
                 {
+                    // User hasn't specified mipmaps file
                     throw new FileNotFoundException("Mipmaps file not found!", mipMapFullFileName);
+                }
+            }
+
+            if (foundMipMapFile)
+            {
+                // Hack to allow exporting when mipmaps file has unknown compression types. Will ignore mipmaps data
+                var unsupportedCompressionTypes = string.Join(',',
+                    srvRes.SurfaceRes.Frag2.Mips.Select(x => x.Compression).Distinct().Where(x => x.IsUnknown()));
+                if (unsupportedCompressionTypes is not "")
+                {
+                    TextureInfo += Environment.NewLine + $"Mipmaps compression type(s) not supported! {unsupportedCompressionTypes}";
+                    foundMipMapFile = false;
                 }
             }
 

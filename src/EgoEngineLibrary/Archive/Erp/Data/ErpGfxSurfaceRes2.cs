@@ -20,7 +20,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
     {
         public static bool IsUnknown(this ErpGfxSurfaceResMipCompressionAlgorithm compression)
         {
-            return compression is ErpGfxSurfaceResMipCompressionAlgorithm.Unknown7;
+            return compression is ErpGfxSurfaceResMipCompressionAlgorithm.Unknown7 || !Enum.IsDefined(compression);
         }
     }
     

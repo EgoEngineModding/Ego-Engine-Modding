@@ -137,7 +137,7 @@ namespace EgoEngineLibrary.Graphics
             }
 
             byte[] imageData = srvRes.SurfaceRes.Fragment1.Data;
-            if (srvRes.SurfaceRes.HasMips && srvRes.SurfaceRes.HasValidMips && mipMapsStream is not null)
+            if (srvRes.SurfaceRes is { HasMips: true, HasValidMips: true } && mipMapsStream is not null)
             {
                 using (MemoryStream output = new MemoryStream())
                 using (BinaryReader reader = new BinaryReader(mipMapsStream, Encoding.ASCII, true))
