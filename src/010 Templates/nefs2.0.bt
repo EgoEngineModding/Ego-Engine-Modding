@@ -1,0 +1,103 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: Label NeFS 2.0 files
+//------------------------------------------------
+LittleEndian();
+
+struct {
+    char magic[4];
+    byte hash[32];
+    char aesKey[64];
+    uint headerSize;
+    uint version;
+    uint numItems;
+    uint unknown1;
+    uint unknown2;
+    uint unknown3;
+    uint unknown4;
+} header;
+
+struct
+{
+    uint16 numVolumes;
+    uint16 hashBlockSizeHi;
+    //uint16 blockSizeHi;
+    //uint16 splitSizeHi;
+    //local uint blockSize = (uint)blockSizeHi << 15;
+    local uint hashBlockSize = (uint)hashBlockSizeHi << 15;
+    if (hashBlockSize == 0)
+    {
+        hashBlockSize = 0x800000;
+    }
+
+    uint part1;
+    uint part6;
+    uint part2;
+    uint part7;
+    uint part3;
+    uint part4;
+    uint part5;
+    uint part8;
+
+    byte unknown1[0x5C];
+} toc;
+
+FSeek(toc.part1);
+struct
+{
+    uint64 dataOffset;
+    uint32 indexP2;
+    uint32 indexP4;
+    uint32 id;
+} hp1[header.numItems];
+
+FSeek(toc.part2);
+struct
+{
+    uint32 parentId;
+    uint32 childId;
+    uint32 stringOffset;
+    uint32 extractedFileSize;
+    uint32 id;
+} hp2[header.numItems];
+
+FSeek(toc.part4);
+uint cumulativeCompressedChunkSize[(toc.part5 - toc.part4) / 8];
+
+FSeek(toc.part5);
+struct
+{
+    uint64 dataSize;
+    uint32 nefsStringOffset;
+    uint32 dataOffset;
+} hp5;
+
+FSeek(toc.part6);
+struct
+{
+    uint16 volume;
+    byte flags;
+    byte unknown;
+} hp6[header.numItems];
+
+FSeek(toc.part7);
+struct
+{
+    uint32 nextId;
+    uint32 id;
+} hp7[header.numItems];
+
+//FSeek(toc.part8);
+local uint64 dd = hp5.dataSize / toc.hashBlockSize;
+struct
+{
+    byte blockHash[32];
+} hp8[(hp5.dataSize - hp5.dataOffset) / toc.hashBlockSize];
