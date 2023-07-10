@@ -1,0 +1,96 @@
+//--------------------------------------
+//--- 010 Editor v3.1.3 Binary Template
+//
+// File: nfs.bt
+// Author: Mike
+// Purpose: Label (decoded) NeFS 1.5.1 files
+//--------------------------------------
+LittleEndian();
+
+// This structure points to the data for a file
+typedef struct
+{
+    uint64 dataOffset; // 0 for directories
+    int16 pad; // Always 0 so far
+    int16 flags; // Maybe? 0 for files, 0x02 for directories, 0x10 for last file entry
+    uint32 indexP2;
+    uint32 indexP4;
+    uint32 id;
+} DATAINDEX <read=readDataIndex, optimize=true>;
+
+// This structure points out the name for a file/directory
+typedef struct
+{
+    int parentId; // Points to parent directory for hierarchy
+    int nextId; // next id at same level
+    int childId; // id of first child
+    int nameOffset; // Offset within the strings structure
+    uint32 extractedFileSize; // 0 for directories
+    int id3;
+    int id4;
+} FILEINDEX <read=readFileIndex, optimize=true>;
+
+struct {
+    char magic[4];
+    uint32 headerSize; // I think must end on multiple of 128 (add padding)
+    int version; // Maybe? Equals 0x010501 for all files so far
+    int pad; // is often 1
+    int numItems;
+    int blockSize;
+    int pad; // is often 0
+    int index_offset;
+    int part2;
+    int strings_offset;
+    int part4;
+    int part5;
+    int pad; // is often 0
+    int pad;
+    int pad;
+    char aesKey[0x40];
+    int pad;
+} header;
+
+FSeek(header.index_offset);
+DATAINDEX dataindices[header.numItems];
+
+FSeek(header.part2);
+FILEINDEX fileindices[header.numItems];
+
+FSeek(header.strings_offset);
+char hp3[header.part4 - header.strings_offset];
+
+FSeek(header.part4);
+struct
+{
+    uint32 totalBlockSize;
+    uint16 transformationType;
+    uint16 unknown;
+} hp4[(header.part5 - header.part4) / 8];
+
+FSeek(header.part5);
+struct
+{
+    uint64 dataSize;
+    uint32 nefsStringOffset;
+    uint32 dataOffset; // must be multiple of block size and larger than header size
+} hp5;
+
+// These functions are just for displaying the struct data nicely in 010
+string readDataIndex(DATAINDEX &index)
+{
+    string ret;
+    local int i;
+    SPrintf(ret, "ID: %d // Idx: %d %d // ETC: %d", index.id, index.indexP2, index.indexP4, index.pad[0]);
+    for (i = 1; exists(index.pad[i]); i++) {
+        SPrintf(ret, "%s : %d", ret, index.pad[i]);
+    }
+    return ret;
+}
+
+string readFileIndex(FILEINDEX &index)
+{
+    string name = ReadString(header.strings_offset + index.nameOffset, 100);
+    string ret;
+    SPrintf(ret, "ID: %d %d // PCN: %d %d %d // %s", index.id3, index.id4, index.parentId, index.childId, index.nextId, name);
+    return ret;
+}
