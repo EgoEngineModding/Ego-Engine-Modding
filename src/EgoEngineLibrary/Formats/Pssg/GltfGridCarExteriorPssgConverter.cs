@@ -312,9 +312,9 @@ namespace EgoEngineLibrary.Formats.Pssg
                     var b = tri.B + baseVertexIndex;
                     var c = tri.C + baseVertexIndex;
 
-                    rds.Indices.Add((ushort)a);
-                    rds.Indices.Add((ushort)b);
-                    rds.Indices.Add((ushort)c);
+                    rds.Indices.Add((uint)a);
+                    rds.Indices.Add((uint)b);
+                    rds.Indices.Add((uint)c);
                 }
             }
 
