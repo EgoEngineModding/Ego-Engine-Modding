@@ -1,9 +1,9 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <title>EPE - Readme</title>
-    <style type="text/css">
+    <style>
         body {
             margin: 0;
             margin-left: auto;
@@ -87,7 +87,7 @@
 <body>
     <div id="top">
         <h1>Ego PSSG Editor</h1>
-        version 12.1.0<br />
+        version 12.1.1<br />
         <p style="font-family: Georgia, 'Times New Roman', Times, serif;"><a href="https://petar.page/l/ego-epe-home" target="_blank">Application Website</a></p>
     </div>
     <div class="readme-main">
@@ -103,21 +103,21 @@
         </ol>
     </div>
     <div class="readme-main">
-        <h2><a name="Reqs"></a>Requirements</h2>
+        <h2><a id="Reqs"></a>Requirements</h2>
         <ul>
             <li>.NET 6.0 Desktop Runtime (x64 or x86 depending on your OS)</li>
         </ul>
-        <h2><a name="Inst"></a>Installation</h2>
+        <h2><a id="Inst"></a>Installation</h2>
         <p>To install, simply <em>EXTRACT</em> everything from the zip file to a desired location, and run the <em>Ego PSSG Editor.exe</em> file.</p>
     </div>
     <div class="readme-main">
-        <h2><a name="EdIn"></a>Editor Information</h2>
+        <h2><a id="EdIn"></a>Editor Information</h2>
         <p>
             This tool will allow you to open and edit PSSG files for the EGO engine games.
             Textures can be previewed and modified through DDS conversion.
             Car models can be modified through glTF conversion.
         </p>
-        <h2><a name="Usag"></a>Usage</h2>
+        <h2><a id="Usag"></a>Usage</h2>
         <p>After turning on the program simply click File -&gt; Open and select a PSSG to edit.</p>
 
         Editing Textures:
@@ -181,7 +181,7 @@
         </ul>
     </div>
     <div class="readme-main">
-        <h2><a name="Supp"></a>Support</h2>
+        <h2><a id="Supp"></a>Support</h2>
         <p>You can get support by asking in the modding channels of the following communities:</p>
         <ul>
             <li><a href="https://discord.gg/5bCjMqS" target="_blank">Ego Engine Modding Discord</a></li>
@@ -190,8 +190,14 @@
         <p>If you think you've found a bug, post an issue <a href="https://petar.page/l/ego-epe-code" target="_blank">here</a> with as much information as possible.</p>
     </div>
     <div class="readme-main">
-        <h2><a name="Chan"></a>Changelog</h2>
+        <h2><a id="Chan"></a>Changelog</h2>
         <ul>
+            <li>
+                <strong>12.1.1+20240414</strong>
+                <ul>
+                    <li>Fixed model import when shader instance has >65535 vertices</li>
+                </ul>
+            </li>
             <li>
                 <strong>12.1.0+20220227</strong>
                 <ul>
@@ -378,7 +384,7 @@
                 </ul>
             </li>
         </ul>
-        <h2><a name="Cred"></a>Credits</h2>
+        <h2><a id="Cred"></a>Credits</h2>
         <ul>
             <li>Petar Tasev - <small>For creating the program.</small></li>
             <li>luh-koala - <small>For creating icon and other graphics</small></li>
