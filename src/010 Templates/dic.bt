@@ -1,0 +1,58 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: Label DIC files
+//------------------------------------------------
+LittleEndian();
+
+struct {
+    char magic[4];
+    uint unknown;
+    char version[4];
+    uint numBanks;
+} header;
+
+struct {
+    uint sampleOffset;
+    uint numSamples;
+    char name[16];
+
+    local int currPos = FTell();
+    FSeek(sampleOffset);
+
+    uint unknown;
+    struct {
+        uint16 sampleRate;
+        struct {
+            uint16 unk0 : 1;
+            uint16 unk1 : 1;
+            uint16 unk2 : 1;
+            uint16 unk3 : 1;
+            uint16 loop : 1;
+            uint16 stereo : 1;
+            uint16 unk6 : 1;
+            uint16 unk7 : 1;
+            uint16 unk8 : 1;
+            uint16 unk9 : 1;
+            uint16 unk10 : 1;
+            uint16 unk11 : 1;
+            uint16 unk12 : 1;
+            uint16 unk13 : 1;
+            uint16 unk14 : 1;
+            uint16 unk15 : 1;
+        } flags <bgcolor=cGreen>;
+        char name[16];
+        uint32 size;
+    } sample[numSamples] <read=name>;
+    char format[4];
+
+    FSeek(currPos);
+
+} bank[header.numBanks] <read=name,optimize=false>;
