@@ -1,0 +1,111 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: Label BDL files
+//------------------------------------------------
+LittleEndian();
+
+struct {
+    char magic[4];
+    uint version;
+
+    switch (version)
+    {
+        case 104: // Dirt 2/3
+            byte data[64];
+            break;
+        case 106: // F1 2010-2015, Grid 2, Grid 2019
+            byte data[88];
+            break;
+    }
+} bndlChunk;
+
+while (FEof() == 0)
+{
+    struct {
+        char magic[4];
+        uint version;
+
+        local uint fmt = 0;
+        local uint rate = 48000;
+        switch (version)
+        {
+            case 107: // Dirt 2/3
+                byte data[36];
+                uint numData2;
+                byte data2[numData2];
+                break;
+            case 113: // F1 2010-2017, Grid 2
+            case 114: // F1 2019, Grid 2019 -- has more numData2 21760 (vs 13472)
+                byte data[40];
+                uint format;
+                uint sampleRate;
+                float unknown[2];
+                uint unknown2;
+                uint numData2;
+                byte data2[numData2];
+
+                fmt = format;
+                break;
+                byte data[40];
+                uint format;
+                uint sampleRate;
+                float unknown[2];
+                uint unknown2;
+                uint numData2;
+                byte data2[numData2];
+
+                fmt = format;
+                break;
+        }
+
+        switch (fmt)
+        {
+            case 0:
+                byte unknown3[4];
+                uint numUnk1;
+                float unk1s[numUnk1];
+                uint numUnk2;
+                byte unk2s[numUnk2 * 8];
+                uint size;
+                local uint numBlocks = (size - 1152) / 19;
+                float table1[16];
+                float table2[16];
+                float table3[256];
+                struct {
+                    ubyte blockData[19];
+                } adpcmBlock[numBlocks];
+                byte unk3[20];
+                break;
+            case 1:
+                byte unknown3[4];
+                uint numUnk1;
+                float unk1s[numUnk1];
+                uint numUnk2;
+                byte unk2s[numUnk2 * 8];
+                uint size;
+                byte audioData[size];
+                byte unk3[20];
+                break;
+            case 2:
+                uint32 numSamples;
+                byte audioData[numSamples * 2];
+                uint numUnk1;
+                float unk1s[numUnk1];
+                uint numUnk2;
+                byte unk2s[numUnk2 * 8];
+                byte unk3[24];
+                break;
+        }
+
+        uint numUnk4;
+        byte unk4s[numUnk4 * 92];
+    } egoeChunk;
+}
