@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace EgoJpkExtractor
+namespace EgoJpkArchiver;
+
+static class Program
 {
-    static class Program
+    /// <summary>
+    /// The main entry point for the application.
+    /// </summary>
+    [STAThread]
+    static void Main(string[] Args)
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main(string[] Args)
-        {
-            ApplicationConfiguration.Initialize();
-            Application.Run(new Form1(Args));
-        }
+        ApplicationConfiguration.Initialize();
+        Application.Run(new Form1(Args));
     }
 }

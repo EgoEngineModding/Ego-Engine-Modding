@@ -9,39 +9,37 @@
 LittleEndian();
 SetBackColor(cLtGray);
 
-struct {
-    struct HEADER {
-        int magic;
-        int unknown;
-        int entryCount;
-        int align;
-        int unknown;
-        int sizeToEnd;
-        int unknown;
-        int unknown;
-    } header;
+struct HEADER {
+    int magic;
+    int unknown;
+    int entryCount;
+    int align;
+    int unknown;
+    int sizeToEnd;
+    int unknown;
+    int unknown;
+} header;
 
-    struct Entry {
-        int stringOffset <bgcolor=cGreen>;
-        int fileSize;
-        int fileOffset <bgcolor=cGreen>;
-        int compressedFileSize;
-        int unknown;
-        int unknown;
-        int pad;
-        int pad;
+struct Entry {
+    int stringOffset <bgcolor=cGreen>;
+    int fileSize;
+    int fileOffset <bgcolor=cGreen>;
+    int compressedFileSize;
+    int unknown;
+    int unknown;
+    int pad;
+    int pad;
 
-        local int64 currentPos = FTell();
+    local int64 currentPos = FTell();
 
-        FSeek(stringOffset);
-        string name <bgcolor=cLtYellow>;
+    FSeek(stringOffset);
+    string name <bgcolor=cLtYellow>;
 
-        FSeek(fileOffset);
-        byte data[fileSize] <bgcolor=cLtRed>;
+    FSeek(fileOffset);
+    byte data[fileSize] <bgcolor=cLtRed>;
 
-        FSeek(currentPos);
-    } entry[header.entryCount] <bgcolor=cLtBlue,read=entryName,optimize=false>;
-} file;
+    FSeek(currentPos);
+} entry[header.entryCount] <bgcolor=cLtBlue,read=entryName,optimize=false>;
 
 string entryName(Entry &entry) {
     return entry.name;

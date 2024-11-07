@@ -1,29 +1,26 @@
-﻿namespace EgoJpkExtractor
-{
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Data;
-    using System.Drawing;
-    using System.Linq;
-    using System.Text;
-    using System.Windows.Forms;
-    using System.IO;
-    using EgoEngineLibrary.Archive.Jpk;
-    using BrightIdeasSoftware;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 
+using BrightIdeasSoftware;
+
+using EgoEngineLibrary.Archive.Jpk;
+
+namespace EgoJpkArchiver
+{
     public partial class Form1 : Form
     {
-        // 2.0 -- Rewrote entire code, Supports latest games, Uses EEL
-        JpkFile file;
-        string fileName = "raceload.jpk";
-        string selectedPath = "";
+        private const string ManifestTxtFileName = "manifest.jpk.txt";
+        JpkFile _file;
+        string _fileName = "raceload.jpk";
+        string _selectedPath = "";
 
         public Form1(string[] Args)
         {
             InitializeComponent();
-            this.Icon = EgoJpkArchiver.Properties.Resources.Ryder25;
-            this.Text = EgoJpkArchiver.Properties.Resources.AppTitleLong + " " + EgoJpkArchiver.Properties.Resources.AppVersionShort;
+            this.Icon = Properties.Resources.Ryder25;
+            this.Text = $"{Properties.Resources.AppTitleLong} {Properties.Resources.AppVersionShort}";
 
             this.listView.ShowGroups = false;
             OLVColumn nameCol = new OLVColumn("Name", "Name");
@@ -38,93 +35,173 @@
 
             if (Args.Length > 0)
             {
-                fileName = Args[0];
-                this.ReadJpk();
+                this.ReadJpk(Args[0]);
+            }
+        }
+
+        private void createToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                folderBrowserDialog.Description = "Select a folder to create a new jpk:";
+                if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+                {
+                    CreateJpk(folderBrowserDialog.SelectedPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to create!{Environment.NewLine}{ex}", Properties.Resources.AppTitleLong,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            openFileDialog.FileName = Path.GetFileName(fileName);
-            if (openFileDialog.ShowDialog() != DialogResult.Cancel)
+            try
             {
-                fileName = openFileDialog.FileName;
-                this.ReadJpk();
-                openFileDialog.Dispose();
+                openFileDialog.FileName = _fileName;
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    this.ReadJpk(openFileDialog.FileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to open!{Environment.NewLine}{ex}", Properties.Resources.AppTitleLong,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            saveFileDialog.FileName = Path.GetFileName(fileName);
-            if (saveFileDialog.ShowDialog() != DialogResult.Cancel)
+            try
             {
-                this.WriteJpk(saveFileDialog.FileName);
-                saveFileDialog.Dispose();
+                saveFileDialog.FileName = _fileName;
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    this.WriteJpk(saveFileDialog.FileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to save!{Environment.NewLine}{ex}", Properties.Resources.AppTitleLong,
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void ReadJpk()
+        private void CreateJpk(string folderPath)
         {
-            file = new JpkFile();
-            file.Read(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read));
-            this.listView.SetObjects(file.Entries);
+            _file = new JpkFile();
+            var manifestFilePath = Path.Combine(folderPath, ManifestTxtFileName);
+            var files = File.Exists(manifestFilePath)
+                ? File.ReadAllLines(manifestFilePath).Select(x => Path.Combine(folderPath, x))
+                : Directory.EnumerateFiles(folderPath);
+            foreach (string f in files)
+            {
+                var entry = new JpkEntry(_file) { Name = Path.GetFileName(f) };
+                using var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
+                entry.Import(fs);
+                _file.Entries.Add(entry);
+            }
+            this.listView.SetObjects(_file.Entries);
 
-            this.Text = EgoJpkArchiver.Properties.Resources.AppTitleShort + " " +
-                EgoJpkArchiver.Properties.Resources.AppVersionShort + " - " +
-                Path.GetFileName(fileName);
+            SetFileName($"{Path.GetFileName(folderPath)}.jpk");
+            SetSelectedPath(folderPath);
+            SetTitle();
         }
 
-        private void WriteJpk(string fName)
+        private void ReadJpk(string filePath)
         {
-            file.Write(File.Open(fName, FileMode.Create, FileAccess.Write, FileShare.Read));
+            _file = new JpkFile();
+            using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            _file.Read(fs);
+            this.listView.SetObjects(_file.Entries);
 
-            this.Text = EgoJpkArchiver.Properties.Resources.AppTitleShort + " " +
-                EgoJpkArchiver.Properties.Resources.AppVersionShort + " - " +
-                Path.GetFileName(fName);
+            SetFileName(filePath);
+            SetSelectedPath(filePath);
+            SetTitle();
+        }
+
+        private void WriteJpk(string filePath)
+        {
+            using var fs = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            _file.Write(fs);
+
+            SetFileName(filePath);
+            SetSelectedPath(filePath);
+            SetTitle();
+        }
+
+        private void SetFileName(string filePath)
+        {
+            _fileName = Path.GetFileName(filePath);
+        }
+
+        private void SetSelectedPath(string filePath)
+        {
+            var fileName = Path.GetFileNameWithoutExtension(filePath) ?? "";
+            _selectedPath = fileName;
+        }
+
+        private void SetTitle()
+        {
+            this.Text = $"{Properties.Resources.AppTitleShort} {Properties.Resources.AppVersionShort} - {_fileName}";
         }
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            folderBrowserDialog.Description = "Select a folder to export the files to:";
+            folderBrowserDialog.Description = "Select a target folder to export the files:";
+            folderBrowserDialog.SelectedPath = _selectedPath;
             if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
-                selectedPath = folderBrowserDialog.SelectedPath;
                 try
                 {
-                    foreach (JpkEntry entry in this.file.Entries)
+                    foreach (JpkEntry entry in this._file.Entries)
                     {
-                        entry.Export(File.Open(selectedPath + "\\" + entry.Name, FileMode.Create, FileAccess.Write, FileShare.Read));
+                        using var fs = File.Open(Path.Combine(folderBrowserDialog.SelectedPath, entry.Name),
+                            FileMode.Create, FileAccess.Write, FileShare.Read);
+                        entry.Export(fs);
                     }
+
+                    File.WriteAllLines(Path.Combine(folderBrowserDialog.SelectedPath, ManifestTxtFileName),
+                        this._file.Entries.Select(x => x.Name));
+                    SetSelectedPath(folderBrowserDialog.SelectedPath);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Failed Exporting!", "Fail", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Failed to export!{Environment.NewLine}{ex}", Properties.Resources.AppTitleLong,
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
 
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            folderBrowserDialog.Description = "Select a folder to import the files from:";
-            folderBrowserDialog.SelectedPath = selectedPath;
+            folderBrowserDialog.Description = "Select a source folder to import the files:";
+            folderBrowserDialog.SelectedPath = _selectedPath;
             if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
                     // Import
-                    foreach (string f in Directory.GetFiles(folderBrowserDialog.SelectedPath))
+                    foreach (string f in Directory.EnumerateFiles(folderBrowserDialog.SelectedPath))
                     {
-                        if (this.file.Contains(Path.GetFileName(f)) == true)
+                        var fileName = Path.GetFileName(f);
+                        if (this._file.Contains(fileName))
                         {
-                            this.file[Path.GetFileName(f)].Import(File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read));
+                            using var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
+                            this._file[fileName].Import(fs);
                         }
                     }
-                    this.listView.SetObjects(this.file.Entries);
+
+                    this.listView.SetObjects(this._file.Entries);
+                    SetSelectedPath(folderBrowserDialog.SelectedPath);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Failed Importing!", "Fail", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Failed to import!{Environment.NewLine}{ex}", Properties.Resources.AppTitleLong,
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
