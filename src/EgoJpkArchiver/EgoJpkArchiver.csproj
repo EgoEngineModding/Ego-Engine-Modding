@@ -1,16 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>Ego JPK Archiver</AssemblyName>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <ApplicationIcon>Resources\Ryder25.ico</ApplicationIcon>
+    <AssemblyTitle>Ego JPK Archiver</AssemblyTitle>
+    <Product>Ego JPK Archiver</Product>
+    <Version>2.1.0</Version>
+    <Company>Petar Tasev</Company>
+    <Authors>Petar Tasev</Authors>
+    <Copyright>Copyright © Petar Tasev 2015 - 2024</Copyright>
   </PropertyGroup>
-  
+
+  <ItemGroup>
+    <ProjectReference Include="..\EgoEngineLibrary\EgoEngineLibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ObjectListView.Official" />
+  </ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -31,13 +44,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="..\EgoEngineLibrary\EgoEngineLibrary.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="ObjectListView.Official" />
+    <None Remove="ReadME.html" />
+    <Content Include="ReadME.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>
