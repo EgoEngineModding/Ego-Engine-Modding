@@ -102,18 +102,35 @@ public class QuadTreeMeshData
         return index;
     }
 
-    public void Reorder(IEnumerable<int> triangleIndices)
+    public Dictionary<int, int> Remap(IEnumerable<int> triangleIndices)
     {
-        // Rebuild vertices list in node triangle reference order
+        // Rebuild vertices and triangles in node triangle reference order
         var oldVertices = _vertices.ToArray();
         _vertices.Clear();
-        var triSpan = CollectionsMarshal.AsSpan(_triangles);
+        var oldTriangles = _triangles.ToArray();
+        _triangles.Clear();
+    
+        var triMap = new Dictionary<int, int>(oldTriangles.Length);
         foreach (var index in triangleIndices)
         {
-            ref var tri = ref triSpan[index];
+            if (triMap.ContainsKey(index))
+            {
+                continue;
+            }
+    
+            var tri = oldTriangles[index];
             tri.A = GetVertexIndex(oldVertices[tri.A]);
             tri.B = GetVertexIndex(oldVertices[tri.B]);
             tri.C = GetVertexIndex(oldVertices[tri.C]);
+    
+            triMap.Add(index, _triangles.Count);
+            _triangles.Add(tri);
+        }
+    
+        if (oldTriangles.Length != _triangles.Count)
+        {
+            // This is unexpected unless there's a bug
+            throw new InvalidDataException("Not all vertices were referenced by the given triangles.");
         }
         
         if (oldVertices.Length != _vertices.Count)
@@ -121,6 +138,8 @@ public class QuadTreeMeshData
             // This is unexpected unless there's a bug
             throw new InvalidDataException("Not all vertices were referenced by the given triangles.");
         }
+    
+        return triMap;
     }
 
     public void PatchUp()
