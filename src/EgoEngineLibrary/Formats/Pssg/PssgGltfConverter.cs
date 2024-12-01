@@ -10,6 +10,8 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 
+using EgoEngineLibrary.Conversion;
+
 namespace EgoEngineLibrary.Formats.Pssg
 {
     public abstract class PssgGltfConverter
@@ -66,7 +68,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 		private static Matrix4x4 GetTransform(byte[] buffer)
 		{
 			Matrix4x4 t = new Matrix4x4();
-			MiscUtil.Conversion.BigEndianBitConverter bc = new MiscUtil.Conversion.BigEndianBitConverter();
+			BigEndianBitConverter bc = new BigEndianBitConverter();
 
 			// Surely i've missed something and there's a way to loop through this? Please?
 			int i = 0;

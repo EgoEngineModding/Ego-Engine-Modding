@@ -5,9 +5,10 @@
 using System;
 using System.IO;
 using System.Text;
-using MiscUtil.Conversion;
 
-namespace MiscUtil.IO
+using EgoEngineLibrary.Conversion;
+
+namespace EgoEngineLibrary.IO
 {
 	/// <summary>
 	/// Equivalent of System.IO.BinaryReader, but with either endianness, depending on
