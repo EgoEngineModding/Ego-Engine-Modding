@@ -2,7 +2,7 @@
 // Copyright (c) 2004-2008 Jon Skeet and Marc Gravell.
 // All rights reserved.
 
-namespace MiscUtil.Conversion
+namespace EgoEngineLibrary.Conversion
 {
 	/// <summary>
 	/// Implementation of EndianBitConverter which converts to/from little-endian

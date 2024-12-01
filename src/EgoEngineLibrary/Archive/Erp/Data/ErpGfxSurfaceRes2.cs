@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 
+using EgoEngineLibrary.Conversion;
+
 namespace EgoEngineLibrary.Archive.Erp.Data
 {
     public enum ErpGfxSurfaceResMipCompressionAlgorithm : byte
@@ -117,7 +119,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
         public override void ToFragment(ErpFragment fragment)
         {
             using (var newData = new MemoryStream())
-            using (ErpBinaryWriter writer = new ErpBinaryWriter(MiscUtil.Conversion.EndianBitConverter.Little, newData))
+            using (ErpBinaryWriter writer = new ErpBinaryWriter(EndianBitConverter.Little, newData))
             {
                 writer.Write((byte)MipMapFileName.Length);
                 writer.Write(MipMapFileName, MipMapFileName.Length);

@@ -1,6 +1,7 @@
-﻿namespace EgoEngineLibrary.Archive.Jpk
+﻿using EgoEngineLibrary.Conversion;
+
+namespace EgoEngineLibrary.Archive.Jpk
 {
-    using MiscUtil.Conversion;
     using System;
     using System.Collections.Generic;
     using System.IO;

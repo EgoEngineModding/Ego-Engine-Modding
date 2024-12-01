@@ -1,6 +1,7 @@
-﻿namespace EgoEngineLibrary.Language
+﻿using EgoEngineLibrary.Conversion;
+
+namespace EgoEngineLibrary.Language
 {
-    using MiscUtil.Conversion;
     using System;
     using System.Collections.Generic;
     using System.Data;

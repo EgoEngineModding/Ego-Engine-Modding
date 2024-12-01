@@ -1,6 +1,6 @@
 ﻿using EgoEngineLibrary.Graphics;
 using Microsoft.Win32;
-using MiscUtil.Conversion;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Xml;
 using System.Xml.Linq;
+
+using EgoEngineLibrary.Conversion;
 
 namespace EgoPssgEditor.ViewModel
 {
