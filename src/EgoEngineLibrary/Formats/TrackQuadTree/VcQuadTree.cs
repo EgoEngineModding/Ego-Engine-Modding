@@ -107,22 +107,7 @@ public class VcQuadTree : QuadTree<VcQuadTree, int>
 
     public void Optimize()
     {
-        var triMap = _data.Remap(TraverseFromBottomLeft().SelectMany(x => x.Elements));
-        var array = Traverse().ToArray();
-        foreach (var node in Traverse())
-        {
-            if (node._triangleIndices.Count == 0)
-            {
-                continue;
-            }
-            
-            var oldIndices = node._triangleIndices.ToArray();
-            node._triangleIndices.Clear();
-            foreach (var index in oldIndices)
-            {
-                node._triangleIndices.Add(triMap[index]);
-            }
-        }
+        _data.Reorder(TraverseFromBottomLeft().SelectMany(x => x.Elements).Distinct());
         _data.PatchUp();
     }
 }
