@@ -1,0 +1,196 @@
+//--------------------------------------
+//--- 010 Editor v15.0.1 Binary Template
+//
+// File: vcqtc.bt
+// Author: Petar Tasev
+// Revision: 1
+// Purpose: Label Ego Engine vcqtc files
+//--------------------------------------
+LittleEndian();
+SetBackColor(cLtGray);
+
+local ubyte d3Mode = 1; // Dirt 3 and previous games use diff triangle
+
+typedef float Vec3f[3] <read=Str("%f, %f, %f",this[0],this[1],this[2])>;
+
+struct vCQuadTreeHeader {
+    Vec3f boundsMin;
+    Vec3f boundsMax;
+    int32 numTriangles <comment="Negative in all games">;
+    int32 numVertices <comment="Negative in all games">;
+    int32 numMaterials <comment="Must be 8 or 16 (Autosport), 16 (D3), exact (older than D3). Negative in RD:G, D2">;
+    uint32 verticesOffset;
+    uint32 nodesOffset;
+    uint32 trianglesOffset;
+    uint32 triangleReferencesWorkspaceOffset;
+    char materialList[Abs(numMaterials) * 4];
+
+    local Vec3f vertexScale, vertexOffset;
+    vertexScale[0] = (boundsMax[0] - boundsMin[0]) * 0.000000059604645f;
+    vertexScale[1] = (boundsMax[1] - boundsMin[1]) * 0.000015258789f;
+    vertexScale[2] = (boundsMax[2] - boundsMin[2]) * 0.000000059604645f;
+    vertexOffset[0] = boundsMin[0];
+    vertexOffset[1] = boundsMin[1];
+    vertexOffset[2] = boundsMin[2];
+} header;
+
+struct vCQuadTreeVertex {
+    ubyte x_high;
+    ubyte x_mid;
+    ubyte x_low;
+    ubyte y_high;
+    ubyte y_low;
+    ubyte z_high;
+    ubyte z_mid;
+    ubyte z_low;
+
+    local uint32 xu, yu, zu;
+    xu = ((uint32)x_high << 16) + ((uint32)x_mid << 8) + x_low;
+    yu = ((uint32)y_high << 8) + y_low;
+    zu = ((uint32)z_high << 16) + ((uint32)z_mid << 8) + z_low;
+    local float x = xu * header.vertexScale[0] + header.vertexOffset[0];
+    local float y = yu * header.vertexScale[1] + header.vertexOffset[1];
+    local float z = zu * header.vertexScale[2] + header.vertexOffset[2];
+} vertices[-header.numVertices]<optimize=false,read=Str("%f, %f, %f",x,y,z)>;
+
+typedef struct {
+if (d3Mode == 1) {
+    ubyte vertex0_sheet2bits_top6bits; // unsure if this means sheet
+    ubyte vertex0_bottom4bits_materialID4bits;
+    ubyte vertex1_offset;
+    ubyte vertex2_offset;
+
+    local int32 sheetInfo = (vertex0_sheet2bits_top6bits & 0xC0) >> 6;
+    local int32 materialID = vertex0_bottom4bits_materialID4bits & 0x0F;
+    local int32 vertex0Index = ((vertex0_bottom4bits_materialID4bits >> 4) + (((uint32)vertex0_sheet2bits_top6bits & 0x3F) << 4));
+    local int32 vertex1Index = vertex0Index + ((uint32)vertex1_offset);
+    local int32 vertex2Index = vertex0Index + ((uint32)vertex2_offset);
+}
+else {
+    ubyte vertex0_top8bits;
+    ubyte vertex0_bottom2bits_sheet3bits_materialID3bits;
+    ubyte vertex1_offset;
+    ubyte vertex2_offset;
+
+    local int32 sheetInfo = (vertex0_bottom2bits_sheet3bits_materialID3bits & 0x38) >> 3;
+    local int32 materialID = vertex0_bottom2bits_sheet3bits_materialID3bits & 0x07;
+    local int32 vertex0Index = ((vertex0_bottom2bits_sheet3bits_materialID3bits >> 6) + ((uint32)vertex0_top8bits << 2));
+    local int32 vertex1Index = vertex0Index + ((uint32)vertex1_offset);
+    local int32 vertex2Index = vertex0Index + ((uint32)vertex2_offset);
+}
+} vCQuadTreeTriangle<read=Str("%d,%d,%d SM %d,%d",vertex0Index,vertex1Index,vertex2Index,sheetInfo,materialID)>;
+
+typedef struct {
+    ubyte u8Data[2];
+
+    local byte hasChildren = ((u8Data[0] & 0x80) == 0);
+    local byte hasTriangles = !hasChildren && ((u8Data[0] != 0xFF) || (u8Data[1] != 0xFF));
+    local uint16 data = (u8Data[1] + ((uint16)u8Data[0] << 8)) & 0x7FFF;
+} vCQuadTreeNode<read=readNode>;
+
+string readNode(struct vCQuadTreeNode& n)
+{
+    char t = n.hasTriangles ? 'T' : 'C';
+    string s;
+    SPrintf(s, "%c %d", t, n.data);
+    return s;
+}
+
+local int32 numNodes<hidden=true> = (header.trianglesOffset - header.nodesOffset) / 2;
+vCQuadTreeNode nodes[numNodes]<optimize=false>;
+
+vCQuadTreeTriangle triangles[-header.numTriangles]<optimize=false>;
+
+struct {
+    local uint32 numRefs <hidden=true> = 0;
+    while (!FEof())
+    {
+    ++numRefs;
+    struct nodeTriangleReference {
+        local int64 startPos <hidden=true> = FTell();
+        local uint16 polyIndexOffset <hidden=true> = startPos - header.triangleReferencesWorkspaceOffset;
+        local uint16 numPolys <hidden=true> = 1, numRefData <hidden=true> = 2;
+        local ubyte temp <hidden=true>;
+        while (1)
+        {
+            temp = ReadByte(startPos + numRefData);
+            if (temp == 255)
+            {
+                break;
+            }
+
+            numRefData++;
+            if (temp != 254)
+            {
+                numPolys++;
+            }
+        }
+
+        ubyte triangleReferenceData[numRefData];
+        ubyte end <bgcolor=cLtRed,hidden=true>;
+        local int32 polyIndexList[numPolys];
+        local int32 i <hidden=true> = 1, t <hidden=true>;
+        local int32 lastIndex = ((uint16)triangleReferenceData[0] << 8) + triangleReferenceData[1];
+        polyIndexList[0] = lastIndex;
+        for (t = 2; t < numRefData; ++t)
+        {
+            lastIndex += triangleReferenceData[t];
+            if (triangleReferenceData[t] != 254)
+            {
+                polyIndexList[i++] = lastIndex;
+            }
+        }
+    } nodeTriRef<optimize=false,read=readNodeTriRef>;
+    }
+} nodeTriangleReferences<read=numRefs>;
+
+string readNodeTriRef(struct nodeTriangleReference& n)
+{
+    string s, s2;
+    SPrintf(s, "%d,%d ", n.polyIndexOffset, n.numPolys);
+    int i;
+    for (i = 0; i < n.numPolys; ++i)
+    {
+        SPrintf(s2, "%d,", n.polyIndexList[i]);
+        s += s2;
+    }
+    return s;
+}
+
+typedef struct {
+    local int32 nodeIndex;
+    local int32 triRefIndex;
+} nodeInfo<read=readNodeInfo>;
+
+string readNodeInfo(nodeInfo& n)
+{
+    string s2 = readNode(nodes[n.nodeIndex]);
+    if (n.triRefIndex > -1)
+    {
+        s2 += " | " + readNodeTriRef(nodeTriangleReferences.nodeTriRef[n.triRefIndex]);
+    }
+    return s2;
+}
+
+local nodeInfo nodeInfos[numNodes];
+local int i<hidden=true>;
+for (i = 0; i < numNodes; ++i)
+{
+    getNodeInfo(nodeInfos[i], i);
+}
+
+void getNodeInfo(nodeInfo& ni, int index)
+{
+    ni.nodeIndex = index;
+    ni.triRefIndex = -1;
+
+    local int p;
+    for (p = 0; p < nodeTriangleReferences.numRefs; ++p)
+    {
+        if (nodeTriangleReferences.nodeTriRef[p].polyIndexOffset == nodes[index].data)
+        {
+            ni.triRefIndex = p;
+            break;
+        }
+    }
+}
