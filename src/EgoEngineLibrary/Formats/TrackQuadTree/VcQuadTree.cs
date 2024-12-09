@@ -31,7 +31,7 @@ public class VcQuadTree : QuadTree<VcQuadTree, int>
     }
 
     private VcQuadTree(Vector3 boundsMin, Vector3 boundsMax, QuadTreeMeshData data) : base(
-        new QuadTreeBounds(new Vector2(boundsMin.X, boundsMin.Z), new Vector2(boundsMax.X, boundsMax.Z)), 4)
+        new QuadTreeBounds(new Vector2(boundsMin.X, boundsMin.Z), new Vector2(boundsMax.X, boundsMax.Z)), 6)
     {
         _data = data;
         _triangleIndices = [];
@@ -48,7 +48,7 @@ public class VcQuadTree : QuadTree<VcQuadTree, int>
 
     protected override bool AddElement(int data)
     {
-        if (!SeparatingAxisTheorem.Intersect(Bounds, _data.GetTriangle(data)))
+        if (!SeparatingAxisTheorem.Intersect(Bounds, _data.DataTriangles[data]))
         {
             return false;
         }

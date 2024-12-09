@@ -5,51 +5,56 @@ using EgoEngineLibrary.Collections;
 
 namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
-public class TrackGroundQuadTree : QuadTree<TrackGroundQuadTree, QuadTreeTriangleData>
+public class TrackGroundQuadTree : QuadTree<TrackGroundQuadTree, QuadTreeDataTriangle>
 {
-    public static readonly Vector3 Padding = new(0.1f);
+    private static readonly Vector3 Padding = new(0.1f);
     private readonly QuadTreeMeshData _data;
 
     public Vector3 BoundsMin { get; }
 
     public Vector3 BoundsMax { get; }
 
-    public override IReadOnlyCollection<QuadTreeTriangleData> Elements => _data.GetTriangles();
+    public override IReadOnlyCollection<QuadTreeDataTriangle> Elements => _data.DataTriangles;
 
-    public TrackGroundQuadTree(Vector3 boundsMin, Vector3 boundsMax, IQuadTreeTypeInfo typeInfo)
-        : this(boundsMin, boundsMax, new QuadTreeMeshData(typeInfo))
+    public static TrackGroundQuadTree Create(Vector3 boundsMin, Vector3 boundsMax, VcQuadTreeTypeInfo typeInfo)
     {
+        boundsMin -= Padding;
+        boundsMax += Padding;
+        var qtBounds = GetQuadTreeBounds(boundsMin, boundsMax);
+        var qt = new TrackGroundQuadTree(boundsMin, boundsMax, qtBounds, new QuadTreeMeshData(typeInfo));
+        return qt;
     }
 
-    private TrackGroundQuadTree(Vector3 boundsMin, Vector3 boundsMax, QuadTreeMeshData data)
-        : base(new QuadTreeBounds(new Vector2(boundsMin.X, boundsMin.Z), new Vector2(boundsMax.X, boundsMax.Z)),
-            TrackGround.CellWidthBits)
+    private TrackGroundQuadTree(Vector3 boundsMin, Vector3 boundsMax, QuadTreeBounds bounds, QuadTreeMeshData data)
+        : base(bounds, 16)
     {
         _data = data;
         BoundsMin = boundsMin;
         BoundsMax = boundsMax;
     }
 
+    private static QuadTreeBounds GetQuadTreeBounds(Vector3 boundsMin, Vector3 boundsMax)
+    {
+        return new QuadTreeBounds(new Vector2(boundsMin.X, boundsMin.Z), new Vector2(boundsMax.X, boundsMax.Z));
+    }
+
     protected override TrackGroundQuadTree CreateChild(QuadTreeBounds bounds)
     {
         return new TrackGroundQuadTree(
             new Vector3(bounds.Min.X, BoundsMin.Y, bounds.Min.Y),
-            new Vector3(bounds.Max.X, BoundsMax.Y, bounds.Max.Y), _data.TypeInfo) { Level = Level + 1 };
+            new Vector3(bounds.Max.X, BoundsMax.Y, bounds.Max.Y),
+            bounds, new QuadTreeMeshData(_data.TypeInfo)) { Level = Level + 1 };
     }
 
-    protected override bool AddElement(QuadTreeTriangleData data)
+    protected override bool AddElement(QuadTreeDataTriangle data)
     {
-        if (!Fits(data))
+        if (!SeparatingAxisTheorem.Intersect(Bounds, data))
         {
             return false;
         }
 
         _data.Add(data);
         return true;
-        bool Fits(QuadTreeTriangleData tri)
-        {
-            return SeparatingAxisTheorem.Intersect(Bounds, tri);
-        }
     }
 
     protected override void ClearElements()
@@ -59,14 +64,7 @@ public class TrackGroundQuadTree : QuadTree<TrackGroundQuadTree, QuadTreeTriangl
 
     protected override bool ShouldSplit()
     {
-        return !_data.IsValid();
-    }
-
-    public VcQuadTreeFile BuildVcQuadTree()
-    {
-        var quadTree = VcQuadTree.Create(_data.BoundsMin - Padding, _data.BoundsMax + Padding, _data);
-        quadTree.Optimize();
-        return VcQuadTreeFile.Create(quadTree);
+        return _data.ShouldSplit();
     }
 
     public override IEnumerable<TrackGroundQuadTree> Traverse()
@@ -97,5 +95,14 @@ public class TrackGroundQuadTree : QuadTree<TrackGroundQuadTree, QuadTreeTriangl
         {
             yield return child;
         }
+    }
+
+    public VcQuadTreeFile BuildVcQuadTree()
+    {
+        var quadTree = VcQuadTree.Create(
+            new Vector3(_data.BoundsMin.X, BoundsMin.Y, _data.BoundsMin.Z),
+            new Vector3(_data.BoundsMax.X, BoundsMax.Y, _data.BoundsMax.Z), _data);
+        quadTree.Optimize();
+        return VcQuadTreeFile.Create(quadTree);
     }
 }

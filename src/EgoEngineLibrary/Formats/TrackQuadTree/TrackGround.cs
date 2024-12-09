@@ -11,13 +11,15 @@ public partial class TrackGround
     // Grid subdivided into cells, then cells further subdivided to make collection of nodes
     private const int GridWidthBits = 16;
     private const int GridSubdivisions = 5;
-    public const int CellWidthBits = GridWidthBits - GridSubdivisions;
+    private const int CellWidthBits = GridWidthBits - GridSubdivisions;
 
     private const int GridWidth = 1 << GridWidthBits;
     private const int CellWidth = 1 << CellWidthBits;
     private const int NumCells = 1 << GridSubdivisions;
     private const int TotalCells = NumCells * NumCells;
-    
+    private static readonly Vector3 ScaleFactor = new(1.0f / GridWidth, 1, 1.0f / GridWidth);
+
+    private readonly Vector3 _scale;
     private readonly VcQuadTreeFile?[] _workspace;
     private readonly CellData[] _grid;
 
@@ -29,6 +31,7 @@ public partial class TrackGround
     {
         BoundsMin = boundsMin;
         BoundsMax = boundsMax;
+        _scale = (boundsMax - boundsMin) * ScaleFactor;
         if (cellSubdivisions.Length != TotalCells)
         {
             ArgumentOutOfRangeException.ThrowIfNotEqual(cellSubdivisions.Length, TotalCells, nameof(cellSubdivisions));
@@ -131,6 +134,12 @@ public partial class TrackGround
         ArgumentOutOfRangeException.ThrowIfGreaterThan(minZ, maxZ);
         ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(maxZ, GridWidth);
 
+        if (node.Identifier is null)
+        {
+            var level = GridWidthBits - int.Log2((maxX - minX) + 1);
+            node.Identifier = GetNameFromData(minX, minZ, level);
+        }
+
         var gridX = minX >> CellWidthBits;
         var gridZ = minZ >> CellWidthBits;
         var gridMaxX = maxX >> CellWidthBits;
@@ -221,10 +230,19 @@ public partial class TrackGround
         if (isLeaf)
         {
             var current = Get(x, z);
-            if (current is not null)
+            if (current is null)
             {
-                yield return new TraversalData(current, x, z, level);
+                yield break;
             }
+
+            var nodeWidth = GridWidth >> level;
+            var localBoundsMin = (new Vector3(x, 0, z) * _scale) + BoundsMin;
+            var localBoundsMax = (new Vector3(x + nodeWidth, 1, z + nodeWidth) * _scale) + BoundsMin;
+            yield return new TraversalData(current, x, z, level)
+            {
+                BoundsMin = localBoundsMin,
+                BoundsMax = localBoundsMax
+            };
 
             yield break;
         }
@@ -328,5 +346,10 @@ public partial class TrackGround
         public int NodeCount => 1 << (2 * Subdivisions);
     }
 
-    public record TraversalData(VcQuadTreeFile QuadTree, int X, int Y, int Level);
+    public record TraversalData(VcQuadTreeFile QuadTree, int X, int Y, int Level)
+    {
+        public Vector3 BoundsMin { get; init; }
+
+        public Vector3 BoundsMax { get; init; }
+    };
 }

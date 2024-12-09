@@ -5,30 +5,34 @@ using EgoEngineLibrary.Collections;
 
 namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
+// References
+// https://dyn4j.org/2010/01/sat/
+// https://programmerart.weebly.com/separating-axis-theorem.html
+
 public static class SeparatingAxisTheorem
 {
-    public static bool Intersect(QuadTreeBounds rectangle, QuadTreeTriangleData triangle)
+    public static bool Intersect(in QuadTreeBounds rectangle, in QuadTreeDataTriangle triangle)
     {
         // Normals aren't normalized since it's not necessary for merely getting a bool value
-        var rectVertices = new[]
-        {
+        Span<Vector2> rectVertices =
+        [
             rectangle.Min,
-            new Vector2(rectangle.Max.X, rectangle.Min.Y),
+            new(rectangle.Max.X, rectangle.Min.Y),
             rectangle.Max,
-            new Vector2(rectangle.Min.X, rectangle.Max.Y),
-        };
-        var edgeNormals = new[]
-        {
-            new Vector2(0, rectangle.Max.X - rectangle.Min.X),
-            new Vector2(rectangle.Max.Y - rectangle.Min.Y, 0),
-        };
+            new(rectangle.Min.X, rectangle.Max.Y)
+        ];
+        Span<Vector2> edgeNormals =
+        [
+            new(0, rectangle.Max.X - rectangle.Min.X),
+            new(rectangle.Max.Y - rectangle.Min.Y, 0)
+        ];
         // Swap order to account for winding due to use of XZ plane
-        var triVertices = new[]
-        {
-            new Vector2(triangle.Position0.X, triangle.Position0.Z),
-            new Vector2(triangle.Position2.X, triangle.Position2.Z),
-            new Vector2(triangle.Position1.X, triangle.Position1.Z),
-        };
+        Span<Vector2> triVertices =
+        [
+            new(triangle.Position0.X, triangle.Position0.Z),
+            new(triangle.Position2.X, triangle.Position2.Z),
+            new(triangle.Position1.X, triangle.Position1.Z)
+        ];
 
         var result = Intersect(rectVertices, triVertices, edgeNormals);
         if (result is false)

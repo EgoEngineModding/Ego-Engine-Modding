@@ -13,7 +13,7 @@ public partial class TrackGround
 {
     private const string InfoEntryName = "qt.info";
 
-    public static TrackGround Load(JpkFile jpk, VcQuadTreeType qtType)
+    public static TrackGround Load(JpkFile jpk, VcQuadTreeTypeInfo typeInfo)
     {
         var info = jpk.Entries.FirstOrDefault(x => x.Name.Equals(InfoEntryName));
         if (info is null)
@@ -49,7 +49,7 @@ public partial class TrackGround
             
             var (x, z, level) = GetDataFromName(entry.Name);
             var nodeWidth = GridWidth >> level;
-            var qtc = new VcQuadTreeFile(entry.Data, qtType);
+            var qtc = new VcQuadTreeFile(entry.Data, typeInfo);
             ground.Set(qtc, x, z, x + nodeWidth - 1, z + nodeWidth - 1);
             Debug.Assert(qtc == ground.Get(x, z));
         }
@@ -70,7 +70,7 @@ public partial class TrackGround
 
             var entry = new JpkEntry(jpk) { Name = name, Data = qt.Bytes };
             jpk.Entries.Add(entry);
-            Console.WriteLine($"{entry.Name} {entry.Data.Length} {x} {z} {level}");
+            Debug.WriteLine($"{entry.Name} {entry.Data.Length} {x} {z} {level}");
         }
 
         var infoEntry = new JpkEntry(jpk) { Name = InfoEntryName, Data = new byte[24] };

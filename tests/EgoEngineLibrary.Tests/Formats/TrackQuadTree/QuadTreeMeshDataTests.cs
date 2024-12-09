@@ -29,11 +29,11 @@ public class QuadTreeMeshDataTests
         var numVertices = Math.Max(Math.Max(a, b), c) - 1;
         for (var i = 0; i < numVertices; ++i)
         {
-            data.Add(new QuadTreeTriangleData(new Vector3(i), new Vector3(i + 1), new Vector3(i + 2), string.Empty));
+            data.Add(new QuadTreeDataTriangle(new Vector3(i), new Vector3(i + 1), new Vector3(i + 2), string.Empty));
         }
 
         numVertices += 2;
-        data.Add(new QuadTreeTriangleData(data.Vertices[a], data.Vertices[b], data.Vertices[c], string.Empty));
+        data.Add(new QuadTreeDataTriangle(data.Vertices[a], data.Vertices[b], data.Vertices[c], string.Empty));
 
         // Act
         data.PatchUp();
@@ -70,7 +70,7 @@ public class QuadTreeMeshDataTests
             };
         }
 
-        public bool ValidateTriangle(QuadTreeTriangle triangle)
+        public bool ShouldSplit(QuadTreeMeshData data)
         {
             return true;
         }

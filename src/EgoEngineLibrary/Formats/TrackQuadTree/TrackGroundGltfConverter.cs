@@ -14,19 +14,56 @@ public static class TrackGroundGltfConverter
 {
     private const string SurfaceName = "trackSurface";
     
-    public static ModelRoot Convert(TrackGround ground)
+    public static ModelRoot Convert(TrackGround ground, bool debugMode = false)
     {
         var sceneBuilder = new SceneBuilder();
+        var defaultMaterial = MaterialBuilder.CreateDefault();
         NodeBuilder node = new(SurfaceName);
         var mesh = new MeshBuilder<VertexPosition, VertexEmpty, VertexEmpty>(SurfaceName);
 
         var materialMap = new Dictionary<string, MaterialBuilder>();
+        var meshNumber = 0;
         foreach (var data in ground.TraverseGrid())
         {
-            ConvertQuadTree(data.QuadTree, mesh, materialMap);
+            var qt = data.QuadTree;
+            var qtName = string.Empty;
+            var qtNode = node;
+            var qtMesh = mesh;
+            if (debugMode)
+            {
+                qtName = qt.Identifier ?? meshNumber.ToString();
+                qtNode = new NodeBuilder(qtName);
+                qtMesh = new MeshBuilder<VertexPosition, VertexEmpty, VertexEmpty>();
+            }
+
+            ConvertQuadTree(qt, qtMesh, materialMap);
+
+            if (!debugMode)
+            {
+                continue;
+            }
+
+            sceneBuilder.AddRigidMesh(qtMesh, qtNode);
+            meshNumber++;
+
+            var boundsMesh = new MeshBuilder<VertexPosition>();
+            var bmPrimitive = boundsMesh.UsePrimitive(defaultMaterial, 1);
+            bmPrimitive.AddPoint(new VertexPosition(qt.Header.BoundMin));
+            bmPrimitive.AddPoint(new VertexPosition(qt.Header.BoundMax));
+            sceneBuilder.AddRigidMesh(boundsMesh, new NodeBuilder(qtName + "_bounds"));
+            
+            boundsMesh = new MeshBuilder<VertexPosition>();
+            bmPrimitive = boundsMesh.UsePrimitive(defaultMaterial, 1);
+            bmPrimitive.AddPoint(new VertexPosition(data.BoundsMin));
+            bmPrimitive.AddPoint(new VertexPosition(data.BoundsMax));
+            sceneBuilder.AddRigidMesh(boundsMesh, new NodeBuilder(qtName + "_bounds2"));
         }
-        
-        sceneBuilder.AddRigidMesh(mesh, node);
+
+        if (!debugMode)
+        {
+            sceneBuilder.AddRigidMesh(mesh, node);
+        }
+
         return sceneBuilder.ToGltf2();
     }
 
@@ -66,7 +103,7 @@ public static class TrackGroundGltfConverter
         ConvertTriangles(quadTree.GetTriangles(), mesh, materialMap);
     }
 
-    private static void ConvertTriangles(IEnumerable<QuadTreeTriangleData> triangles, IMeshBuilder<MaterialBuilder> mesh,
+    private static void ConvertTriangles(IEnumerable<QuadTreeDataTriangle> triangles, IMeshBuilder<MaterialBuilder> mesh,
         Dictionary<string, MaterialBuilder> materialMap)
     {
         foreach (var triangle in triangles)

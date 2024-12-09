@@ -20,10 +20,15 @@ public class VcQuadTreeFile
     private byte[] _bytes;
     private readonly Vector3 _vertexScale;
     private readonly Vector3 _vertexOffset;
+    
+    /// <summary>
+    /// Identifier useful for debugging purposes.
+    /// </summary>
+    public string? Identifier { get; set; }
 
     public byte[] Bytes => _bytes;
 
-    public VcQuadTreeType Type { get; private set; }
+    public VcQuadTreeTypeInfo TypeInfo { get; private set; }
 
     public int NumTriangles => -(GetHeader()).NumTriangles;
 
@@ -34,8 +39,7 @@ public class VcQuadTreeFile
         get
         {
             ref var header = ref GetHeader();
-            var info = VcQuadTreeTypeInfo.Get(Type);
-            return info.NegativeMaterials ? -header.NumMaterials : header.NumMaterials;
+            return TypeInfo.NegativeMaterials ? -header.NumMaterials : header.NumMaterials;
         }
     }
     
@@ -66,10 +70,10 @@ public class VcQuadTreeFile
         }
     }
 
-    public VcQuadTreeFile(byte[] bytes, VcQuadTreeType type)
+    public VcQuadTreeFile(byte[] bytes, VcQuadTreeTypeInfo typeInfo)
     {
         _bytes = bytes;
-        Type = type;
+        TypeInfo = typeInfo;
 
         ref var header = ref Header;
         _vertexScale = (header.BoundMax - header.BoundMin) * ScaleFactor;
@@ -181,10 +185,8 @@ public class VcQuadTreeFile
         var numBytes = headerSize + vertsSize + nodesSize + trisSize + nodeTriangleListData.Count;
         var bytes = new byte[numBytes];
         ref var header = ref Unsafe.As<byte, VcQuadTreeHeader>(ref bytes[0]);
-        var boundsSize = quadTree.BoundsMax - quadTree.BoundsMin;
-        var scale = EncodeScaleFactor / boundsSize;
         header.BoundMin = quadTree.BoundsMin;
-        header.BoundMax = (boundsSize / (EncodeScaleFactor * ScaleFactor)) + quadTree.BoundsMin;
+        header.BoundMax = quadTree.BoundsMax;
         header.NumTriangles = -quadTree.Data.Triangles.Count;
         header.NumVertices = -quadTree.Data.Vertices.Count;
         header.NumMaterials = VcQuadTreeTypeInfo.Get(VcQuadTreeType.RaceDriverGrid).NegativeMaterials
@@ -196,7 +198,7 @@ public class VcQuadTreeFile
         header.TriangleReferencesOffset = Convert.ToUInt32(headerSize + vertsSize + nodesSize + trisSize);
         
         // Only support one type for now
-        var qtc = new VcQuadTreeFile(bytes, VcQuadTreeType.RaceDriverGrid);
+        var qtc = new VcQuadTreeFile(bytes, VcQuadTreeTypeInfo.Get(VcQuadTreeType.RaceDriverGrid));
 
         var materials = qtc.GetMaterials();
         for (var i = 0; i < materials.Length; ++i)
@@ -208,6 +210,8 @@ public class VcQuadTreeFile
                            (Convert.ToByte(mat[3]) << 24);
         }
 
+        var boundsSize = quadTree.BoundsMax - quadTree.BoundsMin;
+        var scale = EncodeScaleFactor / boundsSize;
         var vertices = qtc.GetVertices(qtc.Header);
         for (var i = 0; i < vertices.Length; ++i)
         {
@@ -245,14 +249,14 @@ public class VcQuadTreeFile
         }
     }
 
-    public QuadTreeTriangleData[] GetTriangles()
+    public QuadTreeDataTriangle[] GetTriangles()
     {
         var header = GetHeader();
         var vertices = GetVertices(header);
         var materials = new List<string>(NumTriangles);
         GetMaterials(materials);
 
-        var triangles = new QuadTreeTriangleData[NumTriangles];
+        var triangles = new QuadTreeDataTriangle[NumTriangles];
         Span<int> indices = stackalloc int[3];
         for (var i = 0; i < NumTriangles; ++i)
         {
@@ -262,7 +266,7 @@ public class VcQuadTreeFile
             var position0 = (vertices[indices[0]].Position * _vertexScale) + _vertexOffset;
             var position1 = (vertices[indices[1]].Position * _vertexScale) + _vertexOffset;
             var position2 = (vertices[indices[2]].Position * _vertexScale) + _vertexOffset;
-            triangles[i] = new QuadTreeTriangleData(position0, position1, position2, material);
+            triangles[i] = new QuadTreeDataTriangle(position0, position1, position2, material);
         }
 
         return triangles;
@@ -280,11 +284,11 @@ public class VcQuadTreeFile
     
     private IVcQuadTreeTriangle GetTriangle(VcQuadTreeHeader header, int index)
     {
-        return Type switch
+        return TypeInfo.Type switch
         {
             VcQuadTreeType.RaceDriverGrid or VcQuadTreeType.Dirt3 => GetTriangles<VcQuadTreeTriangle1>(header)[index],
             VcQuadTreeType.GridAutosport => GetTriangles<VcQuadTreeTriangle2>(header)[index],
-            _ => throw new NotImplementedException($"Type {Type} is not implemented.")
+            _ => throw new NotImplementedException($"Type {TypeInfo} is not implemented.")
         };
     }
 
@@ -372,20 +376,20 @@ public class VcQuadTreeFile
 
     public void ConvertType(VcQuadTreeType targetType)
     {
-        if (targetType == Type)
+        if (targetType == TypeInfo.Type)
         {
             return;
         }
 
-        if (Type == VcQuadTreeType.GridAutosport && targetType == VcQuadTreeType.Dirt3)
+        if (TypeInfo.Type == VcQuadTreeType.GridAutosport && targetType == VcQuadTreeType.Dirt3)
         {
             ConvertTriangle2To1(out var materialList);
             SetMaterials(materialList);
-            Type = VcQuadTreeType.Dirt3;
+            TypeInfo = VcQuadTreeTypeInfo.Get(VcQuadTreeType.Dirt3);
         }
         else
         {
-            throw new NotImplementedException($"Converting type {Type} to type {targetType} is not implemented.");
+            throw new NotImplementedException($"Converting type {TypeInfo} to type {targetType} is not implemented.");
         }
     }
 
@@ -455,7 +459,7 @@ public class VcQuadTreeFile
 
     public void DumpObj(TextWriter writer)
     {
-        switch (Type)
+        switch (TypeInfo.Type)
         {
             case VcQuadTreeType.RaceDriverGrid:
             case VcQuadTreeType.Dirt3:
@@ -465,7 +469,7 @@ public class VcQuadTreeFile
                 DumpGridAutosportObj(writer);
                 break;
             default:
-                throw new NotImplementedException($"Dumping type {Type} is not implemented.");
+                throw new NotImplementedException($"Dumping type {TypeInfo} is not implemented.");
         }
     }
 
@@ -791,9 +795,9 @@ public struct VcQuadTreeTriangle2 : IVcQuadTreeTriangle
         get => Vertex0Bottom2BitsSheet3BitsMaterialId3Bits & 0x07;
     }
 
-    public int Vertex0 { get; }
-    public int Vertex1 { get; }
-    public int Vertex2 { get; }
+    public int Vertex0 => throw new NotImplementedException();
+    public int Vertex1 => throw new NotImplementedException();
+    public int Vertex2 => throw new NotImplementedException();
 
     public void GetIndices(Span<int> indices)
     {

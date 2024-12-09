@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
@@ -16,6 +17,8 @@ public class QuadTreeMeshData
     public IReadOnlyList<Vector3> Vertices => _vertices;
     public IReadOnlyList<QuadTreeTriangle> Triangles => _triangles;
 
+    public IReadOnlyList<QuadTreeDataTriangle> DataTriangles { get; }
+
     public Vector3 BoundsMin { get; private set; } = new(float.MaxValue);
 
     public Vector3 BoundsMax { get; private set; } = new(float.MinValue);
@@ -28,15 +31,15 @@ public class QuadTreeMeshData
         _materials = [];
         _vertices = [];
         _triangles = [];
+        DataTriangles = new DataTriangleList(this);
     }
 
-    public bool IsValid()
+    public bool ShouldSplit()
     {
-        var tri = _triangles[^1];
-        return TypeInfo.ValidateTriangle(tri);
+        return TypeInfo.ShouldSplit(this);
     }
 
-    public void Add(QuadTreeTriangleData data)
+    public void Add(in QuadTreeDataTriangle data)
     {
         var matIndex = _materials.IndexOf(data.Material);
         if (matIndex == -1)
@@ -66,27 +69,6 @@ public class QuadTreeMeshData
         _materials.Clear();
         _vertices.Clear();
         _triangles.Clear();
-    }
-
-    public QuadTreeTriangleData[] GetTriangles()
-    {
-        var tris = new QuadTreeTriangleData[_triangles.Count];
-        for (int i = 0; i < _triangles.Count; ++i)
-        {
-            tris[i] = GetTriangle(i);
-        }
-
-        return tris;
-    }
-
-    public QuadTreeTriangleData GetTriangle(int index)
-    {
-        var tri = _triangles[index];
-        var p0 = _vertices[tri.A];
-        var p1 = _vertices[tri.B];
-        var p2 = _vertices[tri.C];
-        var matIndex = _materials[tri.MaterialIndex];
-        return new QuadTreeTriangleData(p0, p1, p2, matIndex);
     }
 
     private int GetVertexIndex(Vector3 position)
@@ -125,7 +107,8 @@ public class QuadTreeMeshData
 
     public void PatchUp()
     {
-        var maxIterations = (int)(_triangles.Count * 20.0f);
+        // Brute-force algorithm to make sure triangle indices are within range of min index
+        var maxIterations = (int)(_triangles.Count * 1.0);
         if (maxIterations == 0)
         {
             return;
@@ -177,7 +160,7 @@ public class QuadTreeMeshData
             ++iterations;
             if (iterations >= maxIterations)
             {
-                break;
+                throw new InvalidDataException("Failed to adjust triangle indices to be in range of each other.");
             }
         }
 
@@ -205,6 +188,42 @@ public class QuadTreeMeshData
                 _vertices.RemoveAt(index);
                 _vertices.Insert(insertIndex, pos);
             }
+        }
+    }
+    
+    private class DataTriangleList : IReadOnlyList<QuadTreeDataTriangle>
+    {
+        private readonly QuadTreeMeshData _data;
+        public int Count => _data._triangles.Count;
+
+        public QuadTreeDataTriangle this[int index] => GetTriangle(index);
+
+        public DataTriangleList(QuadTreeMeshData data)
+        {
+            _data = data;
+        }
+        
+        public IEnumerator<QuadTreeDataTriangle> GetEnumerator()
+        {
+            for (var i = 0; i < Count; ++i)
+            {
+                yield return GetTriangle(i);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        private QuadTreeDataTriangle GetTriangle(int index)
+        {
+            var tri = _data._triangles[index];
+            var p0 = _data._vertices[tri.A];
+            var p1 = _data._vertices[tri.B];
+            var p2 = _data._vertices[tri.C];
+            var matIndex = _data._materials[tri.MaterialIndex];
+            return new QuadTreeDataTriangle(p0, p1, p2, matIndex);
         }
     }
 }

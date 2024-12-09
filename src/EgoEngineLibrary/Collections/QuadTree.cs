@@ -3,6 +3,11 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace EgoEngineLibrary.Collections;
 
+// References
+// https://eugene-eeo.github.io/blog/qd-quadtree.html
+// https://lisyarus.github.io/blog/posts/building-a-quadtree.html
+// https://badecho.com/index.php/2023/01/14/fast-simple-quadtree/
+
 public abstract class QuadTree<TSelf, TData> where TSelf : QuadTree<TSelf, TData>
 {
     private readonly int _maxDepth;

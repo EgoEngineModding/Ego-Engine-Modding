@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 
@@ -9,7 +10,7 @@ namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
 public static class GltfTrackGroundConverter
 {
-    public static TrackGround Convert(ModelRoot gltf, IQuadTreeTypeInfo typeInfo)
+    public static TrackGround Convert(ModelRoot gltf, VcQuadTreeTypeInfo typeInfo)
     {
         var scene = gltf.DefaultScene;
         var sceneTemplate = SceneTemplate.Create(scene, new RuntimeOptions { IsolateMemory = false });
@@ -18,7 +19,7 @@ public static class GltfTrackGroundConverter
 
         var boundsMin = new Vector3(float.MaxValue);
         var boundsMax = new Vector3(float.MinValue);
-        var triangles = new List<QuadTreeTriangleData>();
+        var triangles = new List<QuadTreeDataTriangle>();
         foreach (var drawableInstance in sceneInstance)
         {
             var gltfMesh = scene.LogicalParent.LogicalMeshes[drawableInstance.Template.LogicalMeshIndex];
@@ -37,7 +38,7 @@ public static class GltfTrackGroundConverter
                     var pos0 = p.GetPosition(a, drawableInstance.Transform);
                     var pos1 = p.GetPosition(b, drawableInstance.Transform);
                     var pos2 = p.GetPosition(c, drawableInstance.Transform);
-                    var triangle = new QuadTreeTriangleData(pos0, pos1, pos2, materialName);
+                    var triangle = new QuadTreeDataTriangle(pos0, pos1, pos2, materialName);
                     triangles.Add(triangle);
 
                     var triBounds = triangle.GetBounds();
@@ -47,10 +48,7 @@ public static class GltfTrackGroundConverter
             }
         }
 
-        var quadTree = new TrackGroundQuadTree(
-            boundsMin - TrackGroundQuadTree.Padding,
-            boundsMax + TrackGroundQuadTree.Padding,
-            typeInfo);
+        var quadTree = TrackGroundQuadTree.Create(boundsMin, boundsMax, typeInfo);
         foreach (var triangle in triangles)
         {
             quadTree.Add(triangle);
