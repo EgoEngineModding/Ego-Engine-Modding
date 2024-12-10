@@ -1,9 +1,10 @@
-﻿using MiscUtil.Conversion;
-using MiscUtil.IO;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+
+using EgoEngineLibrary.Conversion;
+using EgoEngineLibrary.IO;
 
 namespace EgoEngineLibrary.Xml
 {

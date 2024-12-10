@@ -1,6 +1,7 @@
-﻿namespace EgoEngineLibrary.Graphics
+﻿using EgoEngineLibrary.Conversion;
+
+namespace EgoEngineLibrary.Graphics
 {
-    using MiscUtil.Conversion;
     using System;
     using System.Collections.Generic;
     using System.IO;
