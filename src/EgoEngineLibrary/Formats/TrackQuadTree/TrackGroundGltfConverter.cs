@@ -48,8 +48,8 @@ public static class TrackGroundGltfConverter
 
             var boundsMesh = new MeshBuilder<VertexPosition>();
             var bmPrimitive = boundsMesh.UsePrimitive(defaultMaterial, 1);
-            bmPrimitive.AddPoint(new VertexPosition(qt.Header.BoundMin));
-            bmPrimitive.AddPoint(new VertexPosition(qt.Header.BoundMax));
+            bmPrimitive.AddPoint(new VertexPosition(qt.BoundsMin));
+            bmPrimitive.AddPoint(new VertexPosition(qt.BoundsMax));
             sceneBuilder.AddRigidMesh(boundsMesh, new NodeBuilder(qtName + "_bounds"));
             
             boundsMesh = new MeshBuilder<VertexPosition>();
@@ -134,7 +134,7 @@ public static class TrackGroundGltfConverter
             var mat = new MaterialBuilder(name);
             mat.WithMetallicRoughnessShader()
                 .WithMetallicRoughness(0.1f, 0.75f)
-                .WithBaseColor(new Vector4(1, 1, 1, 1));
+                .WithBaseColor(new Vector4(1));
             return mat;
         }
     }

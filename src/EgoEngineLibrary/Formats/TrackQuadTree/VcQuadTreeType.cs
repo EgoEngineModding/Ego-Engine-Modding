@@ -7,5 +7,5 @@ public enum VcQuadTreeType
     /// </summary>
     RaceDriverGrid,
     Dirt3,
-    GridAutosport
+    DirtShowdown
 }

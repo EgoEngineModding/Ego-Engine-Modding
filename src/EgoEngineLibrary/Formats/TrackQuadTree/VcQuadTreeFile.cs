@@ -30,43 +30,39 @@ public class VcQuadTreeFile
 
     public VcQuadTreeTypeInfo TypeInfo { get; private set; }
 
-    public int NumTriangles => -(GetHeader()).NumTriangles;
+    public int NumTriangles => -Header.NumTriangles;
 
-    public int NumVertices => -(GetHeader()).NumVertices;
+    public int NumVertices => -Header.NumVertices;
 
     public int NumMaterials
     {
         get
         {
-            ref var header = ref GetHeader();
-            return TypeInfo.NegativeMaterials ? -header.NumMaterials : header.NumMaterials;
+            return TypeInfo.NegativeMaterials ? -Header.NumMaterials : Header.NumMaterials;
         }
     }
-    
+
     public unsafe int NumNodes
     {
         get
         {
-            ref var header = ref GetHeader();
-            return Convert.ToInt32((header.TrianglesOffset - header.NodesOffset) / sizeof(VcQuadTreeNode));
+            return Convert.ToInt32((Header.TrianglesOffset - Header.NodesOffset) / sizeof(VcQuadTreeNode));
         }
     }
 
-    public Vector2 BoundsMinXz
-    {
-        get
-        {
-            ref var header = ref GetHeader();
-            return new Vector2(header.BoundMin.X, header.BoundMin.Z);
-        }
-    }
+    public Vector3 BoundsMin => Header.BoundMin;
 
-    public Vector2 BoundsMaxXz
+    public Vector3 BoundsMax => Header.BoundMax;
+
+    public Vector2 BoundsMinXz => new(Header.BoundMin.X, Header.BoundMin.Z);
+
+    public Vector2 BoundsMaxXz => new(Header.BoundMax.X, Header.BoundMax.Z);
+
+    private ref VcQuadTreeHeader Header
     {
         get
         {
-            ref var header = ref GetHeader();
-            return new Vector2(header.BoundMax.X, header.BoundMax.Z);
+            return ref Unsafe.As<byte, VcQuadTreeHeader>(ref _bytes[0]);
         }
     }
 
@@ -80,21 +76,35 @@ public class VcQuadTreeFile
         _vertexOffset = header.BoundMin;
     }
 
-    public static unsafe VcQuadTreeFile Create(VcQuadTree quadTree)
+    public static VcQuadTreeFile Create(VcQuadTree quadTree)
     {
-        // TODO: validate materials
-        const int MaxNodes = short.MaxValue;
-        const int MaxVerts = ushort.MaxValue + byte.MaxValue;
-        //const int MaxTris = ushort.MaxValue;
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(quadTree.Data.Vertices.Count, MaxVerts,
-            $"The number of vertices cannot be greater than {MaxVerts}.");
-        // ArgumentOutOfRangeException.ThrowIfGreaterThan(quadTree.Data.Triangles.Count, ushort.MaxValue,
-        //     $"The number of triangles cannot be greater than {MaxTris}.");
-        
+        if (quadTree.Data.TypeInfo is not VcQuadTreeTypeInfo typeInfo)
+        {
+            throw new InvalidCastException("QuadTree is not a VcQuadTree");
+        }
+
+        const int maxNodes = short.MaxValue;
+        const int maxVerts = ((1 << 10) - 1) + byte.MaxValue;
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(quadTree.Data.Vertices.Count, maxVerts, nameof(quadTree.Data.Vertices));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(quadTree.Data.Materials.Count, typeInfo.MaxMaterials, nameof(quadTree.Data.Materials));
+
         // Encode node data
         var nodes = quadTree.Traverse().ToArray();
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(nodes.Length, MaxNodes,
-            $"The number of nodes cannot be greater than {MaxNodes}.");
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(nodes.Length, maxNodes, nameof(quadTree));
+
+        return typeInfo.Type switch
+        {
+            VcQuadTreeType.RaceDriverGrid or VcQuadTreeType.Dirt3 =>
+                Create<VcQuadTreeTriangle1>(quadTree, nodes, typeInfo),
+            VcQuadTreeType.DirtShowdown => Create<VcQuadTreeTriangle2>(quadTree, nodes, typeInfo),
+            _ => throw new NotSupportedException($"Type {typeInfo} is not supported.")
+        };
+    }
+
+    private static unsafe VcQuadTreeFile Create<T>(VcQuadTree quadTree, VcQuadTree[] nodes, VcQuadTreeTypeInfo typeInfo)
+        where T : unmanaged, IVcQuadTreeTriangle
+    {
+        // Encode node data
         var fileNodes = new VcQuadTreeNode[nodes.Length];
         var nodeTriangleListData = new List<byte>();
         var nodeParents = new Stack<Queue<int>>();
@@ -178,10 +188,12 @@ public class VcQuadTreeFile
             nodeTriangleListData.Add(255);
         }
 
-        var headerSize = sizeof(VcQuadTreeHeader) + quadTree.Data.Materials.Count * 4;
+        // Update header
+        var numMaterials = typeInfo.ForceMaxMaterials ? typeInfo.MaxMaterials : quadTree.Data.Materials.Count;
+        var headerSize = sizeof(VcQuadTreeHeader) + numMaterials * 4;
         var vertsSize = quadTree.Data.Vertices.Count * sizeof(VcQuadTreeVertex);
         var nodesSize = nodes.Length * sizeof(VcQuadTreeNode);
-        var trisSize = quadTree.Data.Triangles.Count * sizeof(VcQuadTreeTriangle1);
+        var trisSize = quadTree.Data.Triangles.Count * sizeof(T);
         var numBytes = headerSize + vertsSize + nodesSize + trisSize + nodeTriangleListData.Count;
         var bytes = new byte[numBytes];
         ref var header = ref Unsafe.As<byte, VcQuadTreeHeader>(ref bytes[0]);
@@ -189,25 +201,29 @@ public class VcQuadTreeFile
         header.BoundMax = quadTree.BoundsMax;
         header.NumTriangles = -quadTree.Data.Triangles.Count;
         header.NumVertices = -quadTree.Data.Vertices.Count;
-        header.NumMaterials = VcQuadTreeTypeInfo.Get(VcQuadTreeType.RaceDriverGrid).NegativeMaterials
-            ? -quadTree.Data.Materials.Count
-            : quadTree.Data.Materials.Count;
+        header.NumMaterials = typeInfo.NegativeMaterials ? -numMaterials : numMaterials;
         header.VerticesOffset = Convert.ToUInt32(headerSize);
         header.NodesOffset = Convert.ToUInt32(headerSize + vertsSize);
         header.TrianglesOffset = Convert.ToUInt32(headerSize + vertsSize + nodesSize);
         header.TriangleReferencesOffset = Convert.ToUInt32(headerSize + vertsSize + nodesSize + trisSize);
-        
-        // Only support one type for now
-        var qtc = new VcQuadTreeFile(bytes, VcQuadTreeTypeInfo.Get(VcQuadTreeType.RaceDriverGrid));
+
+        var qtc = new VcQuadTreeFile(bytes, typeInfo);
 
         var materials = qtc.GetMaterials();
-        for (var i = 0; i < materials.Length; ++i)
+        for (var i = 0; i < quadTree.Data.Materials.Count; ++i)
         {
             var mat = quadTree.Data.Materials[i];
             materials[i] = Convert.ToByte(mat[0]) |
                            (Convert.ToByte(mat[1]) << 8) |
                            (Convert.ToByte(mat[2]) << 16) |
                            (Convert.ToByte(mat[3]) << 24);
+        }
+
+        const int defaultMat = 0x41464544; // DEFA
+        var matToFill = materials.Length <= 0 ? defaultMat : materials[^1];
+        for (var i = quadTree.Data.Materials.Count; i < materials.Length; ++i)
+        {
+            materials[i] = matToFill;
         }
 
         var boundsSize = quadTree.BoundsMax - quadTree.BoundsMin;
@@ -221,7 +237,7 @@ public class VcQuadTreeFile
         var qtcNodes = qtc.GetNodes(qtc.Header);
         fileNodes.CopyTo(qtcNodes);
 
-        var triangles = qtc.GetTriangles<VcQuadTreeTriangle1>(qtc.Header);
+        var triangles = qtc.GetTriangles<T>(qtc.Header);
         for (var i = 0; i < triangles.Length; ++i)
         {
             var triangle = quadTree.Data.Triangles[i];
@@ -229,6 +245,7 @@ public class VcQuadTreeFile
             triangles[i].Vertex0 = triangle.A;
             triangles[i].Vertex1 = triangle.B;
             triangles[i].Vertex2 = triangle.C;
+            triangles[i].Sheet = quadTree.Data.SheetInfo[i];
         }
 
         CollectionsMarshal.AsSpan(nodeTriangleListData)
@@ -236,63 +253,39 @@ public class VcQuadTreeFile
         return qtc;
     }
 
-    public ref VcQuadTreeHeader GetHeader()
-    {
-        return ref Unsafe.As<byte, VcQuadTreeHeader>(ref _bytes[0]);
-    }
-
-    public ref VcQuadTreeHeader Header
-    {
-        get
-        {
-            return ref Unsafe.As<byte, VcQuadTreeHeader>(ref _bytes[0]);
-        }
-    }
-
     public QuadTreeDataTriangle[] GetTriangles()
     {
-        var header = GetHeader();
+        return TypeInfo.Type switch
+        {
+            VcQuadTreeType.RaceDriverGrid or VcQuadTreeType.Dirt3 => GetTriangles<VcQuadTreeTriangle1>(),
+            VcQuadTreeType.DirtShowdown => GetTriangles<VcQuadTreeTriangle2>(),
+            _ => throw new NotSupportedException($"Type {TypeInfo} is not supported.")
+        };
+    }
+
+    private QuadTreeDataTriangle[] GetTriangles<T>() where T : unmanaged, IVcQuadTreeTriangle
+    {
+        var header = Header;
+        var tris = GetTriangles<T>(header);
         var vertices = GetVertices(header);
-        var materials = new List<string>(NumTriangles);
+        var materials = new List<string>(NumMaterials);
         GetMaterials(materials);
 
         var triangles = new QuadTreeDataTriangle[NumTriangles];
-        Span<int> indices = stackalloc int[3];
         for (var i = 0; i < NumTriangles; ++i)
         {
-            var triangle = GetTriangle(header, i);
-            var material = materials[triangle.MaterialIndex];
-            triangle.GetIndices(indices);
-            var position0 = (vertices[indices[0]].Position * _vertexScale) + _vertexOffset;
-            var position1 = (vertices[indices[1]].Position * _vertexScale) + _vertexOffset;
-            var position2 = (vertices[indices[2]].Position * _vertexScale) + _vertexOffset;
+            var triangle = tris[i];
+            var material = TypeInfo.GetMaterial(materials[triangle.MaterialIndex], triangle.Sheet);
+            var position0 = (vertices[triangle.Vertex0].Position * _vertexScale) + _vertexOffset;
+            var position1 = (vertices[triangle.Vertex1].Position * _vertexScale) + _vertexOffset;
+            var position2 = (vertices[triangle.Vertex2].Position * _vertexScale) + _vertexOffset;
             triangles[i] = new QuadTreeDataTriangle(position0, position1, position2, material);
         }
 
         return triangles;
     }
-    
-    public Vector3 GetRawVertex(int index)
-    {
-        return GetVertices(Header)[index].Position;
-    }
-    
-    public IVcQuadTreeTriangle GetTriangle(int index)
-    {
-        return GetTriangle(Header, index);
-    }
-    
-    private IVcQuadTreeTriangle GetTriangle(VcQuadTreeHeader header, int index)
-    {
-        return TypeInfo.Type switch
-        {
-            VcQuadTreeType.RaceDriverGrid or VcQuadTreeType.Dirt3 => GetTriangles<VcQuadTreeTriangle1>(header)[index],
-            VcQuadTreeType.GridAutosport => GetTriangles<VcQuadTreeTriangle2>(header)[index],
-            _ => throw new NotImplementedException($"Type {TypeInfo} is not implemented.")
-        };
-    }
 
-    public unsafe void GetMaterials(HashSet<string> materials)
+    public unsafe void GetMaterials(ICollection<string> materials)
     {
         Span<byte> materialBytes = _bytes.AsSpan(sizeof(VcQuadTreeHeader), NumMaterials * 4);
         while (materialBytes.Length > 0)
@@ -311,33 +304,8 @@ public class VcQuadTreeFile
         }
     }
 
-    public unsafe void GetMaterials(IList<string> materials)
+    private unsafe void SetMaterials(ReadOnlySpan<int> materials)
     {
-        Span<byte> materialBytes = _bytes.AsSpan(sizeof(VcQuadTreeHeader), NumMaterials * 4);
-        while (materialBytes.Length > 0)
-        {
-            var material = string.Create(4, (nuint)(&materialBytes), static (material, ptr) =>
-            {
-                var state = *(ReadOnlySpan<byte>*)ptr;
-                material[0] = (char)state[0];
-                material[1] = (char)state[1];
-                material[2] = (char)state[2];
-                material[3] = (char)state[3];
-            });
-
-            materialBytes = materialBytes[4..];
-            materials.Add(material);
-        }
-    }
-
-    public unsafe Span<int> GetMaterials()
-    {
-        return MemoryMarshal.Cast<byte, int>(_bytes.AsSpan(sizeof(VcQuadTreeHeader), NumMaterials * 4));
-    }
-
-    public unsafe void SetMaterials(ReadOnlySpan<int> materials)
-    {
-        // TODO: Validate num materials for type
         if (NumMaterials == materials.Length)
         {
             materials.CopyTo(GetMaterials());
@@ -366,7 +334,7 @@ public class VcQuadTreeFile
         sourceMaterialBytes.CopyTo(targetMaterialBytes);
         
         // Update offsets
-        ref var header = ref GetHeader();
+        ref var header = ref Header;
         header.NumMaterials = materials.Length;
         header.VerticesOffset = (uint)(header.VerticesOffset + bytesDelta);
         header.NodesOffset = (uint)(header.NodesOffset + bytesDelta);
@@ -381,7 +349,7 @@ public class VcQuadTreeFile
             return;
         }
 
-        if (TypeInfo.Type == VcQuadTreeType.GridAutosport && targetType == VcQuadTreeType.Dirt3)
+        if (TypeInfo.Type == VcQuadTreeType.DirtShowdown && targetType == VcQuadTreeType.Dirt3)
         {
             ConvertTriangle2To1(out var materialList);
             SetMaterials(materialList);
@@ -389,7 +357,7 @@ public class VcQuadTreeFile
         }
         else
         {
-            throw new NotImplementedException($"Converting type {TypeInfo} to type {targetType} is not implemented.");
+            throw new NotSupportedException($"Converting type {TypeInfo} to type {targetType} is not supported.");
         }
     }
 
@@ -399,7 +367,7 @@ public class VcQuadTreeFile
         var numMaterials = 0;
         materialList = new int[16];
         
-        var header = GetHeader();
+        var header = Header;
         var headerMaterials = GetMaterials();
         var triangleBytes = Bytes.AsSpan(Convert.ToInt32(header.TrianglesOffset),
             sizeof(VcQuadTreeTriangle2) * NumTriangles);
@@ -412,8 +380,8 @@ public class VcQuadTreeFile
             ref var sourceTri = ref source[i];
             ref var targetTri = ref target[i];
 
-            var sourceMaterialId = sourceTri.GetMaterialId();
-            var sourceSheet = sourceTri.GetSheet();
+            var sourceMaterialId = sourceTri.MaterialIndex;
+            var sourceSheet = sourceTri.Sheet;
             var material = headerMaterials[sourceMaterialId];
             if ((sourceSheet & 0x01) != 0)
             {
@@ -429,12 +397,11 @@ public class VcQuadTreeFile
                 ++numMaterials;
             }
 
-            var sourceVert0 = sourceTri.GetVertex0Index();
-            targetTri.Vertex0 = sourceVert0;
-            targetTri.SetSheet((byte)(sourceSheet >> 1));
+            targetTri.Sheet = sourceSheet >> 1;
             targetTri.MaterialIndex = targetMaterialId;
-            targetTri.Vertex1 = sourceVert0 + sourceTri.Vertex1Offset;
-            targetTri.Vertex2 = sourceVert0 + sourceTri.Vertex2Offset;
+            targetTri.Vertex0 = sourceTri.Vertex0;
+            targetTri.Vertex1 = sourceTri.Vertex1;
+            targetTri.Vertex2 = sourceTri.Vertex2;
         }
         
         destination.CopyTo(triangleBytes);
@@ -450,11 +417,13 @@ public class VcQuadTreeFile
             materialList[numMaterials] = lastMaterial;
             ++numMaterials;
         }
-    }
 
-    private static int GetMaterialIndex(ReadOnlySpan<int> materials, int material)
-    {
-        return materials.IndexOf(material);
+        return;
+
+        static int GetMaterialIndex(ReadOnlySpan<int> materials, int material)
+        {
+            return materials.IndexOf(material);
+        }
     }
 
     public void DumpObj(TextWriter writer)
@@ -463,62 +432,33 @@ public class VcQuadTreeFile
         {
             case VcQuadTreeType.RaceDriverGrid:
             case VcQuadTreeType.Dirt3:
-                DumpRdgObj(writer);
+                DumpObj<VcQuadTreeTriangle1>(writer);
                 break;
-            case VcQuadTreeType.GridAutosport:
-                DumpGridAutosportObj(writer);
+            case VcQuadTreeType.DirtShowdown:
+                DumpObj<VcQuadTreeTriangle2>(writer);
                 break;
             default:
-                throw new NotImplementedException($"Dumping type {TypeInfo} is not implemented.");
+                throw new NotSupportedException($"Dumping type {TypeInfo} is not supported.");
         }
     }
 
-    private void DumpGridAutosportObj(TextWriter writer)
+    private void DumpObj<T>(TextWriter writer) where T : unmanaged, IVcQuadTreeTriangle
     {
-        var header = GetHeader();
-        var vertexScale = (header.BoundMax - header.BoundMin) *
-                          new Vector3(0.000000059604645f, 0.000015258789f, 0.000000059604645f);
-        var vertexOffset = header.BoundMin;
-        
+        var header = Header;
         var vertices = GetVertices(header);
-        var triangles = GetTriangles<VcQuadTreeTriangle2>(header);
+        var triangles = GetTriangles<T>(header);
 
         for (var i = 0; i < vertices.Length; ++i)
         {
-            var position = (vertices[i].Position * vertexScale) + vertexOffset;
+            var position = (vertices[i].Position * _vertexScale) + _vertexOffset;
             writer.WriteLine(
                 $"v {position.X.ToString("R", CultureInfo.InvariantCulture)} {position.Y.ToString("R", CultureInfo.InvariantCulture)} {position.Z.ToString("R", CultureInfo.InvariantCulture)}");
         }
 
-        Span<int> indices = stackalloc int[3];
         for (var i = 0; i < triangles.Length; ++i)
         {
-            triangles[i].GetIndices(indices);
-            writer.WriteLine($"f {indices[0] + 1} {indices[1] + 1} {indices[2] + 1}");
-        }
-    }
-    private void DumpRdgObj(TextWriter writer)
-    {
-        var header = GetHeader();
-        var vertexScale = (header.BoundMax - header.BoundMin) *
-                          new Vector3(0.000000059604645f, 0.000015258789f, 0.000000059604645f);
-        var vertexOffset = header.BoundMin;
-        
-        var vertices = GetVertices(header);
-        var triangles = GetTriangles<VcQuadTreeTriangle1>(header);
-
-        for (var i = 0; i < vertices.Length; ++i)
-        {
-            var position = (vertices[i].Position * vertexScale) + vertexOffset;
-            writer.WriteLine(
-                $"v {position.X.ToString("R", CultureInfo.InvariantCulture)} {position.Y.ToString("R", CultureInfo.InvariantCulture)} {position.Z.ToString("R", CultureInfo.InvariantCulture)}");
-        }
-
-        Span<int> indices = stackalloc int[3];
-        for (var i = 0; i < triangles.Length; ++i)
-        {
-            triangles[i].GetIndices(indices);
-            writer.WriteLine($"f {indices[0] + 1} {indices[1] + 1} {indices[2] + 1}");
+            var tri = triangles[i];
+            writer.WriteLine($"f {tri.Vertex0 + 1} {tri.Vertex1 + 1} {tri.Vertex2 + 1}");
         }
     }
 
@@ -527,7 +467,7 @@ public class VcQuadTreeFile
         ArgumentOutOfRangeException.ThrowIfLessThan(childSelect, 0, nameof(childSelect));
         ArgumentOutOfRangeException.ThrowIfGreaterThan(childSelect, 3, nameof(childSelect));
 
-        var nodes = GetNodes(GetHeader());
+        var nodes = GetNodes(Header);
         var node = nodes[nodeIndex];
         if (node.IsLeaf)
         {
@@ -599,7 +539,12 @@ public class VcQuadTreeFile
         return count;
     }
 
-    private unsafe Span<T> GetTriangles<T>(VcQuadTreeHeader header) where T : unmanaged
+    private unsafe Span<int> GetMaterials()
+    {
+        return MemoryMarshal.Cast<byte, int>(_bytes.AsSpan(sizeof(VcQuadTreeHeader), NumMaterials * 4));
+    }
+
+    private unsafe Span<T> GetTriangles<T>(VcQuadTreeHeader header) where T : unmanaged, IVcQuadTreeTriangle
     {
         return MemoryMarshal.Cast<byte, T>(_bytes.AsSpan(Convert.ToInt32(header.TrianglesOffset),
             sizeof(T) * NumTriangles));
@@ -611,14 +556,14 @@ public class VcQuadTreeFile
             sizeof(VcQuadTreeVertex) * NumVertices));
     }
 
-    private unsafe Span<VcQuadTreeNode> GetNodes(VcQuadTreeHeader header)
+    private Span<VcQuadTreeNode> GetNodes(VcQuadTreeHeader header)
     {
         var nodesLength = Convert.ToInt32(header.TrianglesOffset - header.NodesOffset);
         return MemoryMarshal.Cast<byte, VcQuadTreeNode>(_bytes.AsSpan(Convert.ToInt32(header.NodesOffset),
             nodesLength));
     }
-    
-    public struct VcQuadTreeHeader
+
+    private struct VcQuadTreeHeader
     {
         public Vector3 BoundMin { get; set; }
         public Vector3 BoundMax { get; set; }
@@ -631,7 +576,7 @@ public class VcQuadTreeFile
         public uint TriangleReferencesOffset { get; set; }
     }
 
-    public struct VcQuadTreeVertex
+    private struct VcQuadTreeVertex
     {
         private const int MaxX = (1 << 24) - 1;
         private const int MaxY = ushort.MaxValue;
@@ -698,10 +643,24 @@ public class VcQuadTreeFile
         }
     }
 
+    private interface IVcQuadTreeTriangle
+    {
+        int Sheet { get; set; }
+    
+        int MaterialIndex { get; set; }
+    
+        int Vertex0 { get; set; }
+
+        int Vertex1 { get; set; }
+
+        int Vertex2 { get; set; }
+    }
+
     private struct VcQuadTreeTriangle1 : IVcQuadTreeTriangle
     {
         private const int MaxVert0 = (1 << 10) - 1;
         private const int MaxVertOffset = byte.MaxValue;
+        private const int MaxMaterialIndex = (1 << 4) - 1;
 
         // unsure if this means sheet
         byte Sheet2BitsVertex0Top6Bits { get; set; }
@@ -709,11 +668,22 @@ public class VcQuadTreeFile
         byte Vertex1Offset { get; set; }
         byte Vertex2Offset { get; set; }
 
+        public int Sheet
+        {
+            get => Sheet2BitsVertex0Top6Bits >> 6;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, 3, nameof(Sheet));
+                Sheet2BitsVertex0Top6Bits = (byte)((Sheet2BitsVertex0Top6Bits & 0x3F) | ((value & 0x03) << 6));
+            }
+        }
+
         public int MaterialIndex
         {
             get => (Vertex0Bottom4BitsMaterialId4Bits & 0x0F);
             set
             {
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, MaxMaterialIndex, nameof(MaterialIndex));
                 Vertex0Bottom4BitsMaterialId4Bits = (byte)((Vertex0Bottom4BitsMaterialId4Bits & 0xF0) | (value & 0x0F));
             }
         }
@@ -723,8 +693,7 @@ public class VcQuadTreeFile
             get => ((Sheet2BitsVertex0Top6Bits & 0x3F) << 4) | (Vertex0Bottom4BitsMaterialId4Bits >> 4);
             set
             {
-                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, MaxVert0,
-                    $"Triangle vertex 0 cannot be greater than {MaxVert0}.");
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, MaxVert0, nameof(Vertex0));
                 Sheet2BitsVertex0Top6Bits = (byte)((Sheet2BitsVertex0Top6Bits & 0xC0) | ((value >>> 4) & 0x3F));
                 Vertex0Bottom4BitsMaterialId4Bits =
                     (byte)((Vertex0Bottom4BitsMaterialId4Bits & 0x0F) | ((value & 0x0F) << 4));
@@ -737,8 +706,7 @@ public class VcQuadTreeFile
             set
             {
                 var offset = value - Vertex0;
-                ArgumentOutOfRangeException.ThrowIfGreaterThan(offset, MaxVertOffset,
-                    $"Triangle vertex 1 offset cannot be greater than {MaxVertOffset}.");
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(offset, MaxVertOffset, nameof(Vertex1));
                 Vertex1Offset = (byte)offset;
             }
         }
@@ -749,132 +717,131 @@ public class VcQuadTreeFile
             set
             {
                 var offset = value - Vertex0;
-                ArgumentOutOfRangeException.ThrowIfGreaterThan(offset, MaxVertOffset,
-                    $"Triangle vertex 2 offset cannot be greater than {MaxVertOffset}.");
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(offset, MaxVertOffset, nameof(Vertex2));
                 Vertex2Offset = (byte)offset;
             }
         }
+    }
 
-        public void GetIndices(Span<int> indices)
+    private struct VcQuadTreeTriangle2 : IVcQuadTreeTriangle
+    {
+        private const int MaxVert0 = (1 << 10) - 1;
+        private const int MaxVertOffset = byte.MaxValue;
+        private const int MaxMaterialIndex = (1 << 4) - 1;
+
+        byte Vertex0Top8Bits { get; set; }
+        byte Vertex0Bottom2BitsSheet3BitsMaterialId3Bits { get; set; }
+        byte Vertex1Offset { get; set; }
+        byte Vertex2Offset { get; set; }
+
+        public int Sheet
         {
-            var index0 = ((Sheet2BitsVertex0Top6Bits & 0x3F) << 4) | (Vertex0Bottom4BitsMaterialId4Bits >> 4);
-            indices[0] = index0;
-            indices[1] = index0 + Vertex1Offset;
-            indices[2] = index0 + Vertex2Offset;
-        }
-
-        public void SetSheet(byte index)
-        {
-            Sheet2BitsVertex0Top6Bits = (byte)((Sheet2BitsVertex0Top6Bits & 0x3F) | ((index & 0x03) << 6));
-        }
-    }
-}
-
-public interface IVcQuadTreeTriangle
-{
-    int MaterialIndex { get; }
-    
-    int Vertex0 { get; }
-
-    int Vertex1 { get; }
-
-    int Vertex2 { get; }
-    
-    void GetIndices(Span<int> indices);
-}
-
-public struct VcQuadTreeTriangle2 : IVcQuadTreeTriangle
-{
-    public byte Vertex0Top8Bits { get; set; }
-    public byte Vertex0Bottom2BitsSheet3BitsMaterialId3Bits { get; set; }
-    public byte Vertex1Offset { get; set; }
-    public byte Vertex2Offset { get; set; }
-
-    public int MaterialIndex
-    {
-        get => Vertex0Bottom2BitsSheet3BitsMaterialId3Bits & 0x07;
-    }
-
-    public int Vertex0 => throw new NotImplementedException();
-    public int Vertex1 => throw new NotImplementedException();
-    public int Vertex2 => throw new NotImplementedException();
-
-    public void GetIndices(Span<int> indices)
-    {
-        var index0 = (Vertex0Bottom2BitsSheet3BitsMaterialId3Bits >> 6) | (Vertex0Top8Bits << 2);
-        indices[0] = index0;
-        indices[1] = index0 + Vertex1Offset;
-        indices[2] = index0 + Vertex2Offset;
-    }
-
-    public short GetVertex0Index()
-    {
-        return (short)((Vertex0Top8Bits << 2) | (Vertex0Bottom2BitsSheet3BitsMaterialId3Bits >> 6));
-    }
-
-    public byte GetSheet()
-    {
-        return (byte)((Vertex0Bottom2BitsSheet3BitsMaterialId3Bits & 0x38) >> 3);
-    }
-
-    public short GetMaterialId()
-    {
-        return (short)(Vertex0Bottom2BitsSheet3BitsMaterialId3Bits & 0x07);
-    }
-}
-
-public struct VcQuadTreeNode
-{
-    private const int MaxTriangleListOffset = 0x7FFE;
-    private const int MaxChildIndex = 0x7FFF;
-    private const int LeafBit = 0x8000;
-    private const int LeafWithoutTrianglesId = 0xFFFF;
-    
-    byte Data0 { get; set; }
-    byte Data1 { get; set; }
-
-    private int ChildIndexOrTriangleListOffset
-    {
-        get => (Data0 << 8) | Data1;
-        set
-        {
-            Data0 = (byte)((value >> 8) & 0xFF);
-            Data1 = (byte)(value & 0xFF);
-        }
-    }
-
-    public int TriangleListOffset
-    {
-        get => ChildIndexOrTriangleListOffset & (~LeafBit);
-        set
-        {
-            if (value == -1)
+            get => (Vertex0Bottom2BitsSheet3BitsMaterialId3Bits & 0x38) >> 3;
+            set
             {
-                ChildIndexOrTriangleListOffset = LeafWithoutTrianglesId;
-                return;
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, 7, nameof(Sheet));
+                Vertex0Bottom2BitsSheet3BitsMaterialId3Bits =
+                    (byte)((Vertex0Bottom2BitsSheet3BitsMaterialId3Bits & 0xC7) | ((value & 0x07) << 3));
             }
-            
-            ArgumentOutOfRangeException.ThrowIfNegative(value);
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(value, MaxTriangleListOffset,
-                $"Node triangle list offset cannot be greater than {MaxTriangleListOffset}.");
-            ChildIndexOrTriangleListOffset = value | LeafBit;
         }
-    }
 
-    public int ChildIndex
-    {
-        get => ChildIndexOrTriangleListOffset;
-        set
+        public int MaterialIndex
         {
-            ArgumentOutOfRangeException.ThrowIfNegative(value);
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(value, MaxChildIndex,
-                $"Node child index cannot be greater than {MaxChildIndex}.");
+            get => Vertex0Bottom2BitsSheet3BitsMaterialId3Bits & 0x07;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, MaxMaterialIndex, nameof(MaterialIndex));
+                Vertex0Bottom2BitsSheet3BitsMaterialId3Bits =
+                    (byte)((Vertex0Bottom2BitsSheet3BitsMaterialId3Bits & 0xF8) | (value & 0x07));
+            }
+        }
 
-            ChildIndexOrTriangleListOffset = value;
+        public int Vertex0
+        {
+            get => (Vertex0Top8Bits << 2) | (Vertex0Bottom2BitsSheet3BitsMaterialId3Bits >> 6);
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, MaxVert0, nameof(Vertex0));
+                Vertex0Top8Bits = (byte)(value >>> 2);
+                Vertex0Bottom2BitsSheet3BitsMaterialId3Bits =
+                    (byte)((Vertex0Bottom2BitsSheet3BitsMaterialId3Bits & 0x3F) | ((value & 0x03) << 6));
+            }
+        }
+
+        public int Vertex1
+        {
+            get => Vertex0 + Vertex1Offset;
+            set
+            {
+                var offset = value - Vertex0;
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(offset, MaxVertOffset, nameof(Vertex1));
+                Vertex1Offset = (byte)offset;
+            }
+        }
+
+        public int Vertex2
+        {
+            get => Vertex0 + Vertex2Offset;
+            set
+            {
+                var offset = value - Vertex0;
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(offset, MaxVertOffset, nameof(Vertex2));
+                Vertex2Offset = (byte)offset;
+            }
         }
     }
-    
-    public bool IsLeaf => (ChildIndexOrTriangleListOffset & LeafBit) != 0;
 
-    public bool HasTriangles => IsLeaf && ChildIndexOrTriangleListOffset != LeafWithoutTrianglesId;
+    private struct VcQuadTreeNode
+    {
+        private const int MaxTriangleListOffset = 0x7FFE;
+        private const int MaxChildIndex = 0x7FFF;
+        private const int LeafBit = 0x8000;
+        private const int LeafWithoutTrianglesId = 0xFFFF;
+    
+        byte Data0 { get; set; }
+        byte Data1 { get; set; }
+
+        private int ChildIndexOrTriangleListOffset
+        {
+            get => (Data0 << 8) | Data1;
+            set
+            {
+                Data0 = (byte)((value >> 8) & 0xFF);
+                Data1 = (byte)(value & 0xFF);
+            }
+        }
+
+        public int TriangleListOffset
+        {
+            get => ChildIndexOrTriangleListOffset & (~LeafBit);
+            set
+            {
+                if (value == -1)
+                {
+                    ChildIndexOrTriangleListOffset = LeafWithoutTrianglesId;
+                    return;
+                }
+            
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, MaxTriangleListOffset, nameof(TriangleListOffset));
+                ChildIndexOrTriangleListOffset = value | LeafBit;
+            }
+        }
+
+        public int ChildIndex
+        {
+            get => ChildIndexOrTriangleListOffset;
+            set
+            {
+                ArgumentOutOfRangeException.ThrowIfNegative(value);
+                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, MaxChildIndex, nameof(ChildIndex));
+
+                ChildIndexOrTriangleListOffset = value;
+            }
+        }
+    
+        public bool IsLeaf => (ChildIndexOrTriangleListOffset & LeafBit) != 0;
+
+        public bool HasTriangles => IsLeaf && ChildIndexOrTriangleListOffset != LeafWithoutTrianglesId;
+    }
 }

@@ -59,6 +59,16 @@ public class QuadTreeMeshDataTests
 
     private class TypeInfo : IQuadTreeTypeInfo
     {
+        public int GetSheetInfo(ref string material)
+        {
+            return 0;
+        }
+
+        public string GetMaterial(string material, int sheetInfo)
+        {
+            throw new NotImplementedException();
+        }
+
         public int GetTriangleIndexOffset(int minIndex, int index)
         {
             Assert.True(minIndex <= index);
@@ -72,7 +82,7 @@ public class QuadTreeMeshDataTests
 
         public bool ShouldSplit(QuadTreeMeshData data)
         {
-            return true;
+            throw new NotImplementedException();
         }
     }
 }

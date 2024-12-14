@@ -6,6 +6,10 @@ namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
 public interface IQuadTreeTypeInfo
 {
+    int GetSheetInfo(ref string material);
+
+    string GetMaterial(string material, int sheetInfo);
+    
     int GetTriangleIndexOffset(int minIndex, int index);
     
     bool ShouldSplit(QuadTreeMeshData data);
@@ -18,6 +22,12 @@ public class VcQuadTreeTypeInfo : IQuadTreeTypeInfo
     public VcQuadTreeType Type { get; private init; }
 
     public bool NegativeMaterials { get; private init; }
+
+    public int MaxMaterials { get; private init; }
+
+    public bool ForceMaxMaterials { get; private init; }
+    
+    public bool SupportsSheetMaterials { get; private init; }
 
     private const int MaxVert0 = 1023;
     private const int MaxOffset = byte.MaxValue;
@@ -44,21 +54,30 @@ public class VcQuadTreeTypeInfo : IQuadTreeTypeInfo
             [VcQuadTreeType.RaceDriverGrid] = new()
             {
                 Type = VcQuadTreeType.RaceDriverGrid,
-                NegativeMaterials = true
+                NegativeMaterials = true,
+                MaxMaterials = 16,
+                ForceMaxMaterials = false,
+                SupportsSheetMaterials = true,
             },
             [VcQuadTreeType.Dirt3] = new()
             {
                 Type = VcQuadTreeType.Dirt3,
-                NegativeMaterials = false
+                NegativeMaterials = false,
+                MaxMaterials = 16,
+                ForceMaxMaterials = true,
+                SupportsSheetMaterials = true,
             },
-            [VcQuadTreeType.GridAutosport] = new()
+            [VcQuadTreeType.DirtShowdown] = new()
             {
-                Type = VcQuadTreeType.GridAutosport,
-                NegativeMaterials = false
+                Type = VcQuadTreeType.DirtShowdown,
+                NegativeMaterials = false,
+                MaxMaterials = 8,
+                ForceMaxMaterials = true,
+                SupportsSheetMaterials = false,
             }
         };
     }
-    
+
     public static VcQuadTreeTypeInfo Get(VcQuadTreeType type)
     {
         if (!Infos.TryGetValue(type, out var info))
@@ -71,6 +90,30 @@ public class VcQuadTreeTypeInfo : IQuadTreeTypeInfo
 
     private VcQuadTreeTypeInfo()
     {
+    }
+
+    public int GetSheetInfo(ref string material)
+    {
+        var isStarMat = (material[3] == '*');
+        // Not sure how to calculate sheet info. Just set to 1 if isStarMat
+        if (SupportsSheetMaterials || !isStarMat)
+        {
+            return 0;
+        }
+
+        material = material[..^1] + "+";
+        return 1;
+    }
+
+    public string GetMaterial(string material, int sheetInfo)
+    {
+        var isStarMat = (material[3] == '+' && (sheetInfo & 0x1) != 0);
+        if (SupportsSheetMaterials || !isStarMat)
+        {
+            return material;
+        }
+
+        return material[..^1] + "*";
     }
 
     public int GetTriangleIndexOffset(int minIndex, int index)
@@ -87,8 +130,9 @@ public class VcQuadTreeTypeInfo : IQuadTreeTypeInfo
 
     public bool ShouldSplit(QuadTreeMeshData data)
     {
-        // TODO: some games only go up to 8 mats
-        return data.Triangles.Count > 2048 || data.Vertices.Count > (MaxVert0 + 1) || data.Materials.Count > 16;
+        return data.Triangles.Count > 2048 ||
+               data.Vertices.Count > (MaxVert0 + 1) ||
+               data.Materials.Count > MaxMaterials;
     }
 
     public override string ToString()

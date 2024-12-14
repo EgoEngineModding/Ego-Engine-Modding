@@ -12,12 +12,17 @@ public class QuadTreeMeshData
     private readonly List<string> _materials;
     private readonly List<Vector3> _vertices;
     private readonly List<QuadTreeTriangle> _triangles;
+    private readonly List<int> _sheetInfo;
 
     public IReadOnlyList<string> Materials => _materials;
+
     public IReadOnlyList<Vector3> Vertices => _vertices;
+
     public IReadOnlyList<QuadTreeTriangle> Triangles => _triangles;
 
     public IReadOnlyList<QuadTreeDataTriangle> DataTriangles { get; }
+    
+    public IReadOnlyList<int> SheetInfo => _sheetInfo;
 
     public Vector3 BoundsMin { get; private set; } = new(float.MaxValue);
 
@@ -31,6 +36,7 @@ public class QuadTreeMeshData
         _materials = [];
         _vertices = [];
         _triangles = [];
+        _sheetInfo = [];
         DataTriangles = new DataTriangleList(this);
     }
 
@@ -41,11 +47,14 @@ public class QuadTreeMeshData
 
     public void Add(in QuadTreeDataTriangle data)
     {
-        var matIndex = _materials.IndexOf(data.Material);
+        var mat = data.Material;
+        var sheetInfo = TypeInfo.GetSheetInfo(ref mat);
+        
+        var matIndex = _materials.IndexOf(mat);
         if (matIndex == -1)
         {
             matIndex = _materials.Count;
-            _materials.Add(data.Material);
+            _materials.Add(mat);
         }
 
         var a = GetVertexIndex(data.Position0);
@@ -55,6 +64,7 @@ public class QuadTreeMeshData
         if (_triangles.IndexOf(tri) == -1)
         {
             _triangles.Add(tri);
+            _sheetInfo.Add(sheetInfo);
         }
 
         var bounds = data.GetBounds();
@@ -69,6 +79,7 @@ public class QuadTreeMeshData
         _materials.Clear();
         _vertices.Clear();
         _triangles.Clear();
+        _sheetInfo.Clear();
     }
 
     private int GetVertexIndex(Vector3 position)
@@ -191,18 +202,12 @@ public class QuadTreeMeshData
         }
     }
     
-    private class DataTriangleList : IReadOnlyList<QuadTreeDataTriangle>
+    private class DataTriangleList(QuadTreeMeshData data) : IReadOnlyList<QuadTreeDataTriangle>
     {
-        private readonly QuadTreeMeshData _data;
-        public int Count => _data._triangles.Count;
+        public int Count => data._triangles.Count;
 
         public QuadTreeDataTriangle this[int index] => GetTriangle(index);
 
-        public DataTriangleList(QuadTreeMeshData data)
-        {
-            _data = data;
-        }
-        
         public IEnumerator<QuadTreeDataTriangle> GetEnumerator()
         {
             for (var i = 0; i < Count; ++i)
@@ -218,11 +223,11 @@ public class QuadTreeMeshData
 
         private QuadTreeDataTriangle GetTriangle(int index)
         {
-            var tri = _data._triangles[index];
-            var p0 = _data._vertices[tri.A];
-            var p1 = _data._vertices[tri.B];
-            var p2 = _data._vertices[tri.C];
-            var matIndex = _data._materials[tri.MaterialIndex];
+            var tri = data._triangles[index];
+            var p0 = data._vertices[tri.A];
+            var p1 = data._vertices[tri.B];
+            var p2 = data._vertices[tri.C];
+            var matIndex = data._materials[tri.MaterialIndex];
             return new QuadTreeDataTriangle(p0, p1, p2, matIndex);
         }
     }
