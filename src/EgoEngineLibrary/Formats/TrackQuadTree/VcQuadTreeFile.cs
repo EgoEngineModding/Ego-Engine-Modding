@@ -66,14 +66,29 @@ public class VcQuadTreeFile
         }
     }
 
-    public VcQuadTreeFile(byte[] bytes, VcQuadTreeTypeInfo typeInfo)
+    public VcQuadTreeFile(byte[] bytes, VcQuadTreeTypeInfo? typeInfo = null)
     {
+        typeInfo ??= Identify(bytes);
+        
         _bytes = bytes;
         TypeInfo = typeInfo;
 
         ref var header = ref Header;
         _vertexScale = (header.BoundMax - header.BoundMin) * ScaleFactor;
         _vertexOffset = header.BoundMin;
+    }
+
+    public static VcQuadTreeTypeInfo Identify(byte[] bytes)
+    {
+        var header = Unsafe.As<byte, VcQuadTreeHeader>(ref bytes[0]);
+        if (header.NumMaterials < 0)
+        {
+            return VcQuadTreeTypeInfo.Get(VcQuadTreeType.RaceDriverGrid);
+        }
+
+        return header.NumMaterials == 16
+            ? VcQuadTreeTypeInfo.Get(VcQuadTreeType.Dirt3)
+            : VcQuadTreeTypeInfo.Get(VcQuadTreeType.DirtShowdown);
     }
 
     public static VcQuadTreeFile Create(VcQuadTree quadTree)
@@ -220,7 +235,7 @@ public class VcQuadTreeFile
         }
 
         const int defaultMat = 0x41464544; // DEFA
-        var matToFill = materials.Length <= 0 ? defaultMat : materials[^1];
+        var matToFill = materials.Length <= 0 ? defaultMat : materials[quadTree.Data.Materials.Count - 1];
         for (var i = quadTree.Data.Materials.Count; i < materials.Length; ++i)
         {
             materials[i] = matToFill;
@@ -706,6 +721,7 @@ public class VcQuadTreeFile
             set
             {
                 var offset = value - Vertex0;
+                ArgumentOutOfRangeException.ThrowIfNegative(offset, nameof(Vertex1));
                 ArgumentOutOfRangeException.ThrowIfGreaterThan(offset, MaxVertOffset, nameof(Vertex1));
                 Vertex1Offset = (byte)offset;
             }
@@ -717,6 +733,7 @@ public class VcQuadTreeFile
             set
             {
                 var offset = value - Vertex0;
+                ArgumentOutOfRangeException.ThrowIfNegative(offset, nameof(Vertex2));
                 ArgumentOutOfRangeException.ThrowIfGreaterThan(offset, MaxVertOffset, nameof(Vertex2));
                 Vertex2Offset = (byte)offset;
             }
@@ -774,6 +791,7 @@ public class VcQuadTreeFile
             set
             {
                 var offset = value - Vertex0;
+                ArgumentOutOfRangeException.ThrowIfNegative(offset, nameof(Vertex1));
                 ArgumentOutOfRangeException.ThrowIfGreaterThan(offset, MaxVertOffset, nameof(Vertex1));
                 Vertex1Offset = (byte)offset;
             }
@@ -785,6 +803,7 @@ public class VcQuadTreeFile
             set
             {
                 var offset = value - Vertex0;
+                ArgumentOutOfRangeException.ThrowIfNegative(offset, nameof(Vertex2));
                 ArgumentOutOfRangeException.ThrowIfGreaterThan(offset, MaxVertOffset, nameof(Vertex2));
                 Vertex2Offset = (byte)offset;
             }

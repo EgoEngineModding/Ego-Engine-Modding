@@ -13,8 +13,21 @@ public partial class TrackGround
 {
     private const string InfoEntryName = "qt.info";
 
-    public static TrackGround Load(JpkFile jpk, VcQuadTreeTypeInfo typeInfo)
+    public static VcQuadTreeTypeInfo Identify(JpkFile jpk)
     {
+        var entry = jpk.Entries.FirstOrDefault(x => !x.Name.Equals(InfoEntryName));
+        if (entry is null)
+        {
+            throw new InvalidOperationException("Cannot identify track ground type without a valid vcqtc file.");
+        }
+
+        return VcQuadTreeFile.Identify(entry.Data);
+    }
+
+    public static TrackGround Load(JpkFile jpk, VcQuadTreeTypeInfo? typeInfo = null)
+    {
+        typeInfo ??= Identify(jpk);
+        
         var info = jpk.Entries.FirstOrDefault(x => x.Name.Equals(InfoEntryName));
         if (info is null)
         {

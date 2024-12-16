@@ -118,7 +118,7 @@ public class VcQuadTreeTypeInfo : IQuadTreeTypeInfo
 
     public int GetTriangleIndexOffset(int minIndex, int index)
     {
-        const int Padding = 30;
+        const int Padding = 50;
         Debug.Assert(minIndex <= index);
         var offset = index - minIndex;
         return offset switch

@@ -1,9 +1,41 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 
 namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
 public record struct QuadTreeTriangle(int A, int B, int C, int MaterialIndex)
 {
+    public int this[int index]
+    {
+        get
+        {
+            return index switch
+            {
+                0 => A,
+                1 => B,
+                2 => C,
+                _ => throw new ArgumentOutOfRangeException(nameof(index))
+            };
+        }
+        set
+        {
+            switch (index)
+            {
+                case 0:
+                    A = value;
+                    break;
+                case 1:
+                    B = value;
+                    break;
+                case 2:
+                    C = value;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(index));
+            }
+        }
+    }
+
     public void EnsureFirstIndexLowest()
     {
         while (A > B || A > C)

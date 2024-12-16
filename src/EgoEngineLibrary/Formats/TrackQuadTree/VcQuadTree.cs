@@ -104,10 +104,4 @@ public class VcQuadTree : QuadTree<VcQuadTree, int>
             yield return child;
         }
     }
-
-    public void Optimize()
-    {
-        _data.Reorder(TraverseFromBottomLeft().SelectMany(x => x.Elements).Distinct());
-        _data.PatchUp();
-    }
 }

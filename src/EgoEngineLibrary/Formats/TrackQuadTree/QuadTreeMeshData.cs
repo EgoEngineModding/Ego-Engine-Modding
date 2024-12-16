@@ -61,6 +61,7 @@ public class QuadTreeMeshData
         var b = GetVertexIndex(data.Position1);
         var c = GetVertexIndex(data.Position2);
         var tri = new QuadTreeTriangle(a, b, c, matIndex);
+        tri.EnsureFirstIndexLowest();
         if (_triangles.IndexOf(tri) == -1)
         {
             _triangles.Add(tri);
@@ -95,34 +96,30 @@ public class QuadTreeMeshData
         return index;
     }
 
-    public void Reorder(IEnumerable<int> triangleIndices)
+    public bool Optimize()
     {
-        // Rebuild vertices list in node triangle reference order
-        var oldVertices = _vertices.ToArray();
-        _vertices.Clear();
-        var triSpan = CollectionsMarshal.AsSpan(_triangles);
-        foreach (var index in triangleIndices)
-        {
-            ref var tri = ref triSpan[index];
-            tri.A = GetVertexIndex(oldVertices[tri.A]);
-            tri.B = GetVertexIndex(oldVertices[tri.B]);
-            tri.C = GetVertexIndex(oldVertices[tri.C]);
-        }
-        
-        if (oldVertices.Length != _vertices.Count)
-        {
-            // This is unexpected unless there's a bug
-            throw new InvalidDataException("Not all vertices were referenced by the given triangles.");
-        }
+        Reorder();
+        return PatchUp();
     }
 
-    public void PatchUp()
+    public void Reorder()
     {
-        // Brute-force algorithm to make sure triangle indices are within range of min index
-        var maxIterations = (int)(_triangles.Count * 1.0);
-        if (maxIterations == 0)
+        if (_vertices.Count < 3)
         {
             return;
+        }
+        
+        MeshOpt.OptimizeVertexCacheFifo(_triangles, _triangles, _vertices.Count, _vertices.Count);
+        MeshOpt.OptimizeVertexFetch(_vertices, _triangles, _vertices);
+    }
+
+    public bool PatchUp()
+    {
+        // Brute-force algorithm to make sure triangle indices are within range of min index
+        var maxIterations = _triangles.Count * 3;
+        if (_triangles.Count == 0)
+        {
+            return true;
         }
         
         var iterations = 0;
@@ -171,7 +168,9 @@ public class QuadTreeMeshData
             ++iterations;
             if (iterations >= maxIterations)
             {
+                // Not using the bool currently, but if necessary in future may need to Split QT on false
                 throw new InvalidDataException("Failed to adjust triangle indices to be in range of each other.");
+                return false;
             }
         }
 
@@ -182,7 +181,7 @@ public class QuadTreeMeshData
             tri.EnsureFirstIndexLowest();
         }
 
-        return;
+        return true;
 
         void MoveVertex(ref int insertIndex, ref int index, Dictionary<int, int> indexMap)
         {

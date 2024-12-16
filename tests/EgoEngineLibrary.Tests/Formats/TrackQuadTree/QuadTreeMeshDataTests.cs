@@ -36,9 +36,10 @@ public class QuadTreeMeshDataTests
         data.Add(new QuadTreeDataTriangle(data.Vertices[a], data.Vertices[b], data.Vertices[c], string.Empty));
 
         // Act
-        data.PatchUp();
+        var result = data.PatchUp();
 
         // Assert
+        Assert.True(result);
         Assert.Equal(numVertices, data.Vertices.Count);
         Assert.Equal(numVertices - 1, data.Triangles.Count);
         for (var i = 0; i < numVertices; ++i)

@@ -99,10 +99,11 @@ public class TrackGroundQuadTree : QuadTree<TrackGroundQuadTree, QuadTreeDataTri
 
     public VcQuadTreeFile BuildVcQuadTree()
     {
+        _data.Optimize();
+        
         var quadTree = VcQuadTree.Create(
             new Vector3(_data.BoundsMin.X, BoundsMin.Y, _data.BoundsMin.Z),
             new Vector3(_data.BoundsMax.X, BoundsMax.Y, _data.BoundsMax.Z), _data);
-        quadTree.Optimize();
         return VcQuadTreeFile.Create(quadTree);
     }
 }

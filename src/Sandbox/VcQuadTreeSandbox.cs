@@ -15,13 +15,13 @@ public static class VcQuadTreeSandbox
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\Dirt 2\tracks\", VcQuadTreeType.RaceDriverGrid);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2014\tracks\", VcQuadTreeType.RaceDriverGrid);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT 3 Complete Edition\tracks\", VcQuadTreeType.Dirt3);
-        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Showdown\tracks\", VcQuadTreeType.GridAutosport);
-        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\grid 2\tracks\", VcQuadTreeType.GridAutosport);
-        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\GRID Autosport\tracks\", VcQuadTreeType.GridAutosport);
-        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Rally\tracks\", VcQuadTreeType.GridAutosport);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Showdown\tracks\", VcQuadTreeType.DirtShowdown);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\grid 2\tracks\", VcQuadTreeType.DirtShowdown);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\GRID Autosport\tracks\", VcQuadTreeType.DirtShowdown);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Rally\tracks\", VcQuadTreeType.DirtShowdown);
         var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2014\tracks\circuits\Abu_Dhabi\route_0", VcQuadTreeType.RaceDriverGrid);
-        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Showdown\tracks\locations\japan\yokohama_docks\route_0", VcQuadTreeType.GridAutosport);
-        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Showdown\tracks\locations\japan\shibuya\route_0", VcQuadTreeType.GridAutosport);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Showdown\tracks\locations\japan\yokohama_docks\route_0", VcQuadTreeType.DirtShowdown);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Showdown\tracks\locations\japan\shibuya\route_0", VcQuadTreeType.DirtShowdown);
         var typeInfo = VcQuadTreeTypeInfo.Get(type);
         var maxEntries = 0;
         var maxTris = 0;
@@ -147,10 +147,10 @@ public static class VcQuadTreeSandbox
                 var tri = tris[i];
                 data.Add(tri);
             }
-                
+
+            data.Optimize();
             var quadTree = VcQuadTree.Create(data.BoundsMin, data.BoundsMax, data);
             //var quadTree = VcQuadTree.Create(vcqtc.Header.BoundMin, vcqtc.Header.BoundMax, dat);
-            quadTree.Optimize();
             var qtc = VcQuadTreeFile.Create(quadTree);
             File.WriteAllBytes(@"C:\Games\Steam\steamapps\common\F1 2014\tracks\circuits\Abu_Dhabi\route_0\track2\qtc.vcqtc", qtc.Bytes);
         }
