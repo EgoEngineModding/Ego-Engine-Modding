@@ -88,14 +88,6 @@ typedef struct {
     local uint16 data = (u8Data[1] + ((uint16)u8Data[0] << 8)) & 0x7FFF;
 } vCQuadTreeNode<read=readNode>;
 
-string readNode(struct vCQuadTreeNode& n)
-{
-    char t = n.hasTriangles ? 'T' : 'C';
-    string s;
-    SPrintf(s, "%c %d", t, n.data);
-    return s;
-}
-
 local int32 numNodes<hidden=true> = (header.trianglesOffset - header.nodesOffset) / 2;
 vCQuadTreeNode nodes[numNodes]<optimize=false>;
 
@@ -144,10 +136,10 @@ struct {
     }
 } nodeTriangleReferences<read=numRefs>;
 
-string readNodeTriRef(struct nodeTriangleReference& n)
+string readNodeTriRefPolys(struct nodeTriangleReference& n)
 {
     string s, s2;
-    SPrintf(s, "%d,%d ", n.polyIndexOffset, n.numPolys);
+    SPrintf(s, "%d ", n.numPolys);
     int i;
     for (i = 0; i < n.numPolys; ++i)
     {
@@ -157,40 +149,33 @@ string readNodeTriRef(struct nodeTriangleReference& n)
     return s;
 }
 
-typedef struct {
-    local int32 nodeIndex;
-    local int32 triRefIndex;
-} nodeInfo<read=readNodeInfo>;
-
-string readNodeInfo(nodeInfo& n)
+string readNodeTriRef(struct nodeTriangleReference& n)
 {
-    string s2 = readNode(nodes[n.nodeIndex]);
-    if (n.triRefIndex > -1)
+    string s;
+    SPrintf(s, "%d | ", n.polyIndexOffset);
+    return s + readNodeTriRefPolys(n);
+}
+
+string readNode(struct vCQuadTreeNode& n)
+{
+    char t = n.hasTriangles ? 'T' : 'C';
+    string s;
+    SPrintf(s, "%c %d", t, n.data);
+    
+    if (!n.hasTriangles)
     {
-        s2 += " | " + readNodeTriRef(nodeTriangleReferences.nodeTriRef[n.triRefIndex]);
+        return s;
     }
-    return s2;
-}
-
-local nodeInfo nodeInfos[numNodes];
-local int i<hidden=true>;
-for (i = 0; i < numNodes; ++i)
-{
-    getNodeInfo(nodeInfos[i], i);
-}
-
-void getNodeInfo(nodeInfo& ni, int index)
-{
-    ni.nodeIndex = index;
-    ni.triRefIndex = -1;
-
-    local int p;
+    
+    int p;
     for (p = 0; p < nodeTriangleReferences.numRefs; ++p)
     {
-        if (nodeTriangleReferences.nodeTriRef[p].polyIndexOffset == nodes[index].data)
+        if (nodeTriangleReferences.nodeTriRef[p].polyIndexOffset == n.data)
         {
-            ni.triRefIndex = p;
+            s += " | " + readNodeTriRefPolys(nodeTriangleReferences.nodeTriRef[p]);
             break;
         }
     }
+    
+    return s;
 }
