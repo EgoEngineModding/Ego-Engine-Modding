@@ -1,6 +1,7 @@
-﻿namespace EgoEngineLibrary.Data
+﻿using EgoEngineLibrary.Conversion;
+
+namespace EgoEngineLibrary.Data
 {
-    using MiscUtil.Conversion;
     using System;
     using System.Collections.Generic;
     using System.Data;

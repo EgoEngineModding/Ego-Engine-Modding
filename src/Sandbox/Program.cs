@@ -6,12 +6,12 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        XmlSandbox();
+        VcQuadTreeSandbox.Run(args);
     }
 
     private static void XmlSandbox()
     {
-        var files = GetFiles(@"C:\Games\Steam\steamapps\common\F1 2012");
+        var files = Utils.GetFiles(@"C:\Games\Steam\steamapps\common\F1 2012");
         foreach (var f in files)
         {
             try
@@ -53,20 +53,6 @@ internal class Program
                     Console.WriteLine(e);
                 }
             }
-        }
-        
-        static IEnumerable<string> GetFiles(params string[] gameFolders)
-        {
-            var extensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".xml" };
-            var files = Enumerable.Empty<string>();
-            foreach (var folder in gameFolders)
-            {
-                var folderFiles = Directory.EnumerateFiles(folder, "*.*", SearchOption.AllDirectories)
-                    .Where(x => extensions.Contains(Path.GetExtension(x)));
-                files = files.Concat(folderFiles);
-            }
-
-            return files;
         }
     }
 }
