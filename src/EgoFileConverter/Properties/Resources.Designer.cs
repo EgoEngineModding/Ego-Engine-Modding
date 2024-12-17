@@ -60,7 +60,7 @@ namespace EgoFileConverter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ego File Converter 3.0.1.
+        ///   Looks up a localized string similar to Ego File Converter 4.0.0-beta.1.
         /// </summary>
         internal static string AppTitleLong {
             get {

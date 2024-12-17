@@ -350,27 +350,27 @@ public static class MeshOpt
 
     public static void OptimizeVertexCacheFifo(
         IList<QuadTreeTriangle> destination,
-        IReadOnlyList<QuadTreeTriangle> indices,
+        IReadOnlyList<QuadTreeTriangle> triangles,
         int vertexCount,
         int cacheSize)
     {
         Debug.Assert(cacheSize >= 3);
 
         // guard for empty meshes
-        if (indices.Count == 0 || vertexCount == 0)
+        if (triangles.Count == 0 || vertexCount == 0)
         {
             return;
         }
 
         // support in-place optimization
-        if (ReferenceEquals(destination, indices))
+        if (ReferenceEquals(destination, triangles))
         {
-            indices = indices.ToArray();
+            triangles = triangles.ToArray();
         }
 
         // build adjacency information
         TriangleAdjacency adjacency = new();
-        BuildTriangleAdjacency(ref adjacency, indices, vertexCount);
+        BuildTriangleAdjacency(ref adjacency, triangles, vertexCount);
 
         // live triangle counts
         var liveTriangles = new int[vertexCount];
@@ -380,11 +380,11 @@ public static class MeshOpt
         var cacheTimestamps = new int[vertexCount];
 
         // dead-end stack
-        Span<int> deadEnd = new int[indices.Count * 3];
+        Span<int> deadEnd = new int[triangles.Count * 3];
         var deadEndTop = 0;
 
         // emitted flags
-        var emittedFlags = new bool[indices.Count];
+        var emittedFlags = new bool[triangles.Count];
 
         var currentVertex = 0;
 
@@ -404,7 +404,7 @@ public static class MeshOpt
                 var triangle = adjacency.Data[it];
                 if (!emittedFlags[triangle])
                 {
-                    var t = indices[triangle];
+                    var t = triangles[triangle];
 
                     // output indices
                     destination[outputTriangle] = t;
@@ -450,7 +450,7 @@ public static class MeshOpt
             }
         }
 
-        Debug.Assert(outputTriangle == indices.Count);
+        Debug.Assert(outputTriangle == triangles.Count);
     }
 
     public static int OptimizeVertexFetch<T>(
