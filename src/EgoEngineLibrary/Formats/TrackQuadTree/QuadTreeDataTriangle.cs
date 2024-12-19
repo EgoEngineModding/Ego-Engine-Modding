@@ -38,11 +38,27 @@ public record struct QuadTreeTriangle(int A, int B, int C, int MaterialIndex)
 
     public void EnsureFirstIndexLowest()
     {
-        while (A > B || A > C)
+        if (B < A)
         {
-            // 'A' index must always be less than others (shift to make C A B)
-            (A, B) = (B, A);
-            (A, C) = (C, A);
+            if (B < C)
+            {
+                (A, B, C) = (B, C, A);
+            }
+            else
+            {
+                (A, B, C) = (C, A, B);
+            }
+        }
+        else if (C < A)
+        {
+            if (C < B)
+            {
+                (A, B, C) = (C, A, B);
+            }
+            else
+            {
+                (A, B, C) = (B, C, A);
+            }
         }
     }
 }

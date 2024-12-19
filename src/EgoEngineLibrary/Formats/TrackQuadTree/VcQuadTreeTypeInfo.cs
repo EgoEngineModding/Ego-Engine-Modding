@@ -4,22 +4,15 @@ using System.Diagnostics;
 
 namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
-public interface IQuadTreeTypeInfo
-{
-    int GetSheetInfo(ref string material);
-
-    string GetMaterial(string material, int sheetInfo);
-    
-    int GetTriangleIndexOffset(int minIndex, int index);
-    
-    bool ShouldSplit(QuadTreeMeshData data);
-}
-
 public class VcQuadTreeTypeInfo : IQuadTreeTypeInfo
 {
     private static readonly Dictionary<VcQuadTreeType, VcQuadTreeTypeInfo> Infos;
 
     public VcQuadTreeType Type { get; private init; }
+
+    public bool NegativeTriangles => true;
+
+    public bool NegativeVertices => true;
 
     public bool NegativeMaterials { get; private init; }
 
@@ -43,7 +36,6 @@ public class VcQuadTreeTypeInfo : IQuadTreeTypeInfo
         // Grid2 E2034 L14 T1591 V856 M8 N645 NT313
         // GridA E689 L11 T1772 V874 M8 N581 NT296
         // DirtR E4590 L14 T1564 V839 M8 N1353 NT504
-
         // F10   E475 L9 T1688 V942 M15 N341 NT246
         // F11   E486 L9 T1520 V868 M16 N333 NT190
         // F12   E438 L8 T1528 V877 M16 N285 NT109
@@ -118,7 +110,7 @@ public class VcQuadTreeTypeInfo : IQuadTreeTypeInfo
 
     public int GetTriangleIndexOffset(int minIndex, int index)
     {
-        const int Padding = 50;
+        const int Padding = MaxOffset / 5;
         Debug.Assert(minIndex <= index);
         var offset = index - minIndex;
         return offset switch

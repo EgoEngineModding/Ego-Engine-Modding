@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 
 using EgoEngineLibrary.Archive.Jpk;
 using EgoEngineLibrary.Formats.TrackQuadTree;
+using EgoEngineLibrary.Formats.TrackQuadTree.Static;
 
 namespace Sandbox;
 
@@ -52,15 +53,8 @@ public static class VcQuadTreeSandbox
                 //PrintSubDivs(jpk.Entries);
                 //continue;
                 var ground = TrackGround.Load(jpk, typeInfo);
-                var gltf = TrackGroundGltfConverter.Convert(ground, true);
-                gltf.Save(Path.ChangeExtension(f, ".glb"));
-                //gltf = ModelRoot.Load(@"C:\Users\tasev\Downloads\untitled.glb");
-                //gltf = ModelRoot.Load(@"C:\Users\tasev\Downloads\Baku Walls Collision Prepared.glb");
-                //gltf = ModelRoot.Load(@"C:\Users\tasev\Downloads\Baku Walls Collision Test.glb");
-                //gltf = ModelRoot.Load(@"C:\Users\tasev\Downloads\Baku collision walls and ground NEW.glb");
-                //gltf = ModelRoot.Load(@"C:\Users\tasev\Downloads\Baku collision walls and ground NEW Height.glb");
-                //gltf = ModelRoot.Load(@"C:\Users\tasev\Downloads\Baku collision walls and ground NEW Height UPDATE.glb");
-                //gltf = ModelRoot.Load(@"C:\Users\tasev\Downloads\Baku collision walls and ground NEW Height UPDATE 2.glb");
+                //var gltf = TrackGroundGltfConverter.Convert(ground, true);
+                //gltf.Save(Path.ChangeExtension(f, ".glb"));
                 //var ground2 = GltfTrackGroundConverter.Convert(gltf, VcQuadTreeTypeInfo.Get(type));
                 var boundsMin = new Vector3(float.MaxValue);
                 var boundsMax = new Vector3(float.MinValue);
@@ -84,12 +78,10 @@ public static class VcQuadTreeSandbox
                 var ground2 = TrackGround.Create(gqt2);
                 
                 var jpk2 = ground2.Save();
+                PrintNodeData(jpk2.Entries, typeInfo);
+                continue;
                 using var fs3 = File.Open(Path.Combine(folder, "track2.jpk"), FileMode.Create, FileAccess.Write, FileShare.Read);
                 jpk2.Write(fs3);
-                PrintNodeData(jpk2.Entries, typeInfo);
-                // var qtc = new VcQuadTreeFile(jpk2.Entries[0].Data, type);
-                // var qtcGltf = TrackGroundGltfConverter.Convert(qtc);
-                // qtcGltf.Save(@"C:\Games\Steam\steamapps\common\F1 2014\tracks\circuits\Abu_Dhabi\route_0\track2\qtc.glb");
 
                 var ground3 = TrackGround.Load(jpk2, typeInfo);
                 var gltf3 = TrackGroundGltfConverter.Convert(ground3, true);

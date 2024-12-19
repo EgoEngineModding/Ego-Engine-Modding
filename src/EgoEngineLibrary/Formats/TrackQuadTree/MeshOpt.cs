@@ -352,7 +352,8 @@ public static class MeshOpt
         IList<QuadTreeTriangle> destination,
         IReadOnlyList<QuadTreeTriangle> triangles,
         int vertexCount,
-        int cacheSize)
+        int cacheSize,
+        int currentVertex = 0)
     {
         Debug.Assert(cacheSize >= 3);
 
@@ -386,10 +387,8 @@ public static class MeshOpt
         // emitted flags
         var emittedFlags = new bool[triangles.Count];
 
-        var currentVertex = 0;
-
         var timestamp = cacheSize + 1;
-        var inputCursor = 1; // vertex to restart from in case of dead-end
+        var inputCursor = 0; // vertex to restart from in case of dead-end
         var outputTriangle = 0;
         while (currentVertex != InvalidIndex)
         {

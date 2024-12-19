@@ -2,6 +2,7 @@
 using System.Numerics;
 
 using EgoEngineLibrary.Collections;
+using EgoEngineLibrary.Formats.TrackQuadTree.Static;
 
 namespace EgoEngineLibrary.Formats.TrackQuadTree;
 

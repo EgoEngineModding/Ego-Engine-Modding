@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Numerics;
 
+using EgoEngineLibrary.Formats.TrackQuadTree.Static;
+
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
@@ -13,7 +15,7 @@ namespace EgoEngineLibrary.Formats.TrackQuadTree;
 public static class TrackGroundGltfConverter
 {
     private const string SurfaceName = "trackSurface";
-    
+
     public static ModelRoot Convert(TrackGround ground, bool debugMode = false)
     {
         var sceneBuilder = new SceneBuilder();
@@ -67,11 +69,12 @@ public static class TrackGroundGltfConverter
         return sceneBuilder.ToGltf2();
     }
 
-    public static ModelRoot Convert(VcQuadTreeFile quadTree)
+    public static ModelRoot Convert(QuadTreeFile quadTree)
     {
+        var qtName = quadTree.Identifier ?? SurfaceName;
         var sceneBuilder = new SceneBuilder();
-        NodeBuilder node = new(SurfaceName);
-        var mesh = new MeshBuilder<VertexPosition, VertexEmpty, VertexEmpty>(SurfaceName);
+        NodeBuilder node = new(qtName);
+        var mesh = new MeshBuilder<VertexPosition, VertexEmpty, VertexEmpty>(qtName);
 
         var materialMap = new Dictionary<string, MaterialBuilder>();
         ConvertQuadTree(quadTree, mesh, materialMap);
@@ -80,11 +83,12 @@ public static class TrackGroundGltfConverter
         return sceneBuilder.ToGltf2();
     }
 
-    public static ModelRoot Convert(VcQuadTreeFile quadTree, int nodeIndex)
+    public static ModelRoot Convert(QuadTreeFile quadTree, int nodeIndex)
     {
+        var qtName = quadTree.Identifier ?? SurfaceName;
         var sceneBuilder = new SceneBuilder();
-        NodeBuilder node = new(SurfaceName);
-        var mesh = new MeshBuilder<VertexPosition, VertexEmpty, VertexEmpty>(SurfaceName);
+        NodeBuilder node = new(qtName);
+        var mesh = new MeshBuilder<VertexPosition, VertexEmpty, VertexEmpty>(qtName);
 
         var materialMap = new Dictionary<string, MaterialBuilder>();
         var count = quadTree.GetNodeTriangles(nodeIndex, []);
@@ -97,7 +101,7 @@ public static class TrackGroundGltfConverter
         return sceneBuilder.ToGltf2();
     }
 
-    private static void ConvertQuadTree(VcQuadTreeFile quadTree, IMeshBuilder<MaterialBuilder> mesh,
+    private static void ConvertQuadTree(QuadTreeFile quadTree, IMeshBuilder<MaterialBuilder> mesh,
         Dictionary<string, MaterialBuilder> materialMap)
     {
         ConvertTriangles(quadTree.GetTriangles(), mesh, materialMap);

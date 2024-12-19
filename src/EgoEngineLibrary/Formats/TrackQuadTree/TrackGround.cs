@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 
+using EgoEngineLibrary.Formats.TrackQuadTree.Static;
+
 namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
 public partial class TrackGround

@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
+
+using Microsoft.Toolkit.HighPerformance.Buffers;
 
 namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
@@ -108,8 +111,20 @@ public class QuadTreeMeshData
         {
             return;
         }
-        
-        MeshOpt.OptimizeVertexCacheFifo(_triangles, _triangles, _vertices.Count, _vertices.Count);
+
+        var smallestVertexIndex = 0;
+        var length = float.MaxValue;
+        for (var i = 0; i < _vertices.Count; ++i)
+        {
+            var vLength = _vertices[i].LengthSquared();
+            if (vLength < length)
+            {
+                smallestVertexIndex = i;
+                length = vLength;
+            }
+        }
+
+        MeshOpt.OptimizeVertexCacheFifo(_triangles, _triangles, _vertices.Count, _vertices.Count, smallestVertexIndex);
         MeshOpt.OptimizeVertexFetch(_vertices, _triangles, _vertices);
     }
 
@@ -147,20 +162,34 @@ public class QuadTreeMeshData
             }
 
             var insertIndex = minIndex + offset;
-            var indexMap = new Dictionary<int, int>();
+            var updateCount = index - insertIndex + 1;
+            using var indexMapBuffer = SpanOwner<int>.Allocate(updateCount);
+            var indexMap = indexMapBuffer.Span;
             MoveVertex(ref insertIndex, ref index, indexMap);
             for (var i = insertIndex; i < index; ++i)
             {
-                indexMap[i] = i + 1;
+                indexMap[i - insertIndex] = i + 1;
             }
 
             // Adjust all triangles
             for (var i = 0; i < triSpan.Length; ++i)
             {
                 ref var tri = ref triSpan[i];
-                tri.A = indexMap.GetValueOrDefault(tri.A, tri.A);
-                tri.B = indexMap.GetValueOrDefault(tri.B, tri.B);
-                tri.C = indexMap.GetValueOrDefault(tri.C, tri.C);
+
+                if (tri.A >= insertIndex && tri.A <= index)
+                {
+                    tri.A = indexMap[tri.A - insertIndex];
+                }
+
+                if (tri.B >= insertIndex && tri.B <= index)
+                {
+                    tri.B = indexMap[tri.B - insertIndex];
+                }
+
+                if (tri.C >= insertIndex && tri.C <= index)
+                {
+                    tri.C = indexMap[tri.C - insertIndex];
+                }
             }
             
             // Start from beginning in case fixing one broke another
@@ -181,12 +210,13 @@ public class QuadTreeMeshData
             tri.EnsureFirstIndexLowest();
         }
 
+        Debug.WriteLine(iterations);
         return true;
 
-        void MoveVertex(ref int insertIndex, ref int index, Dictionary<int, int> indexMap)
+        void MoveVertex(ref int insertIndex, ref int index, Span<int> indexMap)
         {
             var pos = _vertices[index];
-            indexMap[index] = insertIndex;
+            indexMap[index - insertIndex] = insertIndex;
             if (insertIndex > index)
             {
                 _vertices.Insert(insertIndex, pos);

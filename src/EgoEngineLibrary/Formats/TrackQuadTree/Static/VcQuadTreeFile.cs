@@ -7,75 +7,17 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace EgoEngineLibrary.Formats.TrackQuadTree;
+namespace EgoEngineLibrary.Formats.TrackQuadTree.Static;
 
-public class VcQuadTreeFile
+public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader, VcQuadTreeNode>
 {
-    private const float VertXScale = 1 << 24;
-    private const float VertYScale = 1 << 16;
-    private static readonly Vector3 ScaleFactor = new(1.0f / VertXScale, 1.0f / VertYScale, 1.0f / VertXScale);
-    private static readonly Vector3 EncodeScaleFactor = new(VertXScale, VertYScale, VertXScale);
-    private static readonly Vector3 Half = new(0.5f);
-
-    private byte[] _bytes;
-    private readonly Vector3 _vertexScale;
-    private readonly Vector3 _vertexOffset;
-    
-    /// <summary>
-    /// Identifier useful for debugging purposes.
-    /// </summary>
-    public string? Identifier { get; set; }
-
-    public byte[] Bytes => _bytes;
-
-    public VcQuadTreeTypeInfo TypeInfo { get; private set; }
-
-    public int NumTriangles => -Header.NumTriangles;
-
-    public int NumVertices => -Header.NumVertices;
-
-    public int NumMaterials
-    {
-        get
-        {
-            return TypeInfo.NegativeMaterials ? -Header.NumMaterials : Header.NumMaterials;
-        }
-    }
-
-    public unsafe int NumNodes
-    {
-        get
-        {
-            return Convert.ToInt32((Header.TrianglesOffset - Header.NodesOffset) / sizeof(VcQuadTreeNode));
-        }
-    }
-
-    public Vector3 BoundsMin => Header.BoundMin;
-
-    public Vector3 BoundsMax => Header.BoundMax;
-
     public Vector2 BoundsMinXz => new(Header.BoundMin.X, Header.BoundMin.Z);
 
     public Vector2 BoundsMaxXz => new(Header.BoundMax.X, Header.BoundMax.Z);
 
-    private ref VcQuadTreeHeader Header
-    {
-        get
-        {
-            return ref Unsafe.As<byte, VcQuadTreeHeader>(ref _bytes[0]);
-        }
-    }
-
     public VcQuadTreeFile(byte[] bytes, VcQuadTreeTypeInfo? typeInfo = null)
+        : base(bytes, typeInfo ?? Identify(bytes))
     {
-        typeInfo ??= Identify(bytes);
-        
-        _bytes = bytes;
-        TypeInfo = typeInfo;
-
-        ref var header = ref Header;
-        _vertexScale = (header.BoundMax - header.BoundMin) * ScaleFactor;
-        _vertexOffset = header.BoundMin;
     }
 
     public static VcQuadTreeTypeInfo Identify(byte[] bytes)
@@ -268,7 +210,7 @@ public class VcQuadTreeFile
         return qtc;
     }
 
-    public QuadTreeDataTriangle[] GetTriangles()
+    public override QuadTreeDataTriangle[] GetTriangles()
     {
         return TypeInfo.Type switch
         {
@@ -298,25 +240,6 @@ public class VcQuadTreeFile
         }
 
         return triangles;
-    }
-
-    public unsafe void GetMaterials(ICollection<string> materials)
-    {
-        Span<byte> materialBytes = _bytes.AsSpan(sizeof(VcQuadTreeHeader), NumMaterials * 4);
-        while (materialBytes.Length > 0)
-        {
-            var material = string.Create(4, (nuint)(&materialBytes), static (material, ptr) =>
-            {
-                var state = *(ReadOnlySpan<byte>*)ptr;
-                material[0] = (char)state[0];
-                material[1] = (char)state[1];
-                material[2] = (char)state[2];
-                material[3] = (char)state[3];
-            });
-
-            materialBytes = materialBytes[4..];
-            materials.Add(material);
-        }
     }
 
     private unsafe void SetMaterials(ReadOnlySpan<int> materials)
@@ -477,43 +400,7 @@ public class VcQuadTreeFile
         }
     }
 
-    public int GetNodeChild(int nodeIndex, int childSelect, ref Vector2 xzMinBounds, ref Vector2 xzMaxBounds)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThan(childSelect, 0, nameof(childSelect));
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(childSelect, 3, nameof(childSelect));
-
-        var nodes = GetNodes(Header);
-        var node = nodes[nodeIndex];
-        if (node.IsLeaf)
-        {
-            return -1;
-        }
-
-        float width = (xzMaxBounds.X - xzMinBounds.X) * 0.5f;
-        if ((childSelect & 0b01) != 0)
-        {
-            xzMinBounds.X += width;
-        }
-        else
-        {
-            xzMaxBounds.X -= width;
-        }
-
-        width = (xzMaxBounds.Y - xzMinBounds.Y) * 0.5f;
-        if ((childSelect & 0b10) != 0)
-        {
-            xzMaxBounds.Y -= width;
-        }
-        else
-        {
-            xzMinBounds.Y += width;
-        }
-        
-        var childIndex = node.ChildIndex + childSelect;
-        return childIndex;
-    }
-
-    public int GetNodeTriangles(int nodeIndex, Span<int> indices)
+    public override int GetNodeTriangles(int nodeIndex, Span<int> indices)
     {
         var node = GetNodes(Header)[nodeIndex];
         if (!node.HasTriangles)
@@ -554,41 +441,10 @@ public class VcQuadTreeFile
         return count;
     }
 
-    private unsafe Span<int> GetMaterials()
-    {
-        return MemoryMarshal.Cast<byte, int>(_bytes.AsSpan(sizeof(VcQuadTreeHeader), NumMaterials * 4));
-    }
-
-    private unsafe Span<T> GetTriangles<T>(VcQuadTreeHeader header) where T : unmanaged, IVcQuadTreeTriangle
-    {
-        return MemoryMarshal.Cast<byte, T>(_bytes.AsSpan(Convert.ToInt32(header.TrianglesOffset),
-            sizeof(T) * NumTriangles));
-    }
-
     private unsafe Span<VcQuadTreeVertex> GetVertices(VcQuadTreeHeader header)
     {
         return MemoryMarshal.Cast<byte, VcQuadTreeVertex>(_bytes.AsSpan(Convert.ToInt32(header.VerticesOffset),
             sizeof(VcQuadTreeVertex) * NumVertices));
-    }
-
-    private Span<VcQuadTreeNode> GetNodes(VcQuadTreeHeader header)
-    {
-        var nodesLength = Convert.ToInt32(header.TrianglesOffset - header.NodesOffset);
-        return MemoryMarshal.Cast<byte, VcQuadTreeNode>(_bytes.AsSpan(Convert.ToInt32(header.NodesOffset),
-            nodesLength));
-    }
-
-    private struct VcQuadTreeHeader
-    {
-        public Vector3 BoundMin { get; set; }
-        public Vector3 BoundMax { get; set; }
-        public int NumTriangles { get; set; }
-        public int NumVertices { get; set; }
-        public int NumMaterials { get; set; }
-        public uint VerticesOffset { get; set; }
-        public uint NodesOffset { get; set; }
-        public uint TrianglesOffset { get; set; }
-        public uint TriangleReferencesOffset { get; set; }
     }
 
     private struct VcQuadTreeVertex
@@ -658,17 +514,17 @@ public class VcQuadTreeFile
         }
     }
 
-    private interface IVcQuadTreeTriangle
+    private interface IVcQuadTreeTriangle : IQuadTreeTriangle
     {
         int Sheet { get; set; }
-    
-        int MaterialIndex { get; set; }
-    
-        int Vertex0 { get; set; }
 
-        int Vertex1 { get; set; }
+        new int MaterialIndex { get; set; }
 
-        int Vertex2 { get; set; }
+        new int Vertex0 { get; set; }
+
+        new int Vertex1 { get; set; }
+
+        new int Vertex2 { get; set; }
     }
 
     private struct VcQuadTreeTriangle1 : IVcQuadTreeTriangle
@@ -808,59 +664,5 @@ public class VcQuadTreeFile
                 Vertex2Offset = (byte)offset;
             }
         }
-    }
-
-    private struct VcQuadTreeNode
-    {
-        private const int MaxTriangleListOffset = 0x7FFE;
-        private const int MaxChildIndex = 0x7FFF;
-        private const int LeafBit = 0x8000;
-        private const int LeafWithoutTrianglesId = 0xFFFF;
-    
-        byte Data0 { get; set; }
-        byte Data1 { get; set; }
-
-        private int ChildIndexOrTriangleListOffset
-        {
-            get => (Data0 << 8) | Data1;
-            set
-            {
-                Data0 = (byte)((value >> 8) & 0xFF);
-                Data1 = (byte)(value & 0xFF);
-            }
-        }
-
-        public int TriangleListOffset
-        {
-            get => ChildIndexOrTriangleListOffset & (~LeafBit);
-            set
-            {
-                if (value == -1)
-                {
-                    ChildIndexOrTriangleListOffset = LeafWithoutTrianglesId;
-                    return;
-                }
-            
-                ArgumentOutOfRangeException.ThrowIfNegative(value);
-                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, MaxTriangleListOffset, nameof(TriangleListOffset));
-                ChildIndexOrTriangleListOffset = value | LeafBit;
-            }
-        }
-
-        public int ChildIndex
-        {
-            get => ChildIndexOrTriangleListOffset;
-            set
-            {
-                ArgumentOutOfRangeException.ThrowIfNegative(value);
-                ArgumentOutOfRangeException.ThrowIfGreaterThan(value, MaxChildIndex, nameof(ChildIndex));
-
-                ChildIndexOrTriangleListOffset = value;
-            }
-        }
-    
-        public bool IsLeaf => (ChildIndexOrTriangleListOffset & LeafBit) != 0;
-
-        public bool HasTriangles => IsLeaf && ChildIndexOrTriangleListOffset != LeafWithoutTrianglesId;
     }
 }

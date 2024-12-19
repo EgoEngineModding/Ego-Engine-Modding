@@ -90,6 +90,39 @@ public static class SeparatingAxisTheorem
         return Intersect(rectVertices, rectVertices2, edgeNormals);
     }
 
+    public static bool Intersect2(in QuadTreeBounds rectangle, in QuadTreeDataTriangle triangle)
+    {
+        var rectangle2 = new QuadTreeBounds(
+            new Vector2(
+                Math.Min(triangle.Position0.X, Math.Min(triangle.Position1.X, triangle.Position2.X)),
+                Math.Min(triangle.Position0.Z, Math.Min(triangle.Position1.Z, triangle.Position2.Z))),
+            new Vector2(
+                Math.Max(triangle.Position0.X, Math.Max(triangle.Position1.X, triangle.Position2.X)),
+                Math.Max(triangle.Position0.Z, Math.Max(triangle.Position1.Z, triangle.Position2.Z))));
+
+        return Intersect(rectangle, rectangle2) && Intersect(rectangle, triangle);
+    }
+
+    public static bool Intersect(in QuadTreeBounds rectangle1, in QuadTreeBounds rectangle2)
+    {
+        if (rectangle1.Min.X > rectangle2.Max.X)
+        {
+            return false;
+        }
+
+        if (rectangle1.Max.X < rectangle2.Min.X)
+        {
+            return false;
+        }
+
+        if (rectangle1.Min.Y > rectangle2.Max.Y)
+        {
+            return false;
+        }
+
+        return !(rectangle1.Max.Y < rectangle2.Min.Y);
+    }
+
     private static bool Intersect(
         ReadOnlySpan<Vector2> obj1Vertices,
         ReadOnlySpan<Vector2> obj2Vertices,

@@ -5,6 +5,7 @@ using ConsoleAppFramework;
 
 using EgoEngineLibrary.Archive.Jpk;
 using EgoEngineLibrary.Formats.TrackQuadTree;
+using EgoEngineLibrary.Formats.TrackQuadTree.Static;
 
 using Microsoft.Extensions.Logging;
 

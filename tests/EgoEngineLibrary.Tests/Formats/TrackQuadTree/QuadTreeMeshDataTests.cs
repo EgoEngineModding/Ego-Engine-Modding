@@ -16,9 +16,9 @@ public class QuadTreeMeshDataTests
     [InlineData(6, 3, 0, new[] { 0, 1, 2, 6, 3, 4, 5 })]
     [InlineData(0, 5, 6, new[] { 0, 1, 5, 6, 2, 3, 4 })]
     [InlineData(0, 6, 5, new[] { 0, 1, 2, 5, 6, 3, 4 })]
-    [InlineData(5, 0, 6, new[] { 0, 1, 5, 6, 2, 3, 4 })]
+    [InlineData(5, 0, 6, new[] { 0, 1, 2, 5, 6, 3, 4 })]
     [InlineData(5, 6, 0, new[] { 0, 1, 5, 6, 2, 3, 4 })]
-    [InlineData(6, 0, 5, new[] { 0, 1, 2, 5, 6, 3, 4 })]
+    [InlineData(6, 0, 5, new[] { 0, 1, 5, 6, 2, 3, 4 })]
     [InlineData(6, 5, 0, new[] { 0, 1, 2, 5, 6, 3, 4 })]
     public void PatchUp_Test(int a, int b, int c, int[] expectedVertices)
     {
@@ -55,11 +55,32 @@ public class QuadTreeMeshDataTests
             Assert.True(tri.A != tri.B && tri.A != tri.C && tri.B != tri.C);
             Assert.True(tri.A < tri.B);
             Assert.True(tri.A < tri.C);
+
+            var oldTri = new QuadTreeTriangle(expectedVertices[tri.A], expectedVertices[tri.B], expectedVertices[tri.C],
+                0);
+            if (i == data.Triangles.Count - 1)
+            {
+                var exp = new QuadTreeTriangle(a, b, c, 0);
+                exp.EnsureFirstIndexLowest();
+                Assert.Equal(exp, oldTri);
+            }
+            else
+            {
+                oldTri.EnsureFirstIndexLowest();
+                Assert.Equal(i, oldTri.A);
+                Assert.Equal(i + 1, oldTri.B);
+                Assert.Equal(i + 2, oldTri.C);
+            }
         }
     }
 
     private class TypeInfo : IQuadTreeTypeInfo
     {
+        public bool NegativeTriangles => throw new NotImplementedException();
+        public bool NegativeVertices => throw new NotImplementedException();
+        public bool NegativeMaterials => throw new NotImplementedException();
+        public int MaxMaterials => throw new NotImplementedException();
+
         public int GetSheetInfo(ref string material)
         {
             return 0;

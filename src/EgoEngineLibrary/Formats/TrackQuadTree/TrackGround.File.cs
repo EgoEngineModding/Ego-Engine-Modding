@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 
 using EgoEngineLibrary.Archive.Jpk;
+using EgoEngineLibrary.Formats.TrackQuadTree.Static;
 
 namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
