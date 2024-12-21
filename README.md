@@ -26,3 +26,13 @@ An app to edit language localization files.
 
 ### [Ego PSSG Editor](https://petar.page/l/ego-epe-home)
 An app to edit PSSG files. These files contain 3D models and textures.
+
+## Community
+Connect with the modding community.
+
+- [Ego Engine Modding Discord](https://discord.gg/5bCjMqS) - modding community for all Ego racing games
+- [Dirt 3 Discord](https://discord.gg/46KweYnegD) - gaming community for Dirt 3 with downloads section
+- [F1 Game Modding Community Discord](https://discord.gg/b3CREU5Kp2) - modding community for F1 2014 and earlier with downloads section
+- [Mod DB](https://www.moddb.com/) - general game modding community with downloads section
+- [Nexus Mods](https://www.nexusmods.com/) - general game modding community with downloads section
+- [OverTake (formerly RaceDepartment)](https://www.overtake.gg/) - sim racing community with modding forums and downloads section

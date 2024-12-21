@@ -9,45 +9,76 @@ using System.Data;
 using System.IO;
 using System.Xml;
 
+using ConsoleAppFramework;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+using ZLogger;
+
 namespace EgoFileConverter
 {
     class Program
     {
         static void Main(string[] args)
         {
-            try
+            var services = new ServiceCollection();
+            services.AddLogging(x =>
             {
-                Console.WriteLine("--- " + Properties.Resources.AppTitleLong + " ---");
-                if (args.Length == 0)
-                {
-                    Console.WriteLine("No input arguments were found!");
-                    Console.WriteLine("Drag and drop one or more files on the EXE to convert.");
-                }
+                x.ClearProviders();
+                x.SetMinimumLevel(LogLevel.Trace);
+                x.AddZLoggerConsole();
+            });
+            services.AddSingleton<TrackQuadTreeApp>();
 
-                foreach (string f in args)
-                {
-                    try
-                    {
-                        Console.WriteLine("Processing " + Path.GetFileName(f) + "...");
+            using var serviceProvider = services.BuildServiceProvider();
+            ConsoleApp.ServiceProvider = serviceProvider;
+            
+            var topLogger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<Program>();
+            ConsoleApp.Log = x => topLogger.LogInformation(x);
+            ConsoleApp.LogError = x => topLogger.LogError(x);
 
-                        Convert(f);
-                    }
-                    catch (Exception ex) when (!System.Diagnostics.Debugger.IsAttached)
-                    {
-                        Console.WriteLine("Failed to convert the file!");
-                        Console.WriteLine(ex.ToString());
-                    }
-                    finally
-                    {
-                        Console.WriteLine();
-                        Console.WriteLine();
-                    }
-                }
+            topLogger.LogInformation("--- {AppTitle} ---", Properties.Resources.AppTitleLong);
+            topLogger.LogInformation("Drag and drop one or more files on the EXE to convert.");
+            topLogger.LogInformation("Use --help to display a help message for any command");
+            Console.WriteLine();
+
+            var app = ConsoleApp.Create();
+            app.UseFilter<UserPauseFilter>();
+            app.Add("", Root);
+            app.Add<TrackQuadTreeApp>("track-qt");
+            app.Run(args);
+        }
+
+        /// <summary>
+        /// Converts each input file by automatically determining the file type.
+        /// </summary>
+        /// <param name="filePaths">The space-separated input file paths to convert.</param>
+        static void Root([Argument]params string[] filePaths)
+        {
+            if (filePaths.Length == 0)
+            {
+                Console.WriteLine("No input arguments were found!");
             }
-            finally
+
+            foreach (string f in filePaths)
             {
-                Console.WriteLine("Press any key to exit...");
-                Console.ReadKey(true);
+                try
+                {
+                    Console.WriteLine("Processing " + Path.GetFileName(f) + "...");
+
+                    Convert(f);
+                }
+                catch (Exception ex) when (!System.Diagnostics.Debugger.IsAttached)
+                {
+                    Console.WriteLine("Failed to convert the file!");
+                    Console.WriteLine(ex.ToString());
+                }
+                finally
+                {
+                    Console.WriteLine();
+                    Console.WriteLine();
+                }
             }
         }
 
@@ -114,6 +145,11 @@ namespace EgoFileConverter
                 using var fso = File.Open(f + ".tpk", FileMode.Create, FileAccess.Write, FileShare.Read);
                 tpk.Write(fso);
                 Console.WriteLine("Success! DDS converted.");
+            }
+            else if (fileName.EndsWith("track.jpk", StringComparison.InvariantCultureIgnoreCase))
+            {
+                var qtApp = ConsoleApp.ServiceProvider!.GetRequiredService<TrackQuadTreeApp>();
+                qtApp.VcToGltf(f);
             }
             else
             {

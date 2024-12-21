@@ -1,6 +1,7 @@
-﻿namespace EgoEngineLibrary.Vehicle
+﻿using EgoEngineLibrary.Conversion;
+
+namespace EgoEngineLibrary.Vehicle
 {
-    using MiscUtil.Conversion;
     using System;
     using System.Collections.Generic;
     using System.Linq;

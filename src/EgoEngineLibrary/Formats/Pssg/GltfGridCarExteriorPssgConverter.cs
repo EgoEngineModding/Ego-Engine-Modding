@@ -8,6 +8,8 @@ using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
 
+using EgoEngineLibrary.Conversion;
+
 namespace EgoEngineLibrary.Formats.Pssg
 {
     public class GltfGridCarExteriorPssgConverter
@@ -369,7 +371,7 @@ namespace EgoEngineLibrary.Formats.Pssg
         private static byte[] GetBoundingBoxData(Vector3 min, Vector3 max)
         {
             byte[] buffer = new byte[6 * 4];
-            MiscUtil.Conversion.BigEndianBitConverter bc = new MiscUtil.Conversion.BigEndianBitConverter();
+            BigEndianBitConverter bc = new BigEndianBitConverter();
 
             int i = 0;
             bc.CopyBytes(min.X, buffer, i); i += 4;
@@ -386,7 +388,7 @@ namespace EgoEngineLibrary.Formats.Pssg
         private static byte[] GetTransform(Matrix4x4 t)
         {
             byte[] buffer = new byte[16 * 4];
-            MiscUtil.Conversion.BigEndianBitConverter bc = new MiscUtil.Conversion.BigEndianBitConverter();
+            BigEndianBitConverter bc = new BigEndianBitConverter();
 
             int i = 0;
             bc.CopyBytes(t.M11, buffer, i); i += 4;
