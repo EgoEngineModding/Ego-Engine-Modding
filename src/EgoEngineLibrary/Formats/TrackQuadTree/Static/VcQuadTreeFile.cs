@@ -33,21 +33,24 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
             : VcQuadTreeTypeInfo.Get(VcQuadTreeType.DirtShowdown);
     }
 
-    public static VcQuadTreeFile Create(VcQuadTree quadTree)
+    public static void Validate(QuadTreeMeshData data, out VcQuadTreeTypeInfo typeInfo)
     {
-        if (quadTree.Data.TypeInfo is not VcQuadTreeTypeInfo typeInfo)
+        if (data.TypeInfo is not VcQuadTreeTypeInfo info)
         {
-            throw new InvalidCastException("QuadTree is not a VcQuadTree");
+            throw new InvalidCastException("Data is not of VcQuadTreeType.");
         }
 
-        const int maxNodes = short.MaxValue;
-        const int maxVerts = ((1 << 10) - 1) + byte.MaxValue;
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(quadTree.Data.Vertices.Count, maxVerts, nameof(quadTree.Data.Vertices));
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(quadTree.Data.Materials.Count, typeInfo.MaxMaterials, nameof(quadTree.Data.Materials));
+        typeInfo = info;
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(data.Vertices.Count, VcQuadTreeTriangle1.MaxVertices, nameof(data.Vertices));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(data.Materials.Count, typeInfo.MaxMaterials, nameof(data.Materials));
+    }
 
-        // Encode node data
+    public static VcQuadTreeFile Create(VcQuadTree quadTree)
+    {
+        Validate(quadTree.Data, out var typeInfo);
+
         var nodes = quadTree.Traverse().ToArray();
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(nodes.Length, maxNodes, nameof(quadTree));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(nodes.Length, VcQuadTreeNode.MaxNodes, nameof(quadTree));
 
         return typeInfo.Type switch
         {
@@ -61,6 +64,8 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
     private static unsafe VcQuadTreeFile Create<T>(VcQuadTree quadTree, VcQuadTree[] nodes, VcQuadTreeTypeInfo typeInfo)
         where T : unmanaged, IVcQuadTreeTriangle
     {
+        var triangleRemap = BuildTriangleRemap(quadTree);
+
         // Encode node data
         var fileNodes = new VcQuadTreeNode[nodes.Length];
         var nodeTriangleListData = new List<byte>();
@@ -119,7 +124,7 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
             fileNode.TriangleListOffset = nodeTriangleListData.Count;
             var pastFirst = false;
             int lastTriIndex = 0;
-            foreach (var triIndex in node.Elements)
+            foreach (var triIndex in node.Elements.Select(x => triangleRemap[x]).Order())
             {
                 if (!pastFirst)
                 {
@@ -197,12 +202,13 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
         var triangles = qtc.GetTriangles<T>(qtc.Header);
         for (var i = 0; i < triangles.Length; ++i)
         {
+            var oi = triangleRemap[i];
             var triangle = quadTree.Data.Triangles[i];
-            triangles[i].MaterialIndex = triangle.MaterialIndex;
-            triangles[i].Vertex0 = triangle.A;
-            triangles[i].Vertex1 = triangle.B;
-            triangles[i].Vertex2 = triangle.C;
-            triangles[i].Sheet = quadTree.Data.SheetInfo[i];
+            triangles[oi].MaterialIndex = triangle.MaterialIndex;
+            triangles[oi].Vertex0 = triangle.A;
+            triangles[oi].Vertex1 = triangle.B;
+            triangles[oi].Vertex2 = triangle.C;
+            triangles[oi].Sheet = quadTree.Data.SheetInfo[i];
         }
 
         CollectionsMarshal.AsSpan(nodeTriangleListData)
@@ -400,6 +406,16 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
         }
     }
 
+    public QuadTreeTriangle[] GetNodeTriangles(int nodeIndex)
+    {
+        return TypeInfo.Type switch
+        {
+            VcQuadTreeType.RaceDriverGrid or VcQuadTreeType.Dirt3 => GetNodeTriangles<VcQuadTreeTriangle1>(nodeIndex),
+            VcQuadTreeType.DirtShowdown => GetNodeTriangles<VcQuadTreeTriangle2>(nodeIndex),
+            _ => throw new NotSupportedException($"Type {TypeInfo} is not supported.")
+        };
+    }
+
     public override int GetNodeTriangles(int nodeIndex, Span<int> indices)
     {
         var node = GetNodes(Header)[nodeIndex];
@@ -532,6 +548,7 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
         private const int MaxVert0 = (1 << 10) - 1;
         private const int MaxVertOffset = byte.MaxValue;
         private const int MaxMaterialIndex = (1 << 4) - 1;
+        public const int MaxVertices = MaxVert0 + MaxVertOffset + 1;
 
         // unsure if this means sheet
         byte Sheet2BitsVertex0Top6Bits { get; set; }

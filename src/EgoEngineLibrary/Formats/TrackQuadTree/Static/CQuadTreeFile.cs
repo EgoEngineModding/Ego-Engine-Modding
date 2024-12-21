@@ -20,21 +20,24 @@ public class CQuadTreeFile : QuadTreeFile<CQuadTreeTypeInfo, CQuadTreeHeader, CQ
         return CQuadTreeTypeInfo.Get(CQuadTreeType.Dirt);
     }
 
-    public static CQuadTreeFile Create(CQuadTree quadTree)
+    public static void Validate(QuadTreeMeshData data, out CQuadTreeTypeInfo typeInfo)
     {
-        if (quadTree.Data.TypeInfo is not CQuadTreeTypeInfo typeInfo)
+        if (data.TypeInfo is not CQuadTreeTypeInfo info)
         {
-            throw new InvalidCastException("QuadTree is not a CQuadTree");
+            throw new InvalidCastException("Data is not of CQuadTreeType.");
         }
         
-        const int maxVerts = CQuadTreeTriangle.MaxVert0 + CQuadTreeTriangle.MaxVertOffset;
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(quadTree.Data.Vertices.Count, maxVerts, nameof(quadTree.Data.Vertices));
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(quadTree.Data.Materials.Count, typeInfo.MaxMaterials, nameof(quadTree.Data.Materials));
+        typeInfo = info;
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(data.Vertices.Count, CQuadTreeTriangle.MaxVertices, nameof(data.Vertices));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(data.Materials.Count, typeInfo.MaxMaterials, nameof(data.Materials));
+    }
 
-        // Encode node data
-        const int maxNodes = 0x7FFFFF;
+    public static CQuadTreeFile Create(CQuadTree quadTree)
+    {
+        Validate(quadTree.Data, out var typeInfo);
+
         var nodes = quadTree.Traverse().ToArray();
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(nodes.Length, maxNodes, nameof(quadTree));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(nodes.Length, CQuadTreeNode.MaxNodes, nameof(quadTree));
 
         return typeInfo.Type switch
         {
@@ -45,7 +48,7 @@ public class CQuadTreeFile : QuadTreeFile<CQuadTreeTypeInfo, CQuadTreeHeader, CQ
 
     private static unsafe CQuadTreeFile Create(CQuadTree quadTree, CQuadTree[] nodes, CQuadTreeTypeInfo typeInfo)
     {
-        var triangleRemap = BuildTriangleRemap(nodes, quadTree.Data.Triangles.Count);
+        var triangleRemap = BuildTriangleRemap(quadTree);
         
         // Encode node data
         var fileNodes = new CQuadTreeNode[nodes.Length];
@@ -362,9 +365,10 @@ public class CQuadTreeFile : QuadTreeFile<CQuadTreeTypeInfo, CQuadTreeHeader, CQ
     
     private struct CQuadTreeTriangle : IQuadTreeTriangle
     {
-        public const int MaxVert0 = (1 << 24) - 1;
-        public const int MaxVertOffset = (1 << 12) - 1;
+        private const int MaxVert0 = (1 << 24) - 1;
+        private const int MaxVertOffset = (1 << 12) - 1;
         private const int MaxMaterialIndex = byte.MaxValue;
+        public const int MaxVertices = MaxVert0 + MaxVertOffset + 1;
 
         private byte _vertex0High;
         private byte _vertex0Mid;

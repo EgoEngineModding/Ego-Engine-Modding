@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
 
 using Microsoft.Toolkit.HighPerformance.Buffers;
 
@@ -12,10 +12,10 @@ namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
 public class QuadTreeMeshData
 {
-    private readonly List<string> _materials;
-    private readonly List<Vector3> _vertices;
-    private readonly List<QuadTreeTriangle> _triangles;
-    private readonly List<int> _sheetInfo;
+    private readonly string[] _materials;
+    private readonly Vector3[] _vertices;
+    private readonly QuadTreeTriangle[] _triangles;
+    private readonly int[] _sheetInfo;
 
     public IReadOnlyList<string> Materials => _materials;
 
@@ -24,79 +24,25 @@ public class QuadTreeMeshData
     public IReadOnlyList<QuadTreeTriangle> Triangles => _triangles;
 
     public IReadOnlyList<QuadTreeDataTriangle> DataTriangles { get; }
-    
+
     public IReadOnlyList<int> SheetInfo => _sheetInfo;
 
-    public Vector3 BoundsMin { get; private set; } = new(float.MaxValue);
+    public Vector3 BoundsMin { get; }
 
-    public Vector3 BoundsMax { get; private set; } = new(float.MinValue);
+    public Vector3 BoundsMax { get; }
 
     public IQuadTreeTypeInfo TypeInfo { get; }
 
-    public QuadTreeMeshData(IQuadTreeTypeInfo typeInfo)
+    public QuadTreeMeshData(QuadTreeMeshDataBuilder data)
     {
-        TypeInfo = typeInfo;
-        _materials = [];
-        _vertices = [];
-        _triangles = [];
-        _sheetInfo = [];
+        TypeInfo = data.TypeInfo;
+        _materials = data.Materials.ToArray();
+        _vertices = data.Vertices.ToArray();
+        _triangles = data.Triangles.ToArray();
+        _sheetInfo = data.SheetInfo.ToArray();
+        BoundsMin = data.BoundsMin;
+        BoundsMax = data.BoundsMax;
         DataTriangles = new DataTriangleList(this);
-    }
-
-    public bool ShouldSplit()
-    {
-        return TypeInfo.ShouldSplit(this);
-    }
-
-    public void Add(in QuadTreeDataTriangle data)
-    {
-        var mat = data.Material;
-        var sheetInfo = TypeInfo.GetSheetInfo(ref mat);
-        
-        var matIndex = _materials.IndexOf(mat);
-        if (matIndex == -1)
-        {
-            matIndex = _materials.Count;
-            _materials.Add(mat);
-        }
-
-        var a = GetVertexIndex(data.Position0);
-        var b = GetVertexIndex(data.Position1);
-        var c = GetVertexIndex(data.Position2);
-        var tri = new QuadTreeTriangle(a, b, c, matIndex);
-        tri.EnsureFirstIndexLowest();
-        if (_triangles.IndexOf(tri) == -1)
-        {
-            _triangles.Add(tri);
-            _sheetInfo.Add(sheetInfo);
-        }
-
-        var bounds = data.GetBounds();
-        BoundsMin = Vector3.Min(BoundsMin, bounds.BoundsMin);
-        BoundsMax = Vector3.Max(BoundsMax, bounds.BoundsMax);
-    }
-
-    public void ClearElements()
-    {
-        BoundsMin = new Vector3(float.MaxValue);
-        BoundsMax = new Vector3(float.MinValue);
-        _materials.Clear();
-        _vertices.Clear();
-        _triangles.Clear();
-        _sheetInfo.Clear();
-    }
-
-    private int GetVertexIndex(Vector3 position)
-    {
-        var index = _vertices.IndexOf(position);
-        if (index != -1)
-        {
-            return index;
-        }
-
-        index = _vertices.Count;
-        _vertices.Add(position);
-        return index;
     }
 
     public bool Optimize()
@@ -107,14 +53,15 @@ public class QuadTreeMeshData
 
     public void Reorder()
     {
-        if (_vertices.Count < 3)
+        if (_vertices.Length < 3)
         {
             return;
         }
 
+        // Attempt to reduce PatchUp iterations
         var smallestVertexIndex = 0;
         var length = float.MaxValue;
-        for (var i = 0; i < _vertices.Count; ++i)
+        for (var i = 0; i < _vertices.Length; ++i)
         {
             var vLength = _vertices[i].LengthSquared();
             if (vLength < length)
@@ -124,22 +71,21 @@ public class QuadTreeMeshData
             }
         }
 
-        MeshOpt.OptimizeVertexCacheFifo(_triangles, _triangles, _vertices.Count, _vertices.Count, smallestVertexIndex);
+        MeshOpt.OptimizeVertexCacheFifo(_triangles, _triangles, _vertices.Length, _vertices.Length, smallestVertexIndex);
         MeshOpt.OptimizeVertexFetch(_vertices, _triangles, _vertices);
     }
 
     public bool PatchUp()
     {
         // Brute-force algorithm to make sure triangle indices are within range of min index
-        var maxIterations = _triangles.Count * 3;
-        if (_triangles.Count == 0)
+        var maxIterations = _triangles.Length * 3;
+        if (_triangles.Length == 0)
         {
             return true;
         }
         
         var iterations = 0;
-        var triSpan = CollectionsMarshal.AsSpan(_triangles);
-        for (var ti = 0; ti < _triangles.Count; ++ti)
+        for (var ti = 0; ti < _triangles.Length; ++ti)
         {
             var finalTri = _triangles[ti];
             var minIndex = Math.Min(Math.Min(finalTri.A, finalTri.B), finalTri.C);
@@ -162,19 +108,22 @@ public class QuadTreeMeshData
             }
 
             var insertIndex = minIndex + offset;
+            Debug.Assert(insertIndex < index);
+            MoveVertex(insertIndex, index);
+
             var updateCount = index - insertIndex + 1;
             using var indexMapBuffer = SpanOwner<int>.Allocate(updateCount);
             var indexMap = indexMapBuffer.Span;
-            MoveVertex(ref insertIndex, ref index, indexMap);
+            indexMap[index - insertIndex] = insertIndex;
             for (var i = insertIndex; i < index; ++i)
             {
                 indexMap[i - insertIndex] = i + 1;
             }
 
             // Adjust all triangles
-            for (var i = 0; i < triSpan.Length; ++i)
+            for (var i = 0; i < _triangles.Length; ++i)
             {
-                ref var tri = ref triSpan[i];
+                ref var tri = ref _triangles[i];
 
                 if (tri.A >= insertIndex && tri.A <= index)
                 {
@@ -204,36 +153,26 @@ public class QuadTreeMeshData
         }
 
         // Ensure A is the lowest index
-        for (var i = 0; i < triSpan.Length; ++i)
+        for (var i = 0; i < _triangles.Length; ++i)
         {
-            ref var tri = ref triSpan[i];
+            ref var tri = ref _triangles[i];
             tri.EnsureFirstIndexLowest();
         }
 
         Debug.WriteLine(iterations);
         return true;
 
-        void MoveVertex(ref int insertIndex, ref int index, Span<int> indexMap)
+        void MoveVertex(int insertIndex, int index)
         {
             var pos = _vertices[index];
-            indexMap[index - insertIndex] = insertIndex;
-            if (insertIndex > index)
-            {
-                _vertices.Insert(insertIndex, pos);
-                _vertices.RemoveAt(index);
-                (insertIndex, index) = (index, insertIndex);
-            }
-            else
-            {
-                _vertices.RemoveAt(index);
-                _vertices.Insert(insertIndex, pos);
-            }
+            Array.Copy(_vertices, insertIndex, _vertices, insertIndex + 1, index - insertIndex);
+            _vertices[insertIndex] = pos;
         }
     }
-    
+
     private class DataTriangleList(QuadTreeMeshData data) : IReadOnlyList<QuadTreeDataTriangle>
     {
-        public int Count => data._triangles.Count;
+        public int Count => data._triangles.Length;
 
         public QuadTreeDataTriangle this[int index] => GetTriangle(index);
 

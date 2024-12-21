@@ -14,6 +14,10 @@ public static class VcQuadTreeSandbox
     {
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\Grid\tracks\", VcQuadTreeType.RaceDriverGrid);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\Dirt 2\tracks\", VcQuadTreeType.RaceDriverGrid);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2010\tracks\", VcQuadTreeType.RaceDriverGrid);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2011\tracks\", VcQuadTreeType.RaceDriverGrid);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2012\tracks\", VcQuadTreeType.RaceDriverGrid);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\f12013\tracks\", VcQuadTreeType.RaceDriverGrid);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2014\tracks\", VcQuadTreeType.RaceDriverGrid);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT 3 Complete Edition\tracks\", VcQuadTreeType.Dirt3);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Showdown\tracks\", VcQuadTreeType.DirtShowdown);
@@ -24,13 +28,7 @@ public static class VcQuadTreeSandbox
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Showdown\tracks\locations\japan\yokohama_docks\route_0", VcQuadTreeType.DirtShowdown);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Showdown\tracks\locations\japan\shibuya\route_0", VcQuadTreeType.DirtShowdown);
         var typeInfo = VcQuadTreeTypeInfo.Get(type);
-        var maxEntries = 0;
-        var maxTris = 0;
-        var maxNodes = 0;
-        var maxVerts = 0;
-        var maxMats = 0;
-        var maxNodeTris = 0;
-        var maxLevel = 0;
+        var info = new TrackJpkInfo(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         var files = Utils.GetFiles("track*.jpk", folder);
         foreach (var f in files)
         {
@@ -42,44 +40,28 @@ public static class VcQuadTreeSandbox
                 jpk.Read(fs);
                 
                 //ExamineNode(jpk.Entries, type);
-                var info = PrintNodeData(jpk.Entries, typeInfo);
-                maxEntries = Math.Max(maxEntries, info.E);
-                maxLevel = Math.Max(maxLevel, info.L);
-                maxTris = Math.Max(maxTris, info.T);
-                maxVerts = Math.Max(maxVerts, info.V);
-                maxMats = Math.Max(maxMats, info.M);
-                maxNodes = Math.Max(maxNodes, info.N);
-                maxNodeTris = Math.Max(maxNodeTris, info.NT);
+                var info2 = PrintNodeData(jpk.Entries, typeInfo);
+                info = TrackJpkInfo.Max(info, info2);
                 //PrintSubDivs(jpk.Entries);
                 //continue;
                 var ground = TrackGround.Load(jpk, typeInfo);
-                //var gltf = TrackGroundGltfConverter.Convert(ground, true);
-                //gltf.Save(Path.ChangeExtension(f, ".glb"));
+                var gltf = TrackGroundGltfConverter.Convert(ground, true);
+                gltf.Save(Path.ChangeExtension(f, ".glb"));
                 //var ground2 = GltfTrackGroundConverter.Convert(gltf, VcQuadTreeTypeInfo.Get(type));
-                var boundsMin = new Vector3(float.MaxValue);
-                var boundsMax = new Vector3(float.MinValue);
-                var triangles = new List<QuadTreeDataTriangle>();
+                var data = new QuadTreeMeshDataBuilder(typeInfo);
                 foreach (var node in ground.TraverseGrid())
                 {
                     foreach (var triangle in node.QuadTree.GetTriangles())
                     {
-                        triangles.Add(triangle);
-                
-                        var triBounds = triangle.GetBounds();
-                        boundsMin = Vector3.Min(boundsMin, triBounds.BoundsMin);
-                        boundsMax = Vector3.Max(boundsMax, triBounds.BoundsMax);
+                        data.Add(triangle);
                     }
                 }
-                var gqt2 = TrackGroundQuadTree.Create(boundsMin, boundsMax, typeInfo);
-                foreach (var triangle in triangles)
-                {
-                    gqt2.Add(triangle);
-                }
+                var gqt2 = TrackGroundQuadTree.Create(data.Build());
                 var ground2 = TrackGround.Create(gqt2);
                 
                 var jpk2 = ground2.Save();
                 PrintNodeData(jpk2.Entries, typeInfo);
-                continue;
+                //continue;
                 using var fs3 = File.Open(Path.Combine(folder, "track2.jpk"), FileMode.Create, FileAccess.Write, FileShare.Read);
                 jpk2.Write(fs3);
 
@@ -96,8 +78,7 @@ public static class VcQuadTreeSandbox
             }
         }
 
-        var finalInfo = new TrackJpkInfo(maxEntries, maxLevel, maxTris, maxVerts, maxMats, maxNodes, maxNodeTris);
-        Console.WriteLine(finalInfo.ToString());
+        Console.WriteLine(info.ToString());
     }
 
     private static void ConvertShowdownToDirt3(string f, JpkFile jpk, VcQuadTreeTypeInfo typeInfo)
@@ -133,15 +114,16 @@ public static class VcQuadTreeSandbox
                     
             var vcqtc = new VcQuadTreeFile(entry.Data, typeInfo);
             var tris = vcqtc.GetTriangles();
-            var data = new QuadTreeMeshData(typeInfo);
+            var builder = new QuadTreeMeshDataBuilder(typeInfo);
             for (var i = 0; i < vcqtc.NumTriangles; ++i)
             {
                 var tri = tris[i];
-                data.Add(tri);
+                builder.Add(tri);
             }
 
+            var data = builder.Build();
             data.Optimize();
-            var quadTree = VcQuadTree.Create(data.BoundsMin, data.BoundsMax, data);
+            var quadTree = VcQuadTree.Create(data);
             //var quadTree = VcQuadTree.Create(vcqtc.Header.BoundMin, vcqtc.Header.BoundMax, dat);
             var qtc = VcQuadTreeFile.Create(quadTree);
             File.WriteAllBytes(@"C:\Games\Steam\steamapps\common\F1 2014\tracks\circuits\Abu_Dhabi\route_0\track2\qtc.vcqtc", qtc.Bytes);
@@ -150,12 +132,7 @@ public static class VcQuadTreeSandbox
 
     private static TrackJpkInfo PrintNodeData(IReadOnlyList<JpkEntry> entries, VcQuadTreeTypeInfo typeInfo)
     {
-        var maxTris = 0;
-        var maxNodes = 0;
-        var maxVerts = 0;
-        var maxMats = 0;
-        var maxNodeTris = 0;
-        var maxLevel = 0;
+        var info = new TrackJpkInfo(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         foreach (var entry in entries)
         {
             if (!entry.Name.EndsWith(".vcqtc"))
@@ -163,27 +140,40 @@ public static class VcQuadTreeSandbox
                 continue;
             }
                     
-            var vcqtc = new VcQuadTreeFile(entry.Data, typeInfo);
-            var count = 0;
-            for (var i = 0; i < vcqtc.NumNodes; ++i)
+            var qt = new VcQuadTreeFile(entry.Data, typeInfo);
+            var maxNodeTris = 0;
+            var maxNodeVertices = 0;
+            var maxNodeMaterials = 0;
+            for (var i = 0; i < qt.NumNodes; ++i)
             {
-                var tCount = vcqtc.GetNodeTriangles(i, []);
-                count = Math.Max(count, tCount);
+                var triangles = qt.GetNodeTriangles(i);
+                maxNodeTris = Math.Max(maxNodeTris, triangles.Length);
+                maxNodeVertices = Math.Max(maxNodeVertices,
+                    triangles.SelectMany<QuadTreeTriangle, int>(x => [x.A, x.B, x.C]).Distinct().Count());
+                maxNodeMaterials = Math.Max(maxNodeMaterials, triangles.Select(x => x.MaterialIndex).Distinct().Count());
             }
 
-            maxNodes = Math.Max(maxNodes, vcqtc.NumNodes);
-            maxTris = Math.Max(maxTris, vcqtc.NumTriangles);
-            maxVerts = Math.Max(maxVerts, vcqtc.NumVertices);
-            maxMats = Math.Max(maxMats, vcqtc.NumMaterials);
-            maxNodeTris = Math.Max(maxNodeTris, count);
-            maxLevel = Math.Max(maxLevel, entry.Name.AsSpan().Count('_'));
+            var info2 = new TrackJpkInfo(
+                entries.Count,
+                entry.Name.AsSpan().Count('_'),
+                qt.NumTriangles,
+                qt.NumVertices,
+                qt.NumMaterials,
+                qt.NumNodes,
+                qt.GetDepth(),
+                maxNodeTris,
+                maxNodeVertices,
+                maxNodeMaterials,
+                qt.Bytes.Length
+            );
+            info = TrackJpkInfo.Max(info, info2);
+            //Console.WriteLine(info2.ToString());
         }
 
-        var info = new TrackJpkInfo(entries.Count, maxLevel, maxTris, maxVerts, maxMats, maxNodes, maxNodeTris);
         Console.WriteLine(info.ToString());
         return info;
     }
-    
+
     private static void PrintBounds(IReadOnlyList<JpkEntry> entries, VcQuadTreeTypeInfo typeInfo)
     {
         var children = new List<QuadTreeNodeInfo>();
@@ -298,11 +288,28 @@ public static class VcQuadTreeSandbox
     }
 
     private record QuadTreeNodeInfo(string Name, int Select, Vector2 Min, Vector2 Max);
-    private record TrackJpkInfo(int E, int L, int T, int V, int M, int N, int NT)
+    private record TrackJpkInfo(int E, int L, int T, int V, int M, int N, int NL, int NT, int NV, int NM, int B)
     {
         public override string ToString()
         {
-            return $"E{E} L{L} T{T} V{V} M{M} N{N} NT{NT}";
+            return $"E{E} L{L} T{T} V{V} M{M} N{N} NL{NL} NT{NT} NV{NV} NM{NM} B{B}";
+        }
+
+        public static TrackJpkInfo Max(TrackJpkInfo info, TrackJpkInfo info2)
+        {
+            return new TrackJpkInfo(
+                Math.Max(info.E, info2.E),
+                Math.Max(info.L, info2.L),
+                Math.Max(info.T, info2.T),
+                Math.Max(info.V, info2.V),
+                Math.Max(info.M, info2.M),
+                Math.Max(info.N, info2.N),
+                Math.Max(info.NL, info2.NL),
+                Math.Max(info.NT, info2.NT),
+                Math.Max(info.NV, info2.NV),
+                Math.Max(info.NM, info2.NM),
+                Math.Max(info.B, info2.B)
+            );
         }
     }
 }

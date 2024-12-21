@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Numerics;
+﻿using System.Numerics;
 
 using EgoEngineLibrary.Collections;
 using EgoEngineLibrary.Formats.TrackQuadTree.Static;
@@ -8,15 +7,13 @@ namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
 public class CQuadTree : CellQuadTree<CQuadTree>
 {
-    public static CQuadTree Create(Vector3 boundsMin, Vector3 boundsMax, QuadTreeMeshData data)
+    public static CQuadTree Create(QuadTreeMeshData data)
     {
-        if (data.Materials.Count > data.TypeInfo.MaxMaterials)
-        {
-            throw new InvalidDataException(
-                $"{nameof(CQuadTree)} cannot have more than {data.TypeInfo.MaxMaterials} materials.");
-        }
+        CQuadTreeFile.Validate(data, out _);
         
         data.Optimize();
+        var boundsMin = data.BoundsMin - CellQuadTree.Padding;
+        var boundsMax = data.BoundsMax + CellQuadTree.Padding;
         var qt = new CQuadTree(boundsMin, boundsMax, data);
         for (var i = 0; i < qt._data.Triangles.Count; ++i)
         {
@@ -41,10 +38,5 @@ public class CQuadTree : CellQuadTree<CQuadTree>
     protected override bool ShouldSplit()
     {
         return _triangleIndices.Count > 16;
-    }
-
-    public CQuadTreeFile CreateFile()
-    {
-        return CQuadTreeFile.Create(this);
     }
 }

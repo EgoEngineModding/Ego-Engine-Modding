@@ -126,7 +126,7 @@ public abstract class QuadTree<TSelf, TData> where TSelf : QuadTree<TSelf, TData
     
     protected abstract bool ShouldSplit();
 
-    protected IEnumerable<TSelf> TraverseFromBottomLeft()
+    public IEnumerable<TSelf> TraverseFromBottomLeft()
     {
         if (IsLeaf)
         {

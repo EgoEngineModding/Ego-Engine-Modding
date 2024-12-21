@@ -16,5 +16,5 @@ public interface IQuadTreeTypeInfo
     
     int GetTriangleIndexOffset(int minIndex, int index);
     
-    bool ShouldSplit(QuadTreeMeshData data);
+    bool ShouldSplit(QuadTreeMeshDataView data);
 }

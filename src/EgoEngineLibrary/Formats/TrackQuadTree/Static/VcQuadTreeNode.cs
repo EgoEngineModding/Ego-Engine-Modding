@@ -8,6 +8,7 @@ public struct VcQuadTreeNode : IStaticQuadTreeNode
     private const int MaxChildIndex = 0x7FFF;
     private const int LeafBit = 0x8000;
     private const int LeafWithoutTrianglesId = 0xFFFF;
+    public const int MaxNodes = MaxChildIndex + 4;
     
     byte Data0 { get; set; }
     byte Data1 { get; set; }

@@ -6,7 +6,6 @@ namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
 public class CQuadTreeTypeInfo : IQuadTreeTypeInfo
 {
-    private const int MaxVert0 = (1 << 24) - 1;
     private const int MaxOffset = (1 << 12) - 1;
 
     private static readonly Dictionary<CQuadTreeType, CQuadTreeTypeInfo> Infos;
@@ -83,7 +82,7 @@ public class CQuadTreeTypeInfo : IQuadTreeTypeInfo
         };
     }
 
-    public bool ShouldSplit(QuadTreeMeshData data)
+    public bool ShouldSplit(QuadTreeMeshDataView data)
     {
         throw new NotImplementedException();
     }

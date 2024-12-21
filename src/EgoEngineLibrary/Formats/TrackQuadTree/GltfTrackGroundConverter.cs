@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Numerics;
+
+using EgoEngineLibrary.Formats.TrackQuadTree.Static;
 
 using SharpGLTF.Runtime;
 using SharpGLTF.Schema2;
@@ -11,40 +12,28 @@ public static class GltfTrackGroundConverter
 {
     public static TrackGround Convert(ModelRoot gltf, VcQuadTreeTypeInfo typeInfo)
     {
-        var boundsMin = new Vector3(float.MaxValue);
-        var boundsMax = new Vector3(float.MinValue);
-        var triangles = new List<QuadTreeDataTriangle>();
-        foreach (var triangle in GetTriangles(gltf))
-        {
-            triangles.Add(triangle);
-
-            var triBounds = triangle.GetBounds();
-            boundsMin = Vector3.Min(boundsMin, triBounds.BoundsMin);
-            boundsMax = Vector3.Max(boundsMax, triBounds.BoundsMax);
-        }
-
-        var quadTree = TrackGroundQuadTree.Create(boundsMin, boundsMax, typeInfo);
-        foreach (var triangle in triangles)
-        {
-            quadTree.Add(triangle);
-        }
-
-        var ground = TrackGround.Create(quadTree);
-        return ground;
-    }
-
-    public static CQuadTree Convert(ModelRoot gltf, CQuadTreeTypeInfo typeInfo)
-    {
-        var data = new QuadTreeMeshData(typeInfo);
+        var data = new QuadTreeMeshDataBuilder(typeInfo);
         foreach (var triangle in GetTriangles(gltf))
         {
             data.Add(triangle);
         }
 
-        var quadTree = CQuadTree.Create(
-            new Vector3(data.BoundsMin.X, data.BoundsMin.Y, data.BoundsMin.Z),
-            new Vector3(data.BoundsMax.X, data.BoundsMax.Y, data.BoundsMax.Z), data);
-        return quadTree;
+        var quadTree = TrackGroundQuadTree.Create(data.Build());
+        var ground = TrackGround.Create(quadTree);
+        return ground;
+    }
+
+    public static CQuadTreeFile Convert(ModelRoot gltf, CQuadTreeTypeInfo typeInfo)
+    {
+        var data = new QuadTreeMeshDataBuilder(typeInfo);
+        foreach (var triangle in GetTriangles(gltf))
+        {
+            data.Add(triangle);
+        }
+
+        var quadTree = CQuadTree.Create(data.Build());
+        var file = CQuadTreeFile.Create(quadTree);
+        return file;
     }
 
     private static IEnumerable<QuadTreeDataTriangle> GetTriangles(ModelRoot gltf)

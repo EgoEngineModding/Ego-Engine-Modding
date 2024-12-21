@@ -5,6 +5,11 @@ using EgoEngineLibrary.Collections;
 
 namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
+internal static class CellQuadTree
+{
+    public static readonly Vector3 Padding = new(0, 0.1f, 0);
+}
+
 public abstract class CellQuadTree<T> : QuadTree<T, int> where T : CellQuadTree<T>
 {
     protected readonly QuadTreeMeshData _data;
@@ -33,7 +38,7 @@ public abstract class CellQuadTree<T> : QuadTree<T, int> where T : CellQuadTree<
         {
             return false;
         }
-
+        
         _triangleIndices.Add(data);
         return true;
     }

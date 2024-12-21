@@ -8,6 +8,7 @@ public struct CQuadTreeNode : IStaticQuadTreeNode
     private const int MaxChildIndex = 0x7FFFFF;
     private const int LeafBit = 0x800000;
     private const int LeafWithoutTrianglesId = 0xFFFFFF;
+    public const int MaxNodes = MaxChildIndex + 4;
 
     private byte _data0;
     private byte _data1;

@@ -24,17 +24,20 @@ public class QuadTreeMeshDataTests
     {
         // Arrange
         var typeInfo = new TypeInfo();
-        var data = new QuadTreeMeshData(typeInfo);
+        var builder = new QuadTreeMeshDataBuilder(typeInfo);
 
         var numVertices = Math.Max(Math.Max(a, b), c) - 1;
         for (var i = 0; i < numVertices; ++i)
         {
-            data.Add(new QuadTreeDataTriangle(new Vector3(i), new Vector3(i + 1), new Vector3(i + 2), string.Empty));
+            builder.Add(new QuadTreeDataTriangle(new Vector3(i), new Vector3(i + 1), new Vector3(i + 2), string.Empty));
         }
 
         numVertices += 2;
-        data.Add(new QuadTreeDataTriangle(data.Vertices[a], data.Vertices[b], data.Vertices[c], string.Empty));
-
+        builder.Add(new QuadTreeDataTriangle(builder.Vertices[a], builder.Vertices[b], builder.Vertices[c],
+            string.Empty));
+        
+        var data = builder.Build();
+        
         // Act
         var result = data.PatchUp();
 
@@ -102,7 +105,7 @@ public class QuadTreeMeshDataTests
             };
         }
 
-        public bool ShouldSplit(QuadTreeMeshData data)
+        public bool ShouldSplit(QuadTreeMeshDataView data)
         {
             throw new NotImplementedException();
         }

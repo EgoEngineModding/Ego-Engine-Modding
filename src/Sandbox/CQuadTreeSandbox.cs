@@ -55,15 +55,15 @@ public static class CQuadTreeSandbox
                 //continue;
                 //var gltf = TrackGroundGltfConverter.Convert(qt);
                 //gltf.Save(Path.ChangeExtension(f, ".glb"));
-                //var ground2 = GltfTrackGroundConverter.Convert(gltf, CQuadTreeTypeInfo.Get(type));
-                var data = new QuadTreeMeshData(typeInfo);
+                //var qt2 = GltfTrackGroundConverter.Convert(gltf, CQuadTreeTypeInfo.Get(type));
+                var data = new QuadTreeMeshDataBuilder(typeInfo);
                 foreach (var triangle in qt.GetTriangles())
                 {
                     data.Add(triangle);
                 }
+                var cqt = CQuadTree.Create(data.Build());
+                var qt2 = CQuadTreeFile.Create(cqt);
 
-                var cqt = CQuadTree.Create(data.BoundsMin, data.BoundsMax, data);
-                var qt2 = cqt.CreateFile();
                 PrintNodeData(qt2);
                 continue;
                 File.WriteAllBytes(Path.Combine(folder, Path.GetFileNameWithoutExtension(f) + "2.cqtc"), qt2.Bytes);

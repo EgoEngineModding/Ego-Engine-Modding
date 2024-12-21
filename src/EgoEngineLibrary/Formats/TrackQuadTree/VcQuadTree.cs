@@ -1,13 +1,18 @@
 ﻿using System.Numerics;
 
 using EgoEngineLibrary.Collections;
+using EgoEngineLibrary.Formats.TrackQuadTree.Static;
 
 namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
 public class VcQuadTree : CellQuadTree<VcQuadTree>
 {
-    public static VcQuadTree Create(Vector3 boundsMin, Vector3 boundsMax, QuadTreeMeshData data)
+    public static VcQuadTree Create(QuadTreeMeshData data)
     {
+        VcQuadTreeFile.Validate(data, out _);
+
+        var boundsMin = data.BoundsMin - CellQuadTree.Padding;
+        var boundsMax = data.BoundsMax + CellQuadTree.Padding;
         var qt = new VcQuadTree(boundsMin, boundsMax, data);
         for (var i = 0; i < qt._data.Triangles.Count; ++i)
         {
@@ -18,7 +23,7 @@ public class VcQuadTree : CellQuadTree<VcQuadTree>
     }
 
     private VcQuadTree(Vector3 boundsMin, Vector3 boundsMax, QuadTreeMeshData data)
-        : base(boundsMin, boundsMax, data, 6)
+        : base(boundsMin, boundsMax, data, 16)
     {
     }
 

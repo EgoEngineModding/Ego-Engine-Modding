@@ -25,12 +25,14 @@ public abstract class QuadTreeFile
 
     public abstract int GetNodeTriangles(int nodeIndex, Span<int> indices);
 
-    protected static int[] BuildTriangleRemap<T>(T[] nodes, int triangleCount) where T : CellQuadTree<T>
+    protected static int[] BuildTriangleRemap<T>(T quadTree) where T : CellQuadTree<T>
     {
+        // Attempt to reduce node triangle workspace index range
+        int triangleCount = quadTree.Data.Triangles.Count;
         var currentTriangle = 0;
         int[] remap = new int[triangleCount];
         Array.Fill(remap, -1);
-        foreach (var node in nodes)
+        foreach (var node in quadTree.TraverseFromBottomLeft())
         {
             foreach (var triIndex in node.Elements)
             {
