@@ -1,7 +1,6 @@
 ﻿using System.Numerics;
 
 using EgoEngineLibrary.Collections;
-using EgoEngineLibrary.Formats.TrackQuadTree.Static;
 
 namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
@@ -9,9 +8,6 @@ public class CQuadTree : CellQuadTree<CQuadTree>
 {
     public static CQuadTree Create(QuadTreeMeshData data)
     {
-        CQuadTreeFile.Validate(data, out _);
-        
-        data.Optimize();
         var boundsMin = data.BoundsMin - CellQuadTree.Padding;
         var boundsMax = data.BoundsMax + CellQuadTree.Padding;
         var qt = new CQuadTree(boundsMin, boundsMax, data);
@@ -37,6 +33,7 @@ public class CQuadTree : CellQuadTree<CQuadTree>
 
     protected override bool ShouldSplit()
     {
-        return _triangleIndices.Count > 16;
+        // 16 tris is closest to CM's implementation, but creation is slow due to too many node splits
+        return _triangleIndices.Count > 64;
     }
 }

@@ -84,8 +84,6 @@ public class TrackGroundQuadTree : QuadTree<TrackGroundQuadTree, int>
     {
         var data = _dataView.ToData();
         data.Optimize();
-        
-        var quadTree = VcQuadTree.Create(data);
-        return VcQuadTreeFile.Create(quadTree);
+        return VcQuadTreeFile.Create(data);
     }
 }

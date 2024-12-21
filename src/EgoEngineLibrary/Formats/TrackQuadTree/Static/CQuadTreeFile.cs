@@ -32,10 +32,12 @@ public class CQuadTreeFile : QuadTreeFile<CQuadTreeTypeInfo, CQuadTreeHeader, CQ
         ArgumentOutOfRangeException.ThrowIfGreaterThan(data.Materials.Count, typeInfo.MaxMaterials, nameof(data.Materials));
     }
 
-    public static CQuadTreeFile Create(CQuadTree quadTree)
+    public static CQuadTreeFile Create(QuadTreeMeshData data)
     {
-        Validate(quadTree.Data, out var typeInfo);
+        Validate(data, out var typeInfo);
 
+        data.Optimize();
+        var quadTree = CQuadTree.Create(data);
         var nodes = quadTree.Traverse().ToArray();
         ArgumentOutOfRangeException.ThrowIfGreaterThan(nodes.Length, CQuadTreeNode.MaxNodes, nameof(quadTree));
 

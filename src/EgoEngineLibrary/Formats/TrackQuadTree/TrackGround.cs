@@ -57,8 +57,10 @@ public partial class TrackGround
         }
     }
     
-    public static TrackGround Create(TrackGroundQuadTree quadTree)
+    public static TrackGround Create(QuadTreeMeshData data)
     {
+        var quadTree = TrackGroundQuadTree.Create(data);
+        
         var offset = quadTree.BoundsMin;
         var scale = quadTree.BoundsMax - quadTree.BoundsMin;
         var maxSubdivisions = new int[TotalCells];

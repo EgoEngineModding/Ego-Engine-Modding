@@ -32,21 +32,25 @@ public static class VcQuadTreeSandbox
         var files = Utils.GetFiles("track*.jpk", folder);
         foreach (var f in files)
         {
+            var start = Stopwatch.GetTimestamp();
             try
             {
-                var start = Stopwatch.GetTimestamp();
                 using var fs = new FileStream(f, FileMode.Open, FileAccess.Read, FileShare.Read);
                 var jpk = new JpkFile();
                 jpk.Read(fs);
-                
+
                 //ExamineNode(jpk.Entries, type);
                 var info2 = PrintNodeData(jpk.Entries, typeInfo);
                 info = TrackJpkInfo.Max(info, info2);
                 //PrintSubDivs(jpk.Entries);
                 //continue;
+                
+                // Load
                 var ground = TrackGround.Load(jpk, typeInfo);
                 var gltf = TrackGroundGltfConverter.Convert(ground, true);
                 gltf.Save(Path.ChangeExtension(f, ".glb"));
+
+                // Create
                 //var ground2 = GltfTrackGroundConverter.Convert(gltf, VcQuadTreeTypeInfo.Get(type));
                 var data = new QuadTreeMeshDataBuilder(typeInfo);
                 foreach (var node in ground.TraverseGrid())
@@ -56,25 +60,29 @@ public static class VcQuadTreeSandbox
                         data.Add(triangle);
                     }
                 }
-                var gqt2 = TrackGroundQuadTree.Create(data.Build());
-                var ground2 = TrackGround.Create(gqt2);
-                
+                var ground2 = TrackGround.Create(data.Build());
+
+                // Save
                 var jpk2 = ground2.Save();
                 PrintNodeData(jpk2.Entries, typeInfo);
                 //continue;
-                using var fs3 = File.Open(Path.Combine(folder, "track2.jpk"), FileMode.Create, FileAccess.Write, FileShare.Read);
+                using var fs3 = File.Open(Path.Combine(folder, "track2.jpk"), FileMode.Create, FileAccess.Write,
+                    FileShare.Read);
                 jpk2.Write(fs3);
 
                 var ground3 = TrackGround.Load(jpk2, typeInfo);
                 var gltf3 = TrackGroundGltfConverter.Convert(ground3, true);
                 gltf3.Save(Path.Combine(folder, "track2.glb"));
-                
-                Console.WriteLine($"{Stopwatch.GetElapsedTime(start)}");
+
                 return;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
+            }
+            finally
+            {
+                Console.WriteLine($"{Stopwatch.GetElapsedTime(start)}");
             }
         }
 
@@ -123,9 +131,7 @@ public static class VcQuadTreeSandbox
 
             var data = builder.Build();
             data.Optimize();
-            var quadTree = VcQuadTree.Create(data);
-            //var quadTree = VcQuadTree.Create(vcqtc.Header.BoundMin, vcqtc.Header.BoundMax, dat);
-            var qtc = VcQuadTreeFile.Create(quadTree);
+            var qtc = VcQuadTreeFile.Create(data);
             File.WriteAllBytes(@"C:\Games\Steam\steamapps\common\F1 2014\tracks\circuits\Abu_Dhabi\route_0\track2\qtc.vcqtc", qtc.Bytes);
         }
     }

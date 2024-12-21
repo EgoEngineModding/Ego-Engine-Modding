@@ -9,7 +9,7 @@ public static class CQuadTreeSandbox
 {
     public static void Run(string[] args)
     {
-        var (folder, type) = (@"C:\Games\DiRT Demo\tracks\", CQuadTreeType.Dirt);
+        //var (folder, type) = (@"C:\Games\DiRT Demo\tracks\", CQuadTreeType.Dirt);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\Grid\tracks\", CQuadTreeType.Dirt);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\Dirt 2\tracks\", CQuadTreeType.Dirt);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2010\tracks\", CQuadTreeType.Dirt);
@@ -22,6 +22,7 @@ public static class CQuadTreeSandbox
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\grid 2\tracks\", CQuadTreeType.Dirt);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\GRID Autosport\tracks\", CQuadTreeType.Dirt);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Rally\tracks\", CQuadTreeType.Dirt);
+        var (folder, type) = (@"C:\Games\DiRT Demo\tracks\italy\olbia_02", CQuadTreeType.Dirt);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2014\tracks\circuits\Abu_Dhabi\route_0", CQuadTreeType.Dirt);
         var typeInfo = CQuadTreeTypeInfo.Get(type);
         var maxLevel = 0;
@@ -35,14 +36,14 @@ public static class CQuadTreeSandbox
         var files = Utils.GetFiles("*.cqtc", folder);
         foreach (var f in files)
         {
+            var start = Stopwatch.GetTimestamp();
             try
             {
-                var start = Stopwatch.GetTimestamp();
                 var qt = new CQuadTreeFile(File.ReadAllBytes(f), typeInfo)
                 {
                     Identifier = Path.GetFileNameWithoutExtension(f)
                 };
-                
+
                 var info = PrintNodeData(qt);
                 maxLevel = Math.Max(maxLevel, info.L);
                 maxTris = Math.Max(maxTris, info.T);
@@ -53,30 +54,37 @@ public static class CQuadTreeSandbox
                 maxNodeVertices = Math.Max(maxNodeVertices, info.NV);
                 maxNodeMaterials = Math.Max(maxNodeMaterials, info.NM);
                 //continue;
-                //var gltf = TrackGroundGltfConverter.Convert(qt);
-                //gltf.Save(Path.ChangeExtension(f, ".glb"));
+                
+                // Load
+                var gltf = TrackGroundGltfConverter.Convert(qt);
+                gltf.Save(Path.ChangeExtension(f, ".glb"));
+                
+                // Create
                 //var qt2 = GltfTrackGroundConverter.Convert(gltf, CQuadTreeTypeInfo.Get(type));
                 var data = new QuadTreeMeshDataBuilder(typeInfo);
                 foreach (var triangle in qt.GetTriangles())
                 {
                     data.Add(triangle);
                 }
-                var cqt = CQuadTree.Create(data.Build());
-                var qt2 = CQuadTreeFile.Create(cqt);
+                var qt2 = CQuadTreeFile.Create(data.Build());
 
+                // Save
                 PrintNodeData(qt2);
-                continue;
+                //continue;
                 File.WriteAllBytes(Path.Combine(folder, Path.GetFileNameWithoutExtension(f) + "2.cqtc"), qt2.Bytes);
 
                 var gltf2 = TrackGroundGltfConverter.Convert(qt2);
                 gltf2.Save(Path.Combine(folder, Path.GetFileNameWithoutExtension(f) + "2.glb"));
-                
-                Console.WriteLine($"{Stopwatch.GetElapsedTime(start)}");
+
                 return;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
+            }
+            finally
+            {
+                Console.WriteLine($"{Stopwatch.GetElapsedTime(start)}");
             }
         }
 

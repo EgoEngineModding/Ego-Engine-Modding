@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -45,11 +46,13 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
         ArgumentOutOfRangeException.ThrowIfGreaterThan(data.Materials.Count, typeInfo.MaxMaterials, nameof(data.Materials));
     }
 
-    public static VcQuadTreeFile Create(VcQuadTree quadTree)
+    public static VcQuadTreeFile Create(QuadTreeMeshData data)
     {
-        Validate(quadTree.Data, out var typeInfo);
+        Validate(data, out var typeInfo);
 
+        var quadTree = VcQuadTree.Create(data);
         var nodes = quadTree.Traverse().ToArray();
+        Debug.Assert(nodes.Length <= VcQuadTreeNode.MaxNodes);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(nodes.Length, VcQuadTreeNode.MaxNodes, nameof(quadTree));
 
         return typeInfo.Type switch

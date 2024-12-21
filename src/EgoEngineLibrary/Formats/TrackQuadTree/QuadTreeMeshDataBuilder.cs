@@ -31,7 +31,7 @@ public class QuadTreeMeshDataBuilder
     {
         TypeInfo = typeInfo;
         _materials = [];
-        _vertices = [];
+        _vertices = new OrderedSet<Vector3>(VertexEqualityComparer.Instance);
         _triangles = [];
         _sheetInfo = [];
     }
@@ -66,7 +66,7 @@ public class QuadTreeMeshDataBuilder
         BoundsMax = Vector3.Max(BoundsMax, bounds.BoundsMax);
     }
 
-    public void Clear()
+    public void Reset()
     {
         BoundsMin = new Vector3(float.MaxValue);
         BoundsMax = new Vector3(float.MinValue);
@@ -96,8 +96,8 @@ public class QuadTreeMeshDataBuilder
 
     private class VertexEqualityComparer : IEqualityComparer<Vector3>
     {
-        private const int FractionalDigit = 5;
-        private const float Tolerance = 0.00001f;
+        private const int FractionalDigit = 4;
+        private const float Tolerance = 0.0001f;
         public static readonly VertexEqualityComparer Instance = new();
 
         public bool Equals(Vector3 x, Vector3 y)

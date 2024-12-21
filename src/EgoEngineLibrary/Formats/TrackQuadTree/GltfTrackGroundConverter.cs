@@ -18,8 +18,7 @@ public static class GltfTrackGroundConverter
             data.Add(triangle);
         }
 
-        var quadTree = TrackGroundQuadTree.Create(data.Build());
-        var ground = TrackGround.Create(quadTree);
+        var ground = TrackGround.Create(data.Build());
         return ground;
     }
 
@@ -31,8 +30,7 @@ public static class GltfTrackGroundConverter
             data.Add(triangle);
         }
 
-        var quadTree = CQuadTree.Create(data.Build());
-        var file = CQuadTreeFile.Create(quadTree);
+        var file = CQuadTreeFile.Create(data.Build());
         return file;
     }
 

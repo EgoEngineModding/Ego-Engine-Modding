@@ -1,7 +1,6 @@
 ﻿using System.Numerics;
 
 using EgoEngineLibrary.Collections;
-using EgoEngineLibrary.Formats.TrackQuadTree.Static;
 
 namespace EgoEngineLibrary.Formats.TrackQuadTree;
 
@@ -9,8 +8,6 @@ public class VcQuadTree : CellQuadTree<VcQuadTree>
 {
     public static VcQuadTree Create(QuadTreeMeshData data)
     {
-        VcQuadTreeFile.Validate(data, out _);
-
         var boundsMin = data.BoundsMin - CellQuadTree.Padding;
         var boundsMax = data.BoundsMax + CellQuadTree.Padding;
         var qt = new VcQuadTree(boundsMin, boundsMax, data);
