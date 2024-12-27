@@ -174,8 +174,7 @@ public class CQuadTreeFile : QuadTreeFile<CQuadTreeTypeInfo, CQuadTreeHeader, CQ
                            (Convert.ToByte(mat[3]) << 24);
         }
 
-        const int defaultMat = 0x41464544; // DEFA
-        var matToFill = materials.Length <= 0 ? defaultMat : materials[quadTree.Data.Materials.Count - 1];
+        var matToFill = quadTree.Data.Materials.Count <= 0 ? DefaultMaterial : materials[quadTree.Data.Materials.Count - 1];
         for (var i = quadTree.Data.Materials.Count; i < materials.Length; ++i)
         {
             materials[i] = matToFill;
@@ -207,8 +206,7 @@ public class CQuadTreeFile : QuadTreeFile<CQuadTreeTypeInfo, CQuadTreeHeader, CQ
             Debug.Assert(triangles[oi].Vertex2 == triangle.C);
         }
 
-        CollectionsMarshal.AsSpan(nodeTriangleListData)
-            .CopyTo(bytes.AsSpan(Convert.ToInt32(qtc.Header.TriangleReferencesOffset)));
+        CollectionsMarshal.AsSpan(nodeTriangleListData).CopyTo(qtc.GetNodeTriangleList(qtc.Header));
         return qtc;
     }
 
@@ -247,8 +245,7 @@ public class CQuadTreeFile : QuadTreeFile<CQuadTreeTypeInfo, CQuadTreeHeader, CQ
             return 0;
         }
 
-        var offset = Convert.ToInt32(Header.TriangleReferencesOffset + node.TriangleListOffset);
-        var refsData = _bytes.AsSpan(offset);
+        var refsData = GetNodeTriangleList(Header)[node.TriangleListOffset..];
         var firstIndex = (refsData[0] << 16) + (refsData[1] << 8) + refsData[2];
         
         var stop = false;

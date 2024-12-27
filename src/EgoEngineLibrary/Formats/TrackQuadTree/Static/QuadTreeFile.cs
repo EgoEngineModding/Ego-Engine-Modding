@@ -10,6 +10,7 @@ namespace EgoEngineLibrary.Formats.TrackQuadTree.Static;
 
 public abstract class QuadTreeFile
 {
+    protected const int DefaultMaterial = 0x41464544;
     private const float VertXScale = 1 << 24;
     private const float VertYScale = 1 << 16;
     protected static readonly Vector3 ScaleFactor = new(1.0f / VertXScale, 1.0f / VertYScale, 1.0f / VertXScale);
@@ -57,13 +58,13 @@ public abstract class QuadTreeFile<TTypeInfo, THeader, TNode> : QuadTreeFile
     where THeader : unmanaged, IStaticQuadTreeHeader
     where TNode : unmanaged, IStaticQuadTreeNode
 {
-    protected byte[] _bytes;
+    protected readonly byte[] _bytes;
     protected readonly Vector3 _vertexScale;
     protected readonly Vector3 _vertexOffset;
 
     public byte[] Bytes => _bytes;
 
-    public TTypeInfo TypeInfo { get; protected set; }
+    public TTypeInfo TypeInfo { get; }
 
     protected ref THeader Header
     {
@@ -231,15 +232,10 @@ public abstract class QuadTreeFile<TTypeInfo, THeader, TNode> : QuadTreeFile
         return maxLevel;
     }
 
-    protected unsafe Span<int> GetMaterials()
+    protected unsafe MaterialSpan GetMaterials()
     {
         var materials = MemoryMarshal.Cast<byte, int>(_bytes.AsSpan(sizeof(THeader), NumMaterials * 4));
-        if (!BitConverter.IsLittleEndian)
-        {
-            BinaryPrimitives.ReverseEndianness(materials, materials);
-        }
-
-        return materials;
+        return new MaterialSpan(materials);
     }
 
     protected Span<TNode> GetNodes(THeader header)
@@ -255,6 +251,11 @@ public abstract class QuadTreeFile<TTypeInfo, THeader, TNode> : QuadTreeFile
             sizeof(T) * NumTriangles));
     }
 
+    protected Span<byte> GetNodeTriangleList(THeader header)
+    {
+        return _bytes.AsSpan(Convert.ToInt32(header.TriangleReferencesOffset));
+    }
+
     protected interface IQuadTreeTriangle
     {
         int MaterialIndex { get; }
@@ -264,5 +265,51 @@ public abstract class QuadTreeFile<TTypeInfo, THeader, TNode> : QuadTreeFile
         int Vertex1 { get; }
 
         int Vertex2 { get; }
+    }
+
+    protected readonly ref struct MaterialSpan(Span<int> materials)
+    {
+        private Span<int> Span { get; } = materials;
+
+        public int Length
+        {
+            get => Span.Length;
+        }
+
+        public int this[int index]
+        {
+            get
+            {
+                var mat = Span[index];
+                if (!BitConverter.IsLittleEndian)
+                {
+                    mat = BinaryPrimitives.ReverseEndianness(mat);
+                }
+                
+                return mat;
+            }
+            set
+            {
+                var mat = value;
+                if (!BitConverter.IsLittleEndian)
+                {
+                    mat = BinaryPrimitives.ReverseEndianness(mat);
+                }
+                
+                Span[index] = mat;
+            }
+        }
+
+        public MaterialSpan this[Range range] => new(Span[range]);
+
+        public int IndexOf(int material)
+        {
+            if (!BitConverter.IsLittleEndian)
+            {
+                material = BinaryPrimitives.ReverseEndianness(material);
+            }
+            
+            return Span.IndexOf(material);
+        }
     }
 }

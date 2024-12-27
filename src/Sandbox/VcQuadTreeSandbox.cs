@@ -89,7 +89,7 @@ public static class VcQuadTreeSandbox
         Console.WriteLine(info.ToString());
     }
 
-    private static void ConvertShowdownToDirt3(string f, JpkFile jpk, VcQuadTreeTypeInfo typeInfo)
+    private static void ConvertToDirt3(string f, JpkFile jpk, VcQuadTreeTypeInfo typeInfo)
     {
         var materials1 = new HashSet<string>();
         var materials2 = new HashSet<string>();
@@ -102,15 +102,15 @@ public static class VcQuadTreeSandbox
 
             var vcqtc = new VcQuadTreeFile(entry.Data, typeInfo);
             vcqtc.GetMaterials(materials1);
-            vcqtc.ConvertType(VcQuadTreeType.Dirt3);
-            entry.Data = vcqtc.Bytes;
-            vcqtc.GetMaterials(materials2);
+            var qt2 = vcqtc.ConvertType(VcQuadTreeTypeInfo.Get(VcQuadTreeType.Dirt3));
+            entry.Data = qt2.Bytes;
+            qt2.GetMaterials(materials2);
         }
-                
+
         using var fs2 = new FileStream(Path.ChangeExtension(f, ".new.jpk"), FileMode.Create, FileAccess.Write, FileShare.Read);
         jpk.Write(fs2);
     }
-    
+
     private static void ExamineNode(IReadOnlyList<JpkEntry> entries, VcQuadTreeTypeInfo typeInfo)
     {
         foreach (var entry in entries)

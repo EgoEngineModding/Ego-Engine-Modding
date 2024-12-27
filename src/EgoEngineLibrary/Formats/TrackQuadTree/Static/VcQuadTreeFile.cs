@@ -8,6 +8,8 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+using EgoEngineLibrary.Collections;
+
 namespace EgoEngineLibrary.Formats.TrackQuadTree.Static;
 
 public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader, VcQuadTreeNode>
@@ -64,7 +66,33 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
         };
     }
 
-    private static unsafe VcQuadTreeFile Create<T>(VcQuadTree quadTree, VcQuadTree[] nodes, VcQuadTreeTypeInfo typeInfo)
+    private unsafe static VcQuadTreeFile Create<T>(Vector3 boundsMin, Vector3 boundsMax, int numMaterials,
+        int numVertices, int numTriangles, int numNodes, int nodeTriangleListSize, VcQuadTreeTypeInfo typeInfo)
+        where T : unmanaged, IVcQuadTreeTriangle
+    {
+        numMaterials = typeInfo.ForceMaxMaterials ? typeInfo.MaxMaterials : numMaterials;
+        var headerSize = sizeof(VcQuadTreeHeader) + numMaterials * 4;
+        var verticesSize = numVertices * sizeof(VcQuadTreeVertex);
+        var nodesSize = numNodes * sizeof(VcQuadTreeNode);
+        var trisSize = numTriangles * sizeof(T);
+        var numBytes = headerSize + verticesSize + nodesSize + trisSize + nodeTriangleListSize;
+
+        var bytes = new byte[numBytes];
+        ref var header = ref Unsafe.As<byte, VcQuadTreeHeader>(ref bytes[0]);
+        header.BoundMin = boundsMin;
+        header.BoundMax = boundsMax;
+        header.NumTriangles = -numTriangles;
+        header.NumVertices = -numVertices;
+        header.NumMaterials = typeInfo.NegativeMaterials ? -numMaterials : numMaterials;
+        header.VerticesOffset = Convert.ToUInt32(headerSize);
+        header.NodesOffset = Convert.ToUInt32(headerSize + verticesSize);
+        header.TrianglesOffset = Convert.ToUInt32(headerSize + verticesSize + nodesSize);
+        header.TriangleReferencesOffset = Convert.ToUInt32(headerSize + verticesSize + nodesSize + trisSize);
+        
+        return new VcQuadTreeFile(bytes, typeInfo);
+    }
+
+    private static VcQuadTreeFile Create<T>(VcQuadTree quadTree, VcQuadTree[] nodes, VcQuadTreeTypeInfo typeInfo)
         where T : unmanaged, IVcQuadTreeTriangle
     {
         var triangleRemap = BuildTriangleRemap(quadTree);
@@ -153,26 +181,9 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
             nodeTriangleListData.Add(255);
         }
 
-        // Update header
-        var numMaterials = typeInfo.ForceMaxMaterials ? typeInfo.MaxMaterials : quadTree.Data.Materials.Count;
-        var headerSize = sizeof(VcQuadTreeHeader) + numMaterials * 4;
-        var vertsSize = quadTree.Data.Vertices.Count * sizeof(VcQuadTreeVertex);
-        var nodesSize = nodes.Length * sizeof(VcQuadTreeNode);
-        var trisSize = quadTree.Data.Triangles.Count * sizeof(T);
-        var numBytes = headerSize + vertsSize + nodesSize + trisSize + nodeTriangleListData.Count;
-        var bytes = new byte[numBytes];
-        ref var header = ref Unsafe.As<byte, VcQuadTreeHeader>(ref bytes[0]);
-        header.BoundMin = quadTree.BoundsMin;
-        header.BoundMax = quadTree.BoundsMax;
-        header.NumTriangles = -quadTree.Data.Triangles.Count;
-        header.NumVertices = -quadTree.Data.Vertices.Count;
-        header.NumMaterials = typeInfo.NegativeMaterials ? -numMaterials : numMaterials;
-        header.VerticesOffset = Convert.ToUInt32(headerSize);
-        header.NodesOffset = Convert.ToUInt32(headerSize + vertsSize);
-        header.TrianglesOffset = Convert.ToUInt32(headerSize + vertsSize + nodesSize);
-        header.TriangleReferencesOffset = Convert.ToUInt32(headerSize + vertsSize + nodesSize + trisSize);
-
-        var qtc = new VcQuadTreeFile(bytes, typeInfo);
+        var qtc = Create<T>(quadTree.BoundsMin, quadTree.BoundsMax, quadTree.Data.Materials.Count,
+            quadTree.Data.Vertices.Count, quadTree.Data.Triangles.Count, nodes.Length, nodeTriangleListData.Count,
+            typeInfo);
 
         var materials = qtc.GetMaterials();
         for (var i = 0; i < quadTree.Data.Materials.Count; ++i)
@@ -184,8 +195,7 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
                            (Convert.ToByte(mat[3]) << 24);
         }
 
-        const int defaultMat = 0x41464544; // DEFA
-        var matToFill = materials.Length <= 0 ? defaultMat : materials[quadTree.Data.Materials.Count - 1];
+        var matToFill = quadTree.Data.Materials.Count <= 0 ? DefaultMaterial : materials[quadTree.Data.Materials.Count - 1];
         for (var i = quadTree.Data.Materials.Count; i < materials.Length; ++i)
         {
             materials[i] = matToFill;
@@ -214,8 +224,7 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
             triangles[oi].Sheet = quadTree.Data.SheetInfo[i];
         }
 
-        CollectionsMarshal.AsSpan(nodeTriangleListData)
-            .CopyTo(bytes.AsSpan(Convert.ToInt32(qtc.Header.TriangleReferencesOffset)));
+        CollectionsMarshal.AsSpan(nodeTriangleListData).CopyTo(qtc.GetNodeTriangleList(qtc.Header));
         return qtc;
     }
 
@@ -251,126 +260,119 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
         return triangles;
     }
 
-    private unsafe void SetMaterials(ReadOnlySpan<int> materials)
+    public VcQuadTreeFile ConvertType(VcQuadTreeTypeInfo targetTypeInfo)
     {
-        if (NumMaterials == materials.Length)
+        if (targetTypeInfo.Type == TypeInfo.Type)
         {
-            materials.CopyTo(GetMaterials());
-            return;
+            return new VcQuadTreeFile(_bytes.ToArray(), TypeInfo);
         }
-        
-        // Resize data
-        var bytesDelta = (materials.Length - NumMaterials) * 4;
-        var originalLength = _bytes.Length;
-        var newLength = originalLength + bytesDelta;
-        var headerLength = sizeof(VcQuadTreeHeader) + NumMaterials * 4;
-        if (bytesDelta > 0)
+
+        return (TypeInfo.Type, targetTypeInfo.Type) switch
         {
-            Array.Resize(ref _bytes, newLength);
-            Array.Copy(_bytes, headerLength, _bytes, headerLength + bytesDelta, originalLength - headerLength);
-        }
-        else
-        {
-            Array.Copy(_bytes, headerLength, _bytes, headerLength + bytesDelta, originalLength - headerLength);
-            Array.Resize(ref _bytes, newLength);
-        }
-        
-        // Copy data
-        var sourceMaterialBytes = MemoryMarshal.Cast<int, byte>(materials);
-        Span<byte> targetMaterialBytes = _bytes.AsSpan(sizeof(VcQuadTreeHeader), sourceMaterialBytes.Length);
-        sourceMaterialBytes.CopyTo(targetMaterialBytes);
-        
-        // Update offsets
-        ref var header = ref Header;
-        header.NumMaterials = materials.Length;
-        header.VerticesOffset = (uint)(header.VerticesOffset + bytesDelta);
-        header.NodesOffset = (uint)(header.NodesOffset + bytesDelta);
-        header.TrianglesOffset = (uint)(header.TrianglesOffset + bytesDelta);
-        header.TriangleReferencesOffset = (uint)(header.TriangleReferencesOffset + bytesDelta);
+            (VcQuadTreeType.RaceDriverGrid, VcQuadTreeType.Dirt3)
+                or (VcQuadTreeType.Dirt3, VcQuadTreeType.RaceDriverGrid) =>
+                ConvertType<VcQuadTreeTriangle1, VcQuadTreeTriangle1>(targetTypeInfo),
+            (VcQuadTreeType.RaceDriverGrid, VcQuadTreeType.DirtShowdown)
+                or (VcQuadTreeType.Dirt3, VcQuadTreeType.DirtShowdown) =>
+                ConvertType<VcQuadTreeTriangle1, VcQuadTreeTriangle2>(targetTypeInfo),
+            (VcQuadTreeType.DirtShowdown, VcQuadTreeType.Dirt3)
+                or (VcQuadTreeType.DirtShowdown, VcQuadTreeType.RaceDriverGrid) =>
+                ConvertType<VcQuadTreeTriangle2, VcQuadTreeTriangle1>(targetTypeInfo),
+            _ => throw new NotSupportedException(
+                $"Converting type {TypeInfo} to type {targetTypeInfo} is not supported.")
+        };
     }
 
-    public void ConvertType(VcQuadTreeType targetType)
-    {
-        if (targetType == TypeInfo.Type)
-        {
-            return;
-        }
-
-        if (TypeInfo.Type == VcQuadTreeType.DirtShowdown && targetType == VcQuadTreeType.Dirt3)
-        {
-            ConvertTriangle2To1(out var materialList);
-            SetMaterials(materialList);
-            TypeInfo = VcQuadTreeTypeInfo.Get(VcQuadTreeType.Dirt3);
-        }
-        else
-        {
-            throw new NotSupportedException($"Converting type {TypeInfo} to type {targetType} is not supported.");
-        }
-    }
-
-    private unsafe void ConvertTriangle2To1(out Span<int> materialList)
+    private VcQuadTreeFile ConvertType<TSource, TTarget>(VcQuadTreeTypeInfo targetTypeInfo)
+        where TSource : unmanaged, IVcQuadTreeTriangle
+        where TTarget : unmanaged, IVcQuadTreeTriangle
     {
         // Target has 4 bits for material id.
-        var numMaterials = 0;
-        materialList = new int[16];
-        
-        var header = Header;
-        var headerMaterials = GetMaterials();
-        var triangleBytes = Bytes.AsSpan(Convert.ToInt32(header.TrianglesOffset),
-            sizeof(VcQuadTreeTriangle2) * NumTriangles);
-        var source = MemoryMarshal.Cast<byte, VcQuadTreeTriangle2>(triangleBytes);
+        var sourceMaterials = GetMaterials();
+        var targetMaterials = new OrderedSet<int>();
 
-        Span<byte> destination = new byte[sizeof(VcQuadTreeTriangle1) * NumTriangles];
-        var target = MemoryMarshal.Cast<byte, VcQuadTreeTriangle1>(destination);
+        var source = GetTriangles<TSource>(Header);
+        var targetBuffer = new byte[Unsafe.SizeOf<TTarget>() * source.Length];
+        var target = MemoryMarshal.Cast<byte, TTarget>(targetBuffer);
         for (var i = 0; i < source.Length; ++i)
         {
-            ref var sourceTri = ref source[i];
+            var sourceTri = source[i];
             ref var targetTri = ref target[i];
 
             var sourceMaterialId = sourceTri.MaterialIndex;
             var sourceSheet = sourceTri.Sheet;
-            var material = headerMaterials[sourceMaterialId];
-            if ((sourceSheet & 0x01) != 0)
+            var material = sourceMaterials[sourceMaterialId];
+            if (TypeInfo.SupportsSheetMaterials != targetTypeInfo.SupportsSheetMaterials)
             {
-                // Convert the * at the end
-                material = (material & 0xFFFFFF) | 0x2A000000;
-            }
-            
-            var targetMaterialId = GetMaterialIndex(materialList, material);
-            if (targetMaterialId == -1)
-            {
-                targetMaterialId = numMaterials;
-                materialList[numMaterials] = material;
-                ++numMaterials;
+                const int starValue = 0x2A000000;
+                const int plusValue = 0x2B000000;
+                if (TypeInfo.SupportsSheetMaterials)
+                {
+                    sourceSheet <<= 1;
+                    // Add + instead of * to material
+                    if ((material & 0xFF000000) == starValue)
+                    {
+                        material = (material & 0xFFFFFF) | plusValue;
+                        sourceSheet |= 0b1;
+                    }
+                }
+                else
+                {
+                    // Add * instead of + to material
+                    if ((sourceSheet & 0x01) != 0)
+                    {
+                        material = (material & 0xFFFFFF) | starValue;
+                    }
+
+                    sourceSheet >>= 1;
+                }
             }
 
-            targetTri.Sheet = sourceSheet >> 1;
+            var targetMaterialId = targetMaterials.IndexOf(material);
+            if (targetMaterialId == -1)
+            {
+                targetMaterialId = targetMaterials.Count;
+                targetMaterials.Add(material);
+            }
+
+            if (targetMaterials.Count > targetTypeInfo.MaxMaterials)
+            {
+                throw new InvalidOperationException("Direct conversion not possible. Convert through glTF instead.");
+            }
+
+            targetTri.Sheet = sourceSheet;
             targetTri.MaterialIndex = targetMaterialId;
             targetTri.Vertex0 = sourceTri.Vertex0;
             targetTri.Vertex1 = sourceTri.Vertex1;
             targetTri.Vertex2 = sourceTri.Vertex2;
         }
+
+        var numMaterials = targetTypeInfo.ForceMaxMaterials ? targetTypeInfo.MaxMaterials : targetMaterials.Count;
+        var nodeTriangleListSize = _bytes.Length - Convert.ToInt32(Header.TriangleReferencesOffset);
+        var targetFile = Create<TTarget>(BoundsMin, BoundsMax, numMaterials, NumVertices, NumTriangles,
+            NumNodes, nodeTriangleListSize, targetTypeInfo);
         
-        destination.CopyTo(triangleBytes);
-        if (numMaterials <= 0)
+        // Copy data
+        GetVertices(Header).CopyTo(targetFile.GetVertices(targetFile.Header));
+        target.CopyTo(targetFile.GetTriangles<TTarget>(targetFile.Header));
+        GetNodes(Header).CopyTo(targetFile.GetNodes(targetFile.Header));
+        GetNodeTriangleList(Header).CopyTo(targetFile.GetNodeTriangleList(targetFile.Header));
+
+        // Copy materials
+        var materials = targetFile.GetMaterials();
+        for (var i = 0; i < targetMaterials.Count; ++i)
         {
-            return;
+            materials[i] = targetMaterials[i];
         }
 
-        // Fill remaining list
-        var lastMaterial = materialList[numMaterials - 1];
-        while (numMaterials < 16)
+        // Fill remaining
+        var matToFill = targetMaterials.Count <= 0 ? DefaultMaterial : targetMaterials[^1];
+        for (var i = targetMaterials.Count; i < materials.Length; ++i)
         {
-            materialList[numMaterials] = lastMaterial;
-            ++numMaterials;
+            materials[i] = matToFill;
         }
 
-        return;
-
-        static int GetMaterialIndex(ReadOnlySpan<int> materials, int material)
-        {
-            return materials.IndexOf(material);
-        }
+        return targetFile;
     }
 
     public void DumpObj(TextWriter writer)
@@ -427,8 +429,7 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
             return 0;
         }
 
-        var offset = Convert.ToInt32(Header.TriangleReferencesOffset + node.TriangleListOffset);
-        var refsData = _bytes.AsSpan(offset);
+        var refsData = GetNodeTriangleList(Header)[node.TriangleListOffset..];
         var currentIndex = (refsData[0] << 8) + refsData[1];
         if (indices.Length > 0)
         {

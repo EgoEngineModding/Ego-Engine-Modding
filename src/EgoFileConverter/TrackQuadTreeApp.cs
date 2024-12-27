@@ -15,12 +15,66 @@ namespace EgoFileConverter;
 
 internal class TrackQuadTreeApp(ILogger<TrackQuadTreeApp> logger)
 {
+    private const string TrackJpkExtension = ".track.jpk";
+    private const string VcqtcExtension = ".vcqtc";
+    private const string GlbExtension = ".glb";
+
+    /// <summary>Convert track quad tree file (track.jpk and vcqtc) to a different type.</summary>
+    /// <param name="filePath">The track quad tree file path.</param>
+    /// <param name="targetType">-tt, The target type of quad tree.</param>
+    /// <param name="outputFilePath">-o, The output file path.</param>
+    public void VcConvertType([Argument] string filePath, VcQuadTreeType targetType, string? outputFilePath = null)
+    {
+        if (filePath.EndsWith(VcqtcExtension, StringComparison.InvariantCultureIgnoreCase))
+        {
+            logger.LogInformation("Converting vcqtc to type {Type}: {FileName}", targetType, Path.GetFileName(filePath));
+            var data = File.ReadAllBytes(filePath);
+
+            var typeInfo = VcQuadTreeFile.Identify(data);
+            logger.LogInformation("Quad tree type is {TypeInfo}", typeInfo);
+
+            var quadTree = new VcQuadTreeFile(data, typeInfo);
+            var qt2 = quadTree.ConvertType(VcQuadTreeTypeInfo.Get(targetType));
+            outputFilePath ??= filePath + VcqtcExtension;
+            File.WriteAllBytes(outputFilePath, qt2.Bytes);
+            logger.LogInformation("Success, vcqtc converted: {FileName}", Path.GetFileName(outputFilePath));
+        }
+        else
+        {
+            logger.LogInformation("Converting track.jpk to type {Type}: {FileName}", targetType, Path.GetFileName(filePath));
+            using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var jpk = new JpkFile();
+            jpk.Read(fs);
+
+            var typeInfo = TrackGround.Identify(jpk);
+            logger.LogInformation("Quad tree type is {TypeInfo}", typeInfo);
+
+            var targetTypeInfo = VcQuadTreeTypeInfo.Get(targetType);
+            foreach (var entry in jpk.Entries)
+            {
+                if (!entry.Name.EndsWith(VcqtcExtension, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    continue;
+                }
+
+                var qt = new VcQuadTreeFile(entry.Data);
+                var qt2 = qt.ConvertType(targetTypeInfo);
+                entry.Data = qt2.Bytes;
+            }
+
+            outputFilePath ??= filePath + TrackJpkExtension;
+            using var fso = File.Open(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            jpk.Write(fso);
+            logger.LogInformation("Success, track.jpk converted: {FileName}", Path.GetFileName(outputFilePath));
+        }
+    }
+
     /// <summary>Convert track quad tree file (track.jpk and vcqtc) to glTF.</summary>
     /// <param name="filePath">The track quad tree file path.</param>
     /// <param name="outputFilePath">-o, The output file path.</param>
     public void VcToGltf([Argument] string filePath, string? outputFilePath = null)
     {
-        if (filePath.EndsWith(".vcqtc", StringComparison.InvariantCultureIgnoreCase))
+        if (filePath.EndsWith(VcqtcExtension, StringComparison.InvariantCultureIgnoreCase))
         {
             logger.LogInformation("Converting vcqtc to glTF: {FileName}", Path.GetFileName(filePath));
             var data = File.ReadAllBytes(filePath);
@@ -28,9 +82,9 @@ internal class TrackQuadTreeApp(ILogger<TrackQuadTreeApp> logger)
             var typeInfo = VcQuadTreeFile.Identify(data);
             logger.LogInformation("Quad tree type is {TypeInfo}", typeInfo);
 
-            var quadTree = new VcQuadTreeFile(data);
+            var quadTree = new VcQuadTreeFile(data, typeInfo);
             var gltf = TrackGroundGltfConverter.Convert(quadTree);
-            outputFilePath ??= filePath + ".glb";
+            outputFilePath ??= filePath + GlbExtension;
             gltf.Save(outputFilePath);
             logger.LogInformation("Success, vcqtc converted: {FileName}", Path.GetFileName(outputFilePath));
         }
@@ -46,7 +100,7 @@ internal class TrackQuadTreeApp(ILogger<TrackQuadTreeApp> logger)
                     
             var ground = TrackGround.Load(jpk, typeInfo);
             var gltf = TrackGroundGltfConverter.Convert(ground);
-            outputFilePath ??= filePath + ".glb";
+            outputFilePath ??= filePath + GlbExtension;
             gltf.Save(outputFilePath);
             logger.LogInformation("Success, track.jpk converted: {FileName}", Path.GetFileName(outputFilePath));
         }
@@ -63,7 +117,7 @@ internal class TrackQuadTreeApp(ILogger<TrackQuadTreeApp> logger)
         var ground = GltfTrackGroundConverter.Convert(gltf, VcQuadTreeTypeInfo.Get(type));
         var jpk = ground.Save();
         
-        outputFilePath ??= filePath + ".track.jpk";
+        outputFilePath ??= filePath + TrackJpkExtension;
         using var fs = File.Open(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
         jpk.Write(fs);
         logger.LogInformation("Success, glTF converted: {FileName}", Path.GetFileName(outputFilePath));
@@ -82,7 +136,7 @@ internal class TrackQuadTreeApp(ILogger<TrackQuadTreeApp> logger)
 
         var quadTree = new CQuadTreeFile(data);
         var gltf = TrackGroundGltfConverter.Convert(quadTree);
-        outputFilePath ??= filePath + ".glb";
+        outputFilePath ??= filePath + GlbExtension;
         gltf.Save(outputFilePath);
         logger.LogInformation("Success, cqtc converted: {FileName}", Path.GetFileName(outputFilePath));
     }
