@@ -1,7 +1,8 @@
-﻿using MiscUtil.Conversion;
-using MiscUtil.IO;
-using System;
+﻿using System;
 using System.Text;
+
+using EgoEngineLibrary.Conversion;
+using EgoEngineLibrary.IO;
 
 namespace EgoEngineLibrary.Data.Pkg
 {

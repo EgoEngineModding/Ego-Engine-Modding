@@ -1,0 +1,57 @@
+//------------------------------------------------
+//--- 010 Editor v15.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: Label track.rm in reducedmechanics.jpk
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+LittleEndian();
+
+int32 version;
+
+struct {
+    // data
+    ubyte x[3];
+    ubyte y[3];
+    ubyte z[3];
+    byte xo;
+    byte yo;
+    byte zo;
+    ubyte racingAcrossProportion;
+    byte leftNormalX;
+    byte leftNormalZ;
+    byte rightNormalX;
+    byte rightNormalZ;
+    
+    // decompress
+    local float bX = ((float)(int32)(((uint32)x[0] << 16) + ((uint32)x[1] << 8) + ((uint32)x[2]) - 0x800000)) / 200.0f;
+    local float bY = ((float)(int32)(((uint32)y[0] << 16) + ((uint32)y[1] << 8) + ((uint32)y[2]) - 0x800000)) / 200.0f;
+    local float bZ = ((float)(int32)(((uint32)z[0] << 16) + ((uint32)z[1] << 8) + ((uint32)z[2]) - 0x800000)) / 200.0f;
+    
+    local float oX = xo / 50.0f;
+    local float oY = yo / 100.0f;
+    local float oZ = zo / 50.0f;
+    
+    local float lx = bX - oX;
+    local float ly = bY - oY;
+    local float lz = bZ - oZ;
+    
+    local float rx = bX + oX;
+    local float ry = bY + oY;
+    local float rz = bZ + oZ;
+    
+    local float rap = racingAcrossProportion / 255.0f;
+    
+    local float lnx = leftNormalX / 127.0f;
+    local float lnz = leftNormalZ / 127.0f;
+    local float lny = Sqrt(1.0f - (lnx * lnx + lnz * lnz));
+    
+    local float rnx = rightNormalX / 127.0f;
+    local float rnz = rightNormalZ / 127.0f;
+    local float rny = Sqrt(1.0f - (rnx * rnx + rnz * rnz));
+} gates[(FileSize() - 4) / 17] <optimize=false,read=Str("L %f %f %f R %f %f %f P %f LN %f %f %f RN %f %f %f",lx,ly,lz,rx,ry,rz,rap,lnx,lny,lnz,rnx,rny,rnz)>;

@@ -1,7 +1,8 @@
-﻿namespace EgoEngineLibrary.Language
+﻿using EgoEngineLibrary.Conversion;
+using EgoEngineLibrary.IO;
+
+namespace EgoEngineLibrary.Language
 {
-    using MiscUtil.Conversion;
-    using MiscUtil.IO;
     using System;
     using System.Collections.Generic;
     using System.Linq;

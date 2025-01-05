@@ -9,49 +9,82 @@ using System.Data;
 using System.IO;
 using System.Xml;
 
-namespace EgoFileConverter
+using ConsoleAppFramework;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+using ZLogger;
+
+namespace EgoFileConverter;
+
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
+        var services = new ServiceCollection();
+        services.AddLogging(x =>
         {
-            try
+            x.ClearProviders();
+            x.SetMinimumLevel(LogLevel.Trace);
+            x.AddZLoggerConsole();
+        });
+        services.AddSingleton<TrackQuadTreeApp>();
+
+        using var serviceProvider = services.BuildServiceProvider();
+        ConsoleApp.ServiceProvider = serviceProvider;
+            
+        var topLogger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<Program>();
+        ConsoleApp.Log = x => topLogger.LogInformation(x);
+        ConsoleApp.LogError = x => topLogger.LogError(x);
+
+        topLogger.LogInformation("--- {AppTitle} ---", Properties.Resources.AppTitleLong);
+        topLogger.LogInformation("Drag and drop one or more files on the EXE to convert.");
+        topLogger.LogInformation("Use --help to display a help message for any command");
+        Console.WriteLine();
+
+        var app = ConsoleApp.Create();
+        app.UseFilter<UserPauseFilter>();
+        app.Add<MainApp>();
+        app.Add<TrackQuadTreeApp>("track-qt");
+        app.Run(args);
+    }
+
+    public class MainApp(ILogger<MainApp> logger)
+    {
+        /// <summary>
+        /// Converts each input file by automatically determining the file type.
+        /// </summary>
+        /// <param name="filePaths">The space-separated input file paths to convert.</param>
+        [Command("")]
+        public void Root([Argument] params string[] filePaths)
+        {
+            if (filePaths.Length == 0)
             {
-                Console.WriteLine("--- " + Properties.Resources.AppTitleLong + " ---");
-                if (args.Length == 0)
-                {
-                    Console.WriteLine("No input arguments were found!");
-                    Console.WriteLine("Drag and drop one or more files on the EXE to convert.");
-                }
-
-                foreach (string f in args)
-                {
-                    try
-                    {
-                        Console.WriteLine("Processing " + Path.GetFileName(f) + "...");
-
-                        Convert(f);
-                    }
-                    catch (Exception ex) when (!System.Diagnostics.Debugger.IsAttached)
-                    {
-                        Console.WriteLine("Failed to convert the file!");
-                        Console.WriteLine(ex.ToString());
-                    }
-                    finally
-                    {
-                        Console.WriteLine();
-                        Console.WriteLine();
-                    }
-                }
+                logger.LogWarning("No input arguments were found!");
             }
-            finally
+
+            foreach (string f in filePaths)
             {
-                Console.WriteLine("Press any key to exit...");
-                Console.ReadKey(true);
+                try
+                {
+                    logger.LogInformation("Processing " + Path.GetFileName(f) + "...");
+
+                    Convert(f);
+                }
+                catch (Exception ex) when (!System.Diagnostics.Debugger.IsAttached)
+                {
+                    logger.LogError(ex, "Failed to convert the file!");
+                }
+                finally
+                {
+                    Console.WriteLine();
+                    Console.WriteLine();
+                }
             }
         }
 
-        private static void Convert(string f)
+        private void Convert(string f)
         {
             var fileName = Path.GetFileName(f);
             var ext = Path.GetExtension(f);
@@ -66,14 +99,14 @@ namespace EgoFileConverter
                 reader.Seek(1, SeekOrigin.Begin);
                 xmlMagic = reader.ReadString(3);
             }
-            
+
             if (xmlMagic == "\"Rr" || xmlMagic == "BXM")
             {
                 using var fsi = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
                 XmlFile file = new XmlFile(fsi);
                 using var fso = File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read);
                 file.Write(fso, XmlType.Text);
-                Console.WriteLine("Success! XML converted.");
+                logger.LogInformation("Success! XML converted.");
             }
             else if (magic == "LNGT")
             {
@@ -81,7 +114,7 @@ namespace EgoFileConverter
                 LngFile file = new LngFile(fsi);
                 using var fso = File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read);
                 file.WriteXml(fso);
-                Console.WriteLine("Success! Lng converted.");
+                logger.LogInformation("Success! Lng converted.");
             }
             else if (magic == "!pkg")
             {
@@ -89,18 +122,18 @@ namespace EgoFileConverter
                 PkgFile file = PkgFile.ReadPkg(fsi);
                 using var fso = File.Open(f + ".json", FileMode.Create, FileAccess.Write, FileShare.Read);
                 file.WriteJson(fso);
-                Console.WriteLine("Success! Pkg converted.");
+                logger.LogInformation("Success! Pkg converted.");
             }
             else if (ext == ".tpk")
             {
                 using var fsi = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
                 var tpk = new TpkFile();
                 tpk.Read(fsi);
-                Console.WriteLine($"Tpk name '{tpk.Name}', image format '{tpk.Format}'.");
+                logger.LogInformation($"Tpk name '{tpk.Name}', image format '{tpk.Format}'.");
                 var dds = tpk.ToDds();
                 using var fso = File.Open(f + ".dds", FileMode.Create, FileAccess.Write, FileShare.Read);
                 dds.Write(fso, -1);
-                Console.WriteLine("Success! Tpk converted.");
+                logger.LogInformation("Success! Tpk converted.");
             }
             else if (fileName.EndsWith(".tpk.dds"))
             {
@@ -113,19 +146,37 @@ namespace EgoFileConverter
                 tpk.FromDds(dds);
                 using var fso = File.Open(f + ".tpk", FileMode.Create, FileAccess.Write, FileShare.Read);
                 tpk.Write(fso);
-                Console.WriteLine("Success! DDS converted.");
+                logger.LogInformation("Success! DDS converted.");
+            }
+            else if (fileName.EndsWith("track.jpk", StringComparison.InvariantCultureIgnoreCase))
+            {
+                var qtApp = ConsoleApp.ServiceProvider!.GetRequiredService<TrackQuadTreeApp>();
+                qtApp.VcToGltf(f);
+            }
+            else if (fileName.EndsWith("track.jpk.glb", StringComparison.InvariantCultureIgnoreCase))
+            {
+                logger.LogWarning("Use special command to convert this file. See help menu and documentation for details.");
+            }
+            else if (fileName.EndsWith(".cqtc", StringComparison.InvariantCultureIgnoreCase))
+            {
+                var qtApp = ConsoleApp.ServiceProvider!.GetRequiredService<TrackQuadTreeApp>();
+                qtApp.CqToGltf(f);
+            }
+            else if (fileName.EndsWith(".cqtc.glb", StringComparison.InvariantCultureIgnoreCase))
+            {
+                logger.LogWarning("Use special command to convert this file. See help menu and documentation for details.");
             }
             else
             {
                 bool isJSON = false;
-                JsonException jsonEx = null;
+                JsonException? jsonEx = null;
                 try
                 {
                     using var fsi = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
                     PkgFile pkgFile = PkgFile.ReadJson(fsi);
                     using var fso = File.Open(f + ".pkg", FileMode.Create, FileAccess.Write, FileShare.Read);
                     pkgFile.WritePkg(fso);
-                    Console.WriteLine("Success! JSON converted.");
+                    logger.LogInformation("Success! JSON converted.");
                     isJSON = true;
                 }
                 catch (JsonException e)
@@ -153,7 +204,7 @@ namespace EgoFileConverter
                         LngFile file = new LngFile(dataSet);
                         using var fso = File.Open(f + ".lng", FileMode.Create, FileAccess.Write, FileShare.Read);
                         file.Write(fso);
-                        Console.WriteLine("Success! XML converted.");
+                        logger.LogInformation("Success! XML converted.");
                     }
                     else
                     {
@@ -161,41 +212,8 @@ namespace EgoFileConverter
                         XmlFile file = new XmlFile(fsi);
                         using var fso = File.Open(f + ".xml", FileMode.Create, FileAccess.Write, FileShare.Read);
                         file.Write(fso);
-                        Console.WriteLine("Success! XML converted.");
+                        logger.LogInformation("Success! XML converted.");
                     }
-                }
-            }
-        }
-
-        private static void TpkTest()
-        {
-            //foreach (var f in Directory.GetFiles(@"C:\Games\Steam\steamapps\common\Dirt 2\frontend\ts", "*.tpk", SearchOption.TopDirectoryOnly))
-            //foreach (var f in Directory.GetFiles(@"C:\Games\Steam\steamapps\common\DiRT 3 Complete Edition\frontend\ts", "*.tpk", SearchOption.TopDirectoryOnly))
-            //foreach (var f in Directory.GetFiles(@"C:\Games\Steam\steamapps\common\F1 2012\frontend\ts", "*.tpk", SearchOption.TopDirectoryOnly))
-            foreach (var f in Directory.GetFiles(@"C:\Games\Steam\steamapps\common\F1 2014\frontend\ts", "*.tpk", SearchOption.TopDirectoryOnly))
-            {
-                var fName = Path.GetFileName(f);
-                using var fsi = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
-                var tpk = new TpkFile();
-                tpk.Read(fsi);
-
-                if (!Enum.IsDefined(tpk.Format))
-                {
-                    Console.WriteLine($"{fName}\t frmt {tpk.Format}");
-                }
-
-                if (tpk.Name != Path.GetFileNameWithoutExtension(f))
-                {
-                    Console.WriteLine($"{fName}\t name {tpk.Name}");
-                }
-
-                if (tpk.Unk11 != 0)
-                {
-                    Console.WriteLine($"{fName}\t u11 {tpk.Unk11}");
-                }
-                if (tpk.Unk12 != 1.0)
-                {
-                    Console.WriteLine($"{fName}\t u12 {tpk.Unk12}");
                 }
             }
         }

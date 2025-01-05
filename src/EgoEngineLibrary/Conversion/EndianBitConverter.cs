@@ -5,7 +5,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace MiscUtil.Conversion
+namespace EgoEngineLibrary.Conversion
 {
 	/// <summary>
 	/// Equivalent of System.BitConverter, but with either endianness.

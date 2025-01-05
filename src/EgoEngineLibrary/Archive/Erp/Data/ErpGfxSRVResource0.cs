@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using EgoEngineLibrary.Conversion;
+
 namespace EgoEngineLibrary.Archive.Erp.Data
 {
     public class ErpGfxSRVResource0 : ErpFragmentData
@@ -44,7 +46,7 @@ namespace EgoEngineLibrary.Archive.Erp.Data
         public override void ToFragment(ErpFragment fragment)
         {
             using var newData = new MemoryStream();
-            using var writer = new ErpBinaryWriter(MiscUtil.Conversion.EndianBitConverter.Little, newData);
+            using var writer = new ErpBinaryWriter(EndianBitConverter.Little, newData);
             writer.Write(Unknown);
             writer.Write((int)ImageType);
             writer.Write(Unknown2);

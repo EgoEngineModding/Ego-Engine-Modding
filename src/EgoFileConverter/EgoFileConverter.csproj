@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <AssemblyName>Ego File Converter</AssemblyName>
+    <AssemblyName>ego-file-converter</AssemblyName>
   </PropertyGroup>
   
   <PropertyGroup>
     <ApplicationIcon>Resources\Ryder25.ico</ApplicationIcon>
-    <Copyright>Copyright © Petar Tasev 2016 - 2022</Copyright>
+    <Copyright>Copyright © Petar Tasev 2016 - 2024</Copyright>
     <Authors>Petar Tasev</Authors>
     <Company>Petar Tasev</Company>
-    <Version>3.0.1</Version>
+    <Version>4.0.0</Version>
   </PropertyGroup>
   
   <ItemGroup>
@@ -39,5 +39,14 @@
   
   <ItemGroup>
     <ProjectReference Include="..\EgoEngineLibrary\EgoEngineLibrary.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="ConsoleAppFramework">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="ZLogger" />
   </ItemGroup>
 </Project>

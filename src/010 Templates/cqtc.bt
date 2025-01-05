@@ -1,0 +1,173 @@
+//--------------------------------------
+//--- 010 Editor v15.0.1 Binary Template
+//
+// File: cqtc.bt
+// Author: Petar Tasev
+// Revision: 1
+// Purpose: Label Ego Engine cqtc files
+//--------------------------------------
+LittleEndian();
+SetBackColor(cLtGray);
+
+typedef float Vec3f[3] <read=Str("%f, %f, %f",this[0],this[1],this[2])>;
+
+struct CQuadTreeHeader {
+    Vec3f boundsMin;
+    Vec3f boundsMax;
+    int32 numTriangles;
+    int32 numVertices;
+    int32 numMaterials;
+    uint32 verticesOffset;
+    uint32 nodesOffset;
+    uint32 trianglesOffset;
+    uint32 triangleReferencesWorkspaceOffset;
+    char materialList[numMaterials * 4];
+
+    local Vec3f vertexScale, vertexOffset;
+    vertexScale[0] = (boundsMax[0] - boundsMin[0]) * 0.000000059604645f;
+    vertexScale[1] = (boundsMax[1] - boundsMin[1]) * 0.000015258789f;
+    vertexScale[2] = (boundsMax[2] - boundsMin[2]) * 0.000000059604645f;
+    vertexOffset[0] = boundsMin[0];
+    vertexOffset[1] = boundsMin[1];
+    vertexOffset[2] = boundsMin[2];
+} header;
+
+struct CQuadTreeVertex {
+    ubyte x_high;
+    ubyte x_mid;
+    ubyte x_low;
+    ubyte y_high;
+    ubyte y_low;
+    ubyte z_high;
+    ubyte z_mid;
+    ubyte z_low;
+
+    local uint32 xu, yu, zu;
+    xu = ((uint32)x_high << 16) + ((uint32)x_mid << 8) + x_low;
+    yu = ((uint32)y_high << 8) + y_low;
+    zu = ((uint32)z_high << 16) + ((uint32)z_mid << 8) + z_low;
+    local float x = xu * header.vertexScale[0] + header.vertexOffset[0];
+    local float y = yu * header.vertexScale[1] + header.vertexOffset[1];
+    local float z = zu * header.vertexScale[2] + header.vertexOffset[2];
+} vertices[header.numVertices]<optimize=false,read=Str("%f, %f, %f",x,y,z)>;
+
+local int32 numNodes<hidden=true> = (header.trianglesOffset - header.nodesOffset) / 3;
+struct CQuadTreeNode {
+    ubyte u8Data[3];
+
+    local byte hasTriangles = ((u8Data[0] & 0x80) != 0) && ((u8Data[0] != 0xFF) || (u8Data[1] != 0xFF) || (u8Data[2] != 0xFF));
+    local byte hasChildren = !hasTriangles;
+    local uint32 data = (u8Data[2] + ((uint16)u8Data[1] << 8) + ((uint32)u8Data[0] << 16)) & 0x7FFFFF;
+} nodes[numNodes]<optimize=false,read=readNode>;
+
+struct CQuadTreeTriangle {
+    ubyte vertex0_high;
+    ubyte vertex0_mid;
+    ubyte vertex0_low;
+    ubyte high_nibbles_of_both_offsets;
+    ubyte vertex1_low;
+    ubyte vertex2_low;
+    ubyte material;
+
+    local int32 vertex0Index = vertex0_low + ((uint32)vertex0_mid << 8) + ((uint32)vertex0_high << 16);
+    local int32 vertex1Index = vertex0Index + vertex1_low + (((uint32)high_nibbles_of_both_offsets & 0xF0) << 4);
+    local int32 vertex2Index = vertex0Index + vertex2_low + (((uint32)high_nibbles_of_both_offsets & 0x0F) << 8);
+} triangles[header.numTriangles]<optimize=false,read=Str("%d,%d,%d M %d",vertex0Index,vertex1Index,vertex2Index,material)>;
+
+struct {
+    local uint32 numRefs <hidden=true> = 0;
+    while (!FEof())
+    {
+    ++numRefs;
+    struct nodeTriangleReference {
+        local int64 startPos <hidden=true> = FTell();
+        local uint32 polyIndexOffset <hidden=true> = startPos - header.triangleReferencesWorkspaceOffset;
+        local uint32 numPolys <hidden=true> = 1, numRefData <hidden=true> = 3;
+        local uint16 temp <hidden=true>;
+        if (ReadUByte(startPos) <= 0x7F)
+        {
+            while (1)
+            {
+                temp = ((uint16)ReadUByte(startPos + numRefData) << 8)
+                 + ReadUByte(startPos + numRefData + 1);
+                numPolys++;
+                if (temp > 0x7FFF)
+                {
+                    break;
+                }
+    
+                numRefData += 2;
+            }
+        }
+        else
+        {
+            ubyte triangleReferenceData[numRefData] <bgcolor=cLtRed,hidden=true>;
+            local int32 polyIndexList[1];
+            polyIndexList[0] = (((uint32)triangleReferenceData[0] << 16)
+             + ((uint16)triangleReferenceData[1] << 8)
+             + triangleReferenceData[2]) & 0x7FFFFF;
+            return;
+        }
+
+        ubyte triangleReferenceData[numRefData];
+        ubyte end[2] <bgcolor=cLtRed,hidden=true>;
+        local int32 polyIndexList[numPolys];
+        local int32 i <hidden=true> = 1, t <hidden=true>;
+        polyIndexList[0] = ((uint32)triangleReferenceData[0] << 16)
+             + ((uint16)triangleReferenceData[1] << 8)
+             + triangleReferenceData[2];
+        for (t = 3; t < numRefData; t += 2)
+        {
+            polyIndexList[i++] = polyIndexList[0]
+                 + ((uint16)triangleReferenceData[t] << 8)
+                 + triangleReferenceData[t + 1];
+        }
+        polyIndexList[i] = polyIndexList[0]
+                 + ((((uint16)end[0] << 8) + end[1]) & 0x7FFF);
+    } nodeTriRef<optimize=false,read=readNodeTriRef>;
+    }
+} nodeTriangleReferences<read=numRefs>;
+
+string readNodeTriRefPolys(struct nodeTriangleReference& n)
+{
+    string s, s2;
+    SPrintf(s, "%d ", n.numPolys);
+    int i;
+    for (i = 0; i < n.numPolys; ++i)
+    {
+        SPrintf(s2, "%d,", n.polyIndexList[i]);
+        s += s2;
+    }
+    return s;
+}
+
+string readNodeTriRef(struct nodeTriangleReference& n)
+{
+    string s;
+    SPrintf(s, "%d | ", n.polyIndexOffset);
+    return s + readNodeTriRefPolys(n);
+}
+
+string readNode(struct CQuadTreeNode& n)
+{
+    char t = n.hasTriangles ? 'T' : 'C';
+    string s;
+    SPrintf(s, "%c %d", t, n.data);
+    
+    if (!n.hasTriangles)
+    {
+        return s;
+    }
+    
+    int p;
+    for (p = 0; p < nodeTriangleReferences.numRefs; ++p)
+    {
+        if (nodeTriangleReferences.nodeTriRef[p].polyIndexOffset == n.data)
+        {
+            s += " | " + readNodeTriRefPolys(nodeTriangleReferences.nodeTriRef[p]);
+            break;
+        }
+    }
+    
+    return s;
+}

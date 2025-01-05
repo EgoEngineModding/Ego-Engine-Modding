@@ -83,7 +83,7 @@
 <body>
     <div id="top">
         <h1>Ego File Converter</h1>
-        version 3.0.1<br />
+        version 4.0.0<br />
         <p style="font-family: Georgia, 'Times New Roman', Times, serif;"><a href="https://petar.page/l/ego-efc-home" target="_blank">Application Website</a></p>
     </div>
     <div class="readme-main">
@@ -101,38 +101,92 @@
     <div class="readme-main">
         <h2><a id="Reqs"></a>Requirements</h2>
         <ul>
-            <li>.NET 6.0 Desktop Runtime (x64 or x86 depending on your OS)</li>
+            <li>.NET 8.0 Desktop Runtime (x64 or x86 depending on your OS)</li>
         </ul>
         <h2><a id="Inst"></a>Installation</h2>
-        <p>To install, simply <em>EXTRACT</em> everything from the zip file to a desired location, and run the <em>Ego File Converter.exe</em> file.</p>
+        <p><em>EXTRACT</em> everything from the zip file to a desired location, and run the <em>ego-file-converter.exe</em> file.</p>
     </div>
     <div class="readme-main">
         <h2><a id="ApIn"></a>Application Information</h2>
-        <p>This program lets you convert binary XML, Lng, Tpk, and Pkg files for EGO engine games.</p>
+        <p>An app to convert binary XML, Lng, Tpk, and Pkg files to common formats for EGO engine games.</p>
         <h2><a id="Usag"></a>Usage</h2>
-        <p>Drag and drop a file on the exe to convert it. Alternatively, you can right click a file, click "Open With", and choose the exe.</p>
+        <p>
+            Drag and drop (or use Open With) any supported file type on the executable to convert it to a common file 
+            format and back. Alternatively, you can right-click a file, click "Open With", and choose the exe.
+            Use the app's help menu (e.g. <em>-h</em> or <em>vc-to-gltf -h</em>) to get details on all the commands.
+        </p>
+        <p>Pass the <em>-h</em> option on the command line to get help text for any command.</p>
         <p>Possible conversions:</p>
         <ul>
             <li>Binary XML &lt-&gt XML</li>
             <li>Pkg &lt-&gt JSON</li>
             <li>Lng &lt-&gt XML (<em>DO NOT</em> change the "info" section)</li>
             <li>Tpk &lt-&gt DDS (file name ending with .tpk.dds)</li>
+            <li>track.jpk &lt-&gt glTF</li>
         </ul>
-        <p>When converting a tpk, the app will display the internal name and image format. When converting dds back to tpk make sure to set the file name to the internal tpk name.</p>
-        <p>Note: After conversion, the output file will overwrite any existing file. Output file names are the input file + ".xml", ".json", ".lng", ".dds", ".tpk" or ".pkg"</p>
+        <p>
+            Note: After conversion, the output file will overwrite any existing file. Output file names are the input
+            file + ".xml", ".json", ".lng", ".dds", ".tpk", ".pkg", ".glb", ".gltf", or ".track.jpk"
+        </p>
+        <p>
+            When converting a tpk, the app will display the internal name and image format. When converting dds back to
+            tpk make sure to set the file name to the internal tpk name.
+        </p>
+        <h3>Track Quad Tree</h3>
+        <p>
+            Track quad tree files are track.jpk, vcqtc, and cqtc. They control ground collision, boundary lines, and
+            reset lines. They can be converted using separate commands from the typical drag-and-drop workflow.
+        </p>
+        <p>Track.jpk, and vcqtc files can be converted using the following commands in terminal:</p>
+        <ul>
+            <li>track-qt vc-to-gltf "C:\path\track.jpk"</li>
+            <li>track-qt gltf-to-vc "C:\path\track.jpk.glb" -t RaceDriverGrid</li>
+            <li>
+                Available Types
+                <ul>
+                    <li>RaceDriverGrid - Grid, Dirt 2, F1 2010 - 2014</li>
+                    <li>Dirt3 - Dirt 3</li>
+                    <li>DirtShowdown - Dirt Showdown, Grid 2, Grid Autosport, Dirt Rally</li>
+                </ul>
+            </li>
+        </ul>
+        <p>Cqtc files can be converted using the following commands in terminal:</p>
+        <ul>
+            <li>track-qt cq-to-gltf "C:\path\boundarylines.cqtc"</li>
+            <li>track-qt gltf-to-cq "C:\path\boundarylines.cqtc.glb" -t Dirt</li>
+            <li>
+                Available Types
+                <ul>
+                    <li>Dirt - Dirt, Grid, Dirt 2, F1 2010 - 2014, Dirt 3, Dirt Showdown, Grid 2, Grid Autosport,
+                        Dirt Rally</li>
+                </ul>
+            </li>
+        </ul>
+        <p></p>
     </div>
     <div class="readme-main">
         <h2><a id="Supp"></a>Support</h2>
         <p>You can get support by asking in the modding channels of the following communities:</p>
         <ul>
             <li><a href="https://discord.gg/5bCjMqS" target="_blank">Ego Engine Modding Discord</a></li>
-            <li><a href="https://www.racedepartment.com/" target="_blank">RaceDepartment Forums</a></li>
+            <li><a href="https://discord.gg/46KweYnegD" target="_blank">Dirt 3 Discord</a></li>
+            <li><a href="https://discord.gg/b3CREU5Kp2" target="_blank">F1 Game Modding Community Discord</a></li>
+            <li><a href="https://www.overtake.gg/" target="_blank">OverTake Sim Racing Community</a></li>
         </ul>
         <p>If you think you've found a bug, post an issue <a href="https://petar.page/l/ego-efc-code" target="_blank">here</a> with as much information as possible.</p>
     </div>
     <div class="readme-main">
         <h2><a id="Chan"></a>Changelog</h2>
         <ul>
+            <li>
+                <strong>4.0.0+20250104</strong>
+                <ul>
+                    <li>Added support for converting track quad tree files</li>
+                    <li>Improved CLI experience</li>
+                    <li>Changed app exe name to <em>ego-file-converter</em></li>
+                    <li>Changed .NET framework to .NET 8.0</li>
+                </ul>
+            </li>
             <li>
                 <strong>3.0.1+20221016</strong>
                 <ul>
