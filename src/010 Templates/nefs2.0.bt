@@ -60,17 +60,24 @@ struct
 } hp1[header.numItems];
 
 FSeek(toc.part2);
-struct
+struct HP2
 {
     uint32 parentId;
     uint32 childId;
     uint32 stringOffset;
     uint32 extractedFileSize;
     uint32 id;
-} hp2[header.numItems];
+} hp2[header.numItems] <read=readTocSharedEntryInfo>;
+string readTocSharedEntryInfo(HP2 &info)
+{
+    string name = ReadString(toc.part3 + info.stringOffset, 100);
+    string ret;
+    SPrintf(ret, "FD: %d | PC: %d %d | %s", info.id, info.parentId, info.childId, name);
+    return ret;
+}
 
 FSeek(toc.part4);
-uint cumulativeCompressedChunkSize[(toc.part5 - toc.part4) / 8];
+uint cumulativeCompressedChunkSize[(toc.part5 - toc.part4) / 4];
 
 FSeek(toc.part5);
 struct
@@ -95,7 +102,7 @@ struct
     uint32 id;
 } hp7[header.numItems];
 
-//FSeek(toc.part8);
+FSeek(toc.part8);
 local uint64 dd = hp5.dataSize / toc.hashBlockSize;
 struct
 {

@@ -14,6 +14,11 @@ LittleEndian();
 
 struct TocHeader {
     uint32 fourCC;
+    if ((fourCC & 0xFF) == 83)
+    {
+        BigEndian();
+    }
+
     ubyte hash[32];
     char aesKey[64];
     uint32 tocSize;
@@ -36,17 +41,21 @@ struct TocHeader {
     uint32 volumeInfoTableStart;
     uint32 hashDigestTableStart;
     ubyte randomPadding2[88];
+    
+    local uint32 actualHashBlockSize = (uint32)hashBlockSize << 15;
+    local uint32 actualBlockSize = (uint32)blockSize << 15;
 } header;
 
 FSeek(header.entryTableStart);
 struct TocEntry
 {
-    uint32 startA;
-    uint32 startB;
+    uint64 start;
+    //uint32 startA;
+    //uint32 startB;
     uint32 sharedInfo;
     uint32 firstBlock;
     uint32 nextDuplicate;
-} entryTable[header.numEntries];
+} entryTable[header.numEntries] <read=Str("S: %lu | SI: %d | FB: %d | ND: %d", start, sharedInfo, firstBlock, nextDuplicate)>;
 
 FSeek(header.sharedEntryInfoTableStart);
 struct TocSharedEntryInfo
@@ -56,7 +65,14 @@ struct TocSharedEntryInfo
     uint32 nameOffset;
     uint32 size;
     uint32 firstDuplicate;
-} sharedEntryInfoTable[(header.nameTableStart - header.sharedEntryInfoTableStart) / sizeof(TocSharedEntryInfo)];
+} sharedEntryInfoTable[(header.nameTableStart - header.sharedEntryInfoTableStart) / sizeof(TocSharedEntryInfo)] <read=readTocSharedEntryInfo>;
+string readTocSharedEntryInfo(TocSharedEntryInfo &info)
+{
+    string name = ReadString(header.nameTableStart + info.nameOffset, 100);
+    string ret;
+    SPrintf(ret, "FD: %d | PC: %d %d | %s", info.firstDuplicate, info.parent, info.firstChild, name);
+    return ret;
+}
 
 FSeek(header.nameTableStart);
 char nameTable[header.blockTableStart - header.nameTableStart];
@@ -69,7 +85,7 @@ struct TocBlock
     // 1 - lzss, 2 - huffman, 3 - rle, 4 - aes, 5 - custom, 6 - lzma, 7 - zlib
     uint16 transformation;
     uint16 checksum;
-} blockTable[(header.volumeInfoTableStart - header.blockTableStart) / 8];
+} blockTable[(header.volumeInfoTableStart - header.blockTableStart) / 8] <read=Str("%d %d", this.end, this.transformation)>;
 
 FSeek(header.volumeInfoTableStart);
 struct TocVolumeInfo
@@ -97,9 +113,9 @@ struct TocSharedEntryInfoWritable
 
 local uint64 numHashDigests <hidden=true> = 0;
 local uint32 iv <hidden=true>;
-for (iv = 0; iv < header.numVolumes; ++iv)
+for (iv = 0; iv < header.numVolumes && header.hashBlockSize != 0; ++iv)
 {
-    numHashDigests += (volumeInfoTable[iv].size - volumeInfoTable[iv].dataOffset + header.hashBlockSize - 1) / header.hashBlockSize;
+    numHashDigests += (volumeInfoTable[iv].size - volumeInfoTable[iv].dataOffset + header.actualHashBlockSize - 1) / header.actualHashBlockSize;
 }
 
 FSeek(header.hashDigestTableStart);

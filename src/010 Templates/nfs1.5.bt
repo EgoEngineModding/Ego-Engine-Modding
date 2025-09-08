@@ -1,40 +1,15 @@
 //--------------------------------------
 //--- 010 Editor v3.1.3 Binary Template
 //
-// File: nfs.bt
+// File: nfs1.5.bt
 // Author: Mike
 // Purpose: Label (decoded) NeFS 1.5.1 files
 //--------------------------------------
 LittleEndian();
 
-// This structure points to the data for a file
-typedef struct
-{
-    uint64 start; // 0 for directories
-    uint16 volume; // Always 0 so far
-    // 1 - transformed, 2 - directory, 4 - duplicated, 8 - cacheable,
-    // 16 - lastSibling, 32 - patched
-    uint16 flags;
-    uint32 sharedInfo;
-    uint32 firstBlock;
-    uint32 nextDuplicate;
-} TocEntry <read=readTocEntry, optimize=true>;
-
-// This structure points out the name for a file/directory
-typedef struct
-{
-    uint32 parent; // Points to parent directory for hierarchy
-    uint32 nextSibling; // next id at same level
-    uint32 firstChild; // id of first child
-    uint32 nameOffset; // Offset within the strings structure
-    uint32 size; // 0 for directories
-    uint32 firstDuplicate;
-    uint32 patchedEntry;
-} TocSharedEntryInfo <read=readTocSharedEntryInfo, optimize=true>;
-
 struct TocHeader {
-    char magic[4];
-    if (magic[0] == 83)
+    uint32 fourCC;
+    if ((fourCC & 0xFF) == 83)
     {
         BigEndian();
     }
@@ -52,22 +27,55 @@ struct TocHeader {
     uint32 volumeInfoTableStart;
     if ((version & 0x01) != 0)
     {
-        int pad; // typically 0, not zero when numVolumes > 1
-        int pad;
-        int pad;
+        uint32 userValue; // typically 0, not zero when numVolumes > 1
+        uint32 randomPadding1;
+        uint32 checksum;
     }
     char aesKey[0x40];
     if ((version & 0x01) != 0)
     {
-        int pad;
+        uint32 unused;
     }
 } header;
 
 FSeek(header.entryTableStart);
-TocEntry entryTable[header.numEntries];
+struct TocEntry
+{
+    uint64 start; // 0 for directories
+    uint16 volume; // Always 0 so far
+    // 1 - transformed, 2 - directory, 4 - duplicated, 8 - cacheable,
+    // 16 - lastSibling, 32 - patched
+    uint16 flags;
+    uint32 sharedInfo;
+    uint32 firstBlock;
+    uint32 nextDuplicate;
+} entryTable[header.numEntries] <read=readTocEntry, optimize=true>;
+string readTocEntry(TocEntry &index)
+{
+    string ret;
+    local int i;
+    SPrintf(ret, "S: %d | V: %d | F: %d | SI: %d | FB: %d | ND: %d", index.start, index.volume, index.flags, index.sharedInfo, index.firstBlock, index.nextDuplicate);
+    return ret;
+}
 
 FSeek(header.sharedEntryInfoTableStart);
-TocSharedEntryInfo sharedEntryInfoTable[(header.nameTableStart - header.sharedEntryInfoTableStart) / sizeof(TocSharedEntryInfo)];
+struct TocSharedEntryInfo
+{
+    uint32 parent; // Points to parent directory for hierarchy
+    uint32 nextSibling; // next id at same level
+    uint32 firstChild; // id of first child
+    uint32 nameOffset; // Offset within the strings structure
+    uint32 size; // 0 for directories
+    uint32 firstDuplicate;
+    uint32 patchedEntry;
+} sharedEntryInfoTable[(header.nameTableStart - header.sharedEntryInfoTableStart) / sizeof(TocSharedEntryInfo)] <read=readTocSharedEntryInfo, optimize=true>;
+string readTocSharedEntryInfo(TocSharedEntryInfo &index)
+{
+    string name = ReadString(header.nameTableStart + index.nameOffset, 100);
+    string ret;
+    SPrintf(ret, "ID: %d %d | PCN: %d %d %d | %s", index.firstDuplicate, index.patchedEntry, index.parent, index.firstChild, index.nextSibling, name);
+    return ret;
+}
 
 FSeek(header.nameTableStart);
 char nameTable[header.blockTableStart - header.nameTableStart];
@@ -96,20 +104,3 @@ struct TocVolumeInfo
     uint32 nameOffset;
     uint32 dataOffset; // must be multiple of block size and larger than header size
 } volumeInfoTable[header.numVolumes];
-
-// These functions are just for displaying the struct data nicely in 010
-string readTocEntry(TocEntry &index)
-{
-    string ret;
-    local int i;
-    SPrintf(ret, "S: %d | V: %d | F: %d | SI: %d | FB: %d | ND: %d", index.start, index.volume, index.flags, index.sharedInfo, index.firstBlock, index.nextDuplicate);
-    return ret;
-}
-
-string readTocSharedEntryInfo(TocSharedEntryInfo &index)
-{
-    string name = ReadString(header.nameTableStart + index.nameOffset, 100);
-    string ret;
-    SPrintf(ret, "ID: %d %d | PCN: %d %d %d | %s", index.firstDuplicate, index.patchedEntry, index.parent, index.firstChild, index.nextSibling, name);
-    return ret;
-}
