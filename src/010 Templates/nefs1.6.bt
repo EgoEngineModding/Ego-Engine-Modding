@@ -12,100 +12,114 @@
 //------------------------------------------------
 LittleEndian();
 
-struct {
-    char magic[4];
-    byte hash[32];
-    char aesKey[64];
-    uint version;
-    uint headerSize;
-    uint numItems;
-    uint unknown1;
-    uint unknown2;
-    uint unknown3;
-    uint unknown4;
-} header;
-
-struct
-{
-    uint16 numVolumes;
-    uint16 hashBlockSizeHi;
-    uint16 blockSizeHi;
-    uint16 splitSizeHi;
-    local uint blockSize = (uint)blockSizeHi << 15;
-    local uint hashBlockSize = (uint32)hashBlockSize << 15;
-    if (hashBlockSize == 0)
+struct TocHeader {
+    uint32 fourCC;
+    if ((fourCC & 0xFF) == 83)
     {
-        hashBlockSize = 0x800000;
+        BigEndian();
     }
 
-    uint part1;
-    uint part6;
-    uint part2;
-    uint part7;
-    uint part3;
-    uint part4;
-    uint part5;
-    uint part8;
+    ubyte hash[32];
+    char aesKey[64];
+    uint32 tocSize;
+    uint32 version;
+    uint32 numEntries;
+    uint32 userValue;
+    ubyte randomPadding1[10];
+    ubyte unused[2];
 
-    byte unknown1[0x58];
-} toc;
+    uint16 numVolumes;
+    uint16 hashBlockSize;
+    uint16 blockSize;
+    uint16 splitSize;
+    uint32 entryTableStart;
+    uint32 writableEntryTableStart;
+    uint32 sharedEntryInfoTableStart;
+    uint32 writableSharedEntryInfoTableStart;
+    uint32 nameTableStart;
+    uint32 blockTableStart;
+    uint32 volumeInfoTableStart;
+    uint32 hashDigestTableStart;
+    ubyte randomPadding2[88];
+    
+    local uint32 actualHashBlockSize = (uint32)hashBlockSize << 15;
+    local uint32 actualBlockSize = (uint32)blockSize << 15;
+} header;
 
-FSeek(toc.part1);
-struct
+FSeek(header.entryTableStart);
+struct TocEntry
 {
-    uint64 dataOffset;
-    uint32 indexP2;
-    uint32 indexP4;
-    uint32 id;
-} hp1[header.numItems];
+    uint64 start;
+    //uint32 startA;
+    //uint32 startB;
+    uint32 sharedInfo;
+    uint32 firstBlock;
+    uint32 nextDuplicate;
+} entryTable[header.numEntries] <read=Str("S: %lu | SI: %d | FB: %d | ND: %d", start, sharedInfo, firstBlock, nextDuplicate)>;
 
-FSeek(toc.part2);
-struct
+FSeek(header.sharedEntryInfoTableStart);
+struct TocSharedEntryInfo
 {
-    uint32 parentId;
-    uint32 childId;
-    uint32 stringOffset;
-    uint32 extractedFileSize;
-    uint32 id;
-} hp2[header.numItems];
-
-FSeek(toc.part3);
-char hp3[toc.part4 - toc.part3];
-
-FSeek(toc.part4);
-struct
+    uint32 parent;
+    uint32 firstChild;
+    uint32 nameOffset;
+    uint32 size;
+    uint32 firstDuplicate;
+} sharedEntryInfoTable[(header.nameTableStart - header.sharedEntryInfoTableStart) / sizeof(TocSharedEntryInfo)] <read=readTocSharedEntryInfo>;
+string readTocSharedEntryInfo(TocSharedEntryInfo &info)
 {
-    uint32 totalBlockSize;
-    uint16 transformationType;
-    uint16 unknown;
-} hp4[(toc.part5 - toc.part4) / 8];
+    string name = ReadString(header.nameTableStart + info.nameOffset, 100);
+    string ret;
+    SPrintf(ret, "FD: %d | PC: %d %d | %s", info.firstDuplicate, info.parent, info.firstChild, name);
+    return ret;
+}
 
-FSeek(toc.part5);
-struct
+FSeek(header.nameTableStart);
+char nameTable[header.blockTableStart - header.nameTableStart];
+
+FSeek(header.blockTableStart);
+struct TocBlock
 {
-    uint64 dataSize;
-    uint32 nefsStringOffset;
+    uint32 end;
+    // transformation types
+    // 1 - lzss, 2 - huffman, 3 - rle, 4 - aes, 5 - custom, 6 - lzma, 7 - zlib
+    uint16 transformation;
+    uint16 checksum;
+} blockTable[(header.volumeInfoTableStart - header.blockTableStart) / 8] <read=Str("%d %d", this.end, this.transformation)>;
+
+FSeek(header.volumeInfoTableStart);
+struct TocVolumeInfo
+{
+    uint64 size;
+    uint32 nameOffset;
     uint32 dataOffset;
-} hp5;
+} volumeInfoTable[header.numVolumes];
 
-FSeek(toc.part6);
-struct
+FSeek(header.writableEntryTableStart);
+struct TocEntryWriteable
 {
     uint16 volume;
-    byte flags;
-    byte unknown;
-} hp6[header.numItems];
+    // 1 - transformed, 2 - directory, 4 - duplicated, 8 - cacheable,
+    // 16 - lastSibling, 32 - patched
+    uint16 flags;
+} writableEntryTable[header.numEntries];
 
-FSeek(toc.part7);
-struct
+FSeek(header.writableSharedEntryInfoTableStart);
+struct TocSharedEntryInfoWritable
 {
-    uint32 nextId;
-    uint32 id;
-} hp7[header.numItems];
+    uint32 nextSibling;
+    uint32 patchedEntry;
+} writableSharedEntryInfoTable[header.numEntries];
 
-//FSeek(toc.part8);
-local uint64 dd = hp5.dataSize / toc.hashBlockSize;
-struct
+local uint64 numHashDigests <hidden=true> = 0;
+local uint32 iv <hidden=true>;
+for (iv = 0; iv < header.numVolumes && header.hashBlockSize != 0; ++iv)
 {
-    byte blockHash[32];
-} hp8[(hp5.dataSize - hp5.dataOffset) / toc.hashBlockSize];
+    numHashDigests += (volumeInfoTable[iv].size - volumeInfoTable[iv].dataOffset + header.actualHashBlockSize - 1) / header.actualHashBlockSize;
+}
+
+FSeek(header.hashDigestTableStart);
+struct TocHashDigest
+{
+    ubyte data[32];
+} hashDigestTable[numHashDigests];

@@ -1,0 +1,107 @@
+//--------------------------------------
+//--- 010 Editor v3.1.3 Binary Template
+//
+// File: nfs1.4.bt
+// Author: 
+// Purpose: Label (decoded) NeFS 0.1.0, 0.2.0, 1.3.0, 1.4.0 files
+//--------------------------------------
+LittleEndian();
+
+struct TocHeader {
+    uint32 fourCC;
+    if ((fourCC & 0xFF) == 83)
+    {
+        BigEndian();
+    }
+    
+    uint32 tocSize; // I think must end on multiple of 128 (add padding)
+    uint32 version;
+    uint32 numVolumes;
+    uint32 blockSize;
+    if (version == 0x010300 || version == 0x010400)
+    {
+        uint32 splitSize; // 0 to disable splitting
+    }
+    uint32 entryTableStart;
+    uint32 linkTableStart;
+    uint32 nameTableStart;
+    uint32 blockTableStart;
+    uint32 volumeSizeTableStart;
+    if (version == 0x010300 || version == 0x010400)
+    {
+        uint32 volumeNameStartTableStart;
+        uint32 volumeNameTableStart;
+    }
+    if (version == 0x010400)
+    {
+        uint32 volumeDataStartTableStart; // I think?
+        uint32 unknown1;
+    }
+    if (version == 0x000200 || version == 0x010300 || version == 0x010400)
+    {
+        char aesKey[0x40];
+    }
+} header;
+
+FSeek(header.entryTableStart);
+struct TocEntry
+{
+    uint64 start; // start of first child for directory
+    uint64 linkOffset; // aka nextDup3
+    uint32 size; // aka firstDup1, nextDup2
+    uint32 firstBlock;
+    uint32 volume; // Always 0 so far
+    // 1 - transformed, 2 - directory, 4 - duplicate,
+    // 8 - isDuplicated, 16 - cacheable
+    uint32 flags;
+} entryTable[(header.linkTableStart - header.entryTableStart) / sizeof(TocEntry)] <read=readTocEntry, optimize=true>;
+string readTocEntry(TocEntry &index)
+{
+    string ret;
+    local int i;
+    SPrintf(ret, "S: %lu | V: %d | F: %d | LO: %lu | FB: %d | SZ: %d", index.start, index.volume, index.flags, index.linkOffset, index.firstBlock, index.size);
+    return ret;
+}
+
+FSeek(header.linkTableStart);
+struct TocLink
+{
+    uint32 parentOffset; // Points to parent directory for hierarchy
+    uint32 nextSiblingOffset; // next id at same level
+    uint32 firstChildOffset; // id of first child
+    uint32 nameOffset; // Offset within the strings structure
+} linkTable[(header.nameTableStart - header.linkTableStart) / sizeof(TocLink)] <read=readTocLink, optimize=true>;
+string readTocLink(TocLink &index)
+{
+    string name = ReadString(header.nameTableStart + index.nameOffset, 100);
+    string ret;
+    SPrintf(ret, "PCN: %d %d %d | %s", index.parentOffset, index.firstChildOffset, index.nextSiblingOffset, name);
+    return ret;
+}
+
+FSeek(header.nameTableStart);
+char nameTable[header.blockTableStart - header.nameTableStart];
+
+FSeek(header.blockTableStart);
+struct TocBlock
+{
+    uint32 end;
+    // transformation types
+    // 1 - lzss, 2 - huffman, 3 - rle, 4 - aes, 5 - custom
+    uint32 transformation;
+} blockTable[(header.volumeSizeTableStart - header.blockTableStart) / 8] <read=Str("%d %d", this.end, this.transformation),optimize=true>;
+
+FSeek(header.volumeSizeTableStart);
+uint64 volumeSizeTable[header.numVolumes];
+
+if (header.version == 0x010300 || header.version == 0x010400)
+{
+    FSeek(header.volumeNameStartTableStart);
+    uint32 volumeNameStartTable[header.numVolumes];
+}
+
+if (header.version == 0x010400)
+{
+    FSeek(header.volumeDataStartTableStart);
+    uint32 volumeDataStartTable[header.numVolumes];
+}
