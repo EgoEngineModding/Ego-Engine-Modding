@@ -8,104 +8,264 @@
 //  Category: 
 // File Mask: 
 //  ID Bytes: 
-//   History: Label BDL files
+//   History: Label BDL (engine bundle) files
 //------------------------------------------------
 LittleEndian();
 
 struct {
     char magic[4];
-    uint version;
-
-    switch (version)
+    int32 version;
+    
+    // 104: Dirt 2/3
+    // 106: F1 2010-2015, Grid 2, Grid Autosport, Grid 2019
+    local int64 nextPos <hidden=true> = 8;
+    if (version >= 101)
     {
-        case 104: // Dirt 2/3
-            byte data[64];
+        float volumeThrottle;
+        float volumeIdle;
+        nextPos = 16;
+        
+        if (version >= 102)
+        {
+            int32 extraBytes;
+            nextPos = 20 + extraBytes;
+            float volumeThrottle;
+            float volumeIdle;
+            
+            if (version >= 103)
+            {
+                int32 timbreCompensate; // bool != 0
+                int32 pitchCompensate; // bool != 0
+                
+                if (version >= 104)
+                {
+                    int32 remappingOption;
+                }
+            }
+        }
+    }
+    
+    FSeek(nextPos);
+    int sourceRpmTimbre[2];
+    int destRpmTimbre[2];
+    int sourceRpmPitch[2];
+    int destRpmPitch[2];
+    
+    if (version >= 105)
+    {
+        float dynamic[2];
+    }
+} header;
+
+typedef struct {
+    char magic[4];
+    uint version;
+    
+    int32 unused;
+    int32 firingsPerCycle;
+    float crLoops;
+    float crGranular;
+    float timeLapse;
+    float xFadeReductionRate;
+    
+    // 107: Dirt 2/3
+    // 113: F1 2010-2017, Grid 2, Grid Autosport
+    // 114: F1 2019, Grid 2019
+    local int32 fmt = 0;
+    local int32 rate = 48000;
+    if (version >= 101)
+    {
+        if (version >= 108)
+        {
+            if (version >= 113)
+            {
+                int32 damageWobbleLength[3];
+                int32 unused;
+            }
+            
+            int32 compressedDataType;
+            fmt = compressedDataType;
+            if (version >= 109)
+            {
+                int32 suggestedPlaybackRate;
+                rate = suggestedPlaybackRate;
+            }
+        }
+
+        float gearChangeLoopForceAmount;
+        float gearChangeLoopForceReductionRate;
+        
+        if (version >= 102)
+        {
+            int32 groupFiringsInBlocksOf;
+            
+            if (version >= 103)
+            {
+                int32 sectionSize;
+                int32 loopEnforceZc;
+                int32 loopSuggestZc;
+                
+                if (version >= 104)
+                {
+                    uchar wobbleAssignments[8];
+                    uchar wobbleVolumes[8];
+                    
+                    local int32 numWobbles;
+                    if (version == 104)
+                    {
+                        numWobbles = 3;
+                    }
+                    else if (version < 107)
+                    {
+                        numWobbles = 6;
+                    }
+                    else
+                    {
+                        numWobbles = (version >= 114 ? 12 : version >= 111 ? 4 : 0) + 9;
+                    }
+                    
+                    struct {
+                        int32 length <comment="Should be <= 128">;
+                        if (version >= 105)
+                        {
+                            int32 looping;
+                        }
+                        
+                        // first float is multiplier, next volume
+                        // conversion: (ushort)(val * 4096.0 + 0.5)
+                        float multiplierVolumes[128 * 2];
+                    } wobbles[numWobbles] <optimize=false>;
+                    
+                    if (version >= 106)
+                    {
+                        int32 wobbleGearAvoidanceMask[version >= 114 ? 16 : version >= 106 ? 8 : 5];
+                    }
+                }
+            }
+        }
+    }
+    
+    int32 sourceLength;
+    if (sourceLength < 0)
+    {
+        // use compressed data
+        //sourceLength = -sourceLength;
+    }
+    else
+    {
+        int16 sourceSample[sourceLength];
+    }
+    
+    int32 sourceRpmTableSize;
+    float sourceRpmTable[sourceRpmTableSize];
+    int32 numberOfZeroCrossings;
+    double zeroCrossings[numberOfZeroCrossings];
+
+    switch (fmt)
+    {
+        case 0: // adpcm
+            int32 compressedDataLength;
+            local uint32 numBlocks = (compressedDataLength - 1152) / 19;
+            float predictionFilters[32];
+            float dataInterpreters[256];
+            typedef struct  {
+                ubyte lowerNibble;
+                ubyte upper0;
+                ubyte upper1;
+                
+                ubyte index;                
+                ubyte diIndices[15];
+            } AdpcmBlock;
+            AdpcmBlock blocks[numBlocks];
+            
+            local int16 samples[32 * numBlocks];
+            local int16 sample0u <hidden=true>;
+            local int16 sample1u <hidden=true>;
+            local float sample0f <hidden=true>;
+            local float sample1f <hidden=true>;
+            local ubyte pfIndex <hidden=true>;
+            local float pf0 <hidden=true>;
+            local float pf1 <hidden=true>;
+            local ubyte diIndexUpper <hidden=true>;
+            local ubyte diIndexLower <hidden=true>;
+            local int32 i <hidden=true>;
+            local int32 oi <hidden=true>;
+            local int32 j <hidden=true>;
+            for (i = 0; i < numBlocks; ++i)
+            {
+                sample0u =
+                    ((int16)blocks[i].upper0 << 8) | ((blocks[i].lowerNibble & 0x0F) << 4);
+                sample1u =
+                    ((int16)blocks[i].upper1 << 8) | (blocks[i].lowerNibble & 0xF0);
+                
+                oi = i * 32;
+                sample0f = (float)sample0u;
+                samples[oi + 0] = sample0u;
+                sample1f = (float)sample1u;
+                samples[oi + 1] = sample1u;
+                
+                pfIndex = (blocks[i].index & 0x0F) * 2;
+                pf0 = predictionFilters[pfIndex];
+                pf1 = predictionFilters[pfIndex + 1];
+                diIndexUpper = blocks[i].index & 0xF0;
+                for (j = 0; j < 15; ++j)
+                {
+                    diIndexLower = blocks[i].diIndices[j];
+                    sample0f = sample0f * pf1 + sample1f * pf0 +
+                        dataInterpreters[diIndexUpper + (diIndexLower & 0x0F)];
+                    samples[oi + j * 2 + 2] = (int16)Clamp(sample0f, -0x8000, 0x7FFF);
+                    
+                    sample1f = sample1f * pf1 + sample0f * pf0 +
+                        dataInterpreters[diIndexUpper + (diIndexLower >> 4)];
+                    samples[oi + j * 2 + 3] = (int16)Clamp(sample0f, -0x8000, 0x7FFF);
+                }
+            }
+            
+            int32 compressionIterationsDone;
+            float compressionNoiseLevel;
+            int32 compressionSampleRate[3];
             break;
-        case 106: // F1 2010-2015, Grid 2, Grid 2019
-            byte data[88];
+        case 1: // ulaw
+            int32 compressedDataLength;
+            byte compressedData[compressedDataLength];
+            int32 compressionIterationsDone;
+            float compressionNoiseLevel;
+            int32 compressionSampleRate[3];
+            break;
+        case 2:
+            byte unk3[24];
             break;
     }
-} bndlChunk;
 
-while (FEof() == 0)
-{
+    int32 numLoops;
     struct {
-        char magic[4];
-        uint version;
+        float rpm;
+        int startZc;
+        int endZc;
+        int startXFade;
+        int endXFade;
+        int xFadePower;
+        int loopStyle;
+        char name[64];
+    } loops[numLoops];
+} EngineSound;
 
-        local uint fmt = 0;
-        local uint rate = 48000;
-        switch (version)
-        {
-            case 107: // Dirt 2/3
-                byte data[36];
-                uint numData2;
-                byte data2[numData2];
-                break;
-            case 113: // F1 2010-2017, Grid 2
-            case 114: // F1 2019, Grid 2019 -- has more numData2 21760 (vs 13472)
-                byte data[40];
-                uint format;
-                uint sampleRate;
-                float unknown[2];
-                uint unknown2;
-                uint numData2;
-                byte data2[numData2];
+EngineSound throttle;
+EngineSound idle;
+EngineSound throttle;
+EngineSound idle;
 
-                fmt = format;
-                break;
-                byte data[40];
-                uint format;
-                uint sampleRate;
-                float unknown[2];
-                uint unknown2;
-                uint numData2;
-                byte data2[numData2];
-
-                fmt = format;
-                break;
-        }
-
-        switch (fmt)
-        {
-            case 0:
-                byte unknown3[4];
-                uint numUnk1;
-                float unk1s[numUnk1];
-                uint numUnk2;
-                byte unk2s[numUnk2 * 8];
-                uint size;
-                local uint numBlocks = (size - 1152) / 19;
-                float table1[16];
-                float table2[16];
-                float table3[256];
-                struct {
-                    ubyte blockData[19];
-                } adpcmBlock[numBlocks];
-                byte unk3[20];
-                break;
-            case 1:
-                byte unknown3[4];
-                uint numUnk1;
-                float unk1s[numUnk1];
-                uint numUnk2;
-                byte unk2s[numUnk2 * 8];
-                uint size;
-                byte audioData[size];
-                byte unk3[20];
-                break;
-            case 2:
-                uint32 numSamples;
-                byte audioData[numSamples * 2];
-                uint numUnk1;
-                float unk1s[numUnk1];
-                uint numUnk2;
-                byte unk2s[numUnk2 * 8];
-                byte unk3[24];
-                break;
-        }
-
-        uint numUnk4;
-        byte unk4s[numUnk4 * 92];
-    } egoeChunk;
+int32 Clamp(int32 val, int32 min, int32 max)
+{
+    if (val < min)
+    {
+        return min;
+    }
+    
+    if (val > max)
+    {
+        return max;
+    }
+    
+    return val;
 }
