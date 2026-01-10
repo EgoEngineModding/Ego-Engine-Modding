@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Nullable>enable</Nullable>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Product>Ego Engine Library</Product>
     <Authors>Petar Tasev</Authors>

@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 
-using Microsoft.Toolkit.HighPerformance.Buffers;
+using CommunityToolkit.HighPerformance.Buffers;
 
 namespace EgoEngineLibrary.Formats.TrackQuadTree;
 

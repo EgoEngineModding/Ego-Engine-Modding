@@ -293,7 +293,7 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
 
         var source = GetTriangles<TSource>(Header);
         var targetBuffer = new byte[Unsafe.SizeOf<TTarget>() * source.Length];
-        var target = MemoryMarshal.Cast<byte, TTarget>(targetBuffer);
+        var target = MemoryMarshal.Cast<byte, TTarget>(targetBuffer.AsSpan());
         for (var i = 0; i < source.Length; ++i)
         {
             var sourceTri = source[i];

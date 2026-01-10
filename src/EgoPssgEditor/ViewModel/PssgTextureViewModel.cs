@@ -111,7 +111,7 @@ namespace EgoPssgEditor.ViewModel
                 if (decoder.IsHdrFormat(bcDds))
                 {
                     var pixels = new byte[width * height * 3];
-                    var pixelsSpan = MemoryMarshal.Cast<byte, Bgr24>(pixels);
+                    var pixelsSpan = MemoryMarshal.Cast<byte, Bgr24>(pixels.AsSpan());
                     decoder.DecodeDdsToPixels(bcDds, pixelsSpan);
                     var bmSource = BitmapSource.Create(width, height, 96.0, 96.0, PixelFormats.Bgr24, null, pixels, width * 3);
                     Preview = bmSource;
@@ -119,7 +119,7 @@ namespace EgoPssgEditor.ViewModel
                 else
                 {
                     var pixels = new byte[width * height * 4];
-                    var pixelsSpan = MemoryMarshal.Cast<byte, Bgra32>(pixels);
+                    var pixelsSpan = MemoryMarshal.Cast<byte, Bgra32>(pixels.AsSpan());
                     decoder.DecodeDdsToPixels(bcDds, pixelsSpan);
                     var bmSource = BitmapSource.Create(width, height, 96.0, 96.0, PixelFormats.Bgra32, null, pixels, width * 4);
                     Preview = bmSource;
