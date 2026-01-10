@@ -1,0 +1,30 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/EgoCtfEditor/EgoCtfEditor.csproj" />
+    <Project Path="src/EgoDatabaseEditor/EgoDatabaseEditor.csproj" />
+    <Project Path="src/EgoEngineLibrary/EgoEngineLibrary.csproj" />
+    <Project Path="src/EgoErpArchiver/EgoErpArchiver.csproj" />
+    <Project Path="src/EgoErpArchiverConsole/EgoErpArchiverConsole.csproj" />
+    <Project Path="src/EgoFileConverter/EgoFileConverter.csproj" />
+    <Project Path="src/EgoJpkArchiver/EgoJpkArchiver.csproj" />
+    <Project Path="src/EgoLngEditor/EgoLngEditor.csproj" />
+    <Project Path="src/EgoPssgEditor/EgoPssgEditor.csproj" />
+    <Project Path="src/EgoTngEditor/EgoTngEditor.csproj" />
+    <Project Path="src/Sandbox/Sandbox.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/EgoEngineLibrary.Tests/EgoEngineLibrary.Tests.csproj" />
+  </Folder>
+</Solution>
