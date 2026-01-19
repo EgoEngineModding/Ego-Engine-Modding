@@ -1,11 +1,14 @@
-<Application x:Class="EgoPssgEditor.App" 
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
-             xmlns:local="clr-namespace:EgoPssgEditor" 
-             StartupUri="MainWindow.xaml" >
-    <Application.Resources>
-        <ResourceDictionary>
-            <vm:MainViewModel x:Key="MainVM" xmlns:vm="clr-namespace:EgoPssgEditor.ViewModel" />
-        </ResourceDictionary>
-    </Application.Resources>
+<Application x:Class="EgoPssgEditor.App"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:EgoPssgEditor"
+             RequestedThemeVariant="Default">
+    <Application.DataTemplates>
+        <local:ViewLocator />
+    </Application.DataTemplates>
+
+    <Application.Styles>
+        <FluentTheme DensityStyle="Compact" />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+    </Application.Styles>
 </Application>

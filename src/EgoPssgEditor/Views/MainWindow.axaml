@@ -1,80 +1,83 @@
-﻿<Window x:Class="EgoPssgEditor.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<Window x:Class="EgoPssgEditor.Views.MainWindow"
+        xmlns="https://github.com/avaloniaui" 
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EgoPssgEditor"
-        xmlns:eel_graphics="clr-namespace:EgoEngineLibrary.Graphics;assembly=EgoEngineLibrary"
-        xmlns:vm="clr-namespace:EgoPssgEditor.ViewModel"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        mc:Ignorable="d"
-        Title="{Binding DisplayName}" Height="600" Width="800"
-        DataContext="{Binding Source={StaticResource MainVM}}">
-    <Window.InputBindings>
-        <KeyBinding Key="O" Modifiers="Control" Command="{Binding Path=OpenCommand}"></KeyBinding>
-        <KeyBinding Key="S" Modifiers="Control" Command="{Binding Path=SaveCommand}"></KeyBinding>
-    </Window.InputBindings>
+        xmlns:vm="using:EgoPssgEditor.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:DataType="vm:MainViewModel"
+        Icon="/Assets/Ryder25.ico"
+        Title="{Binding DisplayName}" Height="600" Width="800">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainViewModel/>
+    </Design.DataContext>
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Ctrl+O" Command="{Binding OpenCommand}"></KeyBinding>
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCommand}"></KeyBinding>
+    </Window.KeyBindings>
     <Window.Resources>
         <SolidColorBrush x:Key="imageTextBg" Color="White" Opacity="0.5"/>
     </Window.Resources>
 
     <DockPanel>
-        <Menu x:Name="mainMenu" DockPanel.Dock="Top" IsMainMenu="True">
+        <Menu x:Name="mainMenu" DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="_New" Command="{Binding Path=NewCommand}">
                     <MenuItem.Icon>
-                        <Image Source="pack://application:,,,/Resources/image_add.png"></Image>
+                        <Image Source="/Assets/image_add.png"></Image>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="_Open" Command="{Binding Path=OpenCommand}" InputGestureText="Ctrl+O">
+                <MenuItem Header="_Open" Command="{Binding Path=OpenCommand}" InputGesture="Ctrl+O" HotKey="Ctrl+O">
                     <MenuItem.Icon>
-                        <Image Source="pack://application:,,,/Resources/folder_image.png"></Image>
+                        <Image Source="/Assets/folder_image.png"></Image>
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="_Save">
                     <MenuItem.Icon>
-                        <Image Source="pack://application:,,,/Resources/disk.png"/>
+                        <Image Source="/Assets/disk.png"/>
                     </MenuItem.Icon>
-                    <MenuItem Header="Save As _Opened" Command="{Binding Path=SaveCommand}" InputGestureText="Ctrl+S"></MenuItem>
+                    <MenuItem Header="Save As _Opened" Command="{Binding Path=SaveCommand}" InputGesture="Ctrl+S" HotKey="Ctrl+S"></MenuItem>
                     <MenuItem Header="Save As _Pssg" Command="{Binding Path=SavePssgCommand}"></MenuItem>
                     <MenuItem Header="Save As _Compressed" Command="{Binding Path=SaveCompressedCommand}"></MenuItem>
                     <MenuItem Header="Save As _Xml" Command="{Binding Path=SaveXmlCommand}"></MenuItem>
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="_Nodes">
-                <MenuItem Header="_Export" Command="{Binding Path=NodesWorkspace.Export}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="_Import" Command="{Binding Path=NodesWorkspace.Import}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="E_xport Data" Command="{Binding Path=NodesWorkspace.ExportData}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="I_mport Data" Command="{Binding Path=NodesWorkspace.ImportData}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="Add _Node" Command="{Binding Path=NodesWorkspace.AddNode}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="_Remove Node" Command="{Binding Path=NodesWorkspace.RemoveNode}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="_Clone Node" Command="{Binding Path=NodesWorkspace.CloneNode}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="Add _Attribute" Command="{Binding Path=NodesWorkspace.AddAttribute}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="Rem_ove Attribute" Command="{Binding Path=NodesWorkspace.RemoveAttribute}" CommandParameter="{Binding ElementName=attributesDataGrid, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Export" Command="{Binding Path=NodesWorkspace.ExportCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Import" Command="{Binding Path=NodesWorkspace.ImportCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="E_xport Data" Command="{Binding Path=NodesWorkspace.ExportDataCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="I_mport Data" Command="{Binding Path=NodesWorkspace.ImportDataCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="Add _Node" Command="{Binding Path=NodesWorkspace.AddNodeCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Remove Node" Command="{Binding Path=NodesWorkspace.RemoveNodeCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Clone Node" Command="{Binding Path=NodesWorkspace.CloneNodeCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="Add _Attribute" Command="{Binding Path=NodesWorkspace.AddAttributeCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="Rem_ove Attribute" Command="{Binding Path=NodesWorkspace.RemoveAttributeCommand}" CommandParameter="{Binding ElementName=attributesDataGrid, Path=SelectedItem}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Textures">
-                <MenuItem Header="_Export" Command="{Binding Path=TexturesWorkspace.Export}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="_Import" Command="{Binding Path=TexturesWorkspace.Import}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="E_xport All" Command="{Binding Path=TexturesWorkspace.ExportTextures}"></MenuItem>
-                <MenuItem Header="I_mport All" Command="{Binding Path=TexturesWorkspace.ImportTextures}"></MenuItem>
-                <MenuItem Header="_Duplicate Texture" Command="{Binding Path=TexturesWorkspace.DuplicateTexture}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="_Remove Texture" Command="{Binding Path=TexturesWorkspace.RemoveTextureC}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Export" Command="{Binding Path=TexturesWorkspace.ExportCommand}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Import" Command="{Binding Path=TexturesWorkspace.ImportCommand}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="E_xport All" Command="{Binding Path=TexturesWorkspace.ExportTexturesCommand}"></MenuItem>
+                <MenuItem Header="I_mport All" Command="{Binding Path=TexturesWorkspace.ImportTexturesCommand}"></MenuItem>
+                <MenuItem Header="_Duplicate Texture" Command="{Binding Path=TexturesWorkspace.DuplicateTextureCommand}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Remove Texture" Command="{Binding Path=TexturesWorkspace.RemoveTextureCCommand}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Models">
-                <MenuItem Header="_Export Car" Command="{Binding Path=ModelsWorkspace.Export}"></MenuItem>
-                <MenuItem Header="_Import Car" Command="{Binding Path=ModelsWorkspace.Import}"></MenuItem>
+                <MenuItem Header="_Export Car" Command="{Binding Path=ModelsWorkspace.ExportCarCommand}"></MenuItem>
+                <MenuItem Header="_Import Car" Command="{Binding Path=ModelsWorkspace.ImportCarCommand}"></MenuItem>
                 <Separator/>
-                <MenuItem Header="Export Di_rt Car" Command="{Binding Path=ModelsWorkspace.ExportDirt}"></MenuItem>
-                <MenuItem Header="Import _Dirt Car" Command="{Binding Path=ModelsWorkspace.ImportDirt}"></MenuItem>
-                <MenuItem Header="Import _Grid Car" Command="{Binding Path=ModelsWorkspace.ImportGrid}"></MenuItem>
+                <MenuItem Header="Export Di_rt Car" Command="{Binding Path=ModelsWorkspace.ExportDirtCommand}"></MenuItem>
+                <MenuItem Header="Import _Dirt Car" Command="{Binding Path=ModelsWorkspace.ImportDirtCommand}"></MenuItem>
+                <MenuItem Header="Import _Grid Car" Command="{Binding Path=ModelsWorkspace.ImportGridCommand}"></MenuItem>
                 <Separator/>
-                <MenuItem Header="Export _Car Interior" Command="{Binding Path=ModelsWorkspace.ExportCarInterior}"></MenuItem>
-                <MenuItem Header="Import C_ar Interior" Command="{Binding Path=ModelsWorkspace.ImportCarInterior}"></MenuItem>
+                <MenuItem Header="Export _Car Interior" Command="{Binding Path=ModelsWorkspace.ExportCarInteriorCommand}"></MenuItem>
+                <MenuItem Header="Import C_ar Interior" Command="{Binding Path=ModelsWorkspace.ImportCarInteriorCommand}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Schema">
-                <MenuItem Header="_Load" Command="{Binding Path=LoadSchema}"></MenuItem>
-                <MenuItem Header="_Save" Command="{Binding Path=SaveSchema}"></MenuItem>
-                <MenuItem Header="_Clear" Command="{Binding Path=ClearSchema}"></MenuItem>
+                <MenuItem Header="_Load" Command="{Binding Path=LoadSchemaCommand}"></MenuItem>
+                <MenuItem Header="_Save" Command="{Binding Path=SaveSchemaCommand}"></MenuItem>
+                <MenuItem Header="_Clear" Command="{Binding Path=ClearSchemaCommand}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_Website" Name="websiteMenuItem" Click="websiteMenuItem_Click"></MenuItem>
@@ -83,9 +86,9 @@
         </Menu>
 
 
-        <TabControl SelectedIndex="{Binding SelectedTabIndex}">
-            <TabItem Header="{Binding DisplayName}" DataContext="{Binding Path=NodesWorkspace}">
-                <Grid>
+        <TabControl SelectedIndex="{Binding SelectedTabIndex}" Padding="0">
+            <TabItem Header="{Binding NodesWorkspace.DisplayName}">
+                <Grid DataContext="{Binding NodesWorkspace}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="240" />
                         <ColumnDefinition Width="5" />
@@ -93,87 +96,48 @@
                     </Grid.ColumnDefinitions>
                     <DockPanel>
                         <TreeView Name="tvMain" ItemsSource="{Binding Path=PssgNodes}">
-                            <TreeView.ItemContainerStyle>
-                                <Style TargetType="{x:Type TreeViewItem}">
+                            <TreeView.Styles>
+                                <Style Selector="TreeViewItem" x:DataType="vm:PssgNodeViewModel">
                                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                                     <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                                    <Setter Property="FontWeight" Value="Normal" />
-                                    <Style.Triggers>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="FontWeight" Value="Bold" />
-                                        </Trigger>
-                                    </Style.Triggers>
                                 </Style>
-                            </TreeView.ItemContainerStyle>
+                            </TreeView.Styles>
                             
                             <TreeView.ItemTemplate>
-                                <HierarchicalDataTemplate ItemsSource="{Binding Path=Children}">
+                                <TreeDataTemplate ItemsSource="{Binding Path=Children}">
                                     <TextBlock Text="{Binding Path=DisplayName}"/>
-                                </HierarchicalDataTemplate>
+                                </TreeDataTemplate>
                             </TreeView.ItemTemplate>
                         </TreeView>
                     </DockPanel>
                     <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
-                    <Grid Grid.Column="2">
-                        <Grid.RowDefinitions>
-                            <RowDefinition>
-                                <RowDefinition.Style>
-                                    <Style TargetType="{x:Type RowDefinition}">
-                                        <Setter Property="Height" Value="*" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ElementName=tvMain, Path=SelectedItem.HasAttributes}" Value="False">
-                                                <Setter Property="Height" Value="0" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
+                    <UniformGrid Grid.Column="2" Columns="1">
+                        <DockPanel IsVisible="{Binding ElementName=tvMain, Path=((vm:PssgNodeViewModel)SelectedItem).HasAttributes}">
+                            <DataGrid x:Name="attributesDataGrid" ItemsSource="{Binding ElementName=tvMain, Path=((vm:PssgNodeViewModel)SelectedItem).Attributes}" AutoGenerateColumns="False" CanUserSortColumns="False" HeadersVisibility="All">
+                                <DataGrid.Styles>
+                                    <Style Selector="DataGridRow" x:DataType="vm:PssgAttributeViewModel">
+                                        <Setter Property="Header" Value="{Binding DisplayName}"></Setter>
                                     </Style>
-                                </RowDefinition.Style>
-                            </RowDefinition>
-                            <RowDefinition>
-                                <RowDefinition.Style>
-                                    <Style TargetType="{x:Type RowDefinition}">
-                                        <Setter Property="Height" Value="*" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ElementName=tvMain, Path=SelectedItem.IsDataNode}" Value="False">
-                                                <Setter Property="Height" Value="0" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </RowDefinition.Style>
-                            </RowDefinition>
-                        </Grid.RowDefinitions>
-
-                        <DockPanel>
-                            <DataGrid Name="attributesDataGrid" ItemsSource="{Binding ElementName=tvMain, Path=SelectedItem.Attributes}" AutoGenerateColumns="False" CanUserResizeRows="False" CanUserDeleteRows="False" Background="Gray">
-                                <DataGrid.RowHeaderStyle>
-                                    <Style TargetType="{x:Type DataGridRowHeader}">
-                                        <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"></Setter>
-                                        <Setter Property="BorderBrush" Value="Black"></Setter>
-                                        <Setter Property="BorderThickness" Value="0 0 1 1"></Setter>
-                                    </Style>
-                                </DataGrid.RowHeaderStyle>
+                                </DataGrid.Styles>
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Value" Width="*" Binding="{Binding Path=DisplayValue, ValidatesOnExceptions=True}"></DataGridTextColumn>
+                                    <DataGridTextColumn Header="Value" Width="*" Binding="{Binding Path=DisplayValue}"></DataGridTextColumn>
                                 </DataGrid.Columns>
-                                <DataGrid.RowHeaderTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DataGridRow}}, Path=Item.DisplayName}"/>
-                                    </DataTemplate>
-                                </DataGrid.RowHeaderTemplate>
                             </DataGrid>
                         </DockPanel>
-                        <DockPanel Grid.Row="2">
-                            <TextBox Text="{Binding ElementName=tvMain, Path=SelectedItem.DisplayValue, Mode=OneWay}" 
-                                     TextWrapping="Wrap" 
-                                     AcceptsReturn="True" 
-                                     IsReadOnly="True" 
-                                     VerticalScrollBarVisibility="Auto"
-                                     FontFamily="Consolas"></TextBox>
+                        <DockPanel Grid.Row="1" IsVisible="{Binding ElementName=tvMain, Path=((vm:PssgNodeViewModel)SelectedItem).IsDataNode}">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <TextBox Text="{Binding ElementName=tvMain, Path=((vm:PssgNodeViewModel)SelectedItem).DisplayValue, Mode=OneWay}" 
+                                         TextWrapping="Wrap" 
+                                         AcceptsReturn="True" 
+                                         IsReadOnly="True" 
+                                         FontFamily="Consolas"></TextBox>
+                            </ScrollViewer>
                         </DockPanel>
-                    </Grid>
+                    </UniformGrid>
                 </Grid>
             </TabItem>
-            <TabItem Header="{Binding DisplayName}" DataContext="{Binding Path=TexturesWorkspace}">
-                <Grid>
+            <TabItem Header="{Binding TexturesWorkspace.DisplayName}">
+                <Grid DataContext="{Binding TexturesWorkspace}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="240" />
                         <ColumnDefinition Width="5" />
@@ -181,30 +145,24 @@
                     </Grid.ColumnDefinitions>
                     <DockPanel>
                         <TextBox DockPanel.Dock="Top" Name="texSearchBox" Text="{Binding Path=FilterText, UpdateSourceTrigger=PropertyChanged}" TabIndex="1"></TextBox>
-                        <ListView Name="texListView" ItemsSource="{Binding Path=Textures}" SelectionMode="Single" TabIndex="0">
-                            <ListView.ItemContainerStyle>
-                                <Style TargetType="{x:Type ListViewItem}">
+                        <ListBox Name="texListView" ItemsSource="{Binding Path=TexturesViewSource}" SelectionMode="Single" TabIndex="0">
+                            <ListBox.Styles>
+                                <Style Selector="ListBoxItem" x:DataType="vm:PssgTextureViewModel">
                                     <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-                                    <Setter Property="FontWeight" Value="Normal" />
-                                    <Style.Triggers>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter Property="FontWeight" Value="Bold" />
-                                        </Trigger>
-                                    </Style.Triggers>
                                 </Style>
-                            </ListView.ItemContainerStyle>
+                            </ListBox.Styles>
                             
-                            <ListView.ItemTemplate>
+                            <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Path=DisplayName}"></TextBlock>
                                 </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
                     </DockPanel>
                     <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
                     <DockPanel Grid.Column="2">
                         <DockPanel.Background>
-                            <DrawingBrush Stretch="None" TileMode="Tile" Viewport="0,0,128,128" ViewportUnits="Absolute">
+                            <DrawingBrush Stretch="None" TileMode="Tile" DestinationRect="0,0,128,128">
                                 <DrawingBrush.Drawing>
                                     <DrawingGroup>
                                         <GeometryDrawing Geometry="M0,0 L128,0 128,128, 0,128Z" Brush="DarkGray"/>
@@ -214,13 +172,13 @@
                             </DrawingBrush>
                         </DockPanel.Background>
                         <Grid>
-                            <Image Source="{Binding ElementName=texListView, Path=SelectedItem.Preview}" 
-                               MaxWidth="{Binding ElementName=texListView, Path=SelectedItem.Width}" 
-                               MaxHeight="{Binding ElementName=texListView, Path=SelectedItem.Height}"></Image>
-                            <TextBlock Text="{Binding ElementName=texListView, Path=SelectedItem.PreviewError}" 
-                                   Visibility="{Binding ElementName=texListView, Path=SelectedItem.PreviewErrorVisibility}"/>
+                            <Image Source="{Binding ElementName=texListView, Path=((vm:PssgTextureViewModel)SelectedItem).Preview}" 
+                               MaxWidth="{Binding ElementName=texListView, Path=((vm:PssgTextureViewModel)SelectedItem).Width}" 
+                               MaxHeight="{Binding ElementName=texListView, Path=((vm:PssgTextureViewModel)SelectedItem).Height}"></Image>
+                            <TextBlock Text="{Binding ElementName=texListView, Path=((vm:PssgTextureViewModel)SelectedItem).PreviewError}" 
+                                   IsVisible="{Binding ElementName=texListView, Path=((vm:PssgTextureViewModel)SelectedItem).PreviewErrorVisibility}"/>
                             <StackPanel VerticalAlignment="Bottom" Background="{StaticResource imageTextBg}">
-                                <TextBlock Text="{Binding ElementName=texListView, Path=SelectedItem.TextureInfo}"
+                                <TextBlock Text="{Binding ElementName=texListView, Path=((vm:PssgTextureViewModel)SelectedItem).TextureInfo}"
                                        Foreground="Black"></TextBlock>
                             </StackPanel>
                         </Grid>
