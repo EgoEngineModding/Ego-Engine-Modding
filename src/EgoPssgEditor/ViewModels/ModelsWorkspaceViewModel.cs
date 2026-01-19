@@ -1,6 +1,6 @@
 ﻿using EgoEngineLibrary.Formats.Pssg;
 using EgoEngineLibrary.Graphics;
-using EgoPssgEditor.ViewModel;
+using EgoPssgEditor.ViewModels;
 using Microsoft.Win32;
 using SharpGLTF.Schema2;
 using System;
@@ -9,9 +9,17 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 
-namespace EgoPssgEditor.Models3d
+using Avalonia.Controls;
+using Avalonia.Platform.Storage;
+
+using CommunityToolkit.Mvvm.Input;
+
+using EgoEngineLibrary.Avalonia;
+using EgoEngineLibrary.Avalonia.MessageBox;
+
+namespace EgoPssgEditor.ViewModels
 {
-    public class ModelsWorkspaceViewModel : WorkspaceViewModel
+    public partial class ModelsWorkspaceViewModel : WorkspaceViewModel
     {
         private PssgFile _pssg;
         PssgNodeViewModel rootNode;
@@ -43,16 +51,6 @@ namespace EgoPssgEditor.Models3d
             : base(mainView)
         {
             pssgNodes = new ObservableCollection<PssgNodeViewModel>();
-
-            Export = new RelayCommand(Export_Execute, Export_CanExecute);
-            Import = new RelayCommand(Import_Execute, Import_CanExecute);
-
-            ExportDirt = new RelayCommand(ExportDirt_Execute, ExportDirt_CanExecute);
-            ImportDirt = new RelayCommand(ImportDirt_Execute, ImportDirt_CanExecute);
-            ImportGrid = new RelayCommand(ImportGrid_Execute, ImportGrid_CanExecute);
-
-            ExportCarInterior = new RelayCommand(ExportCarInterior_Execute, ExportCarInterior_CanExecute);
-            ImportCarInterior = new RelayCommand(ImportCarInterior_Execute, ImportCarInterior_CanExecute);
         }
 
         public override void LoadData(object data)
@@ -68,17 +66,8 @@ namespace EgoPssgEditor.Models3d
         }
 
         #region Menu
-        public RelayCommand Export { get; }
-        public RelayCommand Import { get; }
 
-        public RelayCommand ExportDirt { get; }
-        public RelayCommand ImportDirt { get; }
-        public RelayCommand ImportGrid { get; }
-
-        public RelayCommand ExportCarInterior { get; }
-        public RelayCommand ImportCarInterior { get; }
-
-        private bool Export_CanExecute(object parameter)
+        private bool Export_CanExecute()
         {
             try
             {
@@ -86,35 +75,39 @@ namespace EgoPssgEditor.Models3d
             }
             catch { return false; }
         }
-        private void Export_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(Export_CanExecute))]
+        private async Task ExportCar()
         {
-            SaveFileDialog dialog = new SaveFileDialog();
-            dialog.Filter = "Gltf files|*.glb;*.gltf|All files|*.*";
-            dialog.Title = "Select the model's save location and file name";
-            dialog.DefaultExt = "glb";
+            FileSaveOptions saveOptions = new()
+            {
+                FileTypeChoices = [FilePickerTypes.Gltf, FilePickerFileTypes.All],
+                Title = "Select the model's save location and file name",
+                DefaultExtension = "glb",
+            };
             if (!string.IsNullOrEmpty(mainView.FilePath))
             {
-                dialog.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
-                dialog.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+                saveOptions.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
+                saveOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
             }
 
-            if (dialog.ShowDialog() == true)
+            var result = await mainView.FileSaveInteraction.HandleAsync(saveOptions);
+            if (result is not null)
             {
                 try
                 {
                     var converter = new CarExteriorPssgGltfConverter();
                     var model = converter.Convert(_pssg);
-                    model.Save(dialog.FileName);
+                    model.Save(result);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not export the model!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not export the model!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool Import_CanExecute(object parameter)
+        private bool Import_CanExecute()
         {
             try
             {
@@ -122,22 +115,26 @@ namespace EgoPssgEditor.Models3d
             }
             catch { return false; }
         }
-        private void Import_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(Import_CanExecute))]
+        private async Task ImportCar()
         {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "Gltf files|*.glb;*.gltf|All files|*.*";
-            dialog.Title = "Select a gltf model file";
+            FileOpenOptions openOptions = new()
+            {
+                FileTypeChoices = [FilePickerTypes.Gltf, FilePickerFileTypes.All],
+                Title = "Select a gltf model file",
+            };
             if (!string.IsNullOrEmpty(mainView.FilePath))
             {
-                dialog.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
-                dialog.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+                openOptions.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
+                openOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
             }
 
-            if (dialog.ShowDialog() == true)
+            var result = await mainView.FileOpenInteraction.HandleAsync(openOptions);
+            if (result is not null)
             {
                 try
                 {
-                    var gltf = ModelRoot.Load(dialog.FileName);
+                    var gltf = ModelRoot.Load(result);
 
                     var conv = new GltfCarExteriorPssgConverter();
                     conv.Convert(gltf, _pssg);
@@ -146,13 +143,13 @@ namespace EgoPssgEditor.Models3d
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not import the model!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not import the model!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool ExportDirt_CanExecute(object parameter)
+        private bool ExportDirt_CanExecute()
         {
             try
             {
@@ -160,35 +157,39 @@ namespace EgoPssgEditor.Models3d
             }
             catch { return false; }
         }
-        private void ExportDirt_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(ExportDirt_CanExecute))]
+        private async Task ExportDirt()
         {
-            SaveFileDialog dialog = new SaveFileDialog();
-            dialog.Filter = "Gltf files|*.glb;*.gltf|All files|*.*";
-            dialog.Title = "Select the model's save location and file name";
-            dialog.DefaultExt = "glb";
+            FileSaveOptions saveOptions = new()
+            {
+                FileTypeChoices = [FilePickerTypes.Gltf, FilePickerFileTypes.All],
+                Title = "Select the model's save location and file name",
+                DefaultExtension = "glb",
+            };
             if (!string.IsNullOrEmpty(mainView.FilePath))
             {
-                dialog.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
-                dialog.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+                saveOptions.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
+                saveOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
             }
 
-            if (dialog.ShowDialog() == true)
+            var result = await mainView.FileSaveInteraction.HandleAsync(saveOptions);
+            if (result is not null)
             {
                 try
                 {
                     var converter = new DirtCarExteriorPssgGltfConverter();
                     var model = converter.Convert(_pssg);
-                    model.Save(dialog.FileName);
+                    model.Save(result);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not export the model!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not export the model!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool ImportDirt_CanExecute(object parameter)
+        private bool ImportDirt_CanExecute()
         {
             try
             {
@@ -196,22 +197,26 @@ namespace EgoPssgEditor.Models3d
             }
             catch { return false; }
         }
-        private void ImportDirt_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(ImportDirt_CanExecute))]
+        private async Task ImportDirt()
         {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "Gltf files|*.glb;*.gltf|All files|*.*";
-            dialog.Title = "Select a gltf model file";
+            FileOpenOptions openOptions = new()
+            {
+                FileTypeChoices = [FilePickerTypes.Gltf, FilePickerFileTypes.All],
+                Title = "Select a gltf model file",
+            };
             if (!string.IsNullOrEmpty(mainView.FilePath))
             {
-                dialog.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
-                dialog.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+                openOptions.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
+                openOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
             }
 
-            if (dialog.ShowDialog() == true)
+            var result = await mainView.FileOpenInteraction.HandleAsync(openOptions);
+            if (result is not null)
             {
                 try
                 {
-                    var gltf = ModelRoot.Load(dialog.FileName);
+                    var gltf = ModelRoot.Load(result);
 
                     var conv = new GltfDirtCarExteriorPssgConverter();
                     conv.Convert(gltf, _pssg);
@@ -220,13 +225,13 @@ namespace EgoPssgEditor.Models3d
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not import the model!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not import the model!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool ImportGrid_CanExecute(object parameter)
+        private bool ImportGrid_CanExecute()
         {
             try
             {
@@ -234,22 +239,26 @@ namespace EgoPssgEditor.Models3d
             }
             catch { return false; }
         }
-        private void ImportGrid_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(ImportGrid_CanExecute))]
+        private async Task ImportGrid()
         {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "Gltf files|*.glb;*.gltf|All files|*.*";
-            dialog.Title = "Select a gltf model file";
+            FileOpenOptions openOptions = new()
+            {
+                FileTypeChoices = [FilePickerTypes.Gltf, FilePickerFileTypes.All],
+                Title = "Select a gltf model file",
+            };
             if (!string.IsNullOrEmpty(mainView.FilePath))
             {
-                dialog.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
-                dialog.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+                openOptions.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
+                openOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
             }
 
-            if (dialog.ShowDialog() == true)
+            var result = await mainView.FileOpenInteraction.HandleAsync(openOptions);
+            if (result is not null)
             {
                 try
                 {
-                    var gltf = ModelRoot.Load(dialog.FileName);
+                    var gltf = ModelRoot.Load(result);
 
                     var conv = new GltfGridCarExteriorPssgConverter();
                     conv.Convert(gltf, _pssg);
@@ -258,13 +267,13 @@ namespace EgoPssgEditor.Models3d
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not import the model!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not import the model!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool ExportCarInterior_CanExecute(object parameter)
+        private bool ExportCarInterior_CanExecute()
         {
             try
             {
@@ -272,36 +281,40 @@ namespace EgoPssgEditor.Models3d
             }
             catch { return false; }
         }
-        private void ExportCarInterior_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(ExportCarInterior_CanExecute))]
+        private async Task ExportCarInterior()
         {
-            SaveFileDialog dialog = new SaveFileDialog();
-            dialog.Filter = "Gltf files|*.glb;*.gltf|All files|*.*";
-            dialog.Title = "Select the model's save location and file name";
-            dialog.DefaultExt = "glb";
+            FileSaveOptions saveOptions = new()
+            {
+                FileTypeChoices = [FilePickerTypes.Gltf, FilePickerFileTypes.All],
+                Title = "Select the model's save location and file name",
+                DefaultExtension = "glb",
+            };
             if (!string.IsNullOrEmpty(mainView.FilePath))
             {
-                dialog.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
-                dialog.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+                saveOptions.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
+                saveOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
             }
 
-            if (dialog.ShowDialog() == true)
+            var result = await mainView.FileSaveInteraction.HandleAsync(saveOptions);
+            if (result is not null)
             {
                 try
                 {
                     var converter = new CarInteriorPssgGltfConverter();
                     var model = converter.Convert(_pssg);
-                    model.Save(dialog.FileName);
+                    model.Save(result);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not export the model!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not export the model!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
 
-        private bool ImportCarInterior_CanExecute(object parameter)
+        private bool ImportCarInterior_CanExecute()
         {
             try
             {
@@ -309,22 +322,26 @@ namespace EgoPssgEditor.Models3d
             }
             catch { return false; }
         }
-        private void ImportCarInterior_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(ImportCarInterior_CanExecute))]
+        private async Task ImportCarInterior()
         {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "Gltf files|*.glb;*.gltf|All files|*.*";
-            dialog.Title = "Select a gltf model file";
+            FileOpenOptions openOptions = new()
+            {
+                FileTypeChoices = [FilePickerTypes.Gltf, FilePickerFileTypes.All],
+                Title = "Select a gltf model file",
+            };
             if (!string.IsNullOrEmpty(mainView.FilePath))
             {
-                dialog.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
-                dialog.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+                openOptions.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
+                openOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
             }
 
-            if (dialog.ShowDialog() == true)
+            var result = await mainView.FileOpenInteraction.HandleAsync(openOptions);
+            if (result is not null)
             {
                 try
                 {
-                    var gltf = ModelRoot.Load(dialog.FileName);
+                    var gltf = ModelRoot.Load(result);
 
                     var conv = new GltfCarInteriorPssgConverter();
                     conv.Convert(gltf, _pssg);
@@ -333,7 +350,7 @@ namespace EgoPssgEditor.Models3d
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not import the model!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not import the model!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }

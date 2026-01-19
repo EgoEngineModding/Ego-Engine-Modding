@@ -6,10 +6,12 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
-namespace EgoPssgEditor.ViewModel
+using Avalonia;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+
+namespace EgoPssgEditor.ViewModels
 {
     public class PssgTextureViewModel : ViewModelBase
     {
@@ -41,9 +43,9 @@ namespace EgoPssgEditor.ViewModel
 
         #region Presentation Props
         bool isSelected;
-        BitmapSource preview;
+        Bitmap preview;
         string previewError;
-        Visibility previewErrorVisibility;
+        bool previewErrorVisibility;
 
         public bool IsSelected
         {
@@ -66,7 +68,7 @@ namespace EgoPssgEditor.ViewModel
                 }
             }
         }
-        public BitmapSource Preview
+        public Bitmap Preview
         {
             get { return preview; }
             set { preview = value; OnPropertyChanged(nameof(Preview)); }
@@ -76,7 +78,7 @@ namespace EgoPssgEditor.ViewModel
             get { return previewError; }
             set { previewError = value; OnPropertyChanged(nameof(PreviewError)); }
         }
-        public Visibility PreviewErrorVisibility
+        public bool PreviewErrorVisibility
         {
             get { return previewErrorVisibility; }
             set { previewErrorVisibility = value; OnPropertyChanged(nameof(PreviewErrorVisibility)); }
@@ -110,22 +112,36 @@ namespace EgoPssgEditor.ViewModel
                 var decoder = new BcDecoder();
                 if (decoder.IsHdrFormat(bcDds))
                 {
-                    var pixels = new byte[width * height * 3];
-                    var pixelsSpan = MemoryMarshal.Cast<byte, Bgr24>(pixels.AsSpan());
-                    decoder.DecodeDdsToPixels(bcDds, pixelsSpan);
-                    var bmSource = BitmapSource.Create(width, height, 96.0, 96.0, PixelFormats.Bgr24, null, pixels, width * 3);
+                    var bmSource = new WriteableBitmap(new PixelSize(width, height), new Vector(96, 96),
+                        PixelFormats.Bgr24);
+                    using (var frameBuffer = bmSource.Lock())
+                    {
+                        unsafe
+                        {
+                            var pixelsSpan = new Span<Bgr24>(frameBuffer.Address.ToPointer(), width * height * 3);
+                            decoder.DecodeDdsToPixels(bcDds, pixelsSpan);
+                        }
+                    }
+                    
                     Preview = bmSource;
                 }
                 else
                 {
-                    var pixels = new byte[width * height * 4];
-                    var pixelsSpan = MemoryMarshal.Cast<byte, Bgra32>(pixels.AsSpan());
-                    decoder.DecodeDdsToPixels(bcDds, pixelsSpan);
-                    var bmSource = BitmapSource.Create(width, height, 96.0, 96.0, PixelFormats.Bgra32, null, pixels, width * 4);
+                    var bmSource = new WriteableBitmap(new PixelSize(width, height), new Vector(96, 96),
+                        PixelFormats.Bgra8888, AlphaFormat.Unpremul);
+                    using (var frameBuffer = bmSource.Lock())
+                    {
+                        unsafe
+                        {
+                            var pixelsSpan = new Span<Bgra32>(frameBuffer.Address.ToPointer(), width * height * 4);
+                            decoder.DecodeDdsToPixels(bcDds, pixelsSpan);
+                        }
+                    }
+
                     Preview = bmSource;
                 }
 
-                PreviewErrorVisibility = Visibility.Collapsed;
+                PreviewErrorVisibility = false;
                 OnPropertyChanged(nameof(Width));
                 OnPropertyChanged(nameof(Height));
                 OnPropertyChanged(nameof(TextureInfo));
@@ -137,7 +153,7 @@ namespace EgoPssgEditor.ViewModel
                     PreviewError = "Could not create preview! Export/Import may still work." + Environment.NewLine + Environment.NewLine + ex.Message;
                 else
                     PreviewError = "Could not create preview! Failed to convert pssg texture to dds." + Environment.NewLine + Environment.NewLine + ex.Message;
-                PreviewErrorVisibility = Visibility.Visible;
+                PreviewErrorVisibility = true;
             }
         }
     }

@@ -12,11 +12,19 @@ using System.Windows;
 using System.Xml;
 using System.Xml.Linq;
 
+using Avalonia.Platform.Storage;
+
+using CommunityToolkit.Mvvm.Input;
+
+using EgoEngineLibrary.Avalonia;
+using EgoEngineLibrary.Avalonia.MessageBox;
 using EgoEngineLibrary.Conversion;
 
-namespace EgoPssgEditor.ViewModel
+using EgoPssgEditor.Views;
+
+namespace EgoPssgEditor.ViewModels
 {
-    public class NodesWorkspaceViewModel : WorkspaceViewModel
+    public partial class NodesWorkspaceViewModel : WorkspaceViewModel
     {
         #region Data
         PssgNodeViewModel rootNode;
@@ -52,18 +60,6 @@ namespace EgoPssgEditor.ViewModel
             : base(mainView)
         {
             pssgNodes = new ObservableCollection<PssgNodeViewModel>();
-
-            export = new RelayCommand(Export_Execute, Export_CanExecute);
-            import = new RelayCommand(Import_Execute, Import_CanExecute);
-            exportData = new RelayCommand(ExportData_Execute, ExportData_CanExecute);
-            importData = new RelayCommand(ImportData_Execute, ImportData_CanExecute);
-
-            addNode = new RelayCommand(AddNode_Execute, AddNode_CanExecute);
-            removeNode = new RelayCommand(RemoveNode_Execute, RemoveNode_CanExecute);
-            CloneNode = new RelayCommand(CloneNode_Execute, CloneNode_CanExecute);
-
-            addAttribute = new RelayCommand(AddAttribute_Execute, AddAttribute_CanExecute);
-            removeAttribute = new RelayCommand(RemoveAttribute_Execute, RemoveAttribute_CanExecute);
         }
 
         public override void LoadData(object data)
@@ -79,65 +75,25 @@ namespace EgoPssgEditor.ViewModel
         }
 
         #region Menu
-        readonly RelayCommand export;
-        readonly RelayCommand import;
-        readonly RelayCommand exportData;
-        readonly RelayCommand importData;
-
-        readonly RelayCommand addNode;
-        readonly RelayCommand removeNode;
-        readonly RelayCommand addAttribute;
-        readonly RelayCommand removeAttribute;
-
-        public RelayCommand Export
-        {
-            get { return export; }
-        }
-        public RelayCommand Import
-        {
-            get { return import; }
-        }
-        public RelayCommand ExportData
-        {
-            get { return exportData; }
-        }
-        public RelayCommand ImportData
-        {
-            get { return importData; }
-        }
-
-        public RelayCommand AddNode
-        {
-            get { return addNode; }
-        }
-        public RelayCommand RemoveNode
-        {
-            get { return removeNode; }
-        }
-        public RelayCommand CloneNode { get; }
-
-        public RelayCommand AddAttribute
-        {
-            get { return addAttribute; }
-        }
-        public RelayCommand RemoveAttribute
-        {
-            get { return removeAttribute; }
-        }
 
         private bool Export_CanExecute(object parameter)
         {
             return parameter != null;
         }
-        private void Export_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(Export_CanExecute))]
+        private async Task Export(object parameter)
         {
             PssgNode node = ((PssgNodeViewModel)parameter).Node;
-            SaveFileDialog dialog = new SaveFileDialog();
-            dialog.Filter = "Xml files|*.xml|All files|*.*";
-            dialog.Title = "Select the node's save location and file name";
-            dialog.DefaultExt = "xml";
-            dialog.FileName = "node.xml";
-            if (dialog.ShowDialog() == true)
+            FileSaveOptions saveOptions = new()
+            {
+                FileTypeChoices = [FilePickerFileTypes.Xml, FilePickerFileTypes.All],
+                Title = "Select the node's save location and file name",
+                DefaultExtension = "xml",
+                FileName = "node.xml",
+            };
+
+            var result = await mainView.FileSaveInteraction.HandleAsync(saveOptions);
+            if (result is not null)
             {
                 try
                 {
@@ -153,14 +109,14 @@ namespace EgoPssgEditor.ViewModel
                     XElement pssg = (XElement)xDoc.FirstNode;
                     node.WriteXml(pssg);
 
-                    using (XmlWriter writer = XmlWriter.Create(File.Open(dialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read), settings))
+                    using (XmlWriter writer = XmlWriter.Create(File.Open(result, FileMode.Create, FileAccess.Write, FileShare.Read), settings))
                     {
                         xDoc.Save(writer);
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not export the node!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not export the node!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, "Export Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -169,19 +125,24 @@ namespace EgoPssgEditor.ViewModel
         {
             return parameter != null;
         }
-        private void Import_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(Import_CanExecute))]
+        private async Task Import(object parameter)
         {
             PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "Xml files|*.xml|All files|*.*";
-            dialog.Title = "Select a xml file";
-            dialog.FileName = "node.xml";
-            if (dialog.ShowDialog() == true)
+            FileOpenOptions openOptions = new()
+            {
+                FileTypeChoices = [FilePickerFileTypes.Xml, FilePickerFileTypes.All],
+                Title = "Select a xml file",
+                FileName = "node.xml",
+            };
+
+            var result = await mainView.FileOpenInteraction.HandleAsync(openOptions);
+            if (result is not null)
             {
                 try
                 {
                     PssgNode node = nodeView.Node;
-                    using (FileStream fileStream = File.Open(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (FileStream fileStream = File.Open(result, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
                         XDocument xDoc = XDocument.Load(fileStream);
 
@@ -207,7 +168,7 @@ namespace EgoPssgEditor.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not import the node!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not import the node!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -219,20 +180,25 @@ namespace EgoPssgEditor.ViewModel
 
             return ((PssgNodeViewModel)parameter).IsDataNode;
         }
-        private void ExportData_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(ExportData_CanExecute))]
+        private async Task ExportData(object parameter)
         {
             PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
-            SaveFileDialog dialog = new SaveFileDialog();
-            dialog.Filter = "Bin files|*.bin|All files|*.*";
-            dialog.Title = "Select the byte data save location and file name";
-            dialog.DefaultExt = "bin";
-            dialog.FileName = "nodeData.bin";
-            if (dialog.ShowDialog() == true)
+            FileSaveOptions saveOptions = new()
+            {
+                FileTypeChoices = [FilePickerTypes.Bin, FilePickerFileTypes.All],
+                Title = "Select the byte data save location and file name",
+                DefaultExtension = "bin",
+                FileName = "nodeData.bin",
+            };
+
+            var result = await mainView.FileSaveInteraction.HandleAsync(saveOptions);
+            if (result is not null)
             {
                 try
                 {
                     PssgNode node = nodeView.Node;
-                    using (var fs = File.Open(dialog.FileName, FileMode.Create))
+                    using (var fs = File.Open(result, FileMode.Create))
                     using (PssgBinaryWriter writer = new PssgBinaryWriter(EndianBitConverter.Big, fs, false))
                     {
                         writer.WriteObject(node.Value);
@@ -240,7 +206,7 @@ namespace EgoPssgEditor.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not export data!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not export data!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, "Export Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -251,19 +217,24 @@ namespace EgoPssgEditor.ViewModel
 
             return ((PssgNodeViewModel)parameter).IsDataNode;
         }
-        private void ImportData_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(ImportData_CanExecute))]
+        private async Task ImportData(object parameter)
         {
             PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "Bin files|*.bin|All files|*.*";
-            dialog.Title = "Select a bin file";
-            dialog.FileName = "nodeData.bin";
-            if (dialog.ShowDialog() == true)
+            FileOpenOptions openOptions = new()
+            {
+                FileTypeChoices = [FilePickerTypes.Bin, FilePickerFileTypes.All],
+                Title = "Select a bin file",
+                FileName = "nodeData.bin",
+            };
+
+            var result = await mainView.FileOpenInteraction.HandleAsync(openOptions);
+            if (result is not null)
             {
                 try
                 {
                     PssgNode node = nodeView.Node;
-                    using (var fs = File.Open(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (var fs = File.Open(result, FileMode.Open, FileAccess.Read, FileShare.Read))
                     using (PssgBinaryReader reader = new PssgBinaryReader(EndianBitConverter.Big, fs, false))
                     {
                         node.Value = reader.ReadNodeValue((int)reader.BaseStream.Length);
@@ -273,7 +244,7 @@ namespace EgoPssgEditor.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not import data!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not import data!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -283,17 +254,18 @@ namespace EgoPssgEditor.ViewModel
         {
             return parameter != null;
         }
-        private void AddNode_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(AddNode_CanExecute))]
+        private async Task AddNode(object parameter)
         {
             PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
             if (nodeView.Node.IsDataNode)
             {
-                MessageBox.Show("Adding sub nodes to a node with data is not allowed!", Properties.Resources.AppTitleShort, MessageBoxButton.OK, MessageBoxImage.Stop);
+                await MessageBox.Show("Adding sub nodes to a node with data is not allowed!", Properties.Resources.AppTitleShort, MessageBoxButton.OK, MessageBoxImage.Stop);
                 return;
             }
 
             AddNodeWindow aaw = new AddNodeWindow();
-            if (aaw.ShowDialog() == true)
+            if (await aaw.ShowDialog<bool>() == true)
             {
                 PssgNode newNode = nodeView.Node.AppendChild(aaw.NodeName);
 
@@ -310,7 +282,8 @@ namespace EgoPssgEditor.ViewModel
         {
             return parameter != null && parameter != RootNode;
         }
-        private void RemoveNode_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(RemoveNode_CanExecute))]
+        private void RemoveNode(object parameter)
         {
             PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
             nodeView.Node.ParentNode.RemoveChild(nodeView.Node);
@@ -322,7 +295,8 @@ namespace EgoPssgEditor.ViewModel
         {
             return parameter != null && parameter != RootNode;
         }
-        private void CloneNode_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(CloneNode_CanExecute))]
+        private async Task CloneNode(object parameter)
         {
             try
             {
@@ -341,7 +315,7 @@ namespace EgoPssgEditor.ViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Could not clone node!" + Environment.NewLine + Environment.NewLine +
+                await MessageBox.Show("Could not clone node!" + Environment.NewLine + Environment.NewLine +
                     ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -350,12 +324,13 @@ namespace EgoPssgEditor.ViewModel
         {
             return parameter != null;
         }
-        private void AddAttribute_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(AddAttribute_CanExecute))]
+        private async Task AddAttribute(object parameter)
         {
             PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
             AddAttributeWindow aaw = new AddAttributeWindow();
 
-            if (aaw.ShowDialog() == true)
+            if (await aaw.ShowDialog<bool>() == true)
             {
                 PssgAttribute attr = nodeView.Node.AddAttribute(aaw.AttributeName, Convert.ChangeType(aaw.Value, aaw.AttributeValueType));
                 if (attr == null)
@@ -371,7 +346,8 @@ namespace EgoPssgEditor.ViewModel
         {
             return parameter != null;
         }
-        private void RemoveAttribute_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(RemoveAttribute_CanExecute))]
+        private void RemoveAttribute(object parameter)
         {
             PssgAttributeViewModel attrView = (PssgAttributeViewModel)parameter;
 

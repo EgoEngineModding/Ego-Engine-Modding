@@ -1,19 +1,9 @@
 ﻿using EgoEngineLibrary.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
-namespace EgoPssgEditor
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+
+namespace EgoPssgEditor.Views
 {
     /// <summary>
     /// Interaction logic for AddAttributeWindow.xaml
@@ -46,11 +36,11 @@ namespace EgoPssgEditor
             try
             {
                 Convert.ChangeType(Value, AttributeValueType);
-                this.DialogResult = true;
+                Close(true);
             }
             catch
             {
-                this.DialogResult = null;
+                Close(null);
             }
         }
 

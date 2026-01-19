@@ -4,16 +4,27 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Data;
 
-namespace EgoPssgEditor.ViewModel
+using ActiproSoftware.UI.Avalonia.Data;
+
+using Avalonia.Platform.Storage;
+
+using CommunityToolkit.Mvvm.Input;
+
+using EgoEngineLibrary.Avalonia;
+using EgoEngineLibrary.Avalonia.MessageBox;
+
+using EgoPssgEditor.Views;
+
+namespace EgoPssgEditor.ViewModels
 {
-    public class TexturesWorkspaceViewModel : WorkspaceViewModel
+    public partial class TexturesWorkspaceViewModel : WorkspaceViewModel
     {
         #region Data
         readonly ObservableCollection<PssgTextureViewModel> textures;
@@ -30,8 +41,10 @@ namespace EgoPssgEditor.ViewModel
         #endregion
 
         #region Presentation Data
-        readonly CollectionView texturesViewSource;
+        readonly CollectionView<PssgTextureViewModel> texturesViewSource;
         string filterText;
+        
+        public ICollectionView<PssgTextureViewModel> TexturesViewSource => texturesViewSource;
 
         public string FilterText
         {
@@ -51,16 +64,9 @@ namespace EgoPssgEditor.ViewModel
             : base(mainView)
         {
             textures = new ObservableCollection<PssgTextureViewModel>();
-            texturesViewSource = (CollectionView)CollectionViewSource.GetDefaultView(Textures);
+            texturesViewSource = new CollectionView<PssgTextureViewModel>(Textures);
             texturesViewSource.Filter += TextureFilter;
-            texturesViewSource.SortDescriptions.Add(new System.ComponentModel.SortDescription(nameof(DisplayName), System.ComponentModel.ListSortDirection.Ascending));
-
-            export = new RelayCommand(Export_Execute, Export_CanExecute);
-            import = new RelayCommand(Import_Execute, Import_CanExecute);
-            exportTextures = new RelayCommand(ExportTextures_Execute, ExportTextures_CanExecute);
-            importTextures = new RelayCommand(ImportTextures_Execute, ImportTextures_CanExecute);
-            duplicateTexture = new RelayCommand(DuplicateTexture_Execute, DuplicateTexture_CanExecute);
-            removeTextureC = new RelayCommand(RemoveTextureC_Execute, RemoveTextureC_CanExecute);
+            texturesViewSource.SortDescriptions.Add(new SortDescription<PssgTextureViewModel>(x => x.DisplayName));
         }
 
         public override void LoadData(object data)
@@ -121,60 +127,34 @@ namespace EgoPssgEditor.ViewModel
         }
 
         #region Menu
-        readonly RelayCommand export;
-        readonly RelayCommand import;
-        readonly RelayCommand exportTextures;
-        readonly RelayCommand importTextures;
-        readonly RelayCommand duplicateTexture;
-        readonly RelayCommand removeTextureC;
-
-        public RelayCommand Export
-        {
-            get { return export; }
-        }
-        public RelayCommand Import
-        {
-            get { return import; }
-        }
-        public RelayCommand ExportTextures
-        {
-            get { return exportTextures; }
-        }
-        public RelayCommand ImportTextures
-        {
-            get { return importTextures; }
-        }
-        public RelayCommand DuplicateTexture
-        {
-            get { return duplicateTexture; }
-        }
-        public RelayCommand RemoveTextureC
-        {
-            get { return removeTextureC; }
-        }
 
         private bool Export_CanExecute(object parameter)
         {
             return parameter != null;
         }
-        private void Export_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(Export_CanExecute))]
+        private async Task Export(object parameter)
         {
             PssgNode node = ((PssgTextureViewModel)parameter).Texture;
-            SaveFileDialog dialog = new SaveFileDialog();
-            dialog.Filter = "Dds files|*.dds|All files|*.*";
-            dialog.Title = "Select the dds save location and file name";
-            dialog.FileName = node.Attributes["id"].DisplayValue + ".dds";
-            if (dialog.ShowDialog() == true)
+            FileSaveOptions saveOptions = new()
+            {
+                FileTypeChoices = [FilePickerTypes.Dds, FilePickerFileTypes.All],
+                Title = "Select the dds save location and file name",
+                FileName = node.Attributes["id"].DisplayValue + ".dds",
+            };
+
+            var result = await mainView.FileSaveInteraction.HandleAsync(saveOptions);
+            if (result is not null)
             {
                 try
                 {
                     DdsFile dds = node.ToDdsFile(false);
-                    using (var fs = File.Open(dialog.FileName, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
+                    using (var fs = File.Open(result, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                         dds.Write(fs, -1);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not export texture!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not export texture!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, "Export Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -183,35 +163,41 @@ namespace EgoPssgEditor.ViewModel
         {
             return parameter != null;
         }
-        private void Import_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(Import_CanExecute))]
+        private async Task Import(object parameter)
         {
             PssgTextureViewModel texView = (PssgTextureViewModel)parameter;
             PssgNode node = texView.Texture;
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.Filter = "Dds files|*.dds|All files|*.*";
-            dialog.Title = "Select a dds file";
-            dialog.FileName = node.Attributes["id"].DisplayValue + ".dds";
-            if (dialog.ShowDialog() == true)
+            FileOpenOptions openOptions = new()
+            {
+                FileTypeChoices = [FilePickerTypes.Dds, FilePickerFileTypes.All],
+                Title = "Select a dds file",
+                FileName = node.Attributes["id"].DisplayValue + ".dds",
+            };
+
+            var result = await mainView.FileOpenInteraction.HandleAsync(openOptions);
+            if (result is not null)
             {
                 try
                 {
-                    DdsFile dds = new DdsFile(File.Open(dialog.FileName, FileMode.Open));
+                    DdsFile dds = new DdsFile(File.Open(result, FileMode.Open));
                     dds.ToPssgNode(node);
                     texView.GetPreview();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not import texture!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not import texture!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool ExportTextures_CanExecute(object parameter)
+        private bool ExportTextures_CanExecute()
         {
             return Textures.Count > 0;
         }
-        private void ExportTextures_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(ExportTextures_CanExecute))]
+        private async Task ExportTextures()
         {
             try
             {
@@ -225,18 +211,19 @@ namespace EgoPssgEditor.ViewModel
                     using (var fs = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                         dds.Write(fs, -1);
                 }
-                MessageBox.Show("Textures exported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                await MessageBox.Show("Textures exported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch
             {
-                MessageBox.Show("There was an error, could not export all textures!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                await MessageBox.Show("There was an error, could not export all textures!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        private bool ImportTextures_CanExecute(object parameter)
+        private bool ImportTextures_CanExecute()
         {
             return Textures.Count > 0;
         }
-        private void ImportTextures_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(ImportTextures_CanExecute))]
+        private async Task ImportTextures()
         {
             try
             {
@@ -261,29 +248,30 @@ namespace EgoPssgEditor.ViewModel
                         }
                     }
 
-                    MessageBox.Show("Textures imported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    await MessageBox.Show("Textures imported successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    MessageBox.Show("Could not find textures folder!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    await MessageBox.Show("Could not find textures folder!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch
             {
-                MessageBox.Show("There was an error, could not import all textures!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                await MessageBox.Show("There was an error, could not import all textures!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         private bool DuplicateTexture_CanExecute(object parameter)
         {
             return parameter != null;
         }
-        private void DuplicateTexture_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(DuplicateTexture_CanExecute))]
+        private async Task DuplicateTexture(object parameter)
         {
             PssgTextureViewModel texView = (PssgTextureViewModel)parameter;
             DuplicateTextureWindow dtw = new DuplicateTextureWindow();
             dtw.TextureName = texView.DisplayName + "_2";
 
-            if (dtw.ShowDialog() == true)
+            if (await dtw.ShowDialog<bool>() == true)
             {
                 // Copy and Edit Name
                 PssgNode nodeToCopy = texView.Texture;
@@ -311,7 +299,8 @@ namespace EgoPssgEditor.ViewModel
         {
             return parameter != null && ((PssgTextureViewModel)parameter).Texture != mainView.PssgFile.RootNode;
         }
-        private void RemoveTextureC_Execute(object parameter)
+        [RelayCommand(CanExecute = nameof(RemoveTextureC_CanExecute))]
+        private void RemoveTextureC(object parameter)
         {
             PssgTextureViewModel texView = (PssgTextureViewModel)parameter;
 

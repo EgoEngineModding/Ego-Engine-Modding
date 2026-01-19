@@ -1,11 +1,10 @@
-﻿<Window x:Class="EgoPssgEditor.AddNodeWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<Window x:Class="EgoPssgEditor.Views.DuplicateTextureWindow"
+        xmlns="https://github.com/avaloniaui" 
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EgoPssgEditor"
         mc:Ignorable="d"
-        Title="Add Node" Height="150" Width="300" WindowStyle="ToolWindow" ResizeMode="NoResize">
+        Title="Duplicate Texture" Height="150" Width="300" CanResize="False" CanMinimize="False">
     <DockPanel>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Height="40" HorizontalAlignment="Right">
             <Button Name="okButton" Margin="10" Width="50" Click="okButton_Click">Ok</Button>
@@ -23,7 +22,7 @@
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="1" Grid.Column="1">
                 <Label>Attribute Name</Label>
-                <ComboBox Name="nodeNameComboBox" IsEditable="True"></ComboBox>
+                <TextBox Name="textureNameTextBox"></TextBox>
             </StackPanel>
         </Grid>
     </DockPanel>

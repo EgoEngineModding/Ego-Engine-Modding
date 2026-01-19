@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EgoPssgEditor.ViewModel
+namespace EgoPssgEditor.ViewModels
 {
     public abstract class WorkspaceViewModel : ViewModelBase
     {
