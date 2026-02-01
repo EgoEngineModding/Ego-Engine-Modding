@@ -1,26 +1,17 @@
 ﻿using EgoEngineLibrary.Graphics;
-using Microsoft.Win32;
 
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Xml;
 using System.Xml.Linq;
 
-using Avalonia.Platform.Storage;
-
 using CommunityToolkit.Mvvm.Input;
 
-using EgoEngineLibrary.Avalonia;
-using EgoEngineLibrary.Avalonia.MessageBox;
 using EgoEngineLibrary.Conversion;
+using EgoEngineLibrary.Frontend.Dialogs.File;
+using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 
-using EgoPssgEditor.Views;
+using EgoPssgEditor.Dialogs.Pssg;
 
 namespace EgoPssgEditor.ViewModels
 {
@@ -86,13 +77,13 @@ namespace EgoPssgEditor.ViewModels
             PssgNode node = ((PssgNodeViewModel)parameter).Node;
             FileSaveOptions saveOptions = new()
             {
-                FileTypeChoices = [FilePickerFileTypes.Xml, FilePickerFileTypes.All],
+                FileTypeChoices = [FilePickerType.Xml, FilePickerType.All],
                 Title = "Select the node's save location and file name",
                 DefaultExtension = "xml",
                 FileName = "node.xml",
             };
 
-            var result = await mainView.FileSaveInteraction.HandleAsync(saveOptions);
+            var result = await FileDialog.ShowSaveFileDialog(saveOptions);
             if (result is not null)
             {
                 try
@@ -131,18 +122,18 @@ namespace EgoPssgEditor.ViewModels
             PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
             FileOpenOptions openOptions = new()
             {
-                FileTypeChoices = [FilePickerFileTypes.Xml, FilePickerFileTypes.All],
+                FileTypeChoices = [FilePickerType.Xml, FilePickerType.All],
                 Title = "Select a xml file",
                 FileName = "node.xml",
             };
 
-            var result = await mainView.FileOpenInteraction.HandleAsync(openOptions);
-            if (result is not null)
+            var result = await FileDialog.ShowOpenFileDialog(openOptions);
+            if (result.Count > 0)
             {
                 try
                 {
                     PssgNode node = nodeView.Node;
-                    using (FileStream fileStream = File.Open(result, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (FileStream fileStream = File.Open(result[0], FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
                         XDocument xDoc = XDocument.Load(fileStream);
 
@@ -186,13 +177,13 @@ namespace EgoPssgEditor.ViewModels
             PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
             FileSaveOptions saveOptions = new()
             {
-                FileTypeChoices = [FilePickerTypes.Bin, FilePickerFileTypes.All],
+                FileTypeChoices = [FilePickerType.Bin, FilePickerType.All],
                 Title = "Select the byte data save location and file name",
                 DefaultExtension = "bin",
                 FileName = "nodeData.bin",
             };
 
-            var result = await mainView.FileSaveInteraction.HandleAsync(saveOptions);
+            var result = await FileDialog.ShowSaveFileDialog(saveOptions);
             if (result is not null)
             {
                 try
@@ -223,18 +214,18 @@ namespace EgoPssgEditor.ViewModels
             PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
             FileOpenOptions openOptions = new()
             {
-                FileTypeChoices = [FilePickerTypes.Bin, FilePickerFileTypes.All],
+                FileTypeChoices = [FilePickerType.Bin, FilePickerType.All],
                 Title = "Select a bin file",
                 FileName = "nodeData.bin",
             };
 
-            var result = await mainView.FileOpenInteraction.HandleAsync(openOptions);
-            if (result is not null)
+            var result = await FileDialog.ShowOpenFileDialog(openOptions);
+            if (result.Count > 0)
             {
                 try
                 {
                     PssgNode node = nodeView.Node;
-                    using (var fs = File.Open(result, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (var fs = File.Open(result[0], FileMode.Open, FileAccess.Read, FileShare.Read))
                     using (PssgBinaryReader reader = new PssgBinaryReader(EndianBitConverter.Big, fs, false))
                     {
                         node.Value = reader.ReadNodeValue((int)reader.BaseStream.Length);
@@ -264,10 +255,10 @@ namespace EgoPssgEditor.ViewModels
                 return;
             }
 
-            AddNodeWindow aaw = new AddNodeWindow();
-            if (await aaw.ShowDialog<bool>() == true)
+            var nodeName = await PssgDialog.ShowAddNodeDialog();
+            if (nodeName is not null)
             {
-                PssgNode newNode = nodeView.Node.AppendChild(aaw.NodeName);
+                PssgNode newNode = nodeView.Node.AppendChild(nodeName);
 
                 if (newNode == null)
                 {
@@ -328,11 +319,10 @@ namespace EgoPssgEditor.ViewModels
         private async Task AddAttribute(object parameter)
         {
             PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
-            AddAttributeWindow aaw = new AddAttributeWindow();
-
-            if (await aaw.ShowDialog<bool>() == true)
+            var res = await PssgDialog.ShowAddAttributeDialog();
+            if (res is not null)
             {
-                PssgAttribute attr = nodeView.Node.AddAttribute(aaw.AttributeName, Convert.ChangeType(aaw.Value, aaw.AttributeValueType));
+                PssgAttribute attr = nodeView.Node.AddAttribute(res.Name, Convert.ChangeType(res.Value, res.Type));
                 if (attr == null)
                 {
                     return;

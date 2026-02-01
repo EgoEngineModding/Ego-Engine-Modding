@@ -1,21 +1,14 @@
 ﻿using EgoEngineLibrary.Formats.Pssg;
 using EgoEngineLibrary.Graphics;
-using EgoPssgEditor.ViewModels;
-using Microsoft.Win32;
-using SharpGLTF.Schema2;
-using System;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Windows;
 
-using Avalonia.Controls;
-using Avalonia.Platform.Storage;
+using SharpGLTF.Schema2;
+
+using System.Collections.ObjectModel;
 
 using CommunityToolkit.Mvvm.Input;
 
-using EgoEngineLibrary.Avalonia;
-using EgoEngineLibrary.Avalonia.MessageBox;
+using EgoEngineLibrary.Frontend.Dialogs.File;
+using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 
 namespace EgoPssgEditor.ViewModels
 {
@@ -80,7 +73,7 @@ namespace EgoPssgEditor.ViewModels
         {
             FileSaveOptions saveOptions = new()
             {
-                FileTypeChoices = [FilePickerTypes.Gltf, FilePickerFileTypes.All],
+                FileTypeChoices = [FilePickerType.Gltf, FilePickerType.All],
                 Title = "Select the model's save location and file name",
                 DefaultExtension = "glb",
             };
@@ -90,7 +83,7 @@ namespace EgoPssgEditor.ViewModels
                 saveOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
             }
 
-            var result = await mainView.FileSaveInteraction.HandleAsync(saveOptions);
+            var result = await FileDialog.ShowSaveFileDialog(saveOptions);
             if (result is not null)
             {
                 try
@@ -120,7 +113,7 @@ namespace EgoPssgEditor.ViewModels
         {
             FileOpenOptions openOptions = new()
             {
-                FileTypeChoices = [FilePickerTypes.Gltf, FilePickerFileTypes.All],
+                FileTypeChoices = [FilePickerType.Gltf, FilePickerType.All],
                 Title = "Select a gltf model file",
             };
             if (!string.IsNullOrEmpty(mainView.FilePath))
@@ -129,12 +122,12 @@ namespace EgoPssgEditor.ViewModels
                 openOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
             }
 
-            var result = await mainView.FileOpenInteraction.HandleAsync(openOptions);
-            if (result is not null)
+            var result = await FileDialog.ShowOpenFileDialog(openOptions);
+            if (result.Count > 0)
             {
                 try
                 {
-                    var gltf = ModelRoot.Load(result);
+                    var gltf = ModelRoot.Load(result[0]);
 
                     var conv = new GltfCarExteriorPssgConverter();
                     conv.Convert(gltf, _pssg);
@@ -162,7 +155,7 @@ namespace EgoPssgEditor.ViewModels
         {
             FileSaveOptions saveOptions = new()
             {
-                FileTypeChoices = [FilePickerTypes.Gltf, FilePickerFileTypes.All],
+                FileTypeChoices = [FilePickerType.Gltf, FilePickerType.All],
                 Title = "Select the model's save location and file name",
                 DefaultExtension = "glb",
             };
@@ -172,7 +165,7 @@ namespace EgoPssgEditor.ViewModels
                 saveOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
             }
 
-            var result = await mainView.FileSaveInteraction.HandleAsync(saveOptions);
+            var result = await FileDialog.ShowSaveFileDialog(saveOptions);
             if (result is not null)
             {
                 try
@@ -202,7 +195,7 @@ namespace EgoPssgEditor.ViewModels
         {
             FileOpenOptions openOptions = new()
             {
-                FileTypeChoices = [FilePickerTypes.Gltf, FilePickerFileTypes.All],
+                FileTypeChoices = [FilePickerType.Gltf, FilePickerType.All],
                 Title = "Select a gltf model file",
             };
             if (!string.IsNullOrEmpty(mainView.FilePath))
@@ -211,12 +204,12 @@ namespace EgoPssgEditor.ViewModels
                 openOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
             }
 
-            var result = await mainView.FileOpenInteraction.HandleAsync(openOptions);
-            if (result is not null)
+            var result = await FileDialog.ShowOpenFileDialog(openOptions);
+            if (result.Count > 0)
             {
                 try
                 {
-                    var gltf = ModelRoot.Load(result);
+                    var gltf = ModelRoot.Load(result[0]);
 
                     var conv = new GltfDirtCarExteriorPssgConverter();
                     conv.Convert(gltf, _pssg);
@@ -244,7 +237,7 @@ namespace EgoPssgEditor.ViewModels
         {
             FileOpenOptions openOptions = new()
             {
-                FileTypeChoices = [FilePickerTypes.Gltf, FilePickerFileTypes.All],
+                FileTypeChoices = [FilePickerType.Gltf, FilePickerType.All],
                 Title = "Select a gltf model file",
             };
             if (!string.IsNullOrEmpty(mainView.FilePath))
@@ -253,12 +246,12 @@ namespace EgoPssgEditor.ViewModels
                 openOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
             }
 
-            var result = await mainView.FileOpenInteraction.HandleAsync(openOptions);
-            if (result is not null)
+            var result = await FileDialog.ShowOpenFileDialog(openOptions);
+            if (result.Count > 0)
             {
                 try
                 {
-                    var gltf = ModelRoot.Load(result);
+                    var gltf = ModelRoot.Load(result[0]);
 
                     var conv = new GltfGridCarExteriorPssgConverter();
                     conv.Convert(gltf, _pssg);
@@ -286,7 +279,7 @@ namespace EgoPssgEditor.ViewModels
         {
             FileSaveOptions saveOptions = new()
             {
-                FileTypeChoices = [FilePickerTypes.Gltf, FilePickerFileTypes.All],
+                FileTypeChoices = [FilePickerType.Gltf, FilePickerType.All],
                 Title = "Select the model's save location and file name",
                 DefaultExtension = "glb",
             };
@@ -296,7 +289,7 @@ namespace EgoPssgEditor.ViewModels
                 saveOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
             }
 
-            var result = await mainView.FileSaveInteraction.HandleAsync(saveOptions);
+            var result = await FileDialog.ShowSaveFileDialog(saveOptions);
             if (result is not null)
             {
                 try
@@ -327,7 +320,7 @@ namespace EgoPssgEditor.ViewModels
         {
             FileOpenOptions openOptions = new()
             {
-                FileTypeChoices = [FilePickerTypes.Gltf, FilePickerFileTypes.All],
+                FileTypeChoices = [FilePickerType.Gltf, FilePickerType.All],
                 Title = "Select a gltf model file",
             };
             if (!string.IsNullOrEmpty(mainView.FilePath))
@@ -336,12 +329,12 @@ namespace EgoPssgEditor.ViewModels
                 openOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
             }
 
-            var result = await mainView.FileOpenInteraction.HandleAsync(openOptions);
-            if (result is not null)
+            var result = await FileDialog.ShowOpenFileDialog(openOptions);
+            if (result.Count > 0)
             {
                 try
                 {
-                    var gltf = ModelRoot.Load(result);
+                    var gltf = ModelRoot.Load(result[0]);
 
                     var conv = new GltfCarInteriorPssgConverter();
                     conv.Convert(gltf, _pssg);

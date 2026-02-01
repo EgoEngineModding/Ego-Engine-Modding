@@ -1,26 +1,16 @@
 ﻿using EgoEngineLibrary.Graphics;
 using EgoEngineLibrary.Graphics.Dds;
-using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
+
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 using ActiproSoftware.UI.Avalonia.Data;
 
-using Avalonia.Platform.Storage;
-
 using CommunityToolkit.Mvvm.Input;
 
-using EgoEngineLibrary.Avalonia;
-using EgoEngineLibrary.Avalonia.MessageBox;
+using EgoEngineLibrary.Frontend.Dialogs.File;
+using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 
-using EgoPssgEditor.Views;
+using EgoPssgEditor.Dialogs.Pssg;
 
 namespace EgoPssgEditor.ViewModels
 {
@@ -138,12 +128,12 @@ namespace EgoPssgEditor.ViewModels
             PssgNode node = ((PssgTextureViewModel)parameter).Texture;
             FileSaveOptions saveOptions = new()
             {
-                FileTypeChoices = [FilePickerTypes.Dds, FilePickerFileTypes.All],
+                FileTypeChoices = [FilePickerType.Dds, FilePickerType.All],
                 Title = "Select the dds save location and file name",
                 FileName = node.Attributes["id"].DisplayValue + ".dds",
             };
 
-            var result = await mainView.FileSaveInteraction.HandleAsync(saveOptions);
+            var result = await FileDialog.ShowSaveFileDialog(saveOptions);
             if (result is not null)
             {
                 try
@@ -170,17 +160,17 @@ namespace EgoPssgEditor.ViewModels
             PssgNode node = texView.Texture;
             FileOpenOptions openOptions = new()
             {
-                FileTypeChoices = [FilePickerTypes.Dds, FilePickerFileTypes.All],
+                FileTypeChoices = [FilePickerType.Dds, FilePickerType.All],
                 Title = "Select a dds file",
                 FileName = node.Attributes["id"].DisplayValue + ".dds",
             };
 
-            var result = await mainView.FileOpenInteraction.HandleAsync(openOptions);
-            if (result is not null)
+            var result = await FileDialog.ShowOpenFileDialog(openOptions);
+            if (result.Count > 0)
             {
                 try
                 {
-                    DdsFile dds = new DdsFile(File.Open(result, FileMode.Open));
+                    DdsFile dds = new DdsFile(File.Open(result[0], FileMode.Open));
                     dds.ToPssgNode(node);
                     texView.GetPreview();
                 }
@@ -268,15 +258,17 @@ namespace EgoPssgEditor.ViewModels
         private async Task DuplicateTexture(object parameter)
         {
             PssgTextureViewModel texView = (PssgTextureViewModel)parameter;
-            DuplicateTextureWindow dtw = new DuplicateTextureWindow();
-            dtw.TextureName = texView.DisplayName + "_2";
+            var dtVm = new DuplicateTextureViewModel
+            {
+                TextureName = texView.DisplayName + "_2"
+            };
 
-            if (await dtw.ShowDialog<bool>() == true)
+            if (await PssgDialog.ShowDuplicateTextureDialog(dtVm))
             {
                 // Copy and Edit Name
                 PssgNode nodeToCopy = texView.Texture;
                 PssgNode newTexture = new PssgNode(nodeToCopy);
-                newTexture.Attributes["id"].Value = dtw.TextureName;
+                newTexture.Attributes["id"].Value = dtVm.TextureName;
 
                 // Add to Library
                 if (nodeToCopy.ParentNode != null)

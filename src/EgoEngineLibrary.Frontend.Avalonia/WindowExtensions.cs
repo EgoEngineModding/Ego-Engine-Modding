@@ -2,9 +2,9 @@
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 
-namespace EgoEngineLibrary.Avalonia;
+namespace EgoEngineLibrary.Frontend;
 
-public static class DialogExtensions
+public static class WindowExtensions
 {
     public static Task ShowDialog(this Window window)
     {

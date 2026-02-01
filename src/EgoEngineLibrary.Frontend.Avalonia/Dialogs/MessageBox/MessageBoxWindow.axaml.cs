@@ -2,7 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 
-namespace EgoEngineLibrary.Avalonia.MessageBox;
+namespace EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 
 internal partial class MessageBoxWindow : Window
 {

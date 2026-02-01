@@ -1,4 +1,4 @@
-﻿namespace EgoEngineLibrary.Avalonia.MessageBox;
+﻿namespace EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 
 /// <summary>Specifies which message box button that a user clicks.</summary>
 public enum MessageBoxResult

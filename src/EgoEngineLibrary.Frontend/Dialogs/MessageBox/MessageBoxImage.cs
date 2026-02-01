@@ -1,4 +1,4 @@
-﻿namespace EgoEngineLibrary.Avalonia.MessageBox;
+﻿namespace EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 
 /// <summary>Specifies the icon that is displayed by a message box.</summary>
 public enum MessageBoxImage

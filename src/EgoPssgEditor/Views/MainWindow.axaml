@@ -126,11 +126,9 @@
                         </DockPanel>
                         <DockPanel Grid.Row="1" IsVisible="{Binding ElementName=tvMain, Path=((vm:PssgNodeViewModel)SelectedItem).IsDataNode}">
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                <TextBox Text="{Binding ElementName=tvMain, Path=((vm:PssgNodeViewModel)SelectedItem).DisplayValue, Mode=OneWay}" 
+                                <SelectableTextBlock Text="{Binding ElementName=tvMain, Path=((vm:PssgNodeViewModel)SelectedItem).DisplayValue, Mode=OneWay}" 
                                          TextWrapping="Wrap" 
-                                         AcceptsReturn="True" 
-                                         IsReadOnly="True" 
-                                         FontFamily="Consolas"></TextBox>
+                                         FontFamily="Consolas"></SelectableTextBlock>
                             </ScrollViewer>
                         </DockPanel>
                     </UniformGrid>

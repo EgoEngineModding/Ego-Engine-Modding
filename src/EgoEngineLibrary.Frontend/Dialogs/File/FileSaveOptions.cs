@@ -1,4 +1,4 @@
-﻿namespace EgoEngineLibrary.Avalonia;
+﻿namespace EgoEngineLibrary.Frontend.Dialogs.File;
 
 public record FileSaveOptions : FilePickerOptions
 {

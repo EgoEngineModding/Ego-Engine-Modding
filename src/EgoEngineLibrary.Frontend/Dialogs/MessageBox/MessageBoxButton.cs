@@ -1,4 +1,4 @@
-﻿namespace EgoEngineLibrary.Avalonia.MessageBox;
+﻿namespace EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 
 /// <summary>Specifies the buttons that are displayed on a message box.</summary>
 public enum MessageBoxButton

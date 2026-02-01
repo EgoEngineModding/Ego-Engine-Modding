@@ -1,20 +1,9 @@
 using EgoEngineLibrary.Graphics;
-using Microsoft.Win32;
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using System.Windows;
 
-using Avalonia.Controls;
-using Avalonia.Platform.Storage;
-
-using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 
-using EgoEngineLibrary.Avalonia;
-using EgoEngineLibrary.Avalonia.MessageBox;
-
-using EgoPssgEditor.Models;
+using EgoEngineLibrary.Frontend.Dialogs.File;
+using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 
 namespace EgoPssgEditor.ViewModels
 {
@@ -75,9 +64,6 @@ namespace EgoPssgEditor.ViewModels
         }
         #endregion
 
-        public Interaction<FileOpenOptions, string?> FileOpenInteraction { get; } = new();
-        public Interaction<FileSaveOptions, string?> FileSaveInteraction { get; } = new();
-
 
         public MainViewModel()
         {
@@ -132,8 +118,8 @@ namespace EgoPssgEditor.ViewModels
             FileOpenOptions openOptions = new()
             {
                 Title = "Open pssg",
-                FileTypeChoices = [FilePickerTypes.Pssg, FilePickerFileTypes.Xml, FilePickerFileTypes.All],
-                SuggestedFileType = FilePickerTypes.Pssg,
+                FileTypeChoices = [FilePickerType.Pssg, FilePickerType.Xml, FilePickerType.All],
+                SuggestedFileType = FilePickerType.Pssg,
             };
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -141,12 +127,12 @@ namespace EgoPssgEditor.ViewModels
                 openOptions.InitialDirectory = Path.GetDirectoryName(filePath);
             }
 
-            var result = await FileOpenInteraction.HandleAsync(openOptions);
-            if (result is not null)
+            var result = await FileDialog.ShowOpenFileDialog(openOptions);
+            if (result.Count > 0)
             {
                 try
                 {
-                    filePath = result;
+                    filePath = result[0];
                     using (var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
                         var pssg = PssgFile.Open(fs);
@@ -225,20 +211,20 @@ namespace EgoPssgEditor.ViewModels
             FileSaveOptions saveOptions = new()
             {
                 Title = "Save pssg",
-                FileTypeChoices = [FilePickerTypes.Pssg, FilePickerFileTypes.Xml, FilePickerFileTypes.All],
+                FileTypeChoices = [FilePickerType.Pssg, FilePickerType.Xml, FilePickerType.All],
                 SuggestedFileType = type switch
                 {
-                    PssgFileType.Pssg => FilePickerTypes.Pssg,
-                    PssgFileType.Xml => FilePickerFileTypes.Xml,
-                    PssgFileType.CompressedPssg => FilePickerTypes.Pssg,
-                    PssgFileType.CompressedXml => FilePickerFileTypes.Xml,
+                    PssgFileType.Pssg => FilePickerType.Pssg,
+                    PssgFileType.Xml => FilePickerType.Xml,
+                    PssgFileType.CompressedPssg => FilePickerType.Pssg,
+                    PssgFileType.CompressedXml => FilePickerType.Xml,
                     _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
                 },
             };
             saveOptions.FileName = Path.GetFileNameWithoutExtension(filePath);
             saveOptions.InitialDirectory = Path.GetDirectoryName(filePath);
 
-            var result = await FileSaveInteraction.HandleAsync(saveOptions);
+            var result = await FileDialog.ShowSaveFileDialog(saveOptions);
             if (result is not null)
             {
                 SaveTag();

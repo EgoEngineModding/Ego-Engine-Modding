@@ -1,11 +1,7 @@
 ﻿using BCnEncoder.Decoder;
 using EgoEngineLibrary.Graphics;
-using SixLabors.ImageSharp;
+
 using SixLabors.ImageSharp.PixelFormats;
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Windows;
 
 using Avalonia;
 using Avalonia.Media.Imaging;

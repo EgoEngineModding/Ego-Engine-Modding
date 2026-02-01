@@ -33,15 +33,13 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  
+
   <ItemGroup>
-    <Resource Include="Assets\disk.png" />
-    <Resource Include="Assets\folder_image.png" />
-    <Resource Include="Assets\image_add.png" />
+    <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\EgoEngineLibrary.Avalonia\EgoEngineLibrary.Avalonia.csproj" />
+    <ProjectReference Include="..\EgoEngineLibrary.Frontend.Avalonia\EgoEngineLibrary.Frontend.Avalonia.csproj" />
     <ProjectReference Include="..\EgoEngineLibrary\EgoEngineLibrary.csproj" />
   </ItemGroup>
 
@@ -58,10 +56,6 @@
         <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
 
   <ItemGroup>

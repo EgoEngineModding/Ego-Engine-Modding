@@ -11,7 +11,8 @@
   <Folder Name="/src/">
     <Project Path="src/EgoCtfEditor/EgoCtfEditor.csproj" />
     <Project Path="src/EgoDatabaseEditor/EgoDatabaseEditor.csproj" />
-    <Project Path="src/EgoEngineLibrary.Avalonia/EgoEngineLibrary.Avalonia.csproj" />
+    <Project Path="src/EgoEngineLibrary.Frontend.Avalonia/EgoEngineLibrary.Frontend.Avalonia.csproj" />
+    <Project Path="src/EgoEngineLibrary.Frontend/EgoEngineLibrary.Frontend.csproj" />
     <Project Path="src/EgoEngineLibrary/EgoEngineLibrary.csproj" />
     <Project Path="src/EgoErpArchiver/EgoErpArchiver.csproj" />
     <Project Path="src/EgoErpArchiverConsole/EgoErpArchiverConsole.csproj" />

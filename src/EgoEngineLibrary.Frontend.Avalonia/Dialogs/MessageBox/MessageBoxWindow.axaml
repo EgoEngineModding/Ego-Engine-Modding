@@ -3,7 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="640" d:DesignHeight="480"
-        x:Class="EgoEngineLibrary.Avalonia.MessageBox.MessageBoxWindow"
+        x:Class="EgoEngineLibrary.Frontend.Dialogs.MessageBox.MessageBoxWindow"
         Title="MessageBoxWindow" CanResize="False" CanMinimize="False" ShowInTaskbar="false"
         SizeToContent="WidthAndHeight" Padding="10" WindowStartupLocation="CenterOwner">
     <Window.Resources>

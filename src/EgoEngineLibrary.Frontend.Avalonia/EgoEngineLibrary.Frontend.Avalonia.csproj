@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+      <RootNamespace>EgoEngineLibrary.Frontend</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EgoEngineLibrary.Frontend\EgoEngineLibrary.Frontend.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="Dialogs\MessageBox\MessageBoxWindow.axaml" />
+  </ItemGroup>
+
+</Project>
