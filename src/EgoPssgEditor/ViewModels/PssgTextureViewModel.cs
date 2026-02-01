@@ -58,7 +58,9 @@ namespace EgoPssgEditor.ViewModels
                     }
                     else 
                     {
+                        Preview?.Dispose();
                         Preview = null;
+                        NodeView.IsSelected = false;
                     }
                     OnPropertyChanged(nameof(IsSelected));
                 }
@@ -91,6 +93,7 @@ namespace EgoPssgEditor.ViewModels
             var ddsReadSuccess = false;
             try
             {
+                Preview?.Dispose();
                 Preview = null;
                 BCnEncoder.Shared.ImageFiles.DdsFile bcDds;
                 using (var ms = new MemoryStream())
@@ -144,6 +147,7 @@ namespace EgoPssgEditor.ViewModels
             }
             catch (Exception ex)
             {
+                Preview?.Dispose();
                 Preview = null;
                 if (ddsReadSuccess)
                     PreviewError = "Could not create preview! Export/Import may still work." + Environment.NewLine + Environment.NewLine + ex.Message;

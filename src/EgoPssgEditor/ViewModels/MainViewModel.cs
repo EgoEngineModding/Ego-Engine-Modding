@@ -68,7 +68,7 @@ namespace EgoPssgEditor.ViewModels
         public MainViewModel()
         {
             this.DisplayName = Properties.Resources.AppTitleLong;
-            schemaPath = AppDomain.CurrentDomain.BaseDirectory + "\\schema.xml";
+            schemaPath = Path.Combine(AppContext.BaseDirectory, "schema.xml");
 
             nodesWorkspace = new NodesWorkspaceViewModel(this);
             texturesWorkspace = new TexturesWorkspaceViewModel(this);

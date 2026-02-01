@@ -63,10 +63,6 @@ namespace EgoPssgEditor.ViewModels
         {
             ClearData();
             LoadTextures((PssgNodeViewModel)data);
-            //foreach (PssgNode texture in file.RootNode.FindNodes("TEXTURE", "id"))
-            //{
-            //    textures.Add(new PssgTextureViewModel(texture));
-            //}
         }
         public void LoadTextures(PssgNodeViewModel nodeView)
         {
@@ -197,7 +193,7 @@ namespace EgoPssgEditor.ViewModels
                 foreach (PssgTextureViewModel texView in Textures)
                 {
                     dds = texView.Texture.ToDdsFile(false);
-                    string filePath = texDir + "\\" + texView.Texture.Attributes["id"].DisplayValue + ".dds";
+                    string filePath = Path.Combine(texDir, texView.Texture.Attributes["id"].DisplayValue + ".dds");
                     using (var fs = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                         dds.Write(fs, -1);
                 }

@@ -6,8 +6,8 @@
         mc:Ignorable="d"
         Title="Duplicate Texture" Height="150" Width="300" CanResize="False" CanMinimize="False">
     <DockPanel>
-        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Height="40" HorizontalAlignment="Right">
-            <Button Name="okButton" Margin="10" Width="50" Click="okButton_Click">Ok</Button>
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Name="okButton" Margin="10" IsDefault="True" Click="okButton_Click">Ok</Button>
         </StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>

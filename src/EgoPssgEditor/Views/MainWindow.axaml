@@ -113,7 +113,10 @@
                     <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
                     <UniformGrid Grid.Column="2" Columns="1">
                         <DockPanel IsVisible="{Binding ElementName=tvMain, Path=((vm:PssgNodeViewModel)SelectedItem).HasAttributes}">
-                            <DataGrid x:Name="attributesDataGrid" ItemsSource="{Binding ElementName=tvMain, Path=((vm:PssgNodeViewModel)SelectedItem).Attributes}" AutoGenerateColumns="False" CanUserSortColumns="False" HeadersVisibility="All">
+                            <DataGrid x:Name="attributesDataGrid"
+                                      ItemsSource="{Binding ElementName=tvMain, Path=((vm:PssgNodeViewModel)SelectedItem).Attributes}"
+                                      AutoGenerateColumns="False" CanUserSortColumns="False"
+                                      HeadersVisibility="All" RowHeight="20" FontSize="14">
                                 <DataGrid.Styles>
                                     <Style Selector="DataGridRow" x:DataType="vm:PssgAttributeViewModel">
                                         <Setter Property="Header" Value="{Binding DisplayName}"></Setter>

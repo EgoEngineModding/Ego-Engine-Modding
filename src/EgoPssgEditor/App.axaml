@@ -10,5 +10,9 @@
     <Application.Styles>
         <FluentTheme DensityStyle="Compact" />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        <!-- See https://github.com/AvaloniaUI/Avalonia/issues/20530 -->
+        <Style Selector="TreeViewItem /template/ StackPanel > Border > Grid">
+            <Setter Property="HorizontalAlignment" Value="Left"></Setter>
+        </Style>
     </Application.Styles>
 </Application>
