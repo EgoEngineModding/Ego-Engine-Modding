@@ -1,7 +1,8 @@
-﻿using EgoEngineLibrary.Archive.Erp;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 
-namespace EgoErpArchiver.ViewModel
+using EgoEngineLibrary.Archive.Erp;
+
+namespace EgoErpArchiver.ViewModels
 {
     public class ErpResourceViewModel : TreeNodeViewModel
     {

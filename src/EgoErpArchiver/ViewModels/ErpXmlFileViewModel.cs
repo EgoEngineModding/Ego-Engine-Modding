@@ -1,11 +1,10 @@
-﻿using EgoEngineLibrary.Archive.Erp;
+﻿using System.Text;
+
+using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Formats.Erp;
 using EgoEngineLibrary.Xml;
-using System;
-using System.IO;
-using System.Text;
 
-namespace EgoErpArchiver.ViewModel
+namespace EgoErpArchiver.ViewModels
 {
     public class ErpXmlFileViewModel : ViewModelBase
     {
@@ -31,7 +30,7 @@ namespace EgoErpArchiver.ViewModel
                         GetPreview();
                         resView.Select();
                     }
-                    else preview = string.Empty;
+                    else Preview = string.Empty;
                     OnPropertyChanged(nameof(IsSelected));
                 }
             }

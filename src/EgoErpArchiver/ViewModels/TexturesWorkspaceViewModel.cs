@@ -1,13 +1,16 @@
-﻿using Microsoft.Win32;
-using System;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Data;
+﻿using System.Collections.ObjectModel;
+using System.Windows.Input;
 
-namespace EgoErpArchiver.ViewModel
+using ActiproSoftware.UI.Avalonia.Data;
+
+using CommunityToolkit.Mvvm.Input;
+
+using EgoEngineLibrary.Frontend.Dialogs.File;
+using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
+
+using EgoErpArchiver.Dialogs.Erp;
+
+namespace EgoErpArchiver.ViewModels
 {
     public class TexturesWorkspaceViewModel : WorkspaceViewModel
     {
@@ -28,7 +31,7 @@ namespace EgoErpArchiver.ViewModel
             }
         }
 
-        private readonly CollectionView texturesViewSource;
+        private readonly CollectionView<ErpTextureViewModel> texturesViewSource;
         private string filterText;
         public string FilterText
         {
@@ -43,23 +46,23 @@ namespace EgoErpArchiver.ViewModel
             }
         }
 
-        public RelayCommand Export { get; }
-        public RelayCommand Import { get; }
-        public RelayCommand ExportTextures { get; }
-        public RelayCommand ImportTextures { get; }
+        public ICommand Export { get; }
+        public ICommand Import { get; }
+        public ICommand ExportTextures { get; }
+        public ICommand ImportTextures { get; }
 
         public TexturesWorkspaceViewModel(MainViewModel mainView)
             : base(mainView)
         {
             textures = new ObservableCollection<ErpTextureViewModel>();
             _displayName = "Textures";
-            texturesViewSource = (CollectionView)CollectionViewSource.GetDefaultView(Textures);
+            texturesViewSource = new CollectionView<ErpTextureViewModel>(Textures);
             texturesViewSource.Filter += TextureFilter;
 
-            Export = new RelayCommand(Export_Execute, Export_CanExecute);
-            Import = new RelayCommand(Import_Execute, Import_CanExecute);
-            ExportTextures = new RelayCommand(ExportTextures_Execute, ExportTextures_CanExecute);
-            ImportTextures = new RelayCommand(ImportTextures_Execute, ImportTextures_CanExecute);
+            Export = new AsyncRelayCommand<ErpTextureViewModel>(Export_Execute, Export_CanExecute);
+            Import = new AsyncRelayCommand<ErpTextureViewModel>(Import_Execute, Import_CanExecute);
+            ExportTextures = new AsyncRelayCommand(ExportTextures_Execute, ExportTextures_CanExecute);
+            ImportTextures = new AsyncRelayCommand(ImportTextures_Execute, ImportTextures_CanExecute);
         }
 
         public override void LoadData(object data)
@@ -86,71 +89,73 @@ namespace EgoErpArchiver.ViewModel
                 || (item as ErpTextureViewModel).DisplayName.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
         }
 
-        private bool Export_CanExecute(object parameter)
+        private bool Export_CanExecute(ErpTextureViewModel? parameter)
         {
             return parameter != null;
         }
 
-        private void Export_Execute(object parameter)
+        private async Task Export_Execute(ErpTextureViewModel? texView)
         {
-            var texView = (ErpTextureViewModel)parameter;
-            var dialog = new SaveFileDialog
+            ArgumentNullException.ThrowIfNull(texView);
+            var dialog = new FileSaveOptions
             {
-                Filter = "Dds files|*.dds|All files|*.*",
+                FileTypeChoices = [FilePickerType.Dds, FilePickerType.All],
                 Title = "Select the dds save location and file name",
                 FileName = texView.DisplayName.Replace("?", "%3F") + ".dds"
             };
 
-            if (dialog.ShowDialog() == true)
+            var res = await FileDialog.ShowSaveFileDialog(dialog);
+            if (res is not null)
             {
                 try
                 {
-                    texView.ExportDDS(dialog.FileName, false, false);
+                    await texView.ExportDDS(res, false, false);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not export texture!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not export texture!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool Import_CanExecute(object parameter)
+        private bool Import_CanExecute(ErpTextureViewModel? parameter)
         {
             return parameter != null;
         }
 
-        private void Import_Execute(object parameter)
+        private async Task Import_Execute(ErpTextureViewModel? texView)
         {
-            var texView = (ErpTextureViewModel)parameter;
-            var dialog = new OpenFileDialog
+            ArgumentNullException.ThrowIfNull(texView);
+            var dialog = new FileOpenOptions
             {
-                Filter = "Dds files|*.dds|All files|*.*",
+                FileTypeChoices = [FilePickerType.Dds, FilePickerType.All],
                 Title = "Select a dds file",
                 FileName = texView.DisplayName.Replace("?", "%3F") + ".dds"
             };
 
-            if (dialog.ShowDialog() == true)
+            var res = await FileDialog.ShowOpenFileDialog(dialog);
+            if (res.Count > 0)
             {
                 try
                 {
-                    texView.ImportDDS(dialog.FileName, null, false);
+                    await texView.ImportDDS(res[0], null, false);
                     texView.GetPreview();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not import texture!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not import texture!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool ExportTextures_CanExecute(object parameter)
+        private bool ExportTextures_CanExecute()
         {
             return Textures.Count > 0;
         }
 
-        private void ExportTextures_Execute(object parameter)
+        private async Task ExportTextures_Execute()
         {
             try
             {
@@ -160,12 +165,8 @@ namespace EgoErpArchiver.ViewModel
                 {
                     PercentageMax = Textures.Count
                 };
-                var progDialog = new View.ProgressDialog
-                {
-                    DataContext = progDialogVM
-                };
 
-                var task = Task.Run(() =>
+                var task = Task.Run(async () =>
                 {
                     var outputFolderPath = mainView.FilePath.Replace(".", "_") + "_textures";
                     Directory.CreateDirectory(outputFolderPath);
@@ -181,7 +182,7 @@ namespace EgoErpArchiver.ViewModel
                         try
                         {
                             Directory.CreateDirectory(folderPath);
-                            textures[i].ExportDDS(filePath, true, true);
+                            await textures[i].ExportDDS(filePath, true, true);
                             progDialogVM.ProgressStatus.Report("SUCCESS" + Environment.NewLine);
                             ++success;
                         }
@@ -197,21 +198,21 @@ namespace EgoErpArchiver.ViewModel
                     progDialogVM.ProgressStatus.Report(string.Format("{0} Succeeded, {1} Failed", success, fail));
                 });
 
-                progDialog.ShowDialog();
-                task.Wait();
+                await ErpDialog.ShowProgressDialog(progDialogVM);
+                await task;
             }
             catch
             {
-                MessageBox.Show("There was an error, could not export all textures!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                await MessageBox.Show("There was an error, could not export all textures!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private bool ImportTextures_CanExecute(object parameter)
+        private bool ImportTextures_CanExecute()
         {
             return Textures.Count > 0;
         }
 
-        private void ImportTextures_Execute(object parameter)
+        private async Task ImportTextures_Execute()
         {
             try
             {
@@ -228,12 +229,8 @@ namespace EgoErpArchiver.ViewModel
                     {
                         PercentageMax = Textures.Count
                     };
-                    var progDialog = new View.ProgressDialog
-                    {
-                        DataContext = progDialogVM
-                    };
 
-                    var task = Task.Run(() =>
+                    var task = Task.Run(async () =>
                     {
                         for (var i = 0; i < textures.Count;)
                         {
@@ -251,7 +248,7 @@ namespace EgoErpArchiver.ViewModel
                                     {
                                         var mipMapSaveLocation = filePath.Replace(directory, mipMapDirectory) + ".mipmaps";
                                         Directory.CreateDirectory(Path.GetDirectoryName(mipMapSaveLocation));
-                                        textures[i].ImportDDS(filePath, mipMapSaveLocation, true);
+                                        await textures[i].ImportDDS(filePath, mipMapSaveLocation, true);
                                         if (textures[i].IsSelected)
                                         {
                                             textures[i].GetPreview();
@@ -284,17 +281,17 @@ namespace EgoErpArchiver.ViewModel
                         progDialogVM.ProgressStatus.Report(string.Format("{0} Succeeded, {1} Skipped, {2} Failed", success, skip, fail));
                     });
 
-                    progDialog.ShowDialog();
-                    task.Wait();
+                    await ErpDialog.ShowProgressDialog(progDialogVM);
+                    await task;
                 }
                 else
                 {
-                    MessageBox.Show("Could not find textures folder!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    await MessageBox.Show("Could not find textures folder!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch
             {
-                MessageBox.Show("There was an error, could not import all textures!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                await MessageBox.Show("There was an error, could not import all textures!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

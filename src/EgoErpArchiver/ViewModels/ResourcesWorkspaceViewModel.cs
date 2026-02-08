@@ -1,13 +1,16 @@
-﻿using EgoEngineLibrary.Archive.Erp;
-using EgoEngineLibrary.Formats.Erp;
-using Ookii.Dialogs.Wpf;
-using System;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Collections.ObjectModel;
+using System.Windows.Input;
 
-namespace EgoErpArchiver.ViewModel
+using CommunityToolkit.Mvvm.Input;
+
+using EgoEngineLibrary.Archive.Erp;
+using EgoEngineLibrary.Formats.Erp;
+using EgoEngineLibrary.Frontend.Dialogs.File;
+using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
+
+using EgoErpArchiver.Dialogs.Erp;
+
+namespace EgoErpArchiver.ViewModels
 {
     public class ResourcesWorkspaceViewModel : WorkspaceViewModel
     {
@@ -44,10 +47,10 @@ namespace EgoErpArchiver.ViewModel
             }
         }
 
-        public RelayCommand Export { get; }
-        public RelayCommand Import { get; }
-        public RelayCommand ExportAll { get; }
-        public RelayCommand ImportAll { get; }
+        public ICommand Export { get; }
+        public ICommand Import { get; }
+        public ICommand ExportAll { get; }
+        public ICommand ImportAll { get; }
 
         public ResourcesWorkspaceViewModel(MainViewModel mainView)
             : base(mainView)
@@ -56,10 +59,10 @@ namespace EgoErpArchiver.ViewModel
             resources = new ObservableCollection<ErpResourceViewModel>();
             _displayName = "All Resources";
 
-            Export = new RelayCommand(Export_Execute, Export_CanExecute);
-            Import = new RelayCommand(Import_Execute, Import_CanExecute);
-            ExportAll = new RelayCommand(ExportAll_Execute, ExportAll_CanExecute);
-            ImportAll = new RelayCommand(ImportAll_Execute, ImportAll_CanExecute);
+            Export = new AsyncRelayCommand<ErpResourceViewModel>(Export_Execute, Export_CanExecute);
+            Import = new AsyncRelayCommand<ErpResourceViewModel>(Import_Execute, Import_CanExecute);
+            ExportAll = new AsyncRelayCommand(ExportAll_Execute, ExportAll_CanExecute);
+            ImportAll = new AsyncRelayCommand(ImportAll_Execute, ImportAll_CanExecute);
         }
 
         public override void LoadData(object data)
@@ -76,78 +79,81 @@ namespace EgoErpArchiver.ViewModel
             resources.Clear();
         }
 
-        private bool Export_CanExecute(object parameter)
+        private bool Export_CanExecute(ErpResourceViewModel? parameter)
         {
             return parameter != null;
         }
 
-        private void Export_Execute(object parameter)
+        private async Task Export_Execute(ErpResourceViewModel? resView)
         {
-            var resView = (ErpResourceViewModel)parameter;
-            var dlg = new VistaFolderBrowserDialog
+            ArgumentNullException.ThrowIfNull(resView);
+            var dlg = new FolderOpenOptions
             {
-                Description = "Select a folder to export the resource:",
-                Multiselect = false
+                Title = "Select a folder to export the resource:",
+                AllowMultiple = false
             };
 
-            if (dlg.ShowDialog() == true)
+            var res = await FileDialog.ShowOpenFolderDialog(dlg);
+            if (res.Count > 0)
             {
                 try
                 {
-                    resourceExporter.ExportResource(resView.Resource, dlg.SelectedPath);
+                    resourceExporter.ExportResource(resView.Resource, res[0]);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed Exporting!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Failed Exporting!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool Import_CanExecute(object parameter)
+        private bool Import_CanExecute(ErpResourceViewModel? parameter)
         {
             return parameter != null;
         }
 
-        private void Import_Execute(object parameter)
+        private async Task Import_Execute(ErpResourceViewModel? resView)
         {
-            var resView = (ErpResourceViewModel)parameter;
-            var dlg = new VistaFolderBrowserDialog
+            ArgumentNullException.ThrowIfNull(resView);
+            var dlg = new FolderOpenOptions
             {
-                Description = "Select a folder to import the resource from:",
-                Multiselect = false
+                Title = "Select a folder to import the resource from:",
+                AllowMultiple = false
             };
 
-            if (dlg.ShowDialog() == true)
+            var res = await FileDialog.ShowOpenFolderDialog(dlg);
+            if (res.Count > 0)
             {
                 try
                 {
-                    var files = Directory.GetFiles(dlg.SelectedPath, "*", SearchOption.AllDirectories);
+                    var files = Directory.GetFiles(res[0], "*", SearchOption.AllDirectories);
                     resourceExporter.ImportResource(resView.Resource, files);
                     resView.UpdateSize();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed Importing!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Failed Importing!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool ExportAll_CanExecute(object parameter)
+        private bool ExportAll_CanExecute()
         {
             return resources.Count > 0;
         }
 
-        private void ExportAll_Execute(object parameter)
+        private async Task ExportAll_Execute()
         {
-            var dlg = new VistaFolderBrowserDialog
+            var dlg = new FolderOpenOptions
             {
-                Description = "Select a folder to export the resources:",
-                Multiselect = false
+                Title = "Select a folder to export the resources:",
+                AllowMultiple = false
             };
 
-            if (dlg.ShowDialog() == true)
+            var res = await FileDialog.ShowOpenFolderDialog(dlg);
+            if (res.Count > 0)
             {
                 try
                 {
@@ -155,37 +161,34 @@ namespace EgoErpArchiver.ViewModel
                     {
                         PercentageMax = mainView.ErpFile.Resources.Count
                     };
-                    var progDialog = new View.ProgressDialog
-                    {
-                        DataContext = progDialogVM
-                    };
 
-                    var task = Task.Run(() => resourceExporter.Export(mainView.ErpFile, dlg.SelectedPath, progDialogVM.ProgressStatus, progDialogVM.ProgressPercentage));
-                    progDialog.ShowDialog();
-                    task.Wait();
+                    var task = Task.Run(() => resourceExporter.Export(mainView.ErpFile, res[0], progDialogVM.ProgressStatus, progDialogVM.ProgressPercentage));
+                    await ErpDialog.ShowProgressDialog(progDialogVM);
+                    await task;
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed Exporting!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Failed Exporting!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool ImportAll_CanExecute(object parameter)
+        private bool ImportAll_CanExecute()
         {
             return resources.Count > 0;
         }
 
-        private void ImportAll_Execute(object parameter)
+        private async Task ImportAll_Execute()
         {
-            var dlg = new VistaFolderBrowserDialog
+            var dlg = new FolderOpenOptions
             {
-                Description = "Select a folder to import the resources from:",
-                Multiselect = false
+                Title = "Select a folder to import the resources from:",
+                AllowMultiple = false
             };
 
-            if (dlg.ShowDialog() == true)
+            var res = await FileDialog.ShowOpenFolderDialog(dlg);
+            if (res.Count > 0)
             {
                 try
                 {
@@ -193,15 +196,11 @@ namespace EgoErpArchiver.ViewModel
                     {
                         PercentageMax = mainView.ErpFile.Resources.Count
                     };
-                    var progDialog = new View.ProgressDialog
-                    {
-                        DataContext = progDialogVM
-                    };
 
-                    var files = Directory.GetFiles(dlg.SelectedPath, "*", SearchOption.AllDirectories);
+                    var files = Directory.GetFiles(res[0], "*", SearchOption.AllDirectories);
                     var task = Task.Run(() => resourceExporter.Import(mainView.ErpFile, files, progDialogVM.ProgressStatus, progDialogVM.ProgressPercentage));
-                    progDialog.ShowDialog();
-                    task.Wait();
+                    await ErpDialog.ShowProgressDialog(progDialogVM);
+                    await task;
 
                     foreach (var child in resources)
                     {
@@ -210,7 +209,7 @@ namespace EgoErpArchiver.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Failed Importing!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Failed Importing!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }

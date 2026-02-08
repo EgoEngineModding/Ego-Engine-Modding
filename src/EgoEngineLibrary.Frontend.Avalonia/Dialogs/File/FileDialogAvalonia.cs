@@ -12,12 +12,14 @@ public static class FileDialogAvalonia
     {
         FileDialog.Messenger.Register<Visual, FileOpenMessage>(recipient, FileOpenHandler);
         FileDialog.Messenger.Register<Visual, FileSaveMessage>(recipient, FileSaveHandler);
+        FileDialog.Messenger.Register<Visual, FolderOpenMessage>(recipient, FolderOpenHandler);
     }
 
     public static void Unregister(Visual recipient)
     {
         FileDialog.Messenger.Unregister<FileOpenMessage>(recipient);
         FileDialog.Messenger.Unregister<FileSaveMessage>(recipient);
+        FileDialog.Messenger.Unregister<FolderOpenMessage>(recipient);
     }
 
     private static void FileOpenHandler(Visual recipient, FileOpenMessage message)
@@ -81,5 +83,35 @@ public static class FileDialogAvalonia
 
         var storageFiles = await topLevel.StorageProvider.SaveFilePickerAsync(options);
         return storageFiles?.Path.LocalPath;
+    }
+
+    private static void FolderOpenHandler(Visual recipient, FolderOpenMessage message)
+    {
+        message.Reply(Handle(recipient, message));
+        return;
+
+        static async Task<IReadOnlyList<string>> Handle(Visual recipient, FolderOpenMessage message)
+        {
+            // Get a reference to our TopLevel (in our case the parent Window)
+            var topLevel = TopLevel.GetTopLevel(recipient);
+            if (topLevel is null)
+            {
+                return [];
+            }
+
+            var openOptions = message.Options;
+            var options = new FolderPickerOpenOptions
+            {
+                Title = openOptions.Title,
+                AllowMultiple = openOptions.AllowMultiple,
+                SuggestedFileName = openOptions.FileName,
+                SuggestedStartLocation = openOptions.InitialDirectory is null
+                    ? null
+                    : await topLevel.StorageProvider.TryGetFolderFromPathAsync(openOptions.InitialDirectory),
+            };
+
+            var storageFiles = await topLevel.StorageProvider.OpenFolderPickerAsync(options);
+            return storageFiles.Select(x => x.Path.LocalPath).ToArray();
+        }
     }
 }

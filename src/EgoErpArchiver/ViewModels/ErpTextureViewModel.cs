@@ -1,20 +1,20 @@
-﻿using BCnEncoder.Decoder;
+﻿using Avalonia;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+
+using BCnEncoder.Decoder;
+
+using CommunityToolkit.Mvvm.Input;
+
 using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Archive.Erp.Data;
+using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Graphics;
 using EgoEngineLibrary.Graphics.Dds;
-using Microsoft.Win32;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using System;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
-namespace EgoErpArchiver.ViewModel
+using SixLabors.ImageSharp.PixelFormats;
+
+namespace EgoErpArchiver.ViewModels
 {
     public class ErpTextureViewModel : ViewModelBase
     {
@@ -94,6 +94,7 @@ namespace EgoErpArchiver.ViewModel
                     }
                     else
                     {
+                        Preview?.Dispose();
                         Preview = null;
                     }
                     OnPropertyChanged(nameof(IsSelected));
@@ -112,11 +113,14 @@ namespace EgoErpArchiver.ViewModel
             }
         }
 
-        private BitmapSource preview;
-        public BitmapSource Preview
+        public Bitmap Preview
         {
-            get { return preview; }
-            set { preview = value; OnPropertyChanged(nameof(Preview)); }
+            get;
+            set
+            {
+                field = value;
+                OnPropertyChanged();
+            }
         }
 
         private string previewError;
@@ -126,11 +130,14 @@ namespace EgoErpArchiver.ViewModel
             set { previewError = value; OnPropertyChanged(nameof(PreviewError)); }
         }
 
-        private Visibility previewErrorVisibility;
-        public Visibility PreviewErrorVisibility
+        public bool PreviewErrorVisibility
         {
-            get { return previewErrorVisibility; }
-            set { previewErrorVisibility = value; OnPropertyChanged(nameof(PreviewErrorVisibility)); }
+            get;
+            set
+            {
+                field = value;
+                OnPropertyChanged();
+            }
         }
 
         public RelayCommand TexArrayIndexDownCommand { get; }
@@ -152,6 +159,7 @@ namespace EgoErpArchiver.ViewModel
             var ddsReadSuccess = false;
             try
             {
+                Preview?.Dispose();
                 Preview = null;
                 BCnEncoder.Shared.ImageFiles.DdsFile bcDds;
                 using (var ms = new MemoryStream())
@@ -168,43 +176,58 @@ namespace EgoErpArchiver.ViewModel
                 var decoder = new BcDecoder();
                 if (decoder.IsHdrFormat(bcDds))
                 {
-                    var pixels = new byte[width * height * 3];
-                    var pixelsSpan = MemoryMarshal.Cast<byte, Bgr24>(pixels.AsSpan());
-                    decoder.DecodeDdsToPixels(bcDds, pixelsSpan);
-                    var bmSource = BitmapSource.Create(width, height, 96.0, 96.0, PixelFormats.Bgr24, null, pixels, width * 3);
+                    var bmSource = new WriteableBitmap(new PixelSize(width, height), new Vector(96, 96),
+                        PixelFormats.Bgr24);
+                    using (var frameBuffer = bmSource.Lock())
+                    {
+                        unsafe
+                        {
+                            var pixelsSpan = new Span<Bgr24>(frameBuffer.Address.ToPointer(), width * height * 3);
+                            decoder.DecodeDdsToPixels(bcDds, pixelsSpan);
+                        }
+                    }
+
                     Preview = bmSource;
                 }
                 else
                 {
-                    var pixels = new byte[width * height * 4];
-                    var pixelsSpan = MemoryMarshal.Cast<byte, Bgra32>(pixels.AsSpan());
-                    decoder.DecodeDdsToPixels(bcDds, pixelsSpan);
-                    var bmSource = BitmapSource.Create(width, height, 96.0, 96.0, PixelFormats.Bgra32, null, pixels, width * 4);
+                    var bmSource = new WriteableBitmap(new PixelSize(width, height), new Vector(96, 96),
+                        PixelFormats.Bgra8888, AlphaFormat.Unpremul);
+                    using (var frameBuffer = bmSource.Lock())
+                    {
+                        unsafe
+                        {
+                            var pixelsSpan = new Span<Bgra32>(frameBuffer.Address.ToPointer(), width * height * 4);
+                            decoder.DecodeDdsToPixels(bcDds, pixelsSpan);
+                        }
+                    }
+
                     Preview = bmSource;
                 }
 
                 Width = width;
                 Height = height;
-                PreviewErrorVisibility = Visibility.Collapsed;
+                PreviewErrorVisibility = false;
             }
             catch (Exception ex)
             {
+                Preview?.Dispose();
                 Preview = null;
                 if (ddsReadSuccess)
                     PreviewError = "Could not create preview! Export/Import may still work." + Environment.NewLine + Environment.NewLine + ex.Message;
                 else
                     PreviewError = "Could not create preview! Failed to convert texture to dds." + Environment.NewLine + Environment.NewLine + ex.Message;
-                PreviewErrorVisibility = Visibility.Visible;
+                PreviewErrorVisibility = true;
             }
         }
 
-        public DdsFile ExportDDS(string fileName, bool isPreview, bool exportTexArray)
+        public async Task<DdsFile> ExportDDS(string fileName, bool isPreview, bool exportTexArray)
         {
-            using var fs = File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read);
-            return ExportDDS(fs, isPreview, exportTexArray);
+            await using var fs = File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read);
+            return await ExportDDS(fs, isPreview, exportTexArray);
         }
 
-        private DdsFile ExportDDS(Stream stream, bool isPreview, bool exportTexArray)
+        private async Task<DdsFile> ExportDDS(Stream stream, bool isPreview, bool exportTexArray)
         {
             var srvRes = new ErpGfxSRVResource();
             srvRes.FromResource(Resource);
@@ -266,9 +289,9 @@ namespace EgoErpArchiver.ViewModel
             {
                 if (hasValidMips && !foundMipMapFile && !isPreview)
                 {
-                    var odialog = new OpenFileDialog
+                    var odialog = new FileOpenOptions
                     {
-                        Filter = "Mipmaps files|*.mipmaps|All files|*.*",
+                        FileTypeChoices = [FilePickerType.Mipmaps, FilePickerType.All],
                         Title = "Select a mipmaps file",
                         FileName = Path.GetFileName(mipMapFullFileName)
                     };
@@ -278,8 +301,9 @@ namespace EgoErpArchiver.ViewModel
                         odialog.InitialDirectory = mipMapFullFileName;
                     }
 
-                    foundMipMapFile = odialog.ShowDialog() == true;
-                    mipMapFullFileName = odialog.FileName;
+                    var res = await FileDialog.ShowOpenFileDialog(odialog);
+                    foundMipMapFile = res.Count > 0;
+                    mipMapFullFileName = res[0];
                     foundMipMapFile = foundMipMapFile && File.Exists(mipMapFullFileName);
                 }
 
@@ -318,7 +342,7 @@ namespace EgoErpArchiver.ViewModel
 
             DdsFile dds;
             Stream mipMapStream = foundMipMapFile ? File.Open(mipMapFullFileName, FileMode.Open, FileAccess.Read, FileShare.Read) : null;
-            using (mipMapStream)
+            await using (mipMapStream)
             {
                 dds = srvRes.ToDdsFile(mipMapStream, exportTexArray, _texArrayIndex);
             }
@@ -327,7 +351,7 @@ namespace EgoErpArchiver.ViewModel
             return dds;
         }
 
-        public void ImportDDS(string fileName, string mipMapSaveLocation, bool importTexArray)
+        public async Task ImportDDS(string fileName, string? mipMapSaveLocation, bool importTexArray)
         {
             var dds = new DdsFile(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read));
 
@@ -339,9 +363,9 @@ namespace EgoErpArchiver.ViewModel
             {
                 if (string.IsNullOrEmpty(mipMapSaveLocation))
                 {
-                    var sdialog = new SaveFileDialog
+                    var sdialog = new FileSaveOptions
                     {
-                        Filter = "Mipmaps files|*.mipmaps|All files|*.*",
+                        FileTypeChoices = [FilePickerType.Mipmaps, FilePickerType.All],
                         Title = "Select the mipmaps save location and file name",
                         FileName = Path.GetFileName(srvRes.SurfaceRes.Frag2.MipMapFileName)
                     };
@@ -351,8 +375,8 @@ namespace EgoErpArchiver.ViewModel
                         sdialog.InitialDirectory = mipFullPath;
                     }
 
-                    foundMipMapSaveLocation = sdialog.ShowDialog() == true;
-                    mipMapSaveLocation = sdialog.FileName;
+                    mipMapSaveLocation = await FileDialog.ShowSaveFileDialog(sdialog);
+                    foundMipMapSaveLocation = mipMapSaveLocation is not null;
                 }
                 else if (Directory.Exists(Path.GetDirectoryName(mipMapSaveLocation)))
                 {
@@ -374,7 +398,7 @@ namespace EgoErpArchiver.ViewModel
             srvRes.ToResource(Resource);
         }
 
-        private bool TexArrayIndexDownCommand_CanExecute(object parameter)
+        private bool TexArrayIndexDownCommand_CanExecute()
         {
             if (TexArrayIndex == 0)
                 return false;
@@ -382,12 +406,12 @@ namespace EgoErpArchiver.ViewModel
             return true;
         }
 
-        private void TexArrayIndexDownCommand_Execute(object parameter)
+        private void TexArrayIndexDownCommand_Execute()
         {
             --TexArrayIndex;
         }
 
-        private bool TexArrayIndexUpCommand_CanExecute(object parameter)
+        private bool TexArrayIndexUpCommand_CanExecute()
         {
             if (TexArrayIndex == TexArraySize - 1)
                 return false;
@@ -395,7 +419,7 @@ namespace EgoErpArchiver.ViewModel
             return true;
         }
 
-        private void TexArrayIndexUpCommand_Execute(object parameter)
+        private void TexArrayIndexUpCommand_Execute()
         {
             ++TexArrayIndex;
         }

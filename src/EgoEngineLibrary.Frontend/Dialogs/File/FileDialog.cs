@@ -15,4 +15,9 @@ public class FileDialog
     {
         return await Messenger.Send(new FileSaveMessage(saveOptions));
     }
+
+    public static async Task<IReadOnlyList<string>> ShowOpenFolderDialog(FolderOpenOptions openOptions)
+    {
+        return await Messenger.Send(new FolderOpenMessage(openOptions));
+    }
 }

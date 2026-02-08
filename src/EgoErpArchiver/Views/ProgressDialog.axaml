@@ -1,10 +1,11 @@
-﻿<Window x:Class="EgoErpArchiver.View.ProgressDialog"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<Window x:Class="EgoErpArchiver.Views.ProgressDialog"
+        xmlns="https://github.com/avaloniaui" 
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EgoErpArchiver.View"
+        xmlns:vm="using:EgoErpArchiver.ViewModels"
         mc:Ignorable="d"
+        x:DataType="vm:ProgressDialogViewModel"
         Title="{Binding DisplayName}" Height="360" Width="640" WindowStartupLocation="CenterOwner">
     <DockPanel Margin="10 10">
         <Grid DockPanel.Dock="Top" Margin="0 0 0 10">
@@ -12,7 +13,7 @@
             <TextBlock Text="{Binding PercentageText}" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
         </Grid>
         <ScrollViewer Name="scrollViewer">
-            <TextBox Name="statusTextBox" Text="{Binding Status}" TextWrapping="Wrap" AcceptsReturn="True" Height="auto" TextChanged="statusTextBox_TextChanged" IsReadOnly="True"></TextBox>
+            <TextBox Name="statusTextBox" Text="{Binding Status}" TextWrapping="Wrap" AcceptsReturn="True" TextChanged="statusTextBox_TextChanged" IsReadOnly="True"></TextBox>
         </ScrollViewer>
     </DockPanel>
 </Window>

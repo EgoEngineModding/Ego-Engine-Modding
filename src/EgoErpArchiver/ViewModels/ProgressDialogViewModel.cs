@@ -1,7 +1,6 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
-namespace EgoErpArchiver.ViewModel
+namespace EgoErpArchiver.ViewModels
 {
     public class ProgressDialogViewModel : ViewModelBase
     {

@@ -1,19 +1,12 @@
-using EgoEngineLibrary.Archive.Erp;
-using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Drawing;
-using System.IO;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Media.Imaging;
 
-namespace EgoErpArchiver.ViewModel
+using CommunityToolkit.Mvvm.Input;
+
+using EgoEngineLibrary.Archive.Erp;
+using EgoEngineLibrary.Frontend.Dialogs.File;
+using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
+
+namespace EgoErpArchiver.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
@@ -87,8 +80,8 @@ namespace EgoErpArchiver.ViewModel
             xmlFilesWorkspace = new XmlFilesWorkspaceViewModel(this);
 
             // Commands
-            openCommand = new RelayCommand(OpenCommand_Execute);
-            saveCommand = new RelayCommand(SaveCommand_Execute, SaveCommand_CanExecute);
+            openCommand = new AsyncRelayCommand(OpenCommand_Execute);
+            saveCommand = new AsyncRelayCommand(SaveCommand_Execute, SaveCommand_CanExecute);
 
             if (string.IsNullOrEmpty(Properties.Settings.Default.F12016Dir))
             {
@@ -97,45 +90,46 @@ namespace EgoErpArchiver.ViewModel
         }
 
         #region MainMenu
-        readonly RelayCommand openCommand;
-        readonly RelayCommand saveCommand;
+        readonly ICommand openCommand;
+        readonly ICommand saveCommand;
 
-        public RelayCommand OpenCommand
+        public ICommand OpenCommand
         {
             get { return openCommand; }
         }
-        public RelayCommand SaveCommand
+        public ICommand SaveCommand
         {
             get { return saveCommand; }
         }
 
-        public void ParseCommandLineArguments()
+        public async void ParseCommandLineArguments()
         {
-            string[] args = (string[])Application.Current.Resources["CommandLineArgs"];
+            string[] args = Environment.GetCommandLineArgs();
 
-            if (args.Length > 0)
+            if (args.Length > 1)
             {
-                Open(args[0]);
+                await Open(args[1]);
             }
         }
 
-        private void OpenCommand_Execute(object parameter)
+        private async Task OpenCommand_Execute()
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Erp files|*.erp|All files|*.*";
-            openFileDialog.FilterIndex = 1;
+            var openFileDialog = new FileOpenOptions();
+            openFileDialog.FileTypeChoices = [FilePickerType.Erp, FilePickerType.All];
+            openFileDialog.SuggestedFileType = FilePickerType.Erp;
             if (!string.IsNullOrEmpty(filePath))
             {
                 openFileDialog.FileName = Path.GetFileNameWithoutExtension(filePath);
                 openFileDialog.InitialDirectory = Path.GetDirectoryName(filePath);
             }
 
-            if (openFileDialog.ShowDialog() == true)
+            var res = await FileDialog.ShowOpenFileDialog(openFileDialog);
+            if (res.Count > 0)
             {
-                Open(openFileDialog.FileName);
+                await Open(res[0]);
             }
         }
-        private void Open(string fileName)
+        private async Task Open(string fileName)
         {
             try
             {
@@ -154,7 +148,7 @@ namespace EgoErpArchiver.ViewModel
             {
                 // Fail
                 DisplayName = Properties.Resources.AppTitleLong;
-                MessageBox.Show("The program could not open this file!" + Environment.NewLine + Environment.NewLine + excp.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
+                await MessageBox.Show("The program could not open this file!" + Environment.NewLine + Environment.NewLine + excp.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         private void SelectTab(int index)
@@ -184,19 +178,20 @@ namespace EgoErpArchiver.ViewModel
                     break;
             }
         }
-        private bool SaveCommand_CanExecute(object parameter)
+        private bool SaveCommand_CanExecute()
         {
             return file != null;
         }
-        private void SaveCommand_Execute(object parameter)
+        private async Task SaveCommand_Execute()
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "Erp files|*.erp|All files|*.*";
-            saveFileDialog.FilterIndex = 1;
+            var saveFileDialog = new FileSaveOptions();
+            saveFileDialog.FileTypeChoices = [FilePickerType.Erp, FilePickerType.All];
+            saveFileDialog.SuggestedFileType = FilePickerType.Erp;
             saveFileDialog.FileName = Path.GetFileNameWithoutExtension(filePath);
             saveFileDialog.InitialDirectory = Path.GetDirectoryName(filePath);
 
-            if (saveFileDialog.ShowDialog() == true)
+            var res = await FileDialog.ShowSaveFileDialog(saveFileDialog);
+            if (res is not null)
             {
                 try
                 {
@@ -206,7 +201,7 @@ namespace EgoErpArchiver.ViewModel
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("The program could not save this file! The error is displayed below:" + Environment.NewLine + Environment.NewLine + ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
+                    await MessageBox.Show("The program could not save this file! The error is displayed below:" + Environment.NewLine + Environment.NewLine + ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

@@ -8,7 +8,10 @@ public enum FilePickerType
     All,
     Bin,
     Dds,
+    Erp,
     Gltf,
+    Json,
+    Mipmaps,
     Pssg,
     Xml,
 }

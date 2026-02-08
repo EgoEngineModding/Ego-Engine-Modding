@@ -1,14 +1,18 @@
-﻿using EgoEngineLibrary.Data.Pkg;
-using EgoEngineLibrary.Formats.Erp;
-using Microsoft.Win32;
-using System;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Data;
+﻿using System.Collections.ObjectModel;
+using System.Windows.Input;
 
-namespace EgoErpArchiver.ViewModel
+using ActiproSoftware.UI.Avalonia.Data;
+
+using CommunityToolkit.Mvvm.Input;
+
+using EgoEngineLibrary.Data.Pkg;
+using EgoEngineLibrary.Formats.Erp;
+using EgoEngineLibrary.Frontend.Dialogs.File;
+using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
+
+using EgoErpArchiver.Dialogs.Erp;
+
+namespace EgoErpArchiver.ViewModels
 {
     public class PackagesWorkspaceViewModel : WorkspaceViewModel
     {
@@ -29,7 +33,7 @@ namespace EgoErpArchiver.ViewModel
             }
         }
 
-        private readonly CollectionView packagesViewSource;
+        private readonly CollectionView<ErpPackageViewModel> packagesViewSource;
         private string filterText;
         public string FilterText
         {
@@ -44,23 +48,23 @@ namespace EgoErpArchiver.ViewModel
             }
         }
 
-        public RelayCommand Export { get; }
-        public RelayCommand Import { get; }
-        public RelayCommand ExportAll { get; }
-        public RelayCommand ImportAll { get; }
+        public ICommand Export { get; }
+        public ICommand Import { get; }
+        public ICommand ExportAll { get; }
+        public ICommand ImportAll { get; }
 
         public PackagesWorkspaceViewModel(MainViewModel mainView)
             : base(mainView)
         {
             packages = new ObservableCollection<ErpPackageViewModel>();
             _displayName = "Pkg Files";
-            packagesViewSource = (CollectionView)CollectionViewSource.GetDefaultView(Packages);
+            packagesViewSource = new CollectionView<ErpPackageViewModel>(Packages);
             packagesViewSource.Filter += PackagesFilter;
 
-            Export = new RelayCommand(Export_Execute, Export_CanExecute);
-            Import = new RelayCommand(Import_Execute, Import_CanExecute);
-            ExportAll = new RelayCommand(ExportAll_Execute, ExportAll_CanExecute);
-            ImportAll = new RelayCommand(ImportAll_Execute, ImportAll_CanExecute);
+            Export = new AsyncRelayCommand<ErpPackageViewModel>(Export_Execute, Export_CanExecute);
+            Import = new AsyncRelayCommand<ErpPackageViewModel>(Import_Execute, Import_CanExecute);
+            ExportAll = new AsyncRelayCommand(ExportAll_Execute, ExportAll_CanExecute);
+            ImportAll = new AsyncRelayCommand(ImportAll_Execute, ImportAll_CanExecute);
         }
 
         public override void LoadData(object data)
@@ -99,75 +103,77 @@ namespace EgoErpArchiver.ViewModel
                 || (item as ErpPackageViewModel).DisplayName.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
         }
 
-        private bool Export_CanExecute(object parameter)
+        private bool Export_CanExecute(ErpPackageViewModel? parameter)
         {
             return parameter != null;
         }
 
-        private void Export_Execute(object parameter)
+        private async Task Export_Execute(ErpPackageViewModel? pkgView)
         {
-            var pkgView = (ErpPackageViewModel)parameter;
-            var dialog = new SaveFileDialog
+            ArgumentNullException.ThrowIfNull(pkgView);
+            var dialog = new FileSaveOptions
             {
-                Filter = "Json files|*.json|All files|*.*",
+                FileTypeChoices = [FilePickerType.Json, FilePickerType.All],
                 Title = "Select the pkg save location and file name",
                 FileName = pkgView.DisplayName + ".json"
             };
 
-            if (dialog.ShowDialog() == true)
+            var res = await FileDialog.ShowSaveFileDialog(dialog);
+            if (res is not null)
             {
                 try
                 {
-                    using var fs = File.Open(dialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read);
+                    using var fs = File.Open(res, FileMode.Create, FileAccess.Write, FileShare.Read);
                     using var sw = new StreamWriter(fs);
                     pkgView.ExportPkg(sw);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not export pkg file!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not export pkg file!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool Import_CanExecute(object parameter)
+        private bool Import_CanExecute(ErpPackageViewModel? parameter)
         {
             return parameter != null;
         }
 
-        private void Import_Execute(object parameter)
+        private async Task Import_Execute(ErpPackageViewModel? pkgView)
         {
-            var pkgView = (ErpPackageViewModel)parameter;
-            var dialog = new OpenFileDialog
+            ArgumentNullException.ThrowIfNull(pkgView);
+            var dialog = new FileOpenOptions
             {
-                Filter = "Json files|*.json|All files|*.*",
+                FileTypeChoices = [FilePickerType.Json, FilePickerType.All],
                 Title = "Select a pkg file",
                 FileName = pkgView.DisplayName + ".json"
             };
 
-            if (dialog.ShowDialog() == true)
+            var res = await FileDialog.ShowOpenFileDialog(dialog);
+            if (res.Count > 0)
             {
                 try
                 {
-                    using var fs = File.Open(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    using var fs = File.Open(res[0], FileMode.Open, FileAccess.Read, FileShare.Read);
                     pkgView.ImportPkg(fs);
                     pkgView.IsSelected = false;
                     pkgView.IsSelected = true;
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not import pkg file!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not import pkg file!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool ExportAll_CanExecute(object parameter)
+        private bool ExportAll_CanExecute()
         {
             return packages.Count > 0;
         }
 
-        private void ExportAll_Execute(object parameter)
+        private async Task ExportAll_Execute()
         {
             try
             {
@@ -176,10 +182,6 @@ namespace EgoErpArchiver.ViewModel
                 var progDialogVM = new ProgressDialogViewModel()
                 {
                     PercentageMax = packages.Count
-                };
-                var progDialog = new View.ProgressDialog
-                {
-                    DataContext = progDialogVM
                 };
 
                 var task = Task.Run(() =>
@@ -219,21 +221,21 @@ namespace EgoErpArchiver.ViewModel
                     progDialogVM.ProgressStatus.Report(string.Format("{0} Succeeded, {1} Failed", success, fail));
                 });
 
-                progDialog.ShowDialog();
-                task.Wait();
+                await ErpDialog.ShowProgressDialog(progDialogVM);
+                await task;
             }
             catch
             {
-                MessageBox.Show("There was an error, could not export all pkg files!", Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
+                await MessageBox.Show("There was an error, could not export all pkg files!", Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private bool ImportAll_CanExecute(object parameter)
+        private bool ImportAll_CanExecute()
         {
             return packages.Count > 0;
         }
 
-        private void ImportAll_Execute(object parameter)
+        private async Task ImportAll_Execute()
         {
             try
             {
@@ -248,10 +250,6 @@ namespace EgoErpArchiver.ViewModel
                     var progDialogVM = new ProgressDialogViewModel
                     {
                         PercentageMax = packages.Count
-                    };
-                    var progDialog = new View.ProgressDialog
-                    {
-                        DataContext = progDialogVM
                     };
 
                     var task = Task.Run(() =>
@@ -307,17 +305,17 @@ namespace EgoErpArchiver.ViewModel
                         progDialogVM.ProgressStatus.Report(string.Format("{0} Succeeded, {1} Skipped, {2} Failed", success, skip, fail));
                     });
 
-                    progDialog.ShowDialog();
-                    task.Wait();
+                    await ErpDialog.ShowProgressDialog(progDialogVM);
+                    await task;
                 }
                 else
                 {
-                    MessageBox.Show("Could not find pkgfiles folder!", Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
+                    await MessageBox.Show("Could not find pkgfiles folder!", Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch
             {
-                MessageBox.Show("There was an error, could not import all pkg files!", Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
+                await MessageBox.Show("There was an error, could not import all pkg files!", Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

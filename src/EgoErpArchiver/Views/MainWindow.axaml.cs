@@ -1,34 +1,63 @@
-﻿using ICSharpCode.AvalonEdit.Folding;
-using Ookii.Dialogs.Wpf;
-using System.Diagnostics;
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Diagnostics;
 
-namespace EgoErpArchiver
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
+
+using AvaloniaEdit.Folding;
+
+using EgoEngineLibrary.Frontend.Dialogs.File;
+using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
+
+using EgoErpArchiver.Dialogs.Erp;
+using EgoErpArchiver.ViewModels;
+
+namespace EgoErpArchiver.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
+        public MainViewModel? ViewModel => (MainViewModel?)base.DataContext;
+        
         public MainWindow()
         {
             InitializeComponent();
+            
+            FileDialogAvalonia.Register(this);
+            MessageBoxAvalonia.Register(this);
+            ErpDialogAvalonia.Register(this);
         }
 
-        private void setDirectoryF12016MenuItem_Click(object sender, RoutedEventArgs e)
+        protected override void OnLoaded(RoutedEventArgs e)
         {
-            var dlg = new VistaFolderBrowserDialog
+            base.OnLoaded(e);
+            ViewModel?.ParseCommandLineArguments();
+        }
+
+        private async void setDirectoryF12016MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var topLevel = TopLevel.GetTopLevel(this);
+            if (topLevel is null)
             {
-                Description = "Select the location of your game:",
-                Multiselect = false
+                return;
+            }
+
+            var options = new FolderPickerOpenOptions
+            {
+                Title = "Select the location of your game:",
+                AllowMultiple = false,
             };
 
-            if (dlg.ShowDialog() == true)
+            var res = await topLevel.StorageProvider.OpenFolderPickerAsync(options);
+            if (res.Count <= 0)
             {
-                Properties.Settings.Default.F12016Dir = dlg.SelectedPath + "\\";
-                Properties.Settings.Default.Save();
+                return;
             }
+
+            Properties.Settings.Default.F12016Dir = res[0].Path.LocalPath + Path.DirectorySeparatorChar;
+            Properties.Settings.Default.Save();
         }
 
         private void cmdUp_Click(object sender, RoutedEventArgs e)
@@ -66,11 +95,16 @@ namespace EgoErpArchiver
 
         private void mainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (resourcesDataGrid is null)
+            {
+                return;
+            }
+            
             var selectedItem = resourcesDataGrid.SelectedItem;
             if (mainTabControl.SelectedIndex == 0 && selectedItem != null)
             {
                 resourcesDataGrid.Focus();
-                resourcesDataGrid.ScrollIntoView(selectedItem);
+                resourcesDataGrid.ScrollIntoView(selectedItem, null);
             }
         }
 
@@ -82,7 +116,7 @@ namespace EgoErpArchiver
                 return;
             }
             
-            packagePreviewTextEditor.Text = ((ViewModel.ErpPackageViewModel)e.AddedItems[0]).Preview;
+            packagePreviewTextEditor.Text = ((ErpPackageViewModel)e.AddedItems[0]).Preview;
         }
 
         FoldingManager foldingManager;
@@ -101,7 +135,7 @@ namespace EgoErpArchiver
                 return;
             }
 
-            xmlFilePreviewTextEditor.Text = ((ViewModel.ErpXmlFileViewModel)e.AddedItems[0]).Preview;
+            xmlFilePreviewTextEditor.Text = ((ErpXmlFileViewModel)e.AddedItems[0]).Preview;
             foldingManager = FoldingManager.Install(xmlFilePreviewTextEditor.TextArea);
             foldingStrategy.UpdateFoldings(foldingManager, xmlFilePreviewTextEditor.Document);
         }

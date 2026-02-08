@@ -1,14 +1,18 @@
-﻿using EgoEngineLibrary.Formats.Erp;
-using EgoEngineLibrary.Xml;
-using Microsoft.Win32;
-using System;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Data;
+﻿using System.Collections.ObjectModel;
+using System.Windows.Input;
 
-namespace EgoErpArchiver.ViewModel
+using ActiproSoftware.UI.Avalonia.Data;
+
+using CommunityToolkit.Mvvm.Input;
+
+using EgoEngineLibrary.Formats.Erp;
+using EgoEngineLibrary.Frontend.Dialogs.File;
+using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
+using EgoEngineLibrary.Xml;
+
+using EgoErpArchiver.Dialogs.Erp;
+
+namespace EgoErpArchiver.ViewModels
 {
     public class XmlFilesWorkspaceViewModel : WorkspaceViewModel
     {
@@ -29,7 +33,7 @@ namespace EgoErpArchiver.ViewModel
             }
         }
 
-        private readonly CollectionView xmlFilesViewSource;
+        private readonly CollectionView<ErpXmlFileViewModel> xmlFilesViewSource;
         private string filterText;
         public string FilterText
         {
@@ -44,23 +48,23 @@ namespace EgoErpArchiver.ViewModel
             }
         }
 
-        public RelayCommand Export { get; }
-        public RelayCommand Import { get; }
-        public RelayCommand ExportAll { get; }
-        public RelayCommand ImportAll { get; }
+        public ICommand Export { get; }
+        public ICommand Import { get; }
+        public ICommand ExportAll { get; }
+        public ICommand ImportAll { get; }
 
         public XmlFilesWorkspaceViewModel(MainViewModel mainView)
             : base(mainView)
         {
             xmlFiles = new ObservableCollection<ErpXmlFileViewModel>();
             _displayName = "XML Files";
-            xmlFilesViewSource = (CollectionView)CollectionViewSource.GetDefaultView(XmlFiles);
+            xmlFilesViewSource = new CollectionView<ErpXmlFileViewModel>(XmlFiles);
             xmlFilesViewSource.Filter += XmlFilesFilter;
 
-            Export = new RelayCommand(Export_Execute, Export_CanExecute);
-            Import = new RelayCommand(Import_Execute, Import_CanExecute);
-            ExportAll = new RelayCommand(ExportAll_Execute, ExportAll_CanExecute);
-            ImportAll = new RelayCommand(ImportAll_Execute, ImportAll_CanExecute);
+            Export = new AsyncRelayCommand<ErpXmlFileViewModel>(Export_Execute, Export_CanExecute);
+            Import = new AsyncRelayCommand<ErpXmlFileViewModel>(Import_Execute, Import_CanExecute);
+            ExportAll = new AsyncRelayCommand(ExportAll_Execute, ExportAll_CanExecute);
+            ImportAll = new AsyncRelayCommand(ImportAll_Execute, ImportAll_CanExecute);
         }
 
         public override void LoadData(object data)
@@ -99,75 +103,77 @@ namespace EgoErpArchiver.ViewModel
                 || (item as ErpXmlFileViewModel).DisplayName.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
         }
 
-        private bool Export_CanExecute(object parameter)
+        private bool Export_CanExecute(ErpXmlFileViewModel? parameter)
         {
             return parameter != null;
         }
 
-        private void Export_Execute(object parameter)
+        private async Task Export_Execute(ErpXmlFileViewModel? xmlView)
         {
-            var xmlView = (ErpXmlFileViewModel)parameter;
-            var dialog = new SaveFileDialog
+            ArgumentNullException.ThrowIfNull(xmlView);
+            var dialog = new FileSaveOptions
             {
-                Filter = "Xml files|*.xml|All files|*.*",
+                FileTypeChoices = [FilePickerType.Xml, FilePickerType.All],
                 Title = "Select the xml save location and file name",
                 FileName = xmlView.DisplayName + ".xml"
             };
 
-            if (dialog.ShowDialog() == true)
+            var res = await FileDialog.ShowSaveFileDialog(dialog);
+            if (res is not null)
             {
                 try
                 {
-                    using var fs = File.Open(dialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read);
+                    using var fs = File.Open(res, FileMode.Create, FileAccess.Write, FileShare.Read);
                     using var sw = new StreamWriter(fs);
                     xmlView.ExportXML(sw);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not export xml file!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not export xml file!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool Import_CanExecute(object parameter)
+        private bool Import_CanExecute(ErpXmlFileViewModel? parameter)
         {
             return parameter != null;
         }
 
-        private void Import_Execute(object parameter)
+        private async Task Import_Execute(ErpXmlFileViewModel? xmlView)
         {
-            var xmlView = (ErpXmlFileViewModel)parameter;
-            var dialog = new OpenFileDialog
+            ArgumentNullException.ThrowIfNull(xmlView);
+            var dialog = new FileOpenOptions
             {
-                Filter = "Xml files|*.xml|All files|*.*",
+                FileTypeChoices = [FilePickerType.Xml, FilePickerType.All],
                 Title = "Select a xml file",
                 FileName = xmlView.DisplayName + ".xml"
             };
 
-            if (dialog.ShowDialog() == true)
+            var res = await FileDialog.ShowOpenFileDialog(dialog);
+            if (res.Count > 0)
             {
                 try
                 {
-                    using var fs = File.Open(dialog.FileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    using var fs = File.Open(res[0], FileMode.Open, FileAccess.Read, FileShare.Read);
                     xmlView.ImportXML(fs);
                     xmlView.IsSelected = false;
                     xmlView.IsSelected = true;
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not import xml file!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not import xml file!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
 
-        private bool ExportAll_CanExecute(object parameter)
+        private bool ExportAll_CanExecute()
         {
             return xmlFiles.Count > 0;
         }
 
-        private void ExportAll_Execute(object parameter)
+        private async Task ExportAll_Execute()
         {
             try
             {
@@ -176,10 +182,6 @@ namespace EgoErpArchiver.ViewModel
                 var progDialogVM = new ProgressDialogViewModel()
                 {
                     PercentageMax = xmlFiles.Count
-                };
-                var progDialog = new View.ProgressDialog
-                {
-                    DataContext = progDialogVM
                 };
 
                 var task = Task.Run(() =>
@@ -219,21 +221,21 @@ namespace EgoErpArchiver.ViewModel
                     progDialogVM.ProgressStatus.Report(string.Format("{0} Succeeded, {1} Failed", success, fail));
                 });
 
-                progDialog.ShowDialog();
-                task.Wait();
+                await ErpDialog.ShowProgressDialog(progDialogVM);
+                await task;
             }
             catch
             {
-                MessageBox.Show("There was an error, could not export all xml files!", Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
+                await MessageBox.Show("There was an error, could not export all xml files!", Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private bool ImportAll_CanExecute(object parameter)
+        private bool ImportAll_CanExecute()
         {
             return xmlFiles.Count > 0;
         }
 
-        private void ImportAll_Execute(object parameter)
+        private async Task ImportAll_Execute()
         {
             try
             {
@@ -248,10 +250,6 @@ namespace EgoErpArchiver.ViewModel
                     var progDialogVM = new ProgressDialogViewModel()
                     {
                         PercentageMax = xmlFiles.Count
-                    };
-                    var progDialog = new View.ProgressDialog
-                    {
-                        DataContext = progDialogVM
                     };
 
                     var task = Task.Run(() =>
@@ -307,17 +305,17 @@ namespace EgoErpArchiver.ViewModel
                         progDialogVM.ProgressStatus.Report(string.Format("{0} Succeeded, {1} Skipped, {2} Failed", success, skip, fail));
                     });
 
-                    progDialog.ShowDialog();
-                    task.Wait();
+                    await ErpDialog.ShowProgressDialog(progDialogVM);
+                    await task;
                 }
                 else
                 {
-                    MessageBox.Show("Could not find xmlfiles folder!", Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
+                    await MessageBox.Show("Could not find xmlfiles folder!", Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch
             {
-                MessageBox.Show("There was an error, could not import all xml files!", Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
+                await MessageBox.Show("There was an error, could not import all xml files!", Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
