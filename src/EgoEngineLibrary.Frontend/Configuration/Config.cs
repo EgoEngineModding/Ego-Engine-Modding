@@ -2,33 +2,46 @@
 
 namespace EgoEngineLibrary.Frontend.Configuration;
 
-public class Config
+public static class Config
 {
-    private static readonly ConcurrentDictionary<Type, ConfigInfo> _configInfos = new();
+    private static readonly ConcurrentDictionary<Type, ConfigInfo> ConfigInfos = new();
 
     public static void Add<T>(IConfigProvider provider)
     {
-        if (!_configInfos.TryAdd(typeof(T), new ConfigInfo { Provider = provider }))
+        if (!ConfigInfos.TryAdd(typeof(T), new ConfigInfo { Provider = provider }))
         {
             throw new InvalidOperationException($"The configuration provider for type {typeof(T)} already exists.");
+        }
+    }
+
+    public static void LoadAll()
+    {
+        foreach (var configType in ConfigInfos.Keys)
+        {
+            _ = Load(configType);
         }
     }
     
     public static T Load<T>(bool reload = false)
     {
-        if (!_configInfos.TryGetValue(typeof(T), out var configInfo))
+        return (T)Load(typeof(T), reload);
+    }
+    
+    public static object Load(Type configType, bool reload = false)
+    {
+        if (!ConfigInfos.TryGetValue(configType, out var configInfo))
         {
-            throw new InvalidOperationException($"The configuration provider for type {typeof(T)} does not exist.");
+            throw new InvalidOperationException($"The configuration provider for type {configType} does not exist.");
         }
 
         lock (configInfo.Lock)
         {
             if (!reload && configInfo.Value is not null)
             {
-                return (T)configInfo.Value;
+                return configInfo.Value;
             }
 
-            var value = (T)configInfo.Provider.Load();
+            var value = configInfo.Provider.Load();
             configInfo.Value = value;
             return value;
         }
@@ -36,7 +49,7 @@ public class Config
 
     public static void Save<T>()
     {
-        if (!_configInfos.TryGetValue(typeof(T), out var configInfo))
+        if (!ConfigInfos.TryGetValue(typeof(T), out var configInfo))
         {
             throw new InvalidOperationException($"The configuration provider for type {typeof(T)} does not exist.");
         }

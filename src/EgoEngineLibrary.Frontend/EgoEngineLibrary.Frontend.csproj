@@ -5,7 +5,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
-    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   </ItemGroup>
 
 </Project>

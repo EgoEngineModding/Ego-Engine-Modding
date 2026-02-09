@@ -3,5 +3,5 @@
 namespace EgoErpArchiver.Configuration;
 
 [JsonSourceGenerationOptions(WriteIndented = true)]
-[JsonSerializable(typeof(SettingsConfig))]
+[JsonSerializable(typeof(AppSettings))]
 public partial class ConfigJsonContext : JsonSerializerContext;

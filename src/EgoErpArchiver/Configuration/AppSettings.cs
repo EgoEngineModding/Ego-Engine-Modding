@@ -1,6 +1,6 @@
 ﻿namespace EgoErpArchiver.Configuration;
 
-public class SettingsConfig
+public class AppSettings
 {
     public string F1Directory { get; set; } = string.Empty;
 

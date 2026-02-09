@@ -6,12 +6,12 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Archive.Erp.Data;
+using EgoEngineLibrary.Frontend.Configuration;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.ViewModels;
 using EgoEngineLibrary.Graphics;
 using EgoEngineLibrary.Graphics.Dds;
 using EgoErpArchiver.Configuration;
-using Microsoft.Extensions.Options;
 
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -20,7 +20,7 @@ namespace EgoErpArchiver.ViewModels
     public class ErpTextureViewModel : ViewModelBase
     {
         private readonly ErpResourceViewModel resView;
-        private readonly IOptions<SettingsConfig> _settingsOptions;
+        private readonly IOptions<AppSettings> _settingsOptions;
 
         public ErpResource Resource
         {
@@ -149,7 +149,7 @@ namespace EgoErpArchiver.ViewModels
         public ErpTextureViewModel(ErpResourceViewModel resView)
         {
             this.resView = resView;
-            _settingsOptions = Ioc.Default.GetRequiredService<IOptions<SettingsConfig>>();
+            _settingsOptions = Ioc.Default.GetRequiredService<IOptions<AppSettings>>();
             _width = 0;
             _height = 0;
 

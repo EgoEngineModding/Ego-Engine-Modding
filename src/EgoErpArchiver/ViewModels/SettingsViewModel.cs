@@ -8,7 +8,7 @@ namespace EgoErpArchiver.ViewModels;
 
 public partial class SettingsViewModel : ViewModelBase
 {
-    private readonly IWriteableOptions<SettingsConfig> _settingsOptions;
+    private readonly IWriteableOptions<AppSettings> _settingsOptions;
     
     public string F1Directory
     {
@@ -31,8 +31,12 @@ public partial class SettingsViewModel : ViewModelBase
             SafeSave();
         }
     }
+    
+    public SettingsViewModel() : this(new NullOptions<AppSettings>(new AppSettings()))
+    {
+    }
 
-    public SettingsViewModel(IWriteableOptions<SettingsConfig> settingsOptions)
+    public SettingsViewModel(IWriteableOptions<AppSettings> settingsOptions)
     {
         _settingsOptions = settingsOptions;
     }

@@ -7,10 +7,14 @@ using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 using EgoEngineLibrary.Frontend.ViewModels;
 
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
 namespace EgoErpArchiver.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
+        private readonly ILogger<MainViewModel> _logger;
         public SettingsViewModel SettingsViewModel { get; }
 
         #region Data
@@ -72,9 +76,13 @@ namespace EgoErpArchiver.ViewModels
         }
         #endregion
 
-
-        public MainViewModel(SettingsViewModel settingsViewModel)
+        public MainViewModel() : this(new SettingsViewModel(), NullLogger<MainViewModel>.Instance)
         {
+        }
+
+        public MainViewModel(SettingsViewModel settingsViewModel, ILogger<MainViewModel> logger)
+        {
+            _logger = logger;
             SettingsViewModel = settingsViewModel;
             this.DisplayName = Properties.Resources.AppTitleLong;
 
@@ -107,6 +115,7 @@ namespace EgoErpArchiver.ViewModels
 
             if (args.Length > 1)
             {
+                _logger.LogDebug("Parsing arguments");
                 await Open(args[1]);
             }
         }
