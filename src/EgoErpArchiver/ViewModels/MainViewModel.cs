@@ -15,83 +15,64 @@ namespace EgoErpArchiver.ViewModels
     public class MainViewModel : ViewModelBase
     {
         private readonly ILogger<MainViewModel> _logger;
-        public SettingsViewModel SettingsViewModel { get; }
-
-        #region Data
-        string windowTitle;
-        string filePath;
-        ErpFile file;
-        readonly ResourcesWorkspaceViewModel resourcesWorkspace;
-        readonly PackagesWorkspaceViewModel packagesWorkspace;
-        readonly TexturesWorkspaceViewModel texturesWorkspace;
-        readonly XmlFilesWorkspaceViewModel xmlFilesWorkspace;
 
         public override string DisplayName
         {
-            get { return windowTitle; }
+            get;
             protected set
             {
-                windowTitle = value;
-                OnPropertyChanged("DisplayName");
+                field = value;
+                OnPropertyChanged();
             }
         }
-        public string FilePath
-        {
-            get { return filePath; }
-        }
 
-        public ErpFile ErpFile
-        {
-            get { return file; }
-        }
-        public ResourcesWorkspaceViewModel ResourcesWorkspace
-        {
-            get { return resourcesWorkspace; }
-        }
-        public PackagesWorkspaceViewModel PackagesWorkspace
-        {
-            get { return packagesWorkspace; }
-        }
-        public TexturesWorkspaceViewModel TexturesWorkspace
-        {
-            get { return texturesWorkspace; }
-        }
-        public XmlFilesWorkspaceViewModel XmlFilesWorkspace
-        {
-            get { return xmlFilesWorkspace; }
-        }
-        #endregion
+        public ErpFileViewModel FileViewModel { get; }
+        
+        public SettingsViewModel SettingsViewModel { get; }
 
-        #region Presentation Data
-        int selectedTabIndex;
+        public ResourcesWorkspaceViewModel ResourcesWorkspace { get; }
+
+        public PackagesWorkspaceViewModel PackagesWorkspace { get; }
+
+        public TexturesWorkspaceViewModel TexturesWorkspace { get; }
+
+        public XmlFilesWorkspaceViewModel XmlFilesWorkspace { get; }
 
         public int SelectedTabIndex
         {
-            get { return selectedTabIndex; }
+            get;
             set
             {
-                selectedTabIndex = value;
-                OnPropertyChanged("SelectedTabIndex");
+                field = value;
+                OnPropertyChanged();
             }
         }
-        #endregion
 
-        public MainViewModel() : this(new SettingsViewModel(), NullLogger<MainViewModel>.Instance)
+        public MainViewModel()
+            : this(new ErpFileViewModel(), new SettingsViewModel(), new ResourcesWorkspaceViewModel(),
+                new TexturesWorkspaceViewModel(), new PackagesWorkspaceViewModel(), new XmlFilesWorkspaceViewModel(),
+                NullLogger<MainViewModel>.Instance)
         {
         }
 
-        public MainViewModel(SettingsViewModel settingsViewModel, ILogger<MainViewModel> logger)
+        public MainViewModel(ErpFileViewModel fileViewModel,
+            SettingsViewModel settingsViewModel,
+            ResourcesWorkspaceViewModel resourcesWorkspace,
+            TexturesWorkspaceViewModel texturesWorkspace,
+            PackagesWorkspaceViewModel packagesWorkspace,
+            XmlFilesWorkspaceViewModel xmlFilesWorkspace,
+            ILogger<MainViewModel> logger)
         {
             _logger = logger;
+            FileViewModel = fileViewModel;
             SettingsViewModel = settingsViewModel;
-            this.DisplayName = Properties.Resources.AppTitleLong;
+            DisplayName = Properties.Resources.AppTitleLong;
 
-            resourcesWorkspace = new ResourcesWorkspaceViewModel(this);
-            texturesWorkspace = new TexturesWorkspaceViewModel(this);
-            packagesWorkspace = new PackagesWorkspaceViewModel(this);
-            xmlFilesWorkspace = new XmlFilesWorkspaceViewModel(this);
+            ResourcesWorkspace = resourcesWorkspace;
+            TexturesWorkspace = texturesWorkspace;
+            PackagesWorkspace = packagesWorkspace;
+            XmlFilesWorkspace = xmlFilesWorkspace;
 
-            // Commands
             openCommand = new AsyncRelayCommand(OpenCommand_Execute);
             saveCommand = new AsyncRelayCommand(SaveCommand_Execute, SaveCommand_CanExecute);
         }
@@ -125,10 +106,10 @@ namespace EgoErpArchiver.ViewModels
             var openFileDialog = new FileOpenOptions();
             openFileDialog.FileTypeChoices = [FilePickerType.Erp, FilePickerType.All];
             openFileDialog.SuggestedFileType = FilePickerType.Erp;
-            if (!string.IsNullOrEmpty(filePath))
+            if (!string.IsNullOrEmpty(FileViewModel.FilePath))
             {
-                openFileDialog.FileName = Path.GetFileNameWithoutExtension(filePath);
-                openFileDialog.InitialDirectory = Path.GetDirectoryName(filePath);
+                openFileDialog.FileName = Path.GetFileNameWithoutExtension(FileViewModel.FilePath);
+                openFileDialog.InitialDirectory = Path.GetDirectoryName(FileViewModel.FilePath);
             }
 
             var res = await FileDialog.ShowOpenFileDialog(openFileDialog);
@@ -141,20 +122,20 @@ namespace EgoErpArchiver.ViewModels
         {
             try
             {
-                filePath = fileName;
                 ClearVars();
-                this.file = new ErpFile();
-                Task.Run(() => this.file.Read(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))).Wait();
-                resourcesWorkspace.LoadData(file);
-                packagesWorkspace.LoadData(resourcesWorkspace);
-                texturesWorkspace.LoadData(resourcesWorkspace);
-                xmlFilesWorkspace.LoadData(resourcesWorkspace);
+                FileViewModel.FilePath = fileName;
+                var erp = new ErpFile();
+                erp.Read(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read));
+                FileViewModel.File = erp;
+                ResourcesWorkspace.OnFileOpened();
+                PackagesWorkspace.OnFileOpened();
+                TexturesWorkspace.OnFileOpened();
+                XmlFilesWorkspace.OnFileOpened();
                 SelectTab(SettingsViewModel.StartingTab);
-                DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
+                DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(fileName);
             }
             catch (Exception excp)
             {
-                // Fail
                 DisplayName = Properties.Resources.AppTitleLong;
                 await MessageBox.Show("The program could not open this file!" + Environment.NewLine + Environment.NewLine + excp.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -167,45 +148,45 @@ namespace EgoErpArchiver.ViewModels
                     SelectedTabIndex = 0;
                     break;
                 case 1:
-                    if (packagesWorkspace.Packages.Count > 0) SelectedTabIndex = 1;
+                    if (PackagesWorkspace.Packages.Count > 0) SelectedTabIndex = 1;
                     else SelectTab(-1);
                     break;
                 case 2:
-                    if (texturesWorkspace.Textures.Count > 0) SelectedTabIndex = 2;
+                    if (TexturesWorkspace.Textures.Count > 0) SelectedTabIndex = 2;
                     else SelectTab(-1);
                     break;
                 case 3:
-                    if (xmlFilesWorkspace.XmlFiles.Count > 0) SelectedTabIndex = 3;
+                    if (XmlFilesWorkspace.XmlFiles.Count > 0) SelectedTabIndex = 3;
                     else SelectTab(-1);
                     break;
                 default:
-                    if (texturesWorkspace.Textures.Count > 0) SelectedTabIndex = 2;
-                    else if (packagesWorkspace.Packages.Count > 0) SelectedTabIndex = 1;
-                    else if (xmlFilesWorkspace.XmlFiles.Count > 0) SelectedTabIndex = 3;
+                    if (TexturesWorkspace.Textures.Count > 0) SelectedTabIndex = 2;
+                    else if (PackagesWorkspace.Packages.Count > 0) SelectedTabIndex = 1;
+                    else if (XmlFilesWorkspace.XmlFiles.Count > 0) SelectedTabIndex = 3;
                     else SelectedTabIndex = 0;
                     break;
             }
         }
         private bool SaveCommand_CanExecute()
         {
-            return file != null;
+            return FileViewModel.File is not null;
         }
         private async Task SaveCommand_Execute()
         {
             var saveFileDialog = new FileSaveOptions();
             saveFileDialog.FileTypeChoices = [FilePickerType.Erp, FilePickerType.All];
             saveFileDialog.SuggestedFileType = FilePickerType.Erp;
-            saveFileDialog.FileName = Path.GetFileNameWithoutExtension(filePath);
-            saveFileDialog.InitialDirectory = Path.GetDirectoryName(filePath);
+            saveFileDialog.FileName = Path.GetFileNameWithoutExtension(FileViewModel.FilePath);
+            saveFileDialog.InitialDirectory = Path.GetDirectoryName(FileViewModel.FilePath);
 
             var res = await FileDialog.ShowSaveFileDialog(saveFileDialog);
             if (res is not null)
             {
                 try
                 {
-                    Task.Run(() => file.Write(File.Open(saveFileDialog.FileName, FileMode.Create, FileAccess.Write, FileShare.Read))).Wait();
-                    filePath = saveFileDialog.FileName;
-                    DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
+                    FileViewModel.File!.Write(File.Open(res, FileMode.Create, FileAccess.Write, FileShare.Read));
+                    FileViewModel.FilePath = res;
+                    DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(res);
                 }
                 catch (Exception ex)
                 {
@@ -215,13 +196,13 @@ namespace EgoErpArchiver.ViewModels
         }
         private void ClearVars()
         {
-            if (file == null) return;
+            if (FileViewModel.File is null) return;
 
-            resourcesWorkspace.ClearData();
-            texturesWorkspace.ClearData();
+            ResourcesWorkspace.OnFileClosed();
+            TexturesWorkspace.OnFileClosed();
 
             DisplayName = Properties.Resources.AppTitleLong;
-            file = null;
+            FileViewModel.File = null;
         }
         #endregion
     }

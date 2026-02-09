@@ -16,7 +16,7 @@ sealed class Program
 {
     private static readonly string AppDataDir =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EgoErpArchiver");
-    private static readonly string AppLogsDir = Path.Combine(AppDataDir, "logs");
+    private static readonly string AppLogsDir = Path.Combine(AppDataDir, "logs", "log.txt");
     
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
@@ -87,6 +87,11 @@ sealed class Program
 
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<SettingsViewModel>();
+        services.AddSingleton<ErpFileViewModel>();
+        services.AddSingleton<ResourcesWorkspaceViewModel>();
+        services.AddSingleton<TexturesWorkspaceViewModel>();
+        services.AddSingleton<PackagesWorkspaceViewModel>();
+        services.AddSingleton<XmlFilesWorkspaceViewModel>();
         
         var serviceProvider = services.BuildServiceProvider();
         Ioc.Default.ConfigureServices(serviceProvider);

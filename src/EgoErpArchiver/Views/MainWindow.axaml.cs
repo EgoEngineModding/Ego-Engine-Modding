@@ -30,6 +30,11 @@ namespace EgoErpArchiver.Views
         protected override void OnLoaded(RoutedEventArgs e)
         {
             base.OnLoaded(e);
+            if (Design.IsDesignMode)
+            {
+                return;
+            }
+            
             ViewModel?.ParseCommandLineArguments();
         }
 

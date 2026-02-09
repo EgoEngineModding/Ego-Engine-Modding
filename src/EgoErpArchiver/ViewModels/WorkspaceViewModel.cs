@@ -1,18 +1,10 @@
 ﻿using EgoEngineLibrary.Frontend.ViewModels;
 
-namespace EgoErpArchiver.ViewModels
+namespace EgoErpArchiver.ViewModels;
+
+public abstract class WorkspaceViewModel : ViewModelBase
 {
-    public abstract class WorkspaceViewModel : ViewModelBase
-    {
-        protected readonly MainViewModel mainView;
+    public abstract void OnFileOpened();
 
-        public WorkspaceViewModel(MainViewModel mainView)
-        {
-            this.mainView = mainView;
-        }
-
-        public abstract void LoadData(object data);
-
-        public abstract void ClearData();
-    }
+    public abstract void OnFileClosed();
 }

@@ -14,6 +14,8 @@ namespace EgoErpArchiver.ViewModels
 {
     public class TexturesWorkspaceViewModel : WorkspaceViewModel
     {
+        private readonly ErpFileViewModel _fileViewModel;
+        private readonly ResourcesWorkspaceViewModel _resourcesWorkspaceViewModel;
         private readonly ObservableCollection<ErpTextureViewModel> textures;
         public ObservableCollection<ErpTextureViewModel> Textures
         {
@@ -51,9 +53,14 @@ namespace EgoErpArchiver.ViewModels
         public ICommand ExportTextures { get; }
         public ICommand ImportTextures { get; }
 
-        public TexturesWorkspaceViewModel(MainViewModel mainView)
-            : base(mainView)
+        public TexturesWorkspaceViewModel() : this(new ErpFileViewModel(), new ResourcesWorkspaceViewModel())
         {
+        }
+
+        public TexturesWorkspaceViewModel(ErpFileViewModel fileViewModel, ResourcesWorkspaceViewModel resourcesWorkspaceViewModel)
+        {
+            _fileViewModel = fileViewModel;
+            _resourcesWorkspaceViewModel = resourcesWorkspaceViewModel;
             textures = new ObservableCollection<ErpTextureViewModel>();
             _displayName = "Textures";
             texturesViewSource = new CollectionView<ErpTextureViewModel>(Textures);
@@ -65,10 +72,10 @@ namespace EgoErpArchiver.ViewModels
             ImportTextures = new AsyncRelayCommand(ImportTextures_Execute, ImportTextures_CanExecute);
         }
 
-        public override void LoadData(object data)
+        public override void OnFileOpened()
         {
-            ClearData();
-            foreach (var resView in ((ResourcesWorkspaceViewModel)data).Resources)
+            OnFileClosed();
+            foreach (var resView in _resourcesWorkspaceViewModel.Resources)
             {
                 if (resView.Resource.ResourceType == "GfxSRVResource")
                 {
@@ -78,7 +85,7 @@ namespace EgoErpArchiver.ViewModels
             DisplayName = "Textures " + textures.Count;
         }
 
-        public override void ClearData()
+        public override void OnFileClosed()
         {
             textures.Clear();
         }
@@ -168,7 +175,7 @@ namespace EgoErpArchiver.ViewModels
 
                 var task = Task.Run(async () =>
                 {
-                    var outputFolderPath = mainView.FilePath.Replace(".", "_") + "_textures";
+                    var outputFolderPath = _fileViewModel.FilePath.Replace(".", "_") + "_textures";
                     Directory.CreateDirectory(outputFolderPath);
 
                     for (var i = 0; i < textures.Count;)
@@ -216,8 +223,8 @@ namespace EgoErpArchiver.ViewModels
         {
             try
             {
-                var directory = mainView.FilePath.Replace(".", "_") + "_textures";
-                var mipMapDirectory = mainView.FilePath.Replace(".", "_") + "_mipmaps";
+                var directory = _fileViewModel.FilePath.Replace(".", "_") + "_textures";
+                var mipMapDirectory = _fileViewModel.FilePath.Replace(".", "_") + "_mipmaps";
                 if (Directory.Exists(directory) == true)
                 {
                     var success = 0;

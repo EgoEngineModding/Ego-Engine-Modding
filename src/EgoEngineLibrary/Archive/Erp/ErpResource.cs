@@ -37,14 +37,14 @@ namespace EgoEngineLibrary.Archive.Erp
             {
                 if (Identifier.StartsWith("eaid", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return Path.GetDirectoryName(Identifier[7..])?.Replace('/', '\\') ?? string.Empty;
+                    return Path.GetDirectoryName(Identifier[7..])?.Replace('/', Path.DirectorySeparatorChar) ?? string.Empty;
                 }
                 else
                 {
                     var temp = Identifier;
                     if (temp.Contains('/') || temp.Contains('\\'))
                     {
-                        return Path.GetDirectoryName(temp)?.Replace('/', '\\') ?? string.Empty;
+                        return Path.GetDirectoryName(temp)?.Replace('/', Path.DirectorySeparatorChar) ?? string.Empty;
                     }
                     else
                     {

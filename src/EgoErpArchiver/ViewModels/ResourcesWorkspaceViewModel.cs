@@ -3,7 +3,6 @@ using System.Windows.Input;
 
 using CommunityToolkit.Mvvm.Input;
 
-using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Formats.Erp;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
@@ -14,6 +13,7 @@ namespace EgoErpArchiver.ViewModels
 {
     public class ResourcesWorkspaceViewModel : WorkspaceViewModel
     {
+        private readonly ErpFileViewModel _fileViewModel;
         private readonly ErpResourceExporter resourceExporter;
 
         private readonly ObservableCollection<ErpResourceViewModel> resources;
@@ -52,9 +52,13 @@ namespace EgoErpArchiver.ViewModels
         public ICommand ExportAll { get; }
         public ICommand ImportAll { get; }
 
-        public ResourcesWorkspaceViewModel(MainViewModel mainView)
-            : base(mainView)
+        public ResourcesWorkspaceViewModel() : this(new ErpFileViewModel())
         {
+        }
+
+        public ResourcesWorkspaceViewModel(ErpFileViewModel fileViewModel)
+        {
+            _fileViewModel = fileViewModel;
             resourceExporter = new ErpResourceExporter();
             resources = new ObservableCollection<ErpResourceViewModel>();
             _displayName = "All Resources";
@@ -65,16 +69,16 @@ namespace EgoErpArchiver.ViewModels
             ImportAll = new AsyncRelayCommand(ImportAll_Execute, ImportAll_CanExecute);
         }
 
-        public override void LoadData(object data)
+        public override void OnFileOpened()
         {
-            foreach (var resource in ((ErpFile)data).Resources)
+            foreach (var resource in _fileViewModel.File!.Resources)
             {
                 resources.Add(new ErpResourceViewModel(resource, this));
             }
             DisplayName = "All Resources " + resources.Count;
         }
 
-        public override void ClearData()
+        public override void OnFileClosed()
         {
             resources.Clear();
         }
@@ -157,12 +161,13 @@ namespace EgoErpArchiver.ViewModels
             {
                 try
                 {
+                    var file = _fileViewModel.File!;
                     var progDialogVM = new ProgressDialogViewModel()
                     {
-                        PercentageMax = mainView.ErpFile.Resources.Count
+                        PercentageMax = file.Resources.Count
                     };
 
-                    var task = Task.Run(() => resourceExporter.Export(mainView.ErpFile, res[0], progDialogVM.ProgressStatus, progDialogVM.ProgressPercentage));
+                    var task = Task.Run(() => resourceExporter.Export(file, res[0], progDialogVM.ProgressStatus, progDialogVM.ProgressPercentage));
                     await ErpDialog.ShowProgressDialog(progDialogVM);
                     await task;
                 }
@@ -192,13 +197,14 @@ namespace EgoErpArchiver.ViewModels
             {
                 try
                 {
+                    var file = _fileViewModel.File!;
                     var progDialogVM = new ProgressDialogViewModel()
                     {
-                        PercentageMax = mainView.ErpFile.Resources.Count
+                        PercentageMax = file.Resources.Count
                     };
 
                     var files = Directory.GetFiles(res[0], "*", SearchOption.AllDirectories);
-                    var task = Task.Run(() => resourceExporter.Import(mainView.ErpFile, files, progDialogVM.ProgressStatus, progDialogVM.ProgressPercentage));
+                    var task = Task.Run(() => resourceExporter.Import(file, files, progDialogVM.ProgressStatus, progDialogVM.ProgressPercentage));
                     await ErpDialog.ShowProgressDialog(progDialogVM);
                     await task;
 

@@ -12,10 +12,16 @@ using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 
 using EgoErpArchiver.Dialogs.Erp;
 
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
 namespace EgoErpArchiver.ViewModels
 {
     public class PackagesWorkspaceViewModel : WorkspaceViewModel
     {
+        private readonly ErpFileViewModel _fileViewModel;
+        private readonly ResourcesWorkspaceViewModel _resourcesWorkspaceViewModel;
+        private readonly ILogger<PackagesWorkspaceViewModel> _logger;
         private readonly ObservableCollection<ErpPackageViewModel> packages;
         public ObservableCollection<ErpPackageViewModel> Packages
         {
@@ -53,9 +59,17 @@ namespace EgoErpArchiver.ViewModels
         public ICommand ExportAll { get; }
         public ICommand ImportAll { get; }
 
-        public PackagesWorkspaceViewModel(MainViewModel mainView)
-            : base(mainView)
+        public PackagesWorkspaceViewModel() : this(new ErpFileViewModel(), new ResourcesWorkspaceViewModel(),
+            NullLogger<PackagesWorkspaceViewModel>.Instance)
         {
+        }
+
+        public PackagesWorkspaceViewModel(ErpFileViewModel fileViewModel,
+            ResourcesWorkspaceViewModel resourcesWorkspaceViewModel, ILogger<PackagesWorkspaceViewModel> logger)
+        {
+            _fileViewModel = fileViewModel;
+            _resourcesWorkspaceViewModel = resourcesWorkspaceViewModel;
+            _logger = logger;
             packages = new ObservableCollection<ErpPackageViewModel>();
             _displayName = "Pkg Files";
             packagesViewSource = new CollectionView<ErpPackageViewModel>(Packages);
@@ -67,10 +81,10 @@ namespace EgoErpArchiver.ViewModels
             ImportAll = new AsyncRelayCommand(ImportAll_Execute, ImportAll_CanExecute);
         }
 
-        public override void LoadData(object data)
+        public override void OnFileOpened()
         {
-            ClearData();
-            foreach (var resView in ((ResourcesWorkspaceViewModel)data).Resources)
+            OnFileClosed();
+            foreach (var resView in _resourcesWorkspaceViewModel.Resources)
             {
                 var resource = resView.Resource;
                 foreach (var fragment in resource.Fragments)
@@ -83,16 +97,17 @@ namespace EgoErpArchiver.ViewModels
                             Packages.Add(new ErpPackageViewModel(resView, fragment));
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // TODO: log
+                        _logger.LogError(ex, "Failed to detect pkg file {resource} {fragment}.", resource.Identifier,
+                            fragment.Name);
                     }
                 }
             }
             DisplayName = "Pkg Files " + packages.Count;
         }
 
-        public override void ClearData()
+        public override void OnFileClosed()
         {
             packages.Clear();
         }
@@ -186,7 +201,7 @@ namespace EgoErpArchiver.ViewModels
 
                 var task = Task.Run(() =>
                 {
-                    var outputFolder = mainView.FilePath.Replace(".", "_") + "_pkgfiles";
+                    var outputFolder = _fileViewModel.FilePath.Replace(".", "_") + "_pkgfiles";
                     Directory.CreateDirectory(outputFolder);
 
                     for (var i = 0; i < packages.Count;)
@@ -239,7 +254,7 @@ namespace EgoErpArchiver.ViewModels
         {
             try
             {
-                var directory = mainView.FilePath.Replace(".", "_") + "_pkgfiles";
+                var directory = _fileViewModel.FilePath.Replace(".", "_") + "_pkgfiles";
                 if (Directory.Exists(directory) == true)
                 {
                     var success = 0;

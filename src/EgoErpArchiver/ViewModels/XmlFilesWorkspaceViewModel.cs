@@ -12,10 +12,16 @@ using EgoEngineLibrary.Xml;
 
 using EgoErpArchiver.Dialogs.Erp;
 
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
 namespace EgoErpArchiver.ViewModels
 {
     public class XmlFilesWorkspaceViewModel : WorkspaceViewModel
     {
+        private readonly ErpFileViewModel _fileViewModel;
+        private readonly ResourcesWorkspaceViewModel _resourcesWorkspaceViewModel;
+        private readonly ILogger<XmlFilesWorkspaceViewModel> _logger;
         private readonly ObservableCollection<ErpXmlFileViewModel> xmlFiles;
         public ObservableCollection<ErpXmlFileViewModel> XmlFiles
         {
@@ -53,9 +59,16 @@ namespace EgoErpArchiver.ViewModels
         public ICommand ExportAll { get; }
         public ICommand ImportAll { get; }
 
-        public XmlFilesWorkspaceViewModel(MainViewModel mainView)
-            : base(mainView)
+        public XmlFilesWorkspaceViewModel() : this(new ErpFileViewModel(), new ResourcesWorkspaceViewModel(),
+            NullLogger<XmlFilesWorkspaceViewModel>.Instance)
         {
+        }
+
+        public XmlFilesWorkspaceViewModel(ErpFileViewModel fileViewModel, ResourcesWorkspaceViewModel resourcesWorkspaceViewModel, ILogger<XmlFilesWorkspaceViewModel> logger)
+        {
+            _fileViewModel = fileViewModel;
+            _resourcesWorkspaceViewModel = resourcesWorkspaceViewModel;
+            _logger = logger;
             xmlFiles = new ObservableCollection<ErpXmlFileViewModel>();
             _displayName = "XML Files";
             xmlFilesViewSource = new CollectionView<ErpXmlFileViewModel>(XmlFiles);
@@ -67,10 +80,10 @@ namespace EgoErpArchiver.ViewModels
             ImportAll = new AsyncRelayCommand(ImportAll_Execute, ImportAll_CanExecute);
         }
 
-        public override void LoadData(object data)
+        public override void OnFileOpened()
         {
-            ClearData();
-            foreach (var resView in ((ResourcesWorkspaceViewModel)data).Resources)
+            OnFileClosed();
+            foreach (var resView in _resourcesWorkspaceViewModel.Resources)
             {
                 var resource = resView.Resource;
                 foreach (var fragment in resource.Fragments)
@@ -83,16 +96,17 @@ namespace EgoErpArchiver.ViewModels
                             XmlFiles.Add(new ErpXmlFileViewModel(resView, fragment));
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // TODO: log
+                        _logger.LogError(ex, "Failed to detect xml file {resource} {fragment}.", resource.Identifier,
+                            fragment.Name);
                     }
                 }
             }
             DisplayName = "XML Files " + xmlFiles.Count;
         }
 
-        public override void ClearData()
+        public override void OnFileClosed()
         {
             xmlFiles.Clear();
         }
@@ -186,7 +200,7 @@ namespace EgoErpArchiver.ViewModels
 
                 var task = Task.Run(() =>
                 {
-                    var outputFolder = mainView.FilePath.Replace(".", "_") + "_xmlfiles";
+                    var outputFolder = _fileViewModel.FilePath.Replace(".", "_") + "_xmlfiles";
                     Directory.CreateDirectory(outputFolder);
 
                     for (var i = 0; i < xmlFiles.Count;)
@@ -239,7 +253,7 @@ namespace EgoErpArchiver.ViewModels
         {
             try
             {
-                var directory = mainView.FilePath.Replace(".", "_") + "_xmlfiles";
+                var directory = _fileViewModel.FilePath.Replace(".", "_") + "_xmlfiles";
                 if (Directory.Exists(directory) == true)
                 {
                     var success = 0;
