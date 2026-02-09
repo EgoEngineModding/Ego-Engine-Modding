@@ -1,4 +1,6 @@
-﻿namespace EgoErpArchiver.ViewModels
+﻿using EgoEngineLibrary.Frontend.ViewModels;
+
+namespace EgoErpArchiver.ViewModels
 {
     public abstract class WorkspaceViewModel : ViewModelBase
     {

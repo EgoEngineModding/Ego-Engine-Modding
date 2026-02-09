@@ -5,11 +5,14 @@ using CommunityToolkit.Mvvm.Input;
 using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
+using EgoEngineLibrary.Frontend.ViewModels;
 
 namespace EgoErpArchiver.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
+        public SettingsViewModel SettingsViewModel { get; }
+
         #region Data
         string windowTitle;
         string filePath;
@@ -70,8 +73,9 @@ namespace EgoErpArchiver.ViewModels
         #endregion
 
 
-        public MainViewModel()
+        public MainViewModel(SettingsViewModel settingsViewModel)
         {
+            SettingsViewModel = settingsViewModel;
             this.DisplayName = Properties.Resources.AppTitleLong;
 
             resourcesWorkspace = new ResourcesWorkspaceViewModel(this);
@@ -82,11 +86,6 @@ namespace EgoErpArchiver.ViewModels
             // Commands
             openCommand = new AsyncRelayCommand(OpenCommand_Execute);
             saveCommand = new AsyncRelayCommand(SaveCommand_Execute, SaveCommand_CanExecute);
-
-            if (string.IsNullOrEmpty(Properties.Settings.Default.F12016Dir))
-            {
-                Properties.Settings.Default.F12016Dir = string.Empty;
-            }
         }
 
         #region MainMenu
@@ -141,7 +140,7 @@ namespace EgoErpArchiver.ViewModels
                 packagesWorkspace.LoadData(resourcesWorkspace);
                 texturesWorkspace.LoadData(resourcesWorkspace);
                 xmlFilesWorkspace.LoadData(resourcesWorkspace);
-                SelectTab(Properties.Settings.Default.StartingTab);
+                SelectTab(SettingsViewModel.StartingTab);
                 DisplayName = Properties.Resources.AppTitleShort + " - " + Path.GetFileName(filePath);
             }
             catch (Exception excp)

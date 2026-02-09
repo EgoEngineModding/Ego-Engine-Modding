@@ -1,7 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using EgoErpArchiver.ViewModels;
+
+using EgoEngineLibrary.Frontend.ViewModels;
 
 namespace EgoErpArchiver;
 

@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace EgoErpArchiver.ViewModels;
+namespace EgoEngineLibrary.Frontend.ViewModels;
 
 public abstract class ViewModelBase : ObservableObject
 {

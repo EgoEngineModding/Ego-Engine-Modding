@@ -2,6 +2,7 @@
 
 using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Formats.Erp;
+using EgoEngineLibrary.Frontend.ViewModels;
 using EgoEngineLibrary.Xml;
 
 namespace EgoErpArchiver.ViewModels

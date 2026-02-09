@@ -1,14 +1,9 @@
 ﻿using System.Diagnostics;
-
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Platform.Storage;
-
 using AvaloniaEdit.Folding;
-
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
-
 using EgoErpArchiver.Dialogs.Erp;
 using EgoErpArchiver.ViewModels;
 
@@ -34,48 +29,6 @@ namespace EgoErpArchiver.Views
         {
             base.OnLoaded(e);
             ViewModel?.ParseCommandLineArguments();
-        }
-
-        private async void setDirectoryF12016MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            var topLevel = TopLevel.GetTopLevel(this);
-            if (topLevel is null)
-            {
-                return;
-            }
-
-            var options = new FolderPickerOpenOptions
-            {
-                Title = "Select the location of your game:",
-                AllowMultiple = false,
-            };
-
-            var res = await topLevel.StorageProvider.OpenFolderPickerAsync(options);
-            if (res.Count <= 0)
-            {
-                return;
-            }
-
-            Properties.Settings.Default.F12016Dir = res[0].Path.LocalPath + Path.DirectorySeparatorChar;
-            Properties.Settings.Default.Save();
-        }
-
-        private void cmdUp_Click(object sender, RoutedEventArgs e)
-        {
-            if (Properties.Settings.Default.StartingTab == mainTabControl.Items.Count - 1)
-                return;
-
-            ++Properties.Settings.Default.StartingTab;
-            Properties.Settings.Default.Save();
-        }
-
-        private void cmdDown_Click(object sender, RoutedEventArgs e)
-        {
-            if (((int)Properties.Settings.Default["StartingTab"]) == 0)
-                return;
-
-            --Properties.Settings.Default.StartingTab;
-            Properties.Settings.Default.Save();
         }
 
         private void websiteMenuItem_Click(object sender, RoutedEventArgs e)

@@ -1,16 +1,17 @@
 ﻿using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-
 using BCnEncoder.Decoder;
-
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
-
 using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Archive.Erp.Data;
 using EgoEngineLibrary.Frontend.Dialogs.File;
+using EgoEngineLibrary.Frontend.ViewModels;
 using EgoEngineLibrary.Graphics;
 using EgoEngineLibrary.Graphics.Dds;
+using EgoErpArchiver.Configuration;
+using Microsoft.Extensions.Options;
 
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -19,6 +20,7 @@ namespace EgoErpArchiver.ViewModels
     public class ErpTextureViewModel : ViewModelBase
     {
         private readonly ErpResourceViewModel resView;
+        private readonly IOptions<SettingsConfig> _settingsOptions;
 
         public ErpResource Resource
         {
@@ -147,6 +149,7 @@ namespace EgoErpArchiver.ViewModels
         public ErpTextureViewModel(ErpResourceViewModel resView)
         {
             this.resView = resView;
+            _settingsOptions = Ioc.Default.GetRequiredService<IOptions<SettingsConfig>>();
             _width = 0;
             _height = 0;
 
@@ -282,7 +285,7 @@ namespace EgoErpArchiver.ViewModels
                     throw new Exception("Image format not supported!");
             }
 
-            var mipMapFullFileName = Path.Combine(Properties.Settings.Default.F12016Dir, srvRes.SurfaceRes.Frag2.MipMapFileName);
+            var mipMapFullFileName = Path.Combine(_settingsOptions.Value.F1Directory, srvRes.SurfaceRes.Frag2.MipMapFileName);
             var foundMipMapFile = File.Exists(mipMapFullFileName);
             var hasValidMips = srvRes.SurfaceRes.HasValidMips;
             if (srvRes.SurfaceRes.HasMips)
@@ -369,7 +372,7 @@ namespace EgoErpArchiver.ViewModels
                         Title = "Select the mipmaps save location and file name",
                         FileName = Path.GetFileName(srvRes.SurfaceRes.Frag2.MipMapFileName)
                     };
-                    var mipFullPath = Path.GetDirectoryName(Path.Combine(Properties.Settings.Default.F12016Dir, srvRes.SurfaceRes.Frag2.MipMapFileName));
+                    var mipFullPath = Path.GetDirectoryName(Path.Combine(_settingsOptions.Value.F1Directory, srvRes.SurfaceRes.Frag2.MipMapFileName));
                     if (Directory.Exists(mipFullPath))
                     {
                         sdialog.InitialDirectory = mipFullPath;

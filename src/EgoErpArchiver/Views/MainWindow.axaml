@@ -64,14 +64,16 @@
             </MenuItem>
             <MenuItem Header="_Settings">
                 <MenuItem Header="Game _Directory">
-                    <MenuItem Header="{Binding Source={x:Static properties:Settings.Default}, Path=F12016Dir}"></MenuItem>
-                    <MenuItem Name="setDirectoryF12016MenuItem" Header="_Set Directory" Click="setDirectoryF12016MenuItem_Click"></MenuItem>
+                    <MenuItem Header="{Binding SettingsViewModel.F1Directory}"></MenuItem>
+                    <MenuItem Header="_Set Directory" Command="{Binding SettingsViewModel.SetF1DirectoryCommand}"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="Starting _Tab">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock x:Name="startingTabTextBox" x:FieldModifier="private" Margin="0,1,0,0" Width="17" Text="{Binding Source={x:Static properties:Settings.Default}, Path=StartingTab}" />
-                        <Button x:Name="cmdUp" x:FieldModifier="private" Margin="0,0,0,0" Content="˄" Width="20" Click="cmdUp_Click" />
-                        <Button x:Name="cmdDown" x:FieldModifier="private" Margin="0,0,0,0"  Content="˅" Width="20" Click="cmdDown_Click" />
+                        <NumericUpDown
+                            Value="{Binding SettingsViewModel.StartingTab}"
+                            Minimum="0"
+                            Maximum="3"
+                            Increment="1"></NumericUpDown>
                     </StackPanel>
                 </MenuItem>
             </MenuItem>
@@ -82,8 +84,9 @@
             </MenuItem>
         </Menu>
 
-        <TabControl SelectedIndex="{Binding SelectedTabIndex}" Name="mainTabControl" SelectionChanged="mainTabControl_SelectionChanged">
-            <TabItem Header="{Binding ResourcesWorkspace.DisplayName}">
+        <TabControl SelectedIndex="{Binding SelectedTabIndex}" Name="mainTabControl"
+                    SelectionChanged="mainTabControl_SelectionChanged" Focusable="False">
+            <TabItem Header="{Binding ResourcesWorkspace.DisplayName}" Focusable="False">
                 <DockPanel DataContext="{Binding Path=ResourcesWorkspace}">
                     <DataGrid Name="resourcesDataGrid" 
                               AutoGenerateColumns="False" 
@@ -127,7 +130,7 @@
                     </DataGrid>
                 </DockPanel>
             </TabItem>
-            <TabItem Header="{Binding PackagesWorkspace.DisplayName}">
+            <TabItem Header="{Binding PackagesWorkspace.DisplayName}" Focusable="False">
                 <Grid DataContext="{Binding Path=PackagesWorkspace}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="240" />
@@ -160,7 +163,7 @@
                     </DockPanel>
                 </Grid>
             </TabItem>
-            <TabItem Header="{Binding TexturesWorkspace.DisplayName}">
+            <TabItem Header="{Binding TexturesWorkspace.DisplayName}" Focusable="False">
                 <Grid DataContext="{Binding Path=TexturesWorkspace}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="240" />
@@ -223,7 +226,7 @@
                     </DockPanel>
                 </Grid>
             </TabItem>
-            <TabItem Header="{Binding XmlFilesWorkspace.DisplayName}">
+            <TabItem Header="{Binding XmlFilesWorkspace.DisplayName}" Focusable="False">
                 <Grid DataContext="{Binding Path=XmlFilesWorkspace}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="240" />

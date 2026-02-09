@@ -1,5 +1,7 @@
 ﻿using System.Text;
 
+using EgoEngineLibrary.Frontend.ViewModels;
+
 namespace EgoErpArchiver.ViewModels
 {
     public class ProgressDialogViewModel : ViewModelBase
