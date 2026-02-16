@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>$(TargetFramework)-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <UseWPF>true</UseWPF>
     <AssemblyName>Ego PSSG Editor</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   
   <PropertyGroup>
-    <ApplicationIcon>Resources\Ryder25.ico</ApplicationIcon>
+    <ApplicationIcon>Assets\Ryder25.ico</ApplicationIcon>
     <Copyright>Copyright © Petar Tasev 2010 - 2024</Copyright>
     <Authors>Petar Tasev</Authors>
     <Company>Petar Tasev</Company>
@@ -32,29 +33,28 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  
+
   <ItemGroup>
-    <Resource Include="Resources\disk.png" />
-    <Resource Include="Resources\folder_image.png" />
-    <Resource Include="Resources\image_add.png" />
+    <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
   
   <ItemGroup>
+    <ProjectReference Include="..\EgoEngineLibrary.Frontend.Avalonia\EgoEngineLibrary.Frontend.Avalonia.csproj" />
     <ProjectReference Include="..\EgoEngineLibrary\EgoEngineLibrary.csproj" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <Compile Update="Properties\Settings.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Include="Avalonia.Diagnostics">
+        <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+        <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="ObservableCollections" />
   </ItemGroup>
 
   <ItemGroup>

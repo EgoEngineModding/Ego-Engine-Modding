@@ -1,0 +1,23 @@
+﻿using EgoEngineLibrary.Graphics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace EgoPssgEditor.ViewModels
+{
+    public abstract class WorkspaceViewModel : ViewModelBase
+    {
+        protected readonly MainViewModel mainView;
+
+        public WorkspaceViewModel(MainViewModel mainView)
+        {
+            this.mainView = mainView;
+        }
+
+        public abstract void LoadData(object data);
+
+        public abstract void ClearData();
+    }
+}
