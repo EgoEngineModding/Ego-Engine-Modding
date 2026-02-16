@@ -51,6 +51,14 @@ public class VcQuadTreeTypeInfo : IQuadTreeTypeInfo
                 ForceMaxMaterials = false,
                 SupportsSheetMaterials = true,
             },
+            [VcQuadTreeType.Dirt2] = new()
+            {
+                Type = VcQuadTreeType.Dirt2,
+                NegativeMaterials = true,
+                MaxMaterials = 16,
+                ForceMaxMaterials = false,
+                SupportsSheetMaterials = true,
+            },
             [VcQuadTreeType.Dirt3] = new()
             {
                 Type = VcQuadTreeType.Dirt3,

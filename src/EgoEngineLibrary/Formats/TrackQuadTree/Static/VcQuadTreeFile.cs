@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -28,7 +24,8 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
         var header = Unsafe.As<byte, VcQuadTreeHeader>(ref bytes[0]);
         if (header.NumMaterials < 0)
         {
-            return VcQuadTreeTypeInfo.Get(VcQuadTreeType.RaceDriverGrid);
+            // No way to tell if RD: Grid from vcqtc alone
+            return VcQuadTreeTypeInfo.Get(VcQuadTreeType.Dirt2);
         }
 
         return header.NumMaterials == 16
@@ -48,18 +45,26 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
         ArgumentOutOfRangeException.ThrowIfGreaterThan(data.Materials.Count, typeInfo.MaxMaterials, nameof(data.Materials));
     }
 
+    // Method used for testing, not final product
     public static VcQuadTreeFile Create(QuadTreeMeshData data)
+    {
+        return Create(data, data.BoundsMin, data.BoundsMax);
+    }
+
+    public static VcQuadTreeFile Create(QuadTreeMeshData data, Vector3 trackBoundsMin, Vector3 trackBoundsMax)
     {
         Validate(data, out var typeInfo);
 
-        var quadTree = VcQuadTree.Create(data);
+        var quadTree = typeInfo.Type is VcQuadTreeType.RaceDriverGrid
+            ? VcQuadTree.Create(data, trackBoundsMin, trackBoundsMax)
+            : VcQuadTree.Create(data);
         var nodes = quadTree.Traverse().ToArray();
         Debug.Assert(nodes.Length <= VcQuadTreeNode.MaxNodes);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(nodes.Length, VcQuadTreeNode.MaxNodes, nameof(quadTree));
 
         return typeInfo.Type switch
         {
-            VcQuadTreeType.RaceDriverGrid or VcQuadTreeType.Dirt3 =>
+            VcQuadTreeType.RaceDriverGrid or VcQuadTreeType.Dirt2 or VcQuadTreeType.Dirt3 =>
                 Create<VcQuadTreeTriangle1>(quadTree, nodes, typeInfo),
             VcQuadTreeType.DirtShowdown => Create<VcQuadTreeTriangle2>(quadTree, nodes, typeInfo),
             _ => throw new NotSupportedException($"Type {typeInfo} is not supported.")
@@ -232,7 +237,8 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
     {
         return TypeInfo.Type switch
         {
-            VcQuadTreeType.RaceDriverGrid or VcQuadTreeType.Dirt3 => GetTriangles<VcQuadTreeTriangle1>(),
+            VcQuadTreeType.RaceDriverGrid or VcQuadTreeType.Dirt2 or VcQuadTreeType.Dirt3 =>
+                GetTriangles<VcQuadTreeTriangle1>(),
             VcQuadTreeType.DirtShowdown => GetTriangles<VcQuadTreeTriangle2>(),
             _ => throw new NotSupportedException($"Type {TypeInfo} is not supported.")
         };
@@ -266,8 +272,13 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
         {
             return new VcQuadTreeFile(_bytes.ToArray(), TypeInfo);
         }
-
-        return (TypeInfo.Type, targetTypeInfo.Type) switch
+        
+        // Adjust types for the sake of simplifying switch
+        var sourceType = TypeInfo.Type is VcQuadTreeType.Dirt2 ? VcQuadTreeType.RaceDriverGrid : TypeInfo.Type;
+        var targetType = targetTypeInfo.Type is VcQuadTreeType.Dirt2
+            ? VcQuadTreeType.RaceDriverGrid
+            : targetTypeInfo.Type;
+        return (sourceType, targetType) switch
         {
             (VcQuadTreeType.RaceDriverGrid, VcQuadTreeType.Dirt3)
                 or (VcQuadTreeType.Dirt3, VcQuadTreeType.RaceDriverGrid) =>
@@ -380,6 +391,7 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
         switch (TypeInfo.Type)
         {
             case VcQuadTreeType.RaceDriverGrid:
+            case VcQuadTreeType.Dirt2:
             case VcQuadTreeType.Dirt3:
                 DumpObj<VcQuadTreeTriangle1>(writer);
                 break;
@@ -415,7 +427,8 @@ public class VcQuadTreeFile : QuadTreeFile<VcQuadTreeTypeInfo, VcQuadTreeHeader,
     {
         return TypeInfo.Type switch
         {
-            VcQuadTreeType.RaceDriverGrid or VcQuadTreeType.Dirt3 => GetNodeTriangles<VcQuadTreeTriangle1>(nodeIndex),
+            VcQuadTreeType.RaceDriverGrid or VcQuadTreeType.Dirt2 or VcQuadTreeType.Dirt3 =>
+                GetNodeTriangles<VcQuadTreeTriangle1>(nodeIndex),
             VcQuadTreeType.DirtShowdown => GetNodeTriangles<VcQuadTreeTriangle2>(nodeIndex),
             _ => throw new NotSupportedException($"Type {TypeInfo} is not supported.")
         };

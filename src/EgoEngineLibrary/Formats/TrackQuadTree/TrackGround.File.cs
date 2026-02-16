@@ -1,8 +1,6 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 using EgoEngineLibrary.Archive.Jpk;
@@ -22,20 +20,28 @@ public partial class TrackGround
             throw new InvalidOperationException("Cannot identify track ground type without a valid vcqtc file.");
         }
 
-        return VcQuadTreeFile.Identify(entry.Data);
+        var info = VcQuadTreeFile.Identify(entry.Data);
+        if (info.Type is VcQuadTreeType.Dirt2 && TryGetQtInfo(jpk) is null)
+        {
+            return VcQuadTreeTypeInfo.Get(VcQuadTreeType.RaceDriverGrid);
+        }
+
+        return info;
     }
 
     public static TrackGround Load(JpkFile jpk, VcQuadTreeTypeInfo? typeInfo = null)
     {
         typeInfo ??= Identify(jpk);
         
-        var info = jpk.Entries.FirstOrDefault(x => x.Name.Equals(InfoEntryName));
-        if (info is null)
+        // Some files don't have qt.info (RD:G) so we'll compute bounds from entries
+        var info = TryGetQtInfo(jpk);
+        if (info is null && typeInfo.Type is not VcQuadTreeType.RaceDriverGrid)
         {
             throw new FileNotFoundException("qt.info not found in jpk.");
         }
 
-        var bounds = MemoryMarshal.Cast<byte, Vector3>(info.Data.AsSpan(0, 24));
+        var minBounds = new Vector3(float.MaxValue);
+        var maxBounds = new Vector3(float.MinValue);
         var maxSubSubDivisions = new int[TotalCells];
         foreach (var entry in jpk.Entries)
         {
@@ -51,9 +57,21 @@ public partial class TrackGround
             {
                 maxSubSubDivisions[topLevelCell] = subSubDivisions;
             }
+
+            if (info is null)
+            {
+                minBounds = Vector3.Min(minBounds, GetMinBounds(entry.Data));
+                maxBounds = Vector3.Max(maxBounds, GetMaxBounds(entry.Data));
+            }
         }
 
-        var ground = new TrackGround(bounds[0], bounds[1], maxSubSubDivisions);
+        if (info is not null)
+        {
+            minBounds = GetMinBounds(info.Data);
+            maxBounds = GetMaxBounds(info.Data);
+        }
+
+        var ground = new TrackGround(minBounds, maxBounds, maxSubSubDivisions);
         foreach (var entry in jpk.Entries)
         {
             if (entry.Name.Equals(InfoEntryName))
@@ -72,14 +90,25 @@ public partial class TrackGround
             jpk.Entries.Where(x => !x.Name.Equals(InfoEntryName)).Select(x => GetDataFromName(x.Name))));
 
         return ground;
+
+        Vector3 GetMinBounds(byte[] data)
+        {
+            return Unsafe.As<byte, Vector3>(ref data[0]);
+        }
+        Vector3 GetMaxBounds(byte[] data)
+        {
+            return Unsafe.As<byte, Vector3>(ref data[12]);
+        }
     }
 
     public JpkFile Save()
     {
+        VcQuadTreeType? type = null;
         var jpk = new JpkFile();
         foreach (var leaf in TraverseGrid())
         {
             var (qt, x, z, level) = leaf;
+            type ??= qt.TypeInfo.Type;
             var name = GetNameFromData(x, z, level);
 
             var entry = new JpkEntry(jpk) { Name = name, Data = qt.Bytes };
@@ -87,13 +116,21 @@ public partial class TrackGround
             Debug.WriteLine($"{entry.Name} {entry.Data.Length} {x} {z} {level}");
         }
 
-        var infoEntry = new JpkEntry(jpk) { Name = InfoEntryName, Data = new byte[24] };
-        var bounds = MemoryMarshal.Cast<byte, Vector3>(infoEntry.Data.AsSpan(0, 24));
-        bounds[0] = BoundsMin;
-        bounds[1] = BoundsMax;
-        jpk.Entries.Add(infoEntry);
+        if (type is not VcQuadTreeType.RaceDriverGrid)
+        {
+            var infoEntry = new JpkEntry(jpk) { Name = InfoEntryName, Data = new byte[24] };
+            var bounds = MemoryMarshal.Cast<byte, Vector3>(infoEntry.Data.AsSpan(0, 24));
+            bounds[0] = BoundsMin;
+            bounds[1] = BoundsMax;
+            jpk.Entries.Add(infoEntry);
+        }
 
         return jpk;
+    }
+
+    private static JpkEntry? TryGetQtInfo(JpkFile jpk)
+    {
+        return jpk.Entries.FirstOrDefault(x => x.Name.Equals(InfoEntryName));
     }
 
     private static (int X, int Z, int Level) GetDataFromName(string name)

@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-
-using EgoEngineLibrary.Formats.TrackQuadTree.Static;
+﻿using EgoEngineLibrary.Formats.TrackQuadTree.Static;
 
 using SharpGLTF.Runtime;
 using SharpGLTF.Schema2;
@@ -47,6 +44,11 @@ public static class GltfTrackGroundConverter
             var decoder = gltfMesh.Decode();
             foreach (var p in decoder.Primitives)
             {
+                if (!p.TriangleIndices.Any())
+                {
+                    continue;
+                }
+                
                 var materialName = p.Material?.Name;
                 if (materialName is null || materialName.Length != 4)
                 {
