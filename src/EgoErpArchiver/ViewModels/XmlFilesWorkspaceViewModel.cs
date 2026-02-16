@@ -1,7 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows.Input;
-
-using ActiproSoftware.UI.Avalonia.Data;
+﻿using System.Windows.Input;
 
 using CommunityToolkit.Mvvm.Input;
 
@@ -15,42 +12,37 @@ using EgoErpArchiver.Dialogs.Erp;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
+using ObservableCollections;
+
 namespace EgoErpArchiver.ViewModels
 {
-    public class XmlFilesWorkspaceViewModel : WorkspaceViewModel
+    public sealed class XmlFilesWorkspaceViewModel : WorkspaceViewModel
     {
         private readonly ErpFileViewModel _fileViewModel;
         private readonly ResourcesWorkspaceViewModel _resourcesWorkspaceViewModel;
         private readonly ILogger<XmlFilesWorkspaceViewModel> _logger;
-        private readonly ObservableCollection<ErpXmlFileViewModel> xmlFiles;
-        public ObservableCollection<ErpXmlFileViewModel> XmlFiles
-        {
-            get { return xmlFiles; }
-        }
+        private readonly ObservableList<ErpXmlFileViewModel> _xmlFiles;
+        private readonly ISynchronizedView<ErpXmlFileViewModel, ErpXmlFileViewModel> _xmlFilesView;
+        public NotifyCollectionChangedSynchronizedViewList<ErpXmlFileViewModel> XmlFiles { get; }
 
-        private string _displayName;
         public override string DisplayName
         {
-            get { return _displayName; }
+            get;
             protected set
             {
-                _displayName = value;
-                OnPropertyChanged(nameof(DisplayName));
+                field = value;
+                OnPropertyChanged();
             }
         }
 
-        private readonly CollectionView<ErpXmlFileViewModel> xmlFilesViewSource;
-        private string filterText;
         public string FilterText
         {
-            get
-            {
-                return filterText;
-            }
+            get;
             set
             {
-                filterText = value;
-                xmlFilesViewSource.Refresh();
+                field = value;
+                OnPropertyChanged();
+                _xmlFilesView.AttachFilter(XmlFilesFilter);
             }
         }
 
@@ -69,10 +61,12 @@ namespace EgoErpArchiver.ViewModels
             _fileViewModel = fileViewModel;
             _resourcesWorkspaceViewModel = resourcesWorkspaceViewModel;
             _logger = logger;
-            xmlFiles = new ObservableCollection<ErpXmlFileViewModel>();
-            _displayName = "XML Files";
-            xmlFilesViewSource = new CollectionView<ErpXmlFileViewModel>(XmlFiles);
-            xmlFilesViewSource.Filter += XmlFilesFilter;
+            DisplayName = "XML Files";
+
+            _xmlFiles = [];
+            _xmlFilesView = _xmlFiles.CreateView(x => x);
+            _xmlFilesView.AttachFilter(XmlFilesFilter);
+            XmlFiles = _xmlFilesView.ToNotifyCollectionChanged(SynchronizationContextCollectionEventDispatcher.Current);
 
             Export = new AsyncRelayCommand<ErpXmlFileViewModel>(Export_Execute, Export_CanExecute);
             Import = new AsyncRelayCommand<ErpXmlFileViewModel>(Import_Execute, Import_CanExecute);
@@ -93,7 +87,7 @@ namespace EgoErpArchiver.ViewModels
                         using var ds = fragment.GetDecompressDataStream(true);
                         if (XmlFile.IsXmlFile(ds))
                         {
-                            XmlFiles.Add(new ErpXmlFileViewModel(resView, fragment));
+                            _xmlFiles.Add(new ErpXmlFileViewModel(resView, fragment));
                         }
                     }
                     catch (Exception ex)
@@ -103,18 +97,18 @@ namespace EgoErpArchiver.ViewModels
                     }
                 }
             }
-            DisplayName = "XML Files " + xmlFiles.Count;
+            DisplayName = "XML Files " + _xmlFiles.Count;
         }
 
         public override void OnFileClosed()
         {
-            xmlFiles.Clear();
+            _xmlFiles.Clear();
         }
 
-        private bool XmlFilesFilter(object item)
+        private bool XmlFilesFilter(ErpXmlFileViewModel item)
         {
             return string.IsNullOrEmpty(FilterText)
-                || (item as ErpXmlFileViewModel).DisplayName.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
+                || item.DisplayName.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
         }
 
         private bool Export_CanExecute(ErpXmlFileViewModel? parameter)
@@ -184,7 +178,7 @@ namespace EgoErpArchiver.ViewModels
 
         private bool ExportAll_CanExecute()
         {
-            return xmlFiles.Count > 0;
+            return _xmlFiles.Count > 0;
         }
 
         private async Task ExportAll_Execute()
@@ -195,7 +189,7 @@ namespace EgoErpArchiver.ViewModels
                 var fail = 0;
                 var progDialogVM = new ProgressDialogViewModel()
                 {
-                    PercentageMax = xmlFiles.Count
+                    PercentageMax = _xmlFiles.Count
                 };
 
                 var task = Task.Run(() =>
@@ -203,10 +197,10 @@ namespace EgoErpArchiver.ViewModels
                     var outputFolder = _fileViewModel.FilePath.Replace(".", "_") + "_xmlfiles";
                     Directory.CreateDirectory(outputFolder);
 
-                    for (var i = 0; i < xmlFiles.Count;)
+                    for (var i = 0; i < _xmlFiles.Count;)
                     {
-                        var resource = xmlFiles[i].Resource;
-                        var fragment = xmlFiles[i].Fragment;
+                        var resource = _xmlFiles[i].Resource;
+                        var fragment = _xmlFiles[i].Fragment;
                         var folderPath = Path.Combine(outputFolder, resource.Folder);
                         var fileName = ErpResourceExporter.GetFragmentFileName(resource, fragment);
                         var filePath = Path.Combine(folderPath, fileName) + ".xml";
@@ -218,7 +212,7 @@ namespace EgoErpArchiver.ViewModels
 
                             using var fs = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
                             using var sw = new StreamWriter(fs);
-                            xmlFiles[i].ExportXML(sw);
+                            _xmlFiles[i].ExportXML(sw);
 
                             progDialogVM.ProgressStatus.Report("SUCCESS" + Environment.NewLine);
                             ++success;
@@ -246,7 +240,7 @@ namespace EgoErpArchiver.ViewModels
 
         private bool ImportAll_CanExecute()
         {
-            return xmlFiles.Count > 0;
+            return _xmlFiles.Count > 0;
         }
 
         private async Task ImportAll_Execute()
@@ -263,15 +257,15 @@ namespace EgoErpArchiver.ViewModels
 
                     var progDialogVM = new ProgressDialogViewModel()
                     {
-                        PercentageMax = xmlFiles.Count
+                        PercentageMax = _xmlFiles.Count
                     };
 
                     var task = Task.Run(() =>
                     {
-                        for (var i = 0; i < xmlFiles.Count;)
+                        for (var i = 0; i < _xmlFiles.Count;)
                         {
-                            var resource = xmlFiles[i].Resource;
-                            var fragment = xmlFiles[i].Fragment;
+                            var resource = _xmlFiles[i].Resource;
+                            var fragment = _xmlFiles[i].Fragment;
                             var folderPath = Path.Combine(directory, resource.Folder);
                             var fileName = ErpResourceExporter.GetFragmentFileName(resource, fragment);
                             var expFilePath = Path.Combine(folderPath, fileName) + ".xml";
@@ -284,12 +278,12 @@ namespace EgoErpArchiver.ViewModels
                                     if (Path.Equals(filePath, expFilePath))
                                     {
                                         using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                                        xmlFiles[i].ImportXML(fs);
+                                        _xmlFiles[i].ImportXML(fs);
 
-                                        if (xmlFiles[i].IsSelected)
+                                        if (_xmlFiles[i].IsSelected)
                                         {
-                                            xmlFiles[i].IsSelected = false;
-                                            xmlFiles[i].IsSelected = true;
+                                            _xmlFiles[i].IsSelected = false;
+                                            _xmlFiles[i].IsSelected = true;
                                         }
                                         found = true;
                                         break;

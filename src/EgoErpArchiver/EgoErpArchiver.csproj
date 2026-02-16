@@ -42,7 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ActiproSoftware.Controls.Avalonia" />
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.AvaloniaEdit" />
     <PackageReference Include="Avalonia.Controls.DataGrid" />
@@ -55,6 +54,7 @@
         <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="ObservableCollections" />
     <PackageReference Include="Serilog.Extensions.Logging" />
     <PackageReference Include="Serilog.Sinks.File" />
   </ItemGroup>

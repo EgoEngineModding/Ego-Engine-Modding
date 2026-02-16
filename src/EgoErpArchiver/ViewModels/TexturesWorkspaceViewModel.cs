@@ -1,7 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows.Input;
-
-using ActiproSoftware.UI.Avalonia.Data;
+﻿using System.Windows.Input;
 
 using CommunityToolkit.Mvvm.Input;
 
@@ -10,41 +7,36 @@ using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 
 using EgoErpArchiver.Dialogs.Erp;
 
+using ObservableCollections;
+
 namespace EgoErpArchiver.ViewModels
 {
-    public class TexturesWorkspaceViewModel : WorkspaceViewModel
+    public sealed class TexturesWorkspaceViewModel : WorkspaceViewModel
     {
         private readonly ErpFileViewModel _fileViewModel;
         private readonly ResourcesWorkspaceViewModel _resourcesWorkspaceViewModel;
-        private readonly ObservableCollection<ErpTextureViewModel> textures;
-        public ObservableCollection<ErpTextureViewModel> Textures
-        {
-            get { return textures; }
-        }
+        private readonly ObservableList<ErpTextureViewModel> _textures;
+        private readonly ISynchronizedView<ErpTextureViewModel, ErpTextureViewModel> _texturesView;
+        public NotifyCollectionChangedSynchronizedViewList<ErpTextureViewModel> Textures { get; }
 
-        private string _displayName;
         public override string DisplayName
         {
-            get { return _displayName; }
+            get;
             protected set
             {
-                _displayName = value;
-                OnPropertyChanged(nameof(DisplayName));
+                field = value;
+                OnPropertyChanged();
             }
         }
 
-        private readonly CollectionView<ErpTextureViewModel> texturesViewSource;
-        private string filterText;
-        public string FilterText
+        public string? FilterText
         {
-            get
-            {
-                return filterText;
-            }
+            get;
             set
             {
-                filterText = value;
-                texturesViewSource.Refresh();
+                field = value;
+                OnPropertyChanged();
+                _texturesView.AttachFilter(TextureFilter);
             }
         }
 
@@ -61,10 +53,12 @@ namespace EgoErpArchiver.ViewModels
         {
             _fileViewModel = fileViewModel;
             _resourcesWorkspaceViewModel = resourcesWorkspaceViewModel;
-            textures = new ObservableCollection<ErpTextureViewModel>();
-            _displayName = "Textures";
-            texturesViewSource = new CollectionView<ErpTextureViewModel>(Textures);
-            texturesViewSource.Filter += TextureFilter;
+            DisplayName = "Textures";
+            
+            _textures = [];
+            _texturesView = _textures.CreateView(x => x);
+            _texturesView.AttachFilter(TextureFilter);
+            Textures = _texturesView.ToNotifyCollectionChanged(SynchronizationContextCollectionEventDispatcher.Current);
 
             Export = new AsyncRelayCommand<ErpTextureViewModel>(Export_Execute, Export_CanExecute);
             Import = new AsyncRelayCommand<ErpTextureViewModel>(Import_Execute, Import_CanExecute);
@@ -79,21 +73,21 @@ namespace EgoErpArchiver.ViewModels
             {
                 if (resView.Resource.ResourceType == "GfxSRVResource")
                 {
-                    Textures.Add(new ErpTextureViewModel(resView));
+                    _textures.Add(new ErpTextureViewModel(resView));
                 }
             }
-            DisplayName = "Textures " + textures.Count;
+            DisplayName = "Textures " + _textures.Count;
         }
 
         public override void OnFileClosed()
         {
-            textures.Clear();
+            _textures.Clear();
         }
 
-        private bool TextureFilter(object item)
+        private bool TextureFilter(ErpTextureViewModel item)
         {
             return string.IsNullOrEmpty(FilterText)
-                || (item as ErpTextureViewModel).DisplayName.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
+                || item.DisplayName.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
         }
 
         private bool Export_CanExecute(ErpTextureViewModel? parameter)
@@ -159,7 +153,7 @@ namespace EgoErpArchiver.ViewModels
 
         private bool ExportTextures_CanExecute()
         {
-            return Textures.Count > 0;
+            return _textures.Count > 0;
         }
 
         private async Task ExportTextures_Execute()
@@ -170,7 +164,7 @@ namespace EgoErpArchiver.ViewModels
                 var fail = 0;
                 var progDialogVM = new ProgressDialogViewModel
                 {
-                    PercentageMax = Textures.Count
+                    PercentageMax = _textures.Count
                 };
 
                 var task = Task.Run(async () =>
@@ -178,9 +172,9 @@ namespace EgoErpArchiver.ViewModels
                     var outputFolderPath = _fileViewModel.FilePath.Replace(".", "_") + "_textures";
                     Directory.CreateDirectory(outputFolderPath);
 
-                    for (var i = 0; i < textures.Count;)
+                    for (var i = 0; i < _textures.Count;)
                     {
-                        var resource = textures[i].Resource;
+                        var resource = _textures[i].Resource;
                         var folderPath = Path.Combine(outputFolderPath, resource.Folder);
                         var fileName = resource.FileName.Replace("?", "%3F");
                         var filePath = Path.Combine(folderPath, fileName) + ".dds";
@@ -189,7 +183,7 @@ namespace EgoErpArchiver.ViewModels
                         try
                         {
                             Directory.CreateDirectory(folderPath);
-                            await textures[i].ExportDDS(filePath, true, true);
+                            await _textures[i].ExportDDS(filePath, true, true);
                             progDialogVM.ProgressStatus.Report("SUCCESS" + Environment.NewLine);
                             ++success;
                         }
@@ -216,7 +210,7 @@ namespace EgoErpArchiver.ViewModels
 
         private bool ImportTextures_CanExecute()
         {
-            return Textures.Count > 0;
+            return _textures.Count > 0;
         }
 
         private async Task ImportTextures_Execute()
@@ -234,14 +228,14 @@ namespace EgoErpArchiver.ViewModels
 
                     var progDialogVM = new ProgressDialogViewModel
                     {
-                        PercentageMax = Textures.Count
+                        PercentageMax = _textures.Count
                     };
 
                     var task = Task.Run(async () =>
                     {
-                        for (var i = 0; i < textures.Count;)
+                        for (var i = 0; i < _textures.Count;)
                         {
-                            var resource = textures[i].Resource;
+                            var resource = _textures[i].Resource;
                             var folderPath = Path.Combine(directory, resource.Folder);
                             var fileName = resource.FileName.Replace("?", "%3F");
                             var expFilePath = Path.Combine(folderPath, fileName) + ".dds";
@@ -255,10 +249,10 @@ namespace EgoErpArchiver.ViewModels
                                     {
                                         var mipMapSaveLocation = filePath.Replace(directory, mipMapDirectory) + ".mipmaps";
                                         Directory.CreateDirectory(Path.GetDirectoryName(mipMapSaveLocation));
-                                        await textures[i].ImportDDS(filePath, mipMapSaveLocation, true);
-                                        if (textures[i].IsSelected)
+                                        await _textures[i].ImportDDS(filePath, mipMapSaveLocation, true);
+                                        if (_textures[i].IsSelected)
                                         {
-                                            textures[i].GetPreview();
+                                            _textures[i].GetPreview();
                                         }
                                         found = true;
                                         break;

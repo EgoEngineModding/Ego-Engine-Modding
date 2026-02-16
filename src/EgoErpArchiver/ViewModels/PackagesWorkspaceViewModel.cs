@@ -1,7 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows.Input;
-
-using ActiproSoftware.UI.Avalonia.Data;
+﻿using System.Windows.Input;
 
 using CommunityToolkit.Mvvm.Input;
 
@@ -15,42 +12,37 @@ using EgoErpArchiver.Dialogs.Erp;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
+using ObservableCollections;
+
 namespace EgoErpArchiver.ViewModels
 {
-    public class PackagesWorkspaceViewModel : WorkspaceViewModel
+    public sealed class PackagesWorkspaceViewModel : WorkspaceViewModel
     {
         private readonly ErpFileViewModel _fileViewModel;
         private readonly ResourcesWorkspaceViewModel _resourcesWorkspaceViewModel;
         private readonly ILogger<PackagesWorkspaceViewModel> _logger;
-        private readonly ObservableCollection<ErpPackageViewModel> packages;
-        public ObservableCollection<ErpPackageViewModel> Packages
-        {
-            get { return packages; }
-        }
+        private readonly ObservableList<ErpPackageViewModel> _packages;
+        private readonly ISynchronizedView<ErpPackageViewModel, ErpPackageViewModel> _packagesView;
+        public NotifyCollectionChangedSynchronizedViewList<ErpPackageViewModel> Packages { get; }
 
-        private string _displayName;
         public override string DisplayName
         {
-            get { return _displayName; }
+            get;
             protected set
             {
-                _displayName = value;
-                OnPropertyChanged(nameof(DisplayName));
+                field = value;
+                OnPropertyChanged();
             }
         }
 
-        private readonly CollectionView<ErpPackageViewModel> packagesViewSource;
-        private string filterText;
-        public string FilterText
+        public string? FilterText
         {
-            get
-            {
-                return filterText;
-            }
+            get;
             set
             {
-                filterText = value;
-                packagesViewSource.Refresh();
+                field = value;
+                OnPropertyChanged();
+                _packagesView.AttachFilter(PackagesFilter);
             }
         }
 
@@ -70,10 +62,12 @@ namespace EgoErpArchiver.ViewModels
             _fileViewModel = fileViewModel;
             _resourcesWorkspaceViewModel = resourcesWorkspaceViewModel;
             _logger = logger;
-            packages = new ObservableCollection<ErpPackageViewModel>();
-            _displayName = "Pkg Files";
-            packagesViewSource = new CollectionView<ErpPackageViewModel>(Packages);
-            packagesViewSource.Filter += PackagesFilter;
+            DisplayName = "Pkg Files";
+
+            _packages = [];
+            _packagesView = _packages.CreateView(x => x);
+            _packagesView.AttachFilter(PackagesFilter);
+            Packages = _packagesView.ToNotifyCollectionChanged(SynchronizationContextCollectionEventDispatcher.Current);
 
             Export = new AsyncRelayCommand<ErpPackageViewModel>(Export_Execute, Export_CanExecute);
             Import = new AsyncRelayCommand<ErpPackageViewModel>(Import_Execute, Import_CanExecute);
@@ -94,7 +88,7 @@ namespace EgoErpArchiver.ViewModels
                         using var ds = fragment.GetDecompressDataStream(true);
                         if (PkgFile.IsPkgFile(ds))
                         {
-                            Packages.Add(new ErpPackageViewModel(resView, fragment));
+                            _packages.Add(new ErpPackageViewModel(resView, fragment));
                         }
                     }
                     catch (Exception ex)
@@ -104,18 +98,18 @@ namespace EgoErpArchiver.ViewModels
                     }
                 }
             }
-            DisplayName = "Pkg Files " + packages.Count;
+            DisplayName = "Pkg Files " + _packages.Count;
         }
 
         public override void OnFileClosed()
         {
-            packages.Clear();
+            _packages.Clear();
         }
 
-        private bool PackagesFilter(object item)
+        private bool PackagesFilter(ErpPackageViewModel item)
         {
             return string.IsNullOrEmpty(FilterText)
-                || (item as ErpPackageViewModel).DisplayName.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
+                || item.DisplayName.Contains(FilterText, StringComparison.OrdinalIgnoreCase);
         }
 
         private bool Export_CanExecute(ErpPackageViewModel? parameter)
@@ -185,7 +179,7 @@ namespace EgoErpArchiver.ViewModels
 
         private bool ExportAll_CanExecute()
         {
-            return packages.Count > 0;
+            return _packages.Count > 0;
         }
 
         private async Task ExportAll_Execute()
@@ -196,7 +190,7 @@ namespace EgoErpArchiver.ViewModels
                 var fail = 0;
                 var progDialogVM = new ProgressDialogViewModel()
                 {
-                    PercentageMax = packages.Count
+                    PercentageMax = _packages.Count
                 };
 
                 var task = Task.Run(() =>
@@ -204,10 +198,10 @@ namespace EgoErpArchiver.ViewModels
                     var outputFolder = _fileViewModel.FilePath.Replace(".", "_") + "_pkgfiles";
                     Directory.CreateDirectory(outputFolder);
 
-                    for (var i = 0; i < packages.Count;)
+                    for (var i = 0; i < _packages.Count;)
                     {
-                        var resource = packages[i].Resource;
-                        var fragment = packages[i].Fragment;
+                        var resource = _packages[i].Resource;
+                        var fragment = _packages[i].Fragment;
                         var folderPath = Path.Combine(outputFolder, resource.Folder);
                         var fileName = ErpResourceExporter.GetFragmentFileName(resource, fragment);
                         var filePath = Path.Combine(folderPath, fileName) + ".json";
@@ -219,7 +213,7 @@ namespace EgoErpArchiver.ViewModels
 
                             using var fs = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
                             using var sw = new StreamWriter(fs);
-                            packages[i].ExportPkg(sw);
+                            _packages[i].ExportPkg(sw);
 
                             progDialogVM.ProgressStatus.Report("SUCCESS" + Environment.NewLine);
                             ++success;
@@ -247,7 +241,7 @@ namespace EgoErpArchiver.ViewModels
 
         private bool ImportAll_CanExecute()
         {
-            return packages.Count > 0;
+            return _packages.Count > 0;
         }
 
         private async Task ImportAll_Execute()
@@ -264,15 +258,15 @@ namespace EgoErpArchiver.ViewModels
 
                     var progDialogVM = new ProgressDialogViewModel
                     {
-                        PercentageMax = packages.Count
+                        PercentageMax = _packages.Count
                     };
 
                     var task = Task.Run(() =>
                     {
-                        for (var i = 0; i < packages.Count;)
+                        for (var i = 0; i < _packages.Count;)
                         {
-                            var resource = packages[i].Resource;
-                            var fragment = packages[i].Fragment;
+                            var resource = _packages[i].Resource;
+                            var fragment = _packages[i].Fragment;
                             var folderPath = Path.Combine(directory, resource.Folder);
                             var fileName = ErpResourceExporter.GetFragmentFileName(resource, fragment);
                             var expFilePath = Path.Combine(folderPath, fileName) + ".json";
@@ -285,12 +279,12 @@ namespace EgoErpArchiver.ViewModels
                                     if (Path.Equals(filePath, expFilePath))
                                     {
                                         using var fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                                        packages[i].ImportPkg(fs);
+                                        _packages[i].ImportPkg(fs);
 
-                                        if (packages[i].IsSelected)
+                                        if (_packages[i].IsSelected)
                                         {
-                                            packages[i].IsSelected = false;
-                                            packages[i].IsSelected = true;
+                                            _packages[i].IsSelected = false;
+                                            _packages[i].IsSelected = true;
                                         }
                                         found = true;
                                         break;
