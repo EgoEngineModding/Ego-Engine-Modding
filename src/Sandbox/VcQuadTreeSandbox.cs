@@ -12,21 +12,25 @@ public static class VcQuadTreeSandbox
 {
     public static void Run(string[] args)
     {
+        SingleFileLoop(@"C:\Games\Steam\steamapps\common\Grid\tracks\europe\le_mans\route_0\trackO.jpk");
+        return;
+        
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\Grid\tracks\", VcQuadTreeType.RaceDriverGrid);
-        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\Dirt 2\tracks\", VcQuadTreeType.RaceDriverGrid);
-        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2010\tracks\", VcQuadTreeType.RaceDriverGrid);
-        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2011\tracks\", VcQuadTreeType.RaceDriverGrid);
-        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2012\tracks\", VcQuadTreeType.RaceDriverGrid);
-        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\f12013\tracks\", VcQuadTreeType.RaceDriverGrid);
-        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2014\tracks\", VcQuadTreeType.RaceDriverGrid);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\Dirt 2\tracks\", VcQuadTreeType.Dirt2);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2010\tracks\", VcQuadTreeType.Dirt2);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2011\tracks\", VcQuadTreeType.Dirt2);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2012\tracks\", VcQuadTreeType.Dirt2);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\f12013\tracks\", VcQuadTreeType.Dirt2);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2014\tracks\", VcQuadTreeType.Dirt2);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT 3 Complete Edition\tracks\", VcQuadTreeType.Dirt3);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Showdown\tracks\", VcQuadTreeType.DirtShowdown);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\grid 2\tracks\", VcQuadTreeType.DirtShowdown);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\GRID Autosport\tracks\", VcQuadTreeType.DirtShowdown);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Rally\tracks\", VcQuadTreeType.DirtShowdown);
-        var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2014\tracks\circuits\Abu_Dhabi\route_0", VcQuadTreeType.RaceDriverGrid);
+        //var (folder, type) = (@"C:\Games\Steam\steamapps\common\F1 2014\tracks\circuits\Abu_Dhabi\route_0", VcQuadTreeType.Dirt2);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Showdown\tracks\locations\japan\yokohama_docks\route_0", VcQuadTreeType.DirtShowdown);
         //var (folder, type) = (@"C:\Games\Steam\steamapps\common\DiRT Showdown\tracks\locations\japan\shibuya\route_0", VcQuadTreeType.DirtShowdown);
+        var (folder, type) = (@"C:\Games\Steam\steamapps\common\Grid\tracks\europe\le_mans\route_0", VcQuadTreeType.RaceDriverGrid);
         var typeInfo = VcQuadTreeTypeInfo.Get(type);
         var info = new TrackJpkInfo(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         var files = Utils.GetFiles("track*.jpk", folder);
@@ -87,6 +91,28 @@ public static class VcQuadTreeSandbox
         }
 
         Console.WriteLine(info.ToString());
+    }
+
+    private static void SingleFileLoop(string f)
+    {
+        // to glTF
+        using var fs = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
+        var jpk = new JpkFile();
+        jpk.Read(fs);
+
+        var typeInfo = TrackGround.Identify(jpk);
+                    
+        var ground = TrackGround.Load(jpk, typeInfo);
+        var gltf = TrackGroundGltfConverter.Convert(ground);
+        gltf.Save(f + ".glb");
+        
+        // from glTF
+        var ground2 = GltfTrackGroundConverter.Convert(gltf, typeInfo);
+        var jpk2 = ground2.Save();
+        
+        var outputFilePath = f + ".jpk";
+        using var fso = File.Open(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+        jpk2.Write(fso);
     }
 
     private static void ConvertToDirt3(string f, JpkFile jpk, VcQuadTreeTypeInfo typeInfo)

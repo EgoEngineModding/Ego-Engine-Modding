@@ -8,8 +8,13 @@ public class VcQuadTree : CellQuadTree<VcQuadTree>
 {
     public static VcQuadTree Create(QuadTreeMeshData data)
     {
-        var boundsMin = data.BoundsMin - CellQuadTree.Padding;
-        var boundsMax = data.BoundsMax + CellQuadTree.Padding;
+        return Create(data, data.BoundsMin, data.BoundsMax);
+    }
+
+    public static VcQuadTree Create(QuadTreeMeshData data, Vector3 boundsMin, Vector3 boundsMax)
+    {
+        boundsMin -= CellQuadTree.Padding;
+        boundsMax += CellQuadTree.Padding;
         var qt = new VcQuadTree(boundsMin, boundsMax, data);
         for (var i = 0; i < qt._data.Triangles.Count; ++i)
         {
