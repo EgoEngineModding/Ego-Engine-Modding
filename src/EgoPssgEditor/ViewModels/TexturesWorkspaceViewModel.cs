@@ -1,10 +1,6 @@
 ﻿using EgoEngineLibrary.Graphics;
 using EgoEngineLibrary.Graphics.Dds;
 
-using System.Collections.ObjectModel;
-
-using ActiproSoftware.UI.Avalonia.Data;
-
 using CommunityToolkit.Mvvm.Input;
 
 using EgoEngineLibrary.Frontend.Dialogs.File;
@@ -12,51 +8,40 @@ using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 
 using EgoPssgEditor.Dialogs.Pssg;
 
+using ObservableCollections;
+
 namespace EgoPssgEditor.ViewModels
 {
-    public partial class TexturesWorkspaceViewModel : WorkspaceViewModel
+    public sealed partial class TexturesWorkspaceViewModel : WorkspaceViewModel
     {
-        #region Data
-        readonly ObservableCollection<PssgTextureViewModel> textures;
+        private readonly ObservableList<PssgTextureViewModel> _textures;
+        private readonly ISynchronizedView<PssgTextureViewModel, PssgTextureViewModel> _texturesView;
 
         public override string DisplayName
         {
             get { return "Textures"; }
         }
 
-        public ObservableCollection<PssgTextureViewModel> Textures
-        {
-            get { return textures; }
-        }
-        #endregion
-
-        #region Presentation Data
-        readonly CollectionView<PssgTextureViewModel> texturesViewSource;
-        string filterText;
-        
-        public ICollectionView<PssgTextureViewModel> TexturesViewSource => texturesViewSource;
+        public NotifyCollectionChangedSynchronizedViewList<PssgTextureViewModel> Textures { get; }
 
         public string FilterText
         {
-            get
-            {
-                return filterText;
-            }
+            get;
             set
             {
-                filterText = value;
-                texturesViewSource.Refresh();
+                field = value;
+                OnPropertyChanged();
+                _texturesView.AttachFilter(TextureFilter);
             }
         }
-        #endregion
 
         public TexturesWorkspaceViewModel(MainViewModel mainView)
             : base(mainView)
         {
-            textures = new ObservableCollection<PssgTextureViewModel>();
-            texturesViewSource = new CollectionView<PssgTextureViewModel>(Textures);
-            texturesViewSource.Filter += TextureFilter;
-            texturesViewSource.SortDescriptions.Add(new SortDescription<PssgTextureViewModel>(x => x.DisplayName));
+            _textures = [];
+            _texturesView = _textures.CreateView(x => x);
+            _texturesView.AttachFilter(TextureFilter);
+            Textures = _texturesView.ToNotifyCollectionChanged(SynchronizationContextCollectionEventDispatcher.Current);
         }
 
         public override void LoadData(object data)
@@ -68,7 +53,7 @@ namespace EgoPssgEditor.ViewModels
         {
             if (nodeView.Node.Name == "TEXTURE" && nodeView.Node.HasAttribute("id"))
             {
-                textures.Add(new PssgTextureViewModel(nodeView));
+                _textures.Add(new PssgTextureViewModel(nodeView));
             }
 
             foreach (PssgNodeViewModel childNodeView in nodeView.Children)
@@ -79,15 +64,15 @@ namespace EgoPssgEditor.ViewModels
 
         public override void ClearData()
         {
-            textures.Clear();
+            _textures.Clear();
         }
 
         public void RemoveTexture(PssgNodeViewModel nodeView)
         {
             int index = -1;
-            for (int i = 0; i < textures.Count; ++i)
+            for (int i = 0; i < _textures.Count; ++i)
             {
-                if (object.ReferenceEquals(textures[i].NodeView, nodeView))
+                if (object.ReferenceEquals(_textures[i].NodeView, nodeView))
                 {
                     index = i;
                     break;
@@ -95,7 +80,7 @@ namespace EgoPssgEditor.ViewModels
             }
             if (index >= 0)
             {
-                textures.RemoveAt(index);
+                _textures.RemoveAt(index);
             }
 
             foreach (PssgNodeViewModel childNodeView in nodeView.Children)
@@ -104,12 +89,12 @@ namespace EgoPssgEditor.ViewModels
             }
         }
 
-        private bool TextureFilter(object item)
+        private bool TextureFilter(PssgTextureViewModel item)
         {
             if (String.IsNullOrEmpty(FilterText))
                 return true;
             else
-                return ((item as PssgTextureViewModel).DisplayName.IndexOf(FilterText, StringComparison.OrdinalIgnoreCase) >= 0);
+                return (item.DisplayName.IndexOf(FilterText, StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
         #region Menu
