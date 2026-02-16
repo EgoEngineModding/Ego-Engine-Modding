@@ -128,7 +128,7 @@ namespace EgoEngineLibrary.Formats.Erp
                 }
 
                 var resIndex = int.Parse(name.Substring(resTextIndex + FragNameDelimLength, 3));
-                name = Path.GetDirectoryName(f) + "\\" + (name.Remove(resTextIndex) + extension).Replace(QEscString, "?");
+                name = Path.GetDirectoryName(f) + Path.DirectorySeparatorChar + (name.Remove(resTextIndex) + extension).Replace(QEscString, "?");
                 if (name.EndsWith(Path.Combine(resource.Folder, resource.FileName), StringComparison.InvariantCultureIgnoreCase))
                 {
                     var fragment = resource.Fragments[resIndex];

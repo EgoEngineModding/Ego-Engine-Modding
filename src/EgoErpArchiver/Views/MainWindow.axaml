@@ -1,0 +1,263 @@
+﻿<Window x:Class="EgoErpArchiver.Views.MainWindow"
+        xmlns="https://github.com/avaloniaui" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:avalonEdit="using:AvaloniaEdit"
+        xmlns:vm="using:EgoErpArchiver.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:DataType="vm:MainViewModel"
+        Title="{Binding DisplayName}" Height="600" Width="800">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainViewModel/>
+    </Design.DataContext>
+    <Window.Resources>
+        <SolidColorBrush x:Key="imageTextBg" Color="White" Opacity="0.5"/>
+    </Window.Resources>
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Ctrl+O" Command="{Binding Path=OpenCommand}"></KeyBinding>
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding Path=SaveCommand}"></KeyBinding>
+        <KeyBinding Gesture="Alt+Right" Command="{Binding ElementName=texListView, Path=((vm:ErpTextureViewModel)SelectedItem).TexArrayIndexUpCommand}"></KeyBinding>
+        <KeyBinding Gesture="Alt+Left" Command="{Binding ElementName=texListView, Path=((vm:ErpTextureViewModel)SelectedItem).TexArrayIndexDownCommand}"></KeyBinding>
+    </Window.KeyBindings>
+
+    <DockPanel>
+        <Menu x:Name="mainMenu" DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open" Command="{Binding Path=OpenCommand}" InputGesture="Ctrl+O" HotKey="Ctrl+O">
+                    <MenuItem.Icon>
+                        <Image Source="/Assets/folder.png"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Save" Command="{Binding Path=SaveCommand}" InputGesture="Ctrl+S" HotKey="Ctrl+S">
+                    <MenuItem.Icon>
+                        <Image Source="/Assets/disk.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Resources">
+                <MenuItem Header="_Export" Command="{Binding Path=ResourcesWorkspace.Export}" CommandParameter="{Binding ElementName=resourcesDataGrid, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Import" Command="{Binding Path=ResourcesWorkspace.Import}" CommandParameter="{Binding ElementName=resourcesDataGrid, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="E_xport All" Command="{Binding Path=ResourcesWorkspace.ExportAll}"></MenuItem>
+                <MenuItem Header="I_mport All" Command="{Binding Path=ResourcesWorkspace.ImportAll}"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Pkg Files">
+                <MenuItem Header="_Export" Command="{Binding Path=PackagesWorkspace.Export}" CommandParameter="{Binding ElementName=packagesListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Import" Command="{Binding Path=PackagesWorkspace.Import}" CommandParameter="{Binding ElementName=packagesListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="E_xport All" Command="{Binding Path=PackagesWorkspace.ExportAll}"></MenuItem>
+                <MenuItem Header="I_mport All" Command="{Binding Path=PackagesWorkspace.ImportAll}"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Textures">
+                <MenuItem Header="_Export" Command="{Binding Path=TexturesWorkspace.Export}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Import" Command="{Binding Path=TexturesWorkspace.Import}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="E_xport All" Command="{Binding Path=TexturesWorkspace.ExportTextures}"></MenuItem>
+                <MenuItem Header="I_mport All" Command="{Binding Path=TexturesWorkspace.ImportTextures}"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Xml Files">
+                <MenuItem Header="_Export" Command="{Binding Path=XmlFilesWorkspace.Export}" CommandParameter="{Binding ElementName=xmlFilesListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Import" Command="{Binding Path=XmlFilesWorkspace.Import}" CommandParameter="{Binding ElementName=xmlFilesListView, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="E_xport All" Command="{Binding Path=XmlFilesWorkspace.ExportAll}"></MenuItem>
+                <MenuItem Header="I_mport All" Command="{Binding Path=XmlFilesWorkspace.ImportAll}"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Settings">
+                <MenuItem Header="Game _Directory">
+                    <MenuItem Header="{Binding SettingsViewModel.F1Directory}"></MenuItem>
+                    <MenuItem Header="_Set Directory" Command="{Binding SettingsViewModel.SetF1DirectoryCommand}"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="Starting _Tab">
+                    <StackPanel Orientation="Horizontal">
+                        <NumericUpDown
+                            Value="{Binding SettingsViewModel.StartingTab}"
+                            Minimum="0"
+                            Maximum="3"
+                            Increment="1"></NumericUpDown>
+                    </StackPanel>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_Website" Name="websiteMenuItem" Click="websiteMenuItem_Click"></MenuItem>
+                <MenuItem Header="_Source Code" Name="sourceCodeMenuItem" Click="sourceCodeMenuItem_Click"></MenuItem>
+                <MenuItem Header="Modding _Discord" Name="moddingDiscordMenuItem" Click="moddingDiscordMenuItem_Click"/>
+            </MenuItem>
+        </Menu>
+
+        <TabControl SelectedIndex="{Binding SelectedTabIndex}" Name="mainTabControl"
+                    SelectionChanged="mainTabControl_SelectionChanged" Focusable="False">
+            <TabItem Header="{Binding ResourcesWorkspace.DisplayName}" Focusable="False">
+                <DockPanel DataContext="{Binding Path=ResourcesWorkspace}">
+                    <DataGrid Name="resourcesDataGrid" 
+                              AutoGenerateColumns="False" 
+                              ItemsSource="{Binding Resources}" 
+                              SelectionMode="Single"
+                              IsReadOnly="True"
+                              CanUserResizeColumns="False"
+                              HorizontalGridLinesBrush="LightGray"
+                              VerticalGridLinesBrush="LightGray"
+                              SelectedItem="{Binding SelectedItem, Mode=TwoWay}">
+                        <DataGrid.RowTheme>
+                            <ControlTheme TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                <ControlTheme.Children>
+                                    <Style Selector="^:nth-child(2n)">
+                                        <Setter Property="Background" Value="LightBlue" />
+                                    </Style>
+                                </ControlTheme.Children>
+                            </ControlTheme>
+                        </DataGrid.RowTheme>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding DisplayName}" />
+                            <DataGridTextColumn Header="Resource Type" Binding="{Binding ResourceType}" />
+                            <DataGridTextColumn Header="Size" Binding="{Binding Size}" CellStyleClasses="rightAlignedText" />
+                            <DataGridTextColumn Header="Packed Size" Binding="{Binding PackedSize}" CellStyleClasses="rightAlignedText" />
+                            <DataGridTextColumn Header="Uniform Resource Identifier" Binding="{Binding FullPath}" />
+                        </DataGrid.Columns>
+                        <DataGrid.RowDetailsTemplate>
+                            <DataTemplate>
+                                <DataGrid Margin="10"
+                                          ItemsSource="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DataGridRow}}, Path=((vm:ErpResourceViewModel)DataContext).Fragments}"
+                                          IsReadOnly="True"
+                                          CanUserResizeColumns="False">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Fragment Name" Binding="{Binding DisplayName}" />
+                                        <DataGridTextColumn Header="Size" Binding="{Binding Size}" CellStyleClasses="rightAlignedText" />
+                                        <DataGridTextColumn Header="Packed Size" Binding="{Binding PackedSize}" CellStyleClasses="rightAlignedText" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </DataTemplate>
+                        </DataGrid.RowDetailsTemplate>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="{Binding PackagesWorkspace.DisplayName}" Focusable="False">
+                <Grid DataContext="{Binding Path=PackagesWorkspace}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="240" />
+                        <ColumnDefinition Width="5" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <DockPanel>
+                        <TextBox DockPanel.Dock="Top" Name="packagesSearchBox" Text="{Binding Path=FilterText, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                        <ListBox Name="packagesListView" ItemsSource="{Binding Path=Packages}" SelectionMode="Single" SelectionChanged="packagesListView_SelectionChanged">
+                            <ListBox.Styles>
+                                <Style Selector="ListBoxItem" x:DataType="vm:ErpPackageViewModel">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                </Style>
+                            </ListBox.Styles>
+
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=DisplayName}"></TextBlock>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+                    <DockPanel Grid.Column="2">
+                        <avalonEdit:TextEditor Name="packagePreviewTextEditor" 
+                                               SyntaxHighlighting="JavaScript" 
+                                               FontFamily="Consolas"
+                                               IsReadOnly="True">
+                        </avalonEdit:TextEditor>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="{Binding TexturesWorkspace.DisplayName}" Focusable="False">
+                <Grid DataContext="{Binding Path=TexturesWorkspace}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="240" />
+                        <ColumnDefinition Width="5" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <DockPanel>
+                        <TextBox DockPanel.Dock="Top" Name="texSearchBox" Text="{Binding Path=FilterText, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                        <ListBox Name="texListView" ItemsSource="{Binding Path=Textures}" SelectionMode="Single">
+                            <ListBox.Styles>
+                                <Style Selector="ListBoxItem" x:DataType="vm:ErpTextureViewModel">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                </Style>
+                            </ListBox.Styles>
+
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=DisplayName}"></TextBlock>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+                    <DockPanel Grid.Column="2">
+                        <DockPanel.Background>
+                            <DrawingBrush Stretch="None" TileMode="Tile" DestinationRect="0,0,128,128">
+                                <DrawingBrush.Drawing>
+                                    <DrawingGroup>
+                                        <GeometryDrawing Geometry="M0,0 L128,0 128,128, 0,128Z" Brush="DarkGray"/>
+                                        <GeometryDrawing Geometry="M0,64 L128,64 128,128, 64,128 64,0 0,0Z" Brush="LightGray"/>
+                                    </DrawingGroup>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </DockPanel.Background>
+                        <Grid>
+                            <Image 
+                               Source="{Binding ElementName=texListView, Path=((vm:ErpTextureViewModel)SelectedItem).Preview}" 
+                               MaxWidth="{Binding ElementName=texListView, Path=((vm:ErpTextureViewModel)SelectedItem).Width}" 
+                               MaxHeight="{Binding ElementName=texListView, Path=((vm:ErpTextureViewModel)SelectedItem).Height}"
+                                HorizontalAlignment="Left" VerticalAlignment="Top"></Image>
+                            <StackPanel>
+                                <TextBlock TextWrapping="Wrap"
+                                   Text="{Binding ElementName=texListView, Path=((vm:ErpTextureViewModel)SelectedItem).PreviewError}" 
+                                   IsVisible="{Binding ElementName=texListView, Path=((vm:ErpTextureViewModel)SelectedItem).PreviewErrorVisibility}"/>
+                            </StackPanel>
+                            <StackPanel VerticalAlignment="Bottom" Background="{StaticResource imageTextBg}">
+                                <TextBlock Text="{Binding ElementName=texListView, Path=((vm:ErpTextureViewModel)SelectedItem).TextureInfo}"
+                                       Foreground="Black" TextWrapping="Wrap"></TextBlock>
+                                <StackPanel Orientation="Horizontal" IsVisible="{Binding ElementName=texListView, Path=SelectedItem, TargetNullValue=False}">
+                                    <Button x:Name="texArrayIndexDown" x:FieldModifier="private" Margin="0,0,0,0"  Content="&lt;" Command="{Binding ElementName=texListView, Path=((vm:ErpTextureViewModel)SelectedItem).TexArrayIndexDownCommand}" />
+                                    <Button x:Name="texArrayIndexUp" x:FieldModifier="private" Margin="0,0,0,0" Content="&gt;" Command="{Binding ElementName=texListView, Path=((vm:ErpTextureViewModel)SelectedItem).TexArrayIndexUpCommand}" />
+                                    <TextBlock Foreground="Black" Text=" TexArrayIndex: "></TextBlock>
+                                    <TextBlock Foreground="Black" Text="{Binding ElementName=texListView, Path=((vm:ErpTextureViewModel)SelectedItem).TexArrayIndex}"></TextBlock>
+                                    <TextBlock Foreground="Black" Text=" ("></TextBlock>
+                                    <TextBlock Foreground="Black" Text="{Binding ElementName=texListView, Path=((vm:ErpTextureViewModel)SelectedItem).TexArraySize}"></TextBlock>
+                                    <TextBlock Foreground="Black" Text=")"></TextBlock>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="{Binding XmlFilesWorkspace.DisplayName}" Focusable="False">
+                <Grid DataContext="{Binding Path=XmlFilesWorkspace}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="240" />
+                        <ColumnDefinition Width="5" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <DockPanel>
+                        <TextBox DockPanel.Dock="Top" Name="xmlFilesSearchBox" Text="{Binding Path=FilterText, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                        <ListBox Name="xmlFilesListView" ItemsSource="{Binding Path=XmlFiles}" SelectionMode="Single" SelectionChanged="xmlFilesListView_SelectionChanged">
+                            <ListBox.Styles>
+                                <Style Selector="ListBoxItem" x:DataType="vm:ErpXmlFileViewModel">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                </Style>
+                            </ListBox.Styles>
+
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=DisplayName}"></TextBlock>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+                    <DockPanel Grid.Column="2">
+                        <avalonEdit:TextEditor Name="xmlFilePreviewTextEditor" 
+                                               SyntaxHighlighting="XML" 
+                                               FontFamily="Consolas"
+                                               IsReadOnly="True">
+                        </avalonEdit:TextEditor>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>

@@ -1,0 +1,25 @@
+﻿<Application x:Class="EgoErpArchiver.App" 
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+             xmlns:local="using:EgoErpArchiver"
+             RequestedThemeVariant="Default">
+    <Application.DataTemplates>
+        <local:ViewLocator />
+    </Application.DataTemplates>
+
+    <Application.Styles>
+        <FluentTheme DensityStyle="Compact" />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+        <Style Selector="TabItem">
+            <Setter Property="FontSize" Value="20"></Setter>
+        </Style>
+        <Style Selector="DataGridCell">
+            <Setter Property="FontSize" Value="14"></Setter>
+            <Setter Property="MinHeight" Value="26"></Setter>
+            <Style Selector="^.rightAlignedText">
+                <Setter Property="HorizontalContentAlignment" Value="Right"></Setter>
+            </Style>
+        </Style>
+    </Application.Styles>
+</Application>

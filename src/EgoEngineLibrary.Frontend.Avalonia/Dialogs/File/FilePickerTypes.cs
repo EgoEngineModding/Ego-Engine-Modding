@@ -4,9 +4,9 @@ namespace EgoEngineLibrary.Frontend.Dialogs.File;
 
 public static class FilePickerTypes
 {
-    private static readonly FilePickerFileType Pssg = new("PSSG files")
+    private static readonly FilePickerFileType Bin = new("Bin files")
     {
-        Patterns = ["*.pssg"],
+        Patterns = ["*.bin"],
         MimeTypes = ["application/octet-stream"],
         AppleUniformTypeIdentifiers = ["public.data"]
     };
@@ -18,6 +18,13 @@ public static class FilePickerTypes
         AppleUniformTypeIdentifiers = ["public.image"]
     };
 
+    private static readonly FilePickerFileType Erp = new("ERP files")
+    {
+        Patterns = ["*.erp"],
+        MimeTypes = ["application/octet-stream"],
+        AppleUniformTypeIdentifiers = ["public.data"]
+    };
+
     private static readonly FilePickerFileType Gltf = new("Gltf files")
     {
         Patterns = ["*.glb", "*.gltf"],
@@ -25,9 +32,16 @@ public static class FilePickerTypes
         AppleUniformTypeIdentifiers = ["public.3d-content"]
     };
 
-    private static readonly FilePickerFileType Bin = new("Bin files")
+    private static readonly FilePickerFileType Mipmaps = new("Mipmaps files")
     {
-        Patterns = ["*.bin"],
+        Patterns = ["*.mipmaps"],
+        MimeTypes = ["application/octet-stream"],
+        AppleUniformTypeIdentifiers = ["public.data"]
+    };
+
+    private static readonly FilePickerFileType Pssg = new("PSSG files")
+    {
+        Patterns = ["*.pssg"],
         MimeTypes = ["application/octet-stream"],
         AppleUniformTypeIdentifiers = ["public.data"]
     };
@@ -39,7 +53,10 @@ public static class FilePickerTypes
             FilePickerType.All => FilePickerFileTypes.All,
             FilePickerType.Bin => Bin,
             FilePickerType.Dds => Dds,
+            FilePickerType.Erp => Erp,
             FilePickerType.Gltf => Gltf,
+            FilePickerType.Json => FilePickerFileTypes.Json,
+            FilePickerType.Mipmaps => Mipmaps,
             FilePickerType.Pssg => Pssg,
             FilePickerType.Xml => FilePickerFileTypes.Xml,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
