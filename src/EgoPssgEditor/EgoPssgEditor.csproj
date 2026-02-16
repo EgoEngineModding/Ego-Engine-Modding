@@ -44,7 +44,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ActiproSoftware.Controls.Avalonia" />
     <PackageReference Include="Avalonia" />
     <PackageReference Include="Avalonia.Controls.DataGrid" />
     <PackageReference Include="Avalonia.Desktop" />
@@ -55,7 +54,7 @@
         <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
         <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="ObservableCollections" />
   </ItemGroup>
 
   <ItemGroup>
