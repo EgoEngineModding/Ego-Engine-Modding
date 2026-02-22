@@ -27,6 +27,7 @@
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageVersion Include="SharpGLTF.Toolkit" Version="1.0.0-alpha0023" />
     <PackageVersion Include="SixLabors.ImageSharp" Version="2.1.13" />
+    <PackageVersion Include="System.IO.Hashing" Version="$(BclVersion)" />
     <PackageVersion Include="System.IO.Packaging" Version="$(BclVersion)" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="3.2.2" />
     <PackageVersion Include="ZLogger" Version="2.5.10" />

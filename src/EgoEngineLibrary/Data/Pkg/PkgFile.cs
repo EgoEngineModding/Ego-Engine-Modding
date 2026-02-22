@@ -39,7 +39,7 @@ namespace EgoEngineLibrary.Data.Pkg
         public static PkgFile Open(Stream stream)
         {
             var header = new byte[4];
-            stream.Read(header, 0, 4);
+            stream.ReadExactly(header, 0, 4);
             stream.Seek(0, SeekOrigin.Begin);
             var magic = Encoding.UTF8.GetString(header);
             
@@ -91,12 +91,13 @@ namespace EgoEngineLibrary.Data.Pkg
         }
         public void WritePkg(Stream stream)
         {
-            using var writer = new PkgBinaryWriter(stream);
+            using var writer = new PkgBinaryWriter(stream, leaveOpen: true);
             rootItem.Write(writer);
         }
         public void WriteJson(Stream stream)
         {
-            WriteJson(new StreamWriter(stream));
+            using var sw = new StreamWriter(stream, leaveOpen: true);
+            WriteJson(sw);
         }
         public void WriteJson(TextWriter textWriter)
         {

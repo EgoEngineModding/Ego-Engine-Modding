@@ -172,7 +172,7 @@ typedef struct
             OffsetData data2 <hidden=true>;
             if (numElements.type == 1)
             {
-                uint32 unknown;
+                uint32 fnv1a32Hash;
             }
 
             local int64 currOffset = FTell();

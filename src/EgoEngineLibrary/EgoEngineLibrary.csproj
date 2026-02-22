@@ -18,6 +18,7 @@
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="SharpGLTF.Toolkit" />
     <PackageReference Include="SixLabors.ImageSharp" />
+    <PackageReference Include="System.IO.Hashing" />
     <PackageReference Include="System.IO.Packaging" />
     <PackageReference Include="ZstdSharp.Port" />
   </ItemGroup>

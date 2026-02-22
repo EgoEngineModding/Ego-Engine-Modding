@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System.IO;
 
 namespace EgoEngineLibrary.Data.Pkg
 {
@@ -57,6 +56,7 @@ namespace EgoEngineLibrary.Data.Pkg
             Elements[0].Read(reader);
             Elements[1].Read(reader);
         }
+
         public override void Write(PkgBinaryWriter writer)
         {
             PkgValue._offset = 0;

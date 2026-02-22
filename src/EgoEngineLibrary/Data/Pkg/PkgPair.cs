@@ -1,10 +1,14 @@
-﻿using System;
+﻿using System.Text;
+
+using EgoEngineLibrary.IO.Hashing;
+
 using Newtonsoft.Json;
 
 namespace EgoEngineLibrary.Data.Pkg
 {
     public abstract class PkgPairBase : PkgValue
     {
+        private const string Ppv1Id = ".ppv1.";
         public PkgOffsetType NameOffsetType { get; set; }
 
         public string NameData
@@ -23,6 +27,28 @@ namespace EgoEngineLibrary.Data.Pkg
             : base(parentFile)
         {
             NameOffsetType = new PkgOffsetType();
+        }
+
+        public override void FromJson(JsonTextReader reader)
+        {
+            switch (reader.TokenType)
+            {
+                case JsonToken.PropertyName:
+                    var name = (string?)reader.Value ?? string.Empty;
+                    var v1Index = name.LastIndexOf(Ppv1Id, StringComparison.Ordinal);
+                    NameData = v1Index >= 0 ? name[..v1Index] : name;
+                    break;
+                default:
+                    throw new JsonException("Unexpected token type! " + reader.TokenType);
+            }
+            reader.Read();
+            base.FromJson(reader);
+        }
+
+        public override void ToJson(JsonTextWriter writer)
+        {
+            writer.WritePropertyName(NameData);
+            base.ToJson(writer);
         }
     }
 
@@ -44,82 +70,27 @@ namespace EgoEngineLibrary.Data.Pkg
             writer.Write(NameOffsetType);
             base.Write(writer);
         }
-
-        public override void FromJson(JsonTextReader reader)
-        {
-            switch (reader.TokenType)
-            {
-                case JsonToken.PropertyName:
-                    NameData = (string?)reader.Value ?? string.Empty;
-                    break;
-                default:
-                    throw new Exception("Unexpected token type! " + reader.TokenType);
-            }
-            reader.Read();
-            base.FromJson(reader);
-        }
-
-        public override void ToJson(JsonTextWriter writer)
-        {
-            writer.WritePropertyName(NameData);
-            base.ToJson(writer);
-        }
     }
 
     public class PkgPairV1 : PkgPairBase
     {
-        private const string Ppv1Id = ".ppv1.";
-
-        public uint Unknown { get; set; }
-
         public PkgPairV1(PkgFile parentFile)
             : base(parentFile)
         {
-            Unknown = 0;
         }
 
         public override void Read(PkgBinaryReader reader)
         {
             NameOffsetType = reader.ReadOffsetType();
             base.Read(reader);
-            Unknown = reader.ReadUInt32();
+            reader.ReadUInt32();
         }
 
         public override void Write(PkgBinaryWriter writer)
         {
             writer.Write(NameOffsetType);
             base.Write(writer);
-            writer.Write(Unknown);
-        }
-
-        public override void FromJson(JsonTextReader reader)
-        {
-            switch (reader.TokenType)
-            {
-                case JsonToken.PropertyName:
-                    var name = (string?)reader.Value ?? string.Empty;
-                    var v1Index = name.LastIndexOf(Ppv1Id);
-                    if (v1Index >= 0)
-                    {
-                        Unknown = uint.Parse(name[(v1Index + Ppv1Id.Length)..]);
-                        NameData = name[..v1Index];
-                    }
-                    else
-                    {
-                        NameData = name;
-                    }
-                    break;
-                default:
-                    throw new Exception("Unexpected token type! " + reader.TokenType);
-            }
-            reader.Read();
-            base.FromJson(reader);
-        }
-
-        public override void ToJson(JsonTextWriter writer)
-        {
-            writer.WritePropertyName($"{NameData}{Ppv1Id}{Unknown}");
-            base.ToJson(writer);
+            writer.Write(Fnv1a32.HashToUInt32(Encoding.UTF8.GetBytes(NameData)));
         }
     }
 }
