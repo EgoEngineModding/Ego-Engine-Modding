@@ -1,7 +1,5 @@
-﻿using EgoEngineLibrary.Data.Pkg.Data;
-using Newtonsoft.Json;
-using System;
-using System.IO;
+﻿using System.Text.Json;
+using EgoEngineLibrary.Data.Pkg.Data;
 
 namespace EgoEngineLibrary.Data.Pkg
 {
@@ -113,39 +111,38 @@ namespace EgoEngineLibrary.Data.Pkg
             }
         }
 
-        public override void FromJson(JsonTextReader reader)
+        public override void FromJson(ref Utf8JsonReader reader)
         {
             switch (reader.TokenType)
             {
-                case JsonToken.String:
-                    string val = (string?)reader.Value ?? string.Empty;
+                case JsonTokenType.String:
+                    string val = reader.GetString() ?? string.Empty;
                     if (val.StartsWith("!iar "))
                     {
                         ValueOffsetType.Type = 128;
                         ComplexValueData = new PkgDataArrayReference(ParentFile);
-                        ComplexValueData.FromJson(reader);
+                        ComplexValueData.FromJson(ref reader);
                     }
                     else
                     {
                         ValueData = val;
                     }
                     break;
-                case JsonToken.StartObject:
+                case JsonTokenType.StartObject:
                     ValueOffsetType.Type = 128;
                     ComplexValueData = new PkgObject(ParentFile);
-                    ComplexValueData.FromJson(reader);
+                    ComplexValueData.FromJson(ref reader);
                     break;
-                case JsonToken.StartArray:
+                case JsonTokenType.StartArray:
                     ValueOffsetType.Type = 128;
                     ComplexValueData = new PkgArray(ParentFile);
-                    ComplexValueData.FromJson(reader);
+                    ComplexValueData.FromJson(ref reader);
                     break;
                 default:
-                    new Exception("Unexpected token type! " + reader.TokenType);
-                    break;
+                    throw new JsonException("Unexpected token type! " + reader.TokenType);
             }
         }
-        public override void ToJson(JsonTextWriter writer)
+        public override void ToJson(Utf8JsonWriter writer)
         {
             if (ValueOffsetType.Type == 128)
             {
@@ -153,7 +150,7 @@ namespace EgoEngineLibrary.Data.Pkg
             }
             else
             {
-                writer.WriteValue(ValueData);
+                writer.WriteStringValue(ValueData);
             }
         }
     }

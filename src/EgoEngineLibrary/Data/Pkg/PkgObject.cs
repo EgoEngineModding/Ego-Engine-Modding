@@ -1,12 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.IO;
+﻿using System.Text.Json;
 
 namespace EgoEngineLibrary.Data.Pkg
 {
     public class PkgObject : PkgArray<PkgPairBase>
     {
-        private const string VersionPropertyJson = "PkgObjectVersion";
+        private static ReadOnlySpan<byte> VersionPropertyJson => "PkgObjectVersion"u8;
 
         protected override string ChunkType
         {
@@ -80,14 +78,19 @@ namespace EgoEngineLibrary.Data.Pkg
             }
         }
 
-        public override void FromJson(JsonTextReader reader)
+        public override void FromJson(ref Utf8JsonReader reader)
         {
             // Read out special version prop, and pick PkgPair based on that
-            Version = ReadJsonVersionProperty(reader);
+            var versionReader = reader;
+            if (TryReadJsonVersionProperty(ref versionReader, out var version))
+            {
+                reader = versionReader;
+            }
 
+            Version = version;
             while (reader.Read())
             {
-                if (reader.TokenType == JsonToken.EndObject)
+                if (reader.TokenType == JsonTokenType.EndObject)
                 {
                     break;
                 }
@@ -100,36 +103,33 @@ namespace EgoEngineLibrary.Data.Pkg
                 };
 
                 Elements.Add(pair);
-                pair.FromJson(reader);
+                pair.FromJson(ref reader);
             }
 
-            static byte ReadJsonVersionProperty(JsonTextReader reader)
+            static bool TryReadJsonVersionProperty(ref Utf8JsonReader reader, out byte version)
             {
-                var error = $"Expected object to have {VersionPropertyJson} as first property.";
+                version = 0;
+                reader.Read();
+                if (reader.TokenType != JsonTokenType.PropertyName)
+                    return false;
+
+                if (!reader.ValueTextEquals(VersionPropertyJson))
+                    return false;
 
                 reader.Read();
-                if (reader.TokenType != JsonToken.PropertyName)
-                    throw new InvalidDataException(error);
-
-                var propName = (string?)reader.Value ?? string.Empty;
-                if (!VersionPropertyJson.Equals(propName, StringComparison.InvariantCulture))
-                    throw new InvalidDataException(error);
-
-                var version = reader.ReadAsInt32();
-                if (version is null)
-                    throw new InvalidDataException(error);
-
-                return Convert.ToByte(version);
+                return reader.TryGetByte(out version);
             }
         }
 
-        public override void ToJson(JsonTextWriter writer)
+        public override void ToJson(Utf8JsonWriter writer)
         {
             writer.WriteStartObject();
 
             // Write out special version prop
-            writer.WritePropertyName(VersionPropertyJson);
-            writer.WriteValue(Version);
+            if (Version != 0)
+            {
+                writer.WriteNumber(VersionPropertyJson, Version);
+            }
 
             foreach (var pair in Elements)
             {

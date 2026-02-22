@@ -8,10 +8,10 @@
         x:DataType="vm:ProgressDialogViewModel"
         Title="{Binding DisplayName}" Height="360" Width="640" WindowStartupLocation="CenterOwner">
     <DockPanel Margin="10 10">
-        <Grid DockPanel.Dock="Top" Margin="0 0 0 10">
-            <ProgressBar Value="{Binding Percentage}" Maximum="{Binding PercentageMax}"></ProgressBar>
+        <Panel DockPanel.Dock="Top" Margin="0 0 0 10">
+            <ProgressBar Value="{Binding Percentage}" Maximum="{Binding PercentageMax}" VerticalAlignment="Stretch"></ProgressBar>
             <TextBlock Text="{Binding PercentageText}" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
-        </Grid>
+        </Panel>
         <ScrollViewer Name="scrollViewer">
             <TextBox Name="statusTextBox" Text="{Binding Status}" TextWrapping="Wrap" AcceptsReturn="True" TextChanged="statusTextBox_TextChanged" IsReadOnly="True"></TextBox>
         </ScrollViewer>

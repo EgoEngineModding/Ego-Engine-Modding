@@ -133,8 +133,7 @@ namespace EgoErpArchiver.ViewModels
                 try
                 {
                     using var fs = File.Open(res, FileMode.Create, FileAccess.Write, FileShare.Read);
-                    using var sw = new StreamWriter(fs);
-                    pkgView.ExportPkg(sw);
+                    pkgView.ExportPkg(fs);
                 }
                 catch (Exception ex)
                 {
@@ -212,8 +211,7 @@ namespace EgoErpArchiver.ViewModels
                             Directory.CreateDirectory(folderPath);
 
                             using var fs = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-                            using var sw = new StreamWriter(fs);
-                            _packages[i].ExportPkg(sw);
+                            _packages[i].ExportPkg(fs);
 
                             progDialogVM.ProgressStatus.Report("SUCCESS" + Environment.NewLine);
                             ++success;

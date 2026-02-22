@@ -3,10 +3,7 @@ using EgoEngineLibrary.Formats.Tpk;
 using EgoEngineLibrary.Graphics.Dds;
 using EgoEngineLibrary.Language;
 using EgoEngineLibrary.Xml;
-using Newtonsoft.Json;
-using System;
 using System.Data;
-using System.IO;
 using System.Xml;
 
 using ConsoleAppFramework;
@@ -169,7 +166,7 @@ class Program
             else
             {
                 bool isJSON = false;
-                JsonException? jsonEx = null;
+                Exception? jsonEx = null;
                 try
                 {
                     using var fsi = File.Open(f, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -179,7 +176,7 @@ class Program
                     logger.LogInformation("Success! JSON converted.");
                     isJSON = true;
                 }
-                catch (JsonException e)
+                catch (Exception e)
                 {
                     jsonEx = e;
                 }

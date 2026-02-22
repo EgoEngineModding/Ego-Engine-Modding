@@ -1,9 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 
 namespace EgoEngineLibrary.Data.Pkg
 {
@@ -30,7 +25,7 @@ namespace EgoEngineLibrary.Data.Pkg
         public abstract void Write(PkgBinaryWriter writer);
         internal abstract void UpdateOffsets();
 
-        public abstract void FromJson(JsonTextReader reader);
-        public abstract void ToJson(JsonTextWriter writer);
+        public abstract void FromJson(ref Utf8JsonReader reader);
+        public abstract void ToJson(Utf8JsonWriter writer);
     }
 }

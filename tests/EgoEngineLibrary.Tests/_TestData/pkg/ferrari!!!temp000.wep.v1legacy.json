@@ -1,0 +1,16 @@
+{
+  "WRLD": {
+    "PkgObjectVersion": 1,
+    "event_graph.ppv1.2028645668": "stri eaid://f1_2022_vehicle_package/teams/ferrari/wep/ferrari.wep?event_graph",
+    "name.ppv1.2369371622": "stri ferrari",
+    "layers.ppv1.2411172191": [
+      "stri eaid://f1_2022_vehicle_package/teams/ferrari/wep/ferrari-carmodel.layer",
+      "stri eaid://f1_2022_vehicle_package/teams/ferrari/wep/ferrari-camscargame.layer",
+      "stri eaid://f1_2022_vehicle_package/teams/ferrari/wep/ferrari-camscarrepon.layer",
+      "stri eaid://f1_2022_vehicle_package/teams/ferrari/wep/ferrari-vfx.layer",
+      "stri eaid://f1_2022_vehicle_package/teams/ferrari/wep/ferrari-mirrors.layer",
+      "stri eaid://f1_2022_vehicle_package/teams/ferrari/wep/ferrari-carshowroommodel.layer",
+      "stri eaid://f1_2022_vehicle_package/teams/ferrari/wep/ferrari-camscargame_ss.layer"
+    ]
+  }
+}

@@ -18,4 +18,10 @@
       <ProjectReference Include="..\..\src\EgoEngineLibrary\EgoEngineLibrary.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="_TestData\**\*">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

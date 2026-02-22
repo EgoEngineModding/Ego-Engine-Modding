@@ -8,8 +8,8 @@ namespace EgoEngineLibrary.Data.Pkg
 {
     public class PkgBinaryWriter : EndianBinaryWriter
     {
-        public PkgBinaryWriter(System.IO.Stream stream)
-            : base(EndianBitConverter.Little, stream, Encoding.UTF8, false)
+        public PkgBinaryWriter(System.IO.Stream stream, bool leaveOpen = false)
+            : base(EndianBitConverter.Little, stream, Encoding.UTF8, leaveOpen)
         {
         }
         public PkgBinaryWriter(EndianBitConverter bitConverter, System.IO.Stream stream)

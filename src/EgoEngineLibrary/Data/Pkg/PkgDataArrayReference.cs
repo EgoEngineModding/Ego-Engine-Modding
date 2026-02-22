@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json;
 
 namespace EgoEngineLibrary.Data.Pkg
 {
@@ -35,13 +35,13 @@ namespace EgoEngineLibrary.Data.Pkg
             PkgValue._offset += 12;
         }
 
-        public override void FromJson(JsonTextReader reader)
+        public override void FromJson(ref Utf8JsonReader reader)
         {
-            reference = ((string?)reader.Value)?.Substring(5) ?? string.Empty;
+            reference = (reader.GetString())?[5..] ?? string.Empty;
         }
-        public override void ToJson(JsonTextWriter writer)
+        public override void ToJson(Utf8JsonWriter writer)
         {
-            writer.WriteValue(ChunkType + " " + reference);
+            writer.WriteStringValue(ChunkType + " " + reference);
         }
     }
 }
