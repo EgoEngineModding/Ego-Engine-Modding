@@ -1,5 +1,4 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using System.Text.Json;
 
 namespace EgoEngineLibrary.Data.Pkg.Data
 {
@@ -54,11 +53,11 @@ namespace EgoEngineLibrary.Data.Pkg.Data
         public abstract string GetData(int index);
         public abstract int SetData(string data);
 
-        public override void ToJson(JsonTextWriter writer)
+        public override void ToJson(Utf8JsonWriter writer)
         {
             throw new NotImplementedException();
         }
-        public override void FromJson(JsonTextReader reader)
+        public override void FromJson(ref Utf8JsonReader reader)
         {
             throw new NotImplementedException();
         }

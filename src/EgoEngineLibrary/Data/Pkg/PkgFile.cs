@@ -1,7 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.IO;
-using System.Text;
+﻿using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace EgoEngineLibrary.Data.Pkg
 {
@@ -13,6 +12,8 @@ namespace EgoEngineLibrary.Data.Pkg
     public class PkgFile
     {
         private const uint Magic = 1735094305; // !pkg
+        private static readonly JsonSerializerOptions jsonSerializerOptions =
+            new() { Converters = { PkgFileJsonConverter.Instance } };
         private readonly PkgRootObject rootItem;
 
         public PkgRootObject RootItem
@@ -27,11 +28,15 @@ namespace EgoEngineLibrary.Data.Pkg
         {
             rootItem = new PkgRootObject(this);
         }
+        public PkgFile(PkgRootObject rootObject)
+        {
+            rootItem = rootObject;
+        }
 
         public static bool IsPkgFile(Stream stream)
         {
             var header = new byte[4];
-            stream.Read(header, 0, 4);
+            stream.ReadExactly(header, 0, 4);
             var magic = BitConverter.ToUInt32(header);
             return magic == Magic;
         }
@@ -67,11 +72,8 @@ namespace EgoEngineLibrary.Data.Pkg
         }
         public static PkgFile ReadJson(Stream stream)
         {
-            var file = new PkgFile();
-            using (var reader = new JsonTextReader(new StreamReader(stream)))
-            {
-                file.RootItem.FromJson(reader);
-            }
+            var file = JsonSerializer.Deserialize<PkgFile>(stream, jsonSerializerOptions) ??
+                       throw new JsonException("Failed to read pkg json file!");
             return file;
         }
 
@@ -96,14 +98,29 @@ namespace EgoEngineLibrary.Data.Pkg
         }
         public void WriteJson(Stream stream)
         {
-            using var sw = new StreamWriter(stream, leaveOpen: true);
-            WriteJson(sw);
+            using var jw = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true });
+            WriteJson(jw);
         }
-        public void WriteJson(TextWriter textWriter)
+        public void WriteJson(Utf8JsonWriter jsonWriter)
         {
-            using var writer = new JsonTextWriter(textWriter);
-            writer.Formatting = Formatting.Indented;
-            rootItem.ToJson(writer);
+            rootItem.ToJson(jsonWriter);
+        }
+
+        private class PkgFileJsonConverter : JsonConverter<PkgFile>
+        {
+            public static PkgFileJsonConverter Instance { get; } = new();
+            
+            public override PkgFile Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                var pkg = new PkgFile();
+                pkg.RootItem.FromJson(ref reader);
+                return pkg;
+            }
+
+            public override void Write(Utf8JsonWriter writer, PkgFile value, JsonSerializerOptions options)
+            {
+                value.WriteJson(writer);
+            }
         }
     }
 }

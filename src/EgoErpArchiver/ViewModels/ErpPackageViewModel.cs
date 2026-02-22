@@ -1,4 +1,5 @@
-﻿using EgoEngineLibrary.Archive.Erp;
+﻿using System.Text;
+using EgoEngineLibrary.Archive.Erp;
 using EgoEngineLibrary.Data.Pkg;
 using EgoEngineLibrary.Formats.Erp;
 using EgoEngineLibrary.Frontend.ViewModels;
@@ -58,9 +59,9 @@ namespace EgoErpArchiver.ViewModels
         {
             try
             {
-                using var sw = new StringWriter();
-                ExportPkg(sw);
-                Preview = sw.GetStringBuilder().ToString();
+                using var ms = new MemoryStream();
+                ExportPkg(ms);
+                Preview = Encoding.UTF8.GetString(ms.GetBuffer().AsSpan(0, Convert.ToInt32(ms.Length)));
             }
             catch (Exception ex)
             {
@@ -68,11 +69,11 @@ namespace EgoErpArchiver.ViewModels
             }
         }
 
-        public void ExportPkg(TextWriter textWriter)
+        public void ExportPkg(Stream stream)
         {
             using var dataStream = Fragment.GetDataStream(true);
             var package = PkgFile.ReadPkg(dataStream);
-            package.WriteJson(textWriter);
+            package.WriteJson(stream);
         }
 
         public void ImportPkg(Stream stream)

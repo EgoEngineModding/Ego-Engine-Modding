@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using System.Text.Json;
 
 namespace EgoEngineLibrary.Data.Pkg
 {
@@ -79,21 +77,21 @@ namespace EgoEngineLibrary.Data.Pkg
             }
         }
 
-        public override void FromJson(JsonTextReader reader)
+        public override void FromJson(ref Utf8JsonReader reader)
         {
             while (reader.Read())
             {
-                if (reader.TokenType == JsonToken.EndArray)
+                if (reader.TokenType == JsonTokenType.EndArray)
                 {
                     break;
                 }
                 
                 PkgValue val = new PkgValue(ParentFile);
                 Elements.Add(val);
-                val.FromJson(reader);
+                val.FromJson(ref reader);
             }
         }
-        public override void ToJson(JsonTextWriter writer)
+        public override void ToJson(Utf8JsonWriter writer)
         {
             writer.WriteStartArray();
 

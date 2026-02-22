@@ -1,8 +1,6 @@
 ﻿using System.Text;
-
+using System.Text.Json;
 using EgoEngineLibrary.IO.Hashing;
-
-using Newtonsoft.Json;
 
 namespace EgoEngineLibrary.Data.Pkg
 {
@@ -29,12 +27,12 @@ namespace EgoEngineLibrary.Data.Pkg
             NameOffsetType = new PkgOffsetType();
         }
 
-        public override void FromJson(JsonTextReader reader)
+        public override void FromJson(ref Utf8JsonReader reader)
         {
             switch (reader.TokenType)
             {
-                case JsonToken.PropertyName:
-                    var name = (string?)reader.Value ?? string.Empty;
+                case JsonTokenType.PropertyName:
+                    var name = reader.GetString() ?? string.Empty;
                     var v1Index = name.LastIndexOf(Ppv1Id, StringComparison.Ordinal);
                     NameData = v1Index >= 0 ? name[..v1Index] : name;
                     break;
@@ -42,10 +40,10 @@ namespace EgoEngineLibrary.Data.Pkg
                     throw new JsonException("Unexpected token type! " + reader.TokenType);
             }
             reader.Read();
-            base.FromJson(reader);
+            base.FromJson(ref reader);
         }
 
-        public override void ToJson(JsonTextWriter writer)
+        public override void ToJson(Utf8JsonWriter writer)
         {
             writer.WritePropertyName(NameData);
             base.ToJson(writer);

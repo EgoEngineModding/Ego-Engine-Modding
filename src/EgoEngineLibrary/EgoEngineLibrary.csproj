@@ -15,7 +15,6 @@
     <PackageReference Include="BCnEncoder.Net" />
     <PackageReference Include="CommunityToolkit.Diagnostics" />
     <PackageReference Include="K4os.Compression.LZ4" />
-    <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="SharpGLTF.Toolkit" />
     <PackageReference Include="SixLabors.ImageSharp" />
     <PackageReference Include="System.IO.Hashing" />
