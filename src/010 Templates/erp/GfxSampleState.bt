@@ -1,0 +1,40 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+int32 filter;
+//TEXTURE_FILTER_MIN_MAG_MIP_POINT	1	
+//TEXTURE_FILTER_MIN_MAG_POINT_MIP_LINEAR	2	
+//TEXTURE_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT	3	
+//TEXTURE_FILTER_MIN_POINT_MAG_MIP_LINEAR	4	
+//TEXTURE_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR	5	
+//TEXTURE_FILTER_MIN_MAG_LINEAR_MIP_POINT	6	
+//TEXTURE_FILTER_MIN_MAG_MIP_LINEAR	7	
+//TEXTURE_FILTER_ANISOTROPIC	8	
+int32 addressU;
+//TEXTURE_ADDRESS_MODE_WRAP	1	
+//TEXTURE_ADDRESS_MODE_MIRROR	2	
+//TEXTURE_ADDRESS_MODE_CLAMP	3	
+//TEXTURE_ADDRESS_MODE_BORDER	4	
+int32 addressV;
+int32 addressW;
+float mipBias;
+uint32 maxAniso;
+float minLod;
+int32 compareFunc;
+//COMPARE_FUNC_NEVER	1	
+//COMPARE_FUNC_LESS	2	
+//COMPARE_FUNC_EQUAL	3	
+//COMPARE_FUNC_LESS_EQUAL	4	
+//COMPARE_FUNC_GREATER	5	
+//COMPARE_FUNC_NOT_EQUAL	6	
+//COMPARE_FUNC_GREATER_EQUAL	7	
+//COMPARE_FUNC_ALWAYS	8	

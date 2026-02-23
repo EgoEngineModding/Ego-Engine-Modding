@@ -1,0 +1,23 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+uint32 tableEntryCount;
+uint32 uniqueResourceCount;
+uint32 offsetToResourceTable;
+
+struct MaterialBindingInfo
+{
+    uint32 slotNameIndex;
+    uint32 resourceNameIndex;
+    
+    local string resource = ReadString(12 + offsetToResourceTable + resourceNameIndex);
+} bindingInfos[tableEntryCount] <optimize=false,read=ReadString(12 + 8 * tableEntryCount + slotNameIndex)>;

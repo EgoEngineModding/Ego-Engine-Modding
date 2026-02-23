@@ -10,12 +10,21 @@
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
-int32 unknown;
-int32 unknown2;
-int32 imageType;
+int32 type;
+//SURFACE_DIM_INVALID	0	
+//SURFACE_DIM_1D	1	
+//SURFACE_DIM_2D	2	
+//SURFACE_DIM_3D	3	
+//SURFACE_DIM_CUBE	4	
+uint32 flag;
+int32 format;
 uint32 width;
 uint32 height;
-int32 unknown3;
-uint32 mipMapCount;
-uint32 texArraySize;
-int32 unknown4;
+uint32 depth;
+uint32 mipCount;
+uint32 arrayCount;
+int32 msaaLevel;
+//AA_MODE_1X	0	
+//AA_MODE_2X	1	
+//AA_MODE_4X	2	
+//AA_MODE_8X	3	

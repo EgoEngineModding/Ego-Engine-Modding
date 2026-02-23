@@ -1,0 +1,44 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+uint32 parameterCount;
+uint32 fxNameOffset;
+uint32 paramNameOffset;
+uint32 resourceNameOffset;
+
+struct ParameterDef
+{
+    uint32 nameOffset;
+    uint32 type;
+//SHADER_RESOURCE_TYPE_UNKNOWN	0	
+//SHADER_RESOURCE_TYPE_CONSTANT_BUFFER	1	
+//SHADER_RESOURCE_TYPE_TEXTURE	2	
+//SHADER_RESOURCE_TYPE_SAMPLER_STATE	3	
+//SHADER_RESOURCE_TYPE_UAV	4	
+//SHADER_RESOURCE_TYPE_STREAM_OUT	5	
+    uint32 size;
+    uint32 dataOffset;
+    
+    if (type == 1)
+    {
+        local ubyte data[size];
+        ReadBytes(data, 16 + 16 * parameterCount + dataOffset, size);
+    }
+    else
+    {
+        local string data = ReadString(16 + 16 * parameterCount + resourceNameOffset + dataOffset, size);
+    }
+} parameters[parameterCount] <optimize=false,read=ReadString(16 + 16 * parameterCount + paramNameOffset + nameOffset)>;
+
+byte data[fxNameOffset];
+
+string fxName;

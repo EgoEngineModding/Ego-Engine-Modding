@@ -1,0 +1,17 @@
+//------------------------------------------------
+//--- 010 Editor v7.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+uint32 creationFlags;
+uint32 elementSize;
+uint32 elementCount;
+
+byte data[elementSize * elementCount];
