@@ -16,41 +16,61 @@ typedef struct
     float maxDist;
 } LOD;
 
-uint32 numLODDistances;
-uint16 numNodes;
-uint16 numBoneNodeIndices;
-uint32 numNames;
-uint32 numFiles;
-float unk[4];
-uint32 num6[numLODDistances];
-LOD lodDistances[numLODDistances];
-uint32 num7;
+uint32 meshCount;
+uint16 nodeCount;
+uint16 skinNodeCount;
+uint16 nodeNameCount;
+uint16 pad;
+uint32 lodDataCount;
+float boundingSphere[4];
+uint32 mirrorControlBitfield;
+
+//uint32 num6[lodDataCount];
+LOD lodDistances[lodDataCount];
+uint32 lodStrategy;
+//DistanceSwapClamped	0	
+//DistanceCrossfade	1	
+//DistanceSwap	2	
+//ForceLowestLOD	3	
+//ForceHighestLOD	4	
+//ForceLowestLODBeyondThreshold	5	
+//RenderWithinThreshold	6	
 
 typedef struct
 {
-    uint32 stringOffset;
-    uint32 parentIndex;
-    float pos[3];
-    float rot[4];
+    uint32 nameIndex;
+    int32 parentIndex;
+    float translation[3];
+    float rotation[4];
     float scale[3];
-    float transform[16];
-    uint32 unk6;
-    uint32 unk7;
-} Node;
+    float invBindPoseMatrix[16];
+    int32 type;
+//Null	0	
+//Geometry	1	
+//Bone	2	
+//Sphere	3	
+//Box	4	
+//Cylinder	5	
+//Cone	6	
+//Capsule	7	
+//Camera	8	
+//Custom	9	
+//SkinnedGeometry	10	
+    int32 mirrorIndex;
+} Node <read=readDat>;
 
 local uint64 strDataOffset;
 string readDat(Node& node)
 {
-    FSeek(72 + numNodes * 120 + numBoneNodeIndices * 2 + node.stringOffset);
-    return ReadString(strDataOffset + node.stringOffset);
+    return ReadString(strDataOffset + node.nameIndex);
 }
 
-Node nodes[numNodes] <read=readDat>;
+Node nodes[nodeCount];
 
-int16 boneNodeIndices[numBoneNodeIndices];
+uint16 skinNodes[skinNodeCount];
 
-struct { string meshfile; } files[numFiles];
+struct { string meshfile; } files[meshCount] <optimize=false>;
 
 strDataOffset = FTell();
 
-struct { string name; } names[numNames];
+struct { string name; } names[nodeNameCount] <optimize=false>;

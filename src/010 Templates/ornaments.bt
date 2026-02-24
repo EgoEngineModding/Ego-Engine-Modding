@@ -1,0 +1,224 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+local ubyte isDirt2 <hidden=true> = 0; // D2, F1 2011 - 2014
+local ubyte isF12010 <hidden=true> = 0;
+local ubyte isDirt3 <hidden=true> = 0;
+local ubyte isDirtShowdown <hidden=true> = 0;
+local ubyte isGrid2 <hidden=true> = 0;
+local ubyte isGridAutosport <hidden=true> = 1; // GA, Dirt Rally
+SetBackColor(cLtGray);
+
+int32 version;
+if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
+    int32 instanceListOffset;
+    int32 numInstanceList;
+    int32 dependentListOffset;
+    int32 numDependentList;
+    int32 pathAnimRootOffset;
+    int32 numPathAnimRoot;
+}
+else
+{
+    local int32 instanceListOffset <hidden=true> = 4;
+    local int32 numInstanceList <hidden=true> = 1;
+}
+
+FSeek(instanceListOffset);
+struct InstanceList {
+float boundsMin[3];
+float boundsMax[3];
+if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
+    int32 referenceNum;
+}
+int32 totalInstances;
+if (isDirt2 || isF12010 || isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport)
+{
+    int32 totalLandmarks; // does not exist in RD: Grid
+}
+int32 instanceRefOffset;
+int32 numInstanceRef;
+if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
+    int32 instanceOffset;
+    int32 numInstance;
+}
+
+FSeek(instanceRefOffset);
+struct InstanceRef {
+    int32 fileNameOffset;
+    if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
+        int32 referenceId;
+    }
+    float boundsMin[3];
+    float boundsMax[3];
+    if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
+        int32 sponsor;
+        int32 prebakedShadows;
+        int32 maxInstances;
+        int32 renderTypeOffset;
+        local int32 numInstances = 0;
+    }
+    else if (isDirt2 || isF12010) {
+        int32 sponsor;
+        int32 prebakedShadows;
+        int32 maxInstances;
+        int32 offset; // index offset into total instance list
+        int32 instancesOffset;
+        int32 numInstances;
+        int32 renderTypeOffset;
+    }
+    else {
+        int32 maxInstances;
+        int32 offset; // index offset into total instance list
+        int32 instancesOffset;
+        int32 numInstances;
+        int32 renderTypeOffset;
+        int32 unknown;
+    }
+    
+    if (numInstances <= 0) {
+        return;
+    }
+    
+    local int64 pos <hidden=true> = FTell();
+    FSeek(instancesOffset);
+    struct Instance {
+        float transform[12];
+        ubyte color[4];
+        if (isDirt2 || isF12010) {
+            int32 godRayGroup;
+            int32 dynamic;
+            if (isF12010) {
+                int16 landmarkOffset; // landmark = sessionVis + landmarkOffset
+                int16 sessionVis;
+            }
+            else {
+                int32 landmark;
+            }
+        }
+        else {
+            int32 unknown;
+        }
+    } instances[numInstances] <optimize=false>;
+    FSeek(pos);
+} instanceRefs[numInstanceRef] <optimize=false,read=ReadString(fileNameOffset)>;
+
+if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
+FSeek(instanceOffset);
+struct Instance2 {
+    int32 referenceId;
+    int32 instanceId;
+    float transform[12];
+    int32 offsetSkyMap;
+    ubyte color[4];
+    int32 godRayGroup;
+    int32 dynamic;
+    int32 doNotCastShadows;
+    int32 landmark;
+    int32 instanceTag;
+    int32 todSpecificOffset;
+    
+    if (isGrid2 || isGridAutosport)
+    {
+        int32 modeLayerOffset;
+        int32 piaoTextureOffset;
+        int32 atlasU;
+        int32 atlasV;
+        int32 atlasW;
+        int32 atlasH;
+        int32 hueShiftIdOffset;
+        
+        if (isGridAutosport) {
+            int32 sponsorHueShiftIdOffset;
+        }
+    }
+} instances[numInstance] <optimize=false>;
+}
+} instanceLists[numInstanceList] <optimize=false>;
+
+if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport)
+{
+FSeek(dependentListOffset);
+struct DependentList {
+    int32 referenceNum;
+    int32 instanceNum;
+    int32 dependentReferenceOffset;
+    int32 numDependentReference;
+    int32 dependentInstanceOffset;
+    int32 numDependentInstance;
+    
+    if (numDependentReference > 0) {
+    FSeek(dependentReferenceOffset);
+    struct DependentRef {
+        int32 referenceId;
+        int32 fileNameOffset;
+        int32 dependentTypeOffset;
+        int32 prebakedShadows;
+        float boundsMin[3];
+        float boundsMax[3];
+        int32 maxInstances;
+    } dependentRefs[numDependentReference] <optimize=false,read=ReadString(fileNameOffset)>;
+    }
+    
+    if (numDependentInstance > 0) {
+    FSeek(dependentInstanceOffset);
+    struct DependentInstance {
+        int32 instanceId;
+        int32 referenceId;
+        int32 parentId;
+    } dependentInstances[numDependentInstance] <optimize=false>;
+    }
+} dependentLists[numDependentList] <optimize=false>;
+
+FSeek(pathAnimRootOffset);
+struct PathAnimRoot {
+    int32 count;
+    int32 pathAnimOffset;
+    int32 numPathAnim;
+    
+    if (numPathAnim > 0) {
+    FSeek(pathAnimOffset);
+    struct PathAnim {
+        int32 id;
+        int32 animClipNameOffset;
+        int32 instanceTag;
+        int32 loop;
+        int32 cantTriggerEveryLap;
+        int32 pingPong;
+        int32 hideOnLoad;
+        int32 hideWhenFinished;
+        int32 heroAnim;
+        float existProbability;
+        
+        if (isDirtShowdown || isGrid2 || isGridAutosport) {
+            int32 emitterOffset;
+            int32 numEmitter;
+        }
+        else {
+            return;
+        }
+        
+        if (numEmitter > 0) {
+        local int64 pos <hidden=true> = FTell();
+        FSeek(emitterOffset);
+        struct Emitter {
+            int32 nameOffset;
+            float startTime;
+            float endTime;
+            float transform[12];
+        } emitters[numEmitter] <optimize=false,read=ReadString(nameOffset)>;
+        FSeek(pos);
+        }
+    } pathAnims[numPathAnim] <optimize=false,read=ReadString(animClipNameOffset)>;
+    }
+} pathAnimRoots[numPathAnimRoot] <optimize=false>;
+}

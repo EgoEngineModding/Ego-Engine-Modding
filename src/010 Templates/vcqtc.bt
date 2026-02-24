@@ -9,21 +9,50 @@
 LittleEndian();
 SetBackColor(cLtGray);
 
-local ubyte d3Mode = 1; // Dirt 3 and previous games use diff triangle
+local ubyte d3Mode = 0; // Dirt 3 and previous games use diff triangle
+local ubyte f12015 = 1;
 
 typedef float Vec3f[3] <read=Str("%f, %f, %f",this[0],this[1],this[2])>;
 
 struct vCQuadTreeHeader {
+    if (f12015 == 1) {
+        int32 version;
+    }
+    
     Vec3f boundsMin;
     Vec3f boundsMax;
-    int32 numTriangles <comment="Negative in all games">;
-    int32 numVertices <comment="Negative in all games">;
+    int32 numTriangles <comment="Negative in some games">;
+    int32 numVertices <comment="Negative in some games">;
     int32 numMaterials <comment="Must be 8 or 16 (Autosport), 16 (D3), exact (older than D3). Negative in RD:G, D2">;
     uint32 verticesOffset;
+    
+    if (f12015 == 1) {
+        uint32 colorIndicesOffset;
+    }
+    
     uint32 nodesOffset;
+    
+    if (f12015 == 1) {
+        uint32 colorTableOffset;
+    }
+
     uint32 trianglesOffset;
+    
+    if (f12015 == 1) {
+        uint32 padding;
+    }
+
     uint32 triangleReferencesWorkspaceOffset;
+    
+    if (f12015 == 1) {
+        uint32 padding;
+    }
+
     char materialList[Abs(numMaterials) * 4];
+    
+    if (f12015 == 1) {
+        uint32 padding2[12];
+    }
 
     local Vec3f vertexScale, vertexOffset;
     vertexScale[0] = (boundsMax[0] - boundsMin[0]) * 0.000000059604645f;
@@ -34,7 +63,14 @@ struct vCQuadTreeHeader {
     vertexOffset[2] = boundsMin[2];
 } header;
 
+FSeek(header.verticesOffset);
 struct vCQuadTreeVertex {
+if (f12015 == 1) {
+    float x;
+    float y;
+    float z;
+}
+else {
     ubyte x_high;
     ubyte x_mid;
     ubyte x_low;
@@ -51,7 +87,8 @@ struct vCQuadTreeVertex {
     local float x = xu * header.vertexScale[0] + header.vertexOffset[0];
     local float y = yu * header.vertexScale[1] + header.vertexOffset[1];
     local float z = zu * header.vertexScale[2] + header.vertexOffset[2];
-} vertices[-header.numVertices]<optimize=false,read=Str("%f, %f, %f",x,y,z)>;
+}
+} vertices[Abs(header.numVertices)]<optimize=false,read=Str("%f, %f, %f",x,y,z)>;
 
 typedef struct {
 if (d3Mode == 1) {
@@ -63,6 +100,18 @@ if (d3Mode == 1) {
     local int32 sheetInfo = (vertex0_sheet2bits_top6bits & 0xC0) >> 6;
     local int32 materialID = vertex0_bottom4bits_materialID4bits & 0x0F;
     local int32 vertex0Index = ((vertex0_bottom4bits_materialID4bits >> 4) + (((uint32)vertex0_sheet2bits_top6bits & 0x3F) << 4));
+    local int32 vertex1Index = vertex0Index + ((uint32)vertex1_offset);
+    local int32 vertex2Index = vertex0Index + ((uint32)vertex2_offset);
+}
+else if (f12015 == 1) {
+    ubyte vertex0_top_bits_info; // unsure if this means sheet
+    ubyte vertex0_bottom_bits;
+    ubyte vertex1_offset;
+    ubyte vertex2_offset;
+
+    local int32 sheetInfo = (vertex0_top_bits_info >> 5) & 0x07;
+    local int32 materialID = (vertex0_top_bits_info >> 2) & 0x07;
+    local int32 vertex0Index = vertex0_bottom_bits | (((uint32)vertex0_top_bits_info & 0x03) << 8);
     local int32 vertex1Index = vertex0Index + ((uint32)vertex1_offset);
     local int32 vertex2Index = vertex0Index + ((uint32)vertex2_offset);
 }
@@ -88,14 +137,18 @@ typedef struct {
     local uint16 data = (u8Data[1] + ((uint16)u8Data[0] << 8)) & 0x7FFF;
 } vCQuadTreeNode<read=readNode>;
 
+FSeek(header.nodesOffset);
 local int32 numNodes<hidden=true> = (header.trianglesOffset - header.nodesOffset) / 2;
 vCQuadTreeNode nodes[numNodes]<optimize=false>;
 
-vCQuadTreeTriangle triangles[-header.numTriangles]<optimize=false>;
+FSeek(header.trianglesOffset);
+vCQuadTreeTriangle triangles[Abs(header.numTriangles)]<optimize=false>;
 
+FSeek(header.triangleReferencesWorkspaceOffset);
 struct {
     local uint32 numRefs <hidden=true> = 0;
-    while (!FEof())
+    while ((f12015 == 0 && !FEof())
+        || (f12015 == 1 && FTell() < header.colorIndicesOffset))
     {
     ++numRefs;
     struct nodeTriangleReference {
@@ -178,4 +231,12 @@ string readNode(struct vCQuadTreeNode& n)
     }
     
     return s;
+}
+
+if (f12015 == 1) {
+    FSeek(header.colorIndicesOffset);
+    ubyte colorIndices[header.numVertices];
+    
+    FSeek(header.colorTableOffset);
+    float colorTable[(FileSize() - header.colorTableOffset) / sizeof(float)];
 }

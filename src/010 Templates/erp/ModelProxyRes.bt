@@ -11,30 +11,49 @@
 //   History: 
 //------------------------------------------------
 LittleEndian();
-int16 num;
-int16 num2;
-int32 sLen;
-int32 unk2;
+local uint32 formatVersion = 2;
+
+uint16 nodeCount;
+uint16 skinNodeCount;
+uint16 nodeNameCount;
+uint16 pad;
+uint32 mirrorControlBitfield;
 
 typedef struct
 {
-    uint32 stringOffset;
-    uint32 parentIndex;
-    float unk2[3];
-    float unk3[4];
-    float unk4[3];
-    float unk5[16];
-    uint32 unk6;
-    uint32 unk7;
-} Dat;
+    uint32 nameIndex;
+    int32 parentIndex;
+    float translation[3];
+    float rotation[4];
+    float scale[3];
+    float invBindPoseMatrix[16];
+    int32 type;
+//Null	0	
+//Geometry	1	
+//Bone	2	
+//Sphere	3	
+//Box	4	
+//Cylinder	5	
+//Cone	6	
+//Capsule	7	
+//Camera	8	
+//Custom	9	
+//SkinnedGeometry	10	
+    int32 mirrorIndex;
+} Node <read=readDat>;
 
-string readDat(Dat& data)
+string readDat(Node& node)
 {
-    FSeek(12 + num * 120 + num2 * 2 + data.stringOffset);
+    FSeek(12 + nodeCount * 120 + skinNodeCount * 2 + node.nameIndex);
     return ReadString(FTell());
 }
 
-Dat ddd[num] <read=readDat>;
-
-int16 unk[num2];
-char strDat[sLen];
+Node nodes[nodeCount];
+uint16 skinNodes[skinNodeCount];
+char strDat[nodeNameCount];
+if ((ushort)formatVersion > 1) {
+    uint16 boneCullId;
+}
+else {
+    local uint16 boneCullId = 0xFFFF;
+}

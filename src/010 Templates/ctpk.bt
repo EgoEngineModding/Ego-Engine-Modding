@@ -1,0 +1,50 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+uint32 magic;
+uint32 unk;
+uint32 unk;
+uint32 stringsOffset;
+uint32 tablesOffset;
+uint32 unk;
+
+FSeek(stringsOffset);
+uint32 numStrings;
+struct S {
+    uint32 stringLength;
+    char s[stringLength];
+} strings[numStrings] <optimize=false,read=Str("%s",s)>;
+
+FSeek(tablesOffset);
+uint32 numTables;
+struct Table {
+    uint32 tableId; // djb2 hash
+    uint32 rowsOffset;
+    if (rowsOffset == 0xFFFFFFFF) {
+        return;
+    }
+    
+    local int64 pos = FTell();
+    FSeek(rowsOffset);
+    uint32 numRows;
+    if (numRows == 0) {
+        FSeek(pos);
+        return;
+    }
+    struct Row {
+        uint32 id;
+        uint32 dataLength;
+        ubyte data[dataLength]; // protobuf data
+    } row[numRows] <optimize=false>;
+    
+    FSeek(pos);
+} tables[numTables] <optimize=false>;

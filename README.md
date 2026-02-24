@@ -27,6 +27,13 @@ An app to edit language localization files.
 ### [Ego PSSG Editor](https://petar.page/l/ego-epe-home)
 An app to edit PSSG files. These files contain 3D models and textures.
 
+## External Tools
+Tools whose code is not hosted in this repo.
+
+- [Dirt Rally 2 Font Generator](https://github.com/Ftoaster/Dr2-Font-Generator) - A font conversion tool for Dirt Rally 2.
+- [Moonshot's Ego ERP Archiver](https://github.com/moonshot11/Ego-Engine-Modding) - The ERP Archiver with additional features.
+- [NeFSEdit](https://github.com/EgoEngineModding/ego.nefsedit) - An app to export and import resources from NeFS (.nfs, .nefs) archives.
+
 ## Community
 Connect with the modding community.
 

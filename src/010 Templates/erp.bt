@@ -8,54 +8,66 @@
 //--------------------------------------
 LittleEndian();
 
-uint32 magic;
-int32 version;
-int64 padding;
-int64 infoOffset;
-int64 infoSize;
-int64 filesOffset;
-int64 padding;
-int32 numFiles;
-int32 numTempFiles;
+uint32 formatId;
+uint16 majorVersion;
+uint16 minorVersion;
+uint64 checksum;
+uint64 tocOffset;
+uint64 tocSize;
+uint64 resourceDataOffset;
+uint64 reserved;
+uint32 totalResources;
+uint32 totalSections;
 
-struct
+struct ResourceToc
 {
-    int32 fileInfoLength;
-    int16 fileNameSize;
-    char fileName[fileNameSize];
-    char fileType[16];
-    int32 unk;
-    if (version >= 4)
+    uint32 resourceSize;
+    uint16 idStringSize;
+    char id[idStringSize];
+    char type[16];
+    uint32 formatVersion;
+    if (majorVersion >= 4)
     {
         int16 unk2;
     }
-    byte numTempFiles;
+    ubyte sectionCount;
 
-    struct
+    struct ResourceSectionToc
     {
-        char name[4];
-        int64 offset;
-        int64 size;
-        int32 flags;
-        local int64 dataSize;
-        if (version <= 2)
+        char id[4];
+        uint64 fileOffset;
+        uint64 dataSize;
+        if (majorVersion <= 2)
         {
+            if (majorVersion == 2)
+            {
+                uint32 dataAlignment;
+                local ubyte compressionType = 0;
+                local uint64 compressedSize = dataSize;
+            }
+            else
+            {
+                local uint32 dataAlignment = 16;
+                local ubyte compressionType = 0;
+                local uint64 compressedSize = dataSize;
+            }
             dataSize = size;
         }
         else
         {
-            byte compression; // 0x01=zlib, 0x81=no, 0x00=no
-            int64 compressedSize;
-            dataSize = compressedSize;
+            uint32 dataAlignment;
+            // >= 0x80 means no compression
+            ubyte compressionType; // 0x01=zlib, 0x00=no
+            uint64 compressedSize;
         }
         local int64 currPos = FTell();
-        FSeek(offset + filesOffset);
-        byte data[dataSize];
+        FSeek(fileOffset + resourceDataOffset);
+        byte data[compressedSize];
         FSeek(currPos);
-    } tempFile[numTempFiles] <optimize=false>;
+    } sections[sectionCount] <optimize=false,read=Str("%s",id)>;
 
-    if (version > 2)
+    if (majorVersion > 2)
     {
         char hash[16];
     }
-} files[numFiles] <optimize=false>;
+} resources[totalResources] <optimize=false,read=Str("%s",id)>;

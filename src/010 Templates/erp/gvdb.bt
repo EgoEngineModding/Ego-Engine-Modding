@@ -1,0 +1,50 @@
+//------------------------------------------------
+//--- 010 Editor v7.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+local string magicString <hidden=true> = "PxA6v23AL0INY7sA1Ab701AA2A44c7";
+local uint32 magicStringIndex <hidden=true> = 0;
+uint32 magic;
+uint32 numProperties;
+
+struct Prop {
+    uint32 key; // djb2 hash
+    ubyte type;
+//GVET_Float	0	
+//GVET_Int	1	
+//GVET_String	2	
+//GVET_Checkbox	3	
+//GVET_Button	4	
+//GVET_FloatArray	5	
+//GVET_IntArray	6	
+//GVET_Graph	7	
+//GVET_ThorGraph	8	
+//GVET_Colour	9	
+//GVET_StringArray	10	
+//GVET_Bitmask	11	
+    uint32 valLength;
+    if (valLength == 0)
+    {
+        FSkip(1);
+        return;
+    }
+    
+    char val[valLength];
+    
+    local char value[valLength + 1];
+    local uint i <hidden=true>;
+    for (i = 0; i < valLength; ++i)
+    {
+        value[i] = val[i] - magicString[magicStringIndex++ % 30];
+    }
+    value[i] = '\0';
+    FSkip(1);
+} props[numProperties] <optimize=false,read=Str("%u: %s", key, value)>;

@@ -10,48 +10,91 @@
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
-uint32 numMeshes;
-uint32 numVBs;
-uint32 numIBs;
-uint32 numMeshNames;
-uint32 numNodeLinks;
+uint32 subMeshCount;
+uint32 vbIdCount;
+uint32 ibIdCount;
+uint32 materialIdCount;
+uint32 bindingCount;
 
-uint32 vertexBufferOffset;
-uint32 indexBufferOffset;
-uint32 meshNameOffset;
-uint32 nodeLinkOffset;
+uint32 vbIdOffset;
+uint32 ibIdOffset;
+uint32 materialIdOffset;
+uint32 nodeToSubMeshIdOffset;
 
-struct
+struct SubMeshData
 {
-    uint32 numVBs;
-    uint32 unk2;
-    uint32 unk3;
-    uint32 ibIndex;
-    uint32 ibCount;
-    uint32 ibOffset;
-    float unk7[4];
-    uint32 nodeLinkOffset;
-    uint32 unk9;
-    uint32 nameOffset;
-    uint32 unk11;
-    uint32 vertexFileOffset;
-    uint32 unk13;
-    uint32 unk14;
-    uint32 unk15;
-    uint32 unk16;
-    uint32 unk17;
-    uint32 unk18;
-    uint32 unk19;
-} meshes[numMeshes];
+    uint32 vbCount;
+    uint32 primitiveType;
+//PRIMITIVE_TYPE_POINT_LIST	1	
+//PRIMITIVE_TYPE_LINE_LIST	2	
+//PRIMITIVE_TYPE_LINE_STRIP	3	
+//PRIMITIVE_TYPE_TRIANGLE_LIST	4	
+//PRIMITIVE_TYPE_TRIANGLE_STRIP	5	
+//PRIMITIVE_TYPE_LINE_LIST_ADJ	6	
+//PRIMITIVE_TYPE_LINE_STRIP_ADJ	7	
+//PRIMITIVE_TYPE_TRIANGLE_LIST_ADJ	8	
+//PRIMITIVE_TYPE_TRIANGLE_STRIP_ADJ	9	
+//PRIMITIVE_TYPE_1_CONTROL_POINT_PATCHLIST	10	
+//PRIMITIVE_TYPE_2_CONTROL_POINT_PATCHLIST	11	
+//PRIMITIVE_TYPE_3_CONTROL_POINT_PATCHLIST	12	
+//PRIMITIVE_TYPE_4_CONTROL_POINT_PATCHLIST	13	
+//PRIMITIVE_TYPE_5_CONTROL_POINT_PATCHLIST	14	
+//PRIMITIVE_TYPE_6_CONTROL_POINT_PATCHLIST	15	
+//PRIMITIVE_TYPE_7_CONTROL_POINT_PATCHLIST	16	
+//PRIMITIVE_TYPE_8_CONTROL_POINT_PATCHLIST	17	
+//PRIMITIVE_TYPE_9_CONTROL_POINT_PATCHLIST	18	
+//PRIMITIVE_TYPE_10_CONTROL_POINT_PATCHLIST	19	
+//PRIMITIVE_TYPE_11_CONTROL_POINT_PATCHLIST	20	
+//PRIMITIVE_TYPE_12_CONTROL_POINT_PATCHLIST	21	
+//PRIMITIVE_TYPE_13_CONTROL_POINT_PATCHLIST	22	
+//PRIMITIVE_TYPE_14_CONTROL_POINT_PATCHLIST	23	
+//PRIMITIVE_TYPE_15_CONTROL_POINT_PATCHLIST	24	
+//PRIMITIVE_TYPE_16_CONTROL_POINT_PATCHLIST	25	
+//PRIMITIVE_TYPE_17_CONTROL_POINT_PATCHLIST	26	
+//PRIMITIVE_TYPE_18_CONTROL_POINT_PATCHLIST	27	
+//PRIMITIVE_TYPE_19_CONTROL_POINT_PATCHLIST	28	
+//PRIMITIVE_TYPE_20_CONTROL_POINT_PATCHLIST	29	
+//PRIMITIVE_TYPE_21_CONTROL_POINT_PATCHLIST	30	
+//PRIMITIVE_TYPE_22_CONTROL_POINT_PATCHLIST	31	
+//PRIMITIVE_TYPE_23_CONTROL_POINT_PATCHLIST	32	
+//PRIMITIVE_TYPE_24_CONTROL_POINT_PATCHLIST	33	
+//PRIMITIVE_TYPE_25_CONTROL_POINT_PATCHLIST	34	
+//PRIMITIVE_TYPE_26_CONTROL_POINT_PATCHLIST	35	
+//PRIMITIVE_TYPE_27_CONTROL_POINT_PATCHLIST	36	
+//PRIMITIVE_TYPE_28_CONTROL_POINT_PATCHLIST	37	
+//PRIMITIVE_TYPE_29_CONTROL_POINT_PATCHLIST	38	
+//PRIMITIVE_TYPE_30_CONTROL_POINT_PATCHLIST	39	
+//PRIMITIVE_TYPE_31_CONTROL_POINT_PATCHLIST	40	
+//PRIMITIVE_TYPE_32_CONTROL_POINT_PATCHLIST	41	
+    uint32 commandType;
+//CMD_TYPE_DRAW	1	
+//CMD_TYPE_DRAW_INDEXED	2	
+//CMD_TYPE_DRAW_INSTANCED	3	
+//CMD_TYPE_DRAW_INDEXED_INSTANCED	4	
+//CMD_TYPE_DRAW_INSTANCED_INDIRECT	5	
+//CMD_TYPE_DRAW_INDEXED_INSTANCED_INDIRECT	6	
+//CMD_TYPE_DISPATCH	7	
+//CMD_TYPE_DISPATCH_INDIRECT	8	
+//CMD_TYPE_NOP	9	
+    uint32 start;
+    uint32 count;
+    //uint32 ibOffset;
+    float boundingSphere[4];
+    uint32 nodeToSubMeshIdOffset;
+    uint32 nodeToSubMeshIdEntryCount;
+    uint32 materialIdOffset;
+    uint32 indexBufferIdOffset;
+    uint32 verterBufferOffsets[vbCount];
+} subMeshes[subMeshCount] <optimize=false>;
 
-struct {string s;} vbb[numVBs] <optimize=false>;
+struct {string s;} vertexBuffers[vbIdCount] <optimize=false>;
 
-struct {string s;} ibb[numIBs] <optimize=false>;
+struct {string s;} indexBuffers[ibIdCount] <optimize=false>;
 
-struct {string meshName;} meshNames[numMeshNames] <optimize=false>;
+struct {string materialId;} materialIds[materialIdCount] <optimize=false>;
 
 struct
 {
     uint32 nodeIndex;
-    uint32 meshIndex;
-} nodeLinks[numNodeLinks];
+    uint32 subMeshIndex;
+} nodeSubMeshBindings[bindingCount];
