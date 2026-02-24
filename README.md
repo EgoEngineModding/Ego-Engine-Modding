@@ -31,8 +31,8 @@ An app to edit PSSG files. These files contain 3D models and textures.
 Tools whose code is not hosted in this repo.
 
 - [Dirt Rally 2 Font Generator](https://github.com/Ftoaster/Dr2-Font-Generator) - A font conversion tool for Dirt Rally 2.
-- [Moonshot's Ego ERP Archiver](https://github.com/moonshot11/Ego-Engine-Modding/tree/master) - The ERP Archiver with additional features.
-- [NeFSEdit](https://github.com/EgoEngineModding/ego.nefsedit/releases) - An app to export and import resources from NeFS (.nfs, .nefs) archives.
+- [Moonshot's Ego ERP Archiver](https://github.com/moonshot11/Ego-Engine-Modding) - The ERP Archiver with additional features.
+- [NeFSEdit](https://github.com/EgoEngineModding/ego.nefsedit) - An app to export and import resources from NeFS (.nfs, .nefs) archives.
 
 ## Community
 Connect with the modding community.
