@@ -6,7 +6,7 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        VcQuadTreeSandbox.Run(args);
+        GvdbSandbox.Run(args);
     }
 
     private static void XmlSandbox()

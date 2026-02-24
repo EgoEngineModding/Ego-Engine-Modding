@@ -3,14 +3,13 @@ using System.IO.Hashing;
 
 namespace EgoEngineLibrary.IO.Hashing;
 
-public sealed class Fnv1a32 : NonCryptographicHashAlgorithm
+public sealed class Djb2 : NonCryptographicHashAlgorithm
 {
     private uint _hash;
 
-    private const uint FnvDefaultPrime = 0x01000193;
-    private const uint FnvDefaultOffsetBasis = 0x811C9DC5;
+    private const uint DefaultSeed = 5381;
 
-    public Fnv1a32() : base(4)
+    public Djb2() : base(4)
     {
         Reset();
     }
@@ -22,7 +21,7 @@ public sealed class Fnv1a32 : NonCryptographicHashAlgorithm
 
     public override void Reset()
     {
-        _hash = FnvDefaultOffsetBasis;
+        _hash = DefaultSeed;
     }
 
     protected override void GetCurrentHashCore(Span<byte> destination)
@@ -31,7 +30,7 @@ public sealed class Fnv1a32 : NonCryptographicHashAlgorithm
     }
 
     public static uint HashToUInt32(ReadOnlySpan<byte> source) =>
-        Append(FnvDefaultOffsetBasis, source);
+        Append(DefaultSeed, source);
 
     public uint GetCurrentHashAsUInt32() => _hash;
 
@@ -39,8 +38,8 @@ public sealed class Fnv1a32 : NonCryptographicHashAlgorithm
     {
         for (var i = 0; i < source.Length; ++i)
         {
-            hash ^= source[i];
-            hash *= FnvDefaultPrime;
+            // (hash * 33) + b
+            hash = ((hash << 5) + hash) + source[i];
         }
 
         return hash;

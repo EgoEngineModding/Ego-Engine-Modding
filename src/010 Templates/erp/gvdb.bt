@@ -47,4 +47,4 @@ struct Prop {
     }
     value[i] = '\0';
     FSkip(1);
-} props[numProperties] <optimize=false>;
+} props[numProperties] <optimize=false,read=Str("%u: %s", key, value)>;

@@ -10,12 +10,12 @@
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
-local ubyte isDirt2 = 0; // D2, F1 2011 - 2014
-local ubyte isF12010 = 0;
-local ubyte isDirt3 = 0;
-local ubyte isDirtShowdown = 0;
-local ubyte isGrid2 = 0;
-local ubyte isGridAutosport = 1; // GA, Dirt Rally
+local ubyte isDirt2 <hidden=true> = 0; // D2, F1 2011 - 2014
+local ubyte isF12010 <hidden=true> = 0;
+local ubyte isDirt3 <hidden=true> = 0;
+local ubyte isDirtShowdown <hidden=true> = 0;
+local ubyte isGrid2 <hidden=true> = 0;
+local ubyte isGridAutosport <hidden=true> = 1; // GA, Dirt Rally
 SetBackColor(cLtGray);
 
 int32 version;
@@ -29,8 +29,8 @@ if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
 }
 else
 {
-    local int32 instanceListOffset = 4;
-    local int32 numInstanceList = 1;
+    local int32 instanceListOffset <hidden=true> = 4;
+    local int32 numInstanceList <hidden=true> = 1;
 }
 
 FSeek(instanceListOffset);
