@@ -10,8 +10,6 @@
 
   <PropertyGroup>
     <ApplicationIcon>Assets\Ryder25.ico</ApplicationIcon>
-    <Copyright>Copyright © Petar Tasev 2017 - 2023</Copyright>
-    <Authors>Petar Tasev</Authors>
     <Description>Opens Ego Engine erp files</Description>
     <Version>9.1.0</Version>
   </PropertyGroup>
