@@ -72,7 +72,12 @@ namespace EgoEngineLibrary.Data.Pkg
         }
         public static PkgFile ReadJson(Stream stream)
         {
+            // All serialization is done with custom code that references the necessary types
+#pragma warning disable IL2026
+#pragma warning disable IL3050
             var file = JsonSerializer.Deserialize<PkgFile>(stream, jsonSerializerOptions) ??
+#pragma warning restore IL3050
+#pragma warning restore IL2026
                        throw new JsonException("Failed to read pkg json file!");
             return file;
         }

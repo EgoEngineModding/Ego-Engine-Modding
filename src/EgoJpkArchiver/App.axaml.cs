@@ -1,4 +1,5 @@
-﻿using Avalonia;
+﻿using System.Diagnostics.CodeAnalysis;
+using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
@@ -10,10 +11,8 @@ namespace EgoJpkArchiver;
 /// <summary>
 /// Interaction logic for App.xaml
 /// </summary>
-public partial class App : Application
+public class App : Application
 {
-    public static new App? Current => (App?)Application.Current;
-    
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -36,6 +35,9 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
+    [UnconditionalSuppressMessage("Trimming",
+        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+        Justification = "DataValidators are being removed")]
     private void DisableAvaloniaDataAnnotationValidation()
     {
         // Get an array of plugins to remove

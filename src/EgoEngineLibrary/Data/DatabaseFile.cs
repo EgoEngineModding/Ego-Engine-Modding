@@ -95,11 +95,21 @@ namespace EgoEngineLibrary.Data
             string path = Path.GetFullPath(xmlPath).Replace(Path.GetFileName(xmlPath), string.Empty) + Path.GetFileNameWithoutExtension(xmlPath) + "_schema.xsd";
             if (File.Exists(path))
             {
+                // All serialized types are explicitly referenced
+#pragma warning disable IL2026
+#pragma warning disable IL3050
                 base.ReadXmlSchema(path);
+#pragma warning restore IL3050
+#pragma warning restore IL2026
             }
             try
             {
+                // All serialized types are explicitly referenced
+#pragma warning disable IL2026
+#pragma warning disable IL3050
                 base.ReadXml(xmlPath, XmlReadMode.Auto);
+#pragma warning restore IL3050
+#pragma warning restore IL2026
             }
             catch (Exception exception)
             {
@@ -665,7 +675,12 @@ namespace EgoEngineLibrary.Data
         public void WriteXML(string savePath)
         {
             base.AcceptChanges();
+            // All serialized types are explicitly referenced
+#pragma warning disable IL2026
+#pragma warning disable IL3050
             base.WriteXml(savePath, XmlWriteMode.WriteSchema);
+#pragma warning restore IL3050
+#pragma warning restore IL2026
         }
 
         public List<string[]> LoadErrors

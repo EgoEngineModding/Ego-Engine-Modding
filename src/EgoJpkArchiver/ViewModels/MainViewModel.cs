@@ -29,6 +29,7 @@ namespace EgoJpkArchiver.ViewModels
         {
             DisplayName = $"{Properties.Resources.AppTitleLong} {Properties.Resources.AppVersionShort}";
             Entries = [];
+            _file = new JpkFile();
         }
 
         public void ParseCommandLineArgs()

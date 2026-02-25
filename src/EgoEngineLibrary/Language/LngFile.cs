@@ -153,7 +153,12 @@ namespace EgoEngineLibrary.Language
                 LNG.Tables.Add(GetDataTable());
             else
                 LNG.Tables.Add(dataSource);
+            // All serialized types are explicitly referenced
+#pragma warning disable IL2026
+#pragma warning disable IL3050
             LNG.WriteXml(fileStream, XmlWriteMode.WriteSchema);
+#pragma warning restore IL3050
+#pragma warning restore IL2026
             //LNG.WriteXmlSchema(Path.GetFullPath(fileName).Replace(Path.GetFileName(fileName), string.Empty) +
             //Path.GetFileNameWithoutExtension(fileName) + "_schema.xsd");
             hasChanges = false;
