@@ -1,8 +1,13 @@
 <Project>
-    <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
-    <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <Nullable>enable</Nullable>
-        <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
+  <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Company>Petar Tasev</Company>
+    <Authors>Petar Tasev</Authors>
+    <Copyright>© 2010-$([System.DateTime]::UtcNow.ToString("yyyy")) $(Company). All Rights Reserved.</Copyright>
+  </PropertyGroup>
 </Project>

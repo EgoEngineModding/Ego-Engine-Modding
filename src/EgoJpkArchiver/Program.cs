@@ -1,17 +1,31 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using Avalonia;
+using System.Globalization;
 
 namespace EgoJpkArchiver;
 
-static class Program
+sealed class Program
 {
-    /// <summary>
-    /// The main entry point for the application.
-    /// </summary>
+    // Initialization code. Don't use any Avalonia, third-party APIs or any
+    // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
+    // yet and stuff might break.
     [STAThread]
-    static void Main(string[] Args)
+    public static void Main(string[] args)
     {
-        ApplicationConfiguration.Initialize();
-        Application.Run(new Form1(Args));
+        var culture = new CultureInfo("en-US");
+
+        Thread.CurrentThread.CurrentCulture = culture;
+        Thread.CurrentThread.CurrentUICulture = culture;
+        CultureInfo.DefaultThreadCurrentCulture = culture;
+        CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+        BuildAvaloniaApp()
+            .StartWithClassicDesktopLifetime(args);
     }
+
+    // Avalonia configuration, don't remove; also used by visual designer.
+    public static AppBuilder BuildAvaloniaApp()
+        => AppBuilder.Configure<App>()
+            .UsePlatformDetect()
+            .WithInterFont()
+            .LogToTrace();
 }

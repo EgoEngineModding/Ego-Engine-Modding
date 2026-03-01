@@ -86,7 +86,7 @@ namespace EgoEngineLibrary.Graphics
         private static PssgFileType GetPssgType(Stream stream)
         {
             Byte[] header = new Byte[4];
-            stream.Read(header, 0, 4);
+            stream.ReadExactly(header, 0, 4);
 
             string magic = Encoding.UTF8.GetString(header);
 

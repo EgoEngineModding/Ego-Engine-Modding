@@ -32,6 +32,13 @@ public static class FilePickerTypes
         AppleUniformTypeIdentifiers = ["public.3d-content"]
     };
 
+    private static readonly FilePickerFileType Jpk = new("JPK files")
+    {
+        Patterns = ["*.jpk"],
+        MimeTypes = ["application/octet-stream"],
+        AppleUniformTypeIdentifiers = ["public.data"]
+    };
+
     private static readonly FilePickerFileType Mipmaps = new("Mipmaps files")
     {
         Patterns = ["*.mipmaps"],
@@ -55,6 +62,7 @@ public static class FilePickerTypes
             FilePickerType.Dds => Dds,
             FilePickerType.Erp => Erp,
             FilePickerType.Gltf => Gltf,
+            FilePickerType.Jpk => Jpk,
             FilePickerType.Json => FilePickerFileTypes.Json,
             FilePickerType.Mipmaps => Mipmaps,
             FilePickerType.Pssg => Pssg,

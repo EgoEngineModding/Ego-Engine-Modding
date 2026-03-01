@@ -1,4 +1,6 @@
-﻿namespace EgoEngineLibrary.Graphics
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace EgoEngineLibrary.Graphics
 {
     using System;
     using System.Collections.Generic;
@@ -101,6 +103,7 @@
         private static Dictionary<string, Node> entries = new Dictionary<string, Node>();
         private static NameTable nameTable = new NameTable();
 
+        [RequiresUnreferencedCode("The schema node and attribute DataType may be removed.")]
         public static void LoadSchema(Stream stream)
         {
             entries.Clear();

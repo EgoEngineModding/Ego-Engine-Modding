@@ -10,6 +10,7 @@ public enum FilePickerType
     Dds,
     Erp,
     Gltf,
+    Jpk,
     Json,
     Mipmaps,
     Pssg,

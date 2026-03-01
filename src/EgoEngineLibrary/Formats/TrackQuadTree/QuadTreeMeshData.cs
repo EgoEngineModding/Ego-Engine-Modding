@@ -148,7 +148,6 @@ public class QuadTreeMeshData
             {
                 // Not using the bool currently, but if necessary in future may need to Split QT on false
                 throw new InvalidDataException("Failed to adjust triangle indices to be in range of each other.");
-                return false;
             }
         }
 

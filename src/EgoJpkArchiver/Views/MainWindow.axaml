@@ -1,0 +1,65 @@
+﻿<Window x:Class="EgoJpkArchiver.Views.MainWindow"
+        xmlns="https://github.com/avaloniaui" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:EgoJpkArchiver.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:DataType="vm:MainViewModel"
+        Title="{Binding DisplayName}" Height="600" Width="800">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainViewModel/>
+    </Design.DataContext>
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Ctrl+O" Command="{Binding Path=OpenCommand}"></KeyBinding>
+        <KeyBinding Gesture="Ctrl+S" Command="{Binding Path=SaveCommand}"></KeyBinding>
+    </Window.KeyBindings>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="Create from folder" Command="{Binding Path=CreateFromFolderCommand}"
+                          InputGesture="Ctrl+N" HotKey="Ctrl+N">
+                    <MenuItem.Icon>
+                        <Image Source="/Assets/folder.png"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Open" Command="{Binding Path=OpenCommand}"
+                          InputGesture="Ctrl+O" HotKey="Ctrl+O">
+                    <MenuItem.Icon>
+                        <Image Source="/Assets/folder.png"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Save" Command="{Binding Path=SaveCommand}"
+                          InputGesture="Ctrl+S" HotKey="Ctrl+S">
+                    <MenuItem.Icon>
+                        <Image Source="/Assets/disk.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Entries">
+                <MenuItem Header="_Export All" Command="{Binding Path=ExportCommand}"
+                          InputGesture="Ctrl+E" HotKey="Ctrl+E">
+                    <MenuItem.Icon>
+                        <Image Source="/Assets/lorry_delete.png"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Import All" Command="{Binding Path=ImportCommand}"
+                          InputGesture="Ctrl+W" HotKey="Ctrl+W">
+                    <MenuItem.Icon>
+                        <Image Source="/Assets/lorry_add.png"></Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+        
+        <DataGrid IsReadOnly="True"
+                  ItemsSource="{Binding Entries}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="Size" Binding="{Binding Size}" CellStyleClasses="rightAlignedText" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</Window>
