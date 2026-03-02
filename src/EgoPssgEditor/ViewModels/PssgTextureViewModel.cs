@@ -6,6 +6,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using EgoEngineLibrary.Graphics.Pssg;
 
 namespace EgoPssgEditor.ViewModels
 {

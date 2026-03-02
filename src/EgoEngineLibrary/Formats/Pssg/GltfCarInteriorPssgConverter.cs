@@ -9,6 +9,7 @@ using System.Numerics;
 using System.Text.RegularExpressions;
 
 using EgoEngineLibrary.Conversion;
+using EgoEngineLibrary.Graphics.Pssg;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {

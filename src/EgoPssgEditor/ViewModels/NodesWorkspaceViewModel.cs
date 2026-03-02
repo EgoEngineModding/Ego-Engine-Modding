@@ -10,7 +10,7 @@ using CommunityToolkit.Mvvm.Input;
 using EgoEngineLibrary.Conversion;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
-
+using EgoEngineLibrary.Graphics.Pssg;
 using EgoPssgEditor.Dialogs.Pssg;
 
 namespace EgoPssgEditor.ViewModels

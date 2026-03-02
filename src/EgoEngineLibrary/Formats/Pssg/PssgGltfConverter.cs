@@ -11,6 +11,7 @@ using System.Linq;
 using System.Numerics;
 
 using EgoEngineLibrary.Conversion;
+using EgoEngineLibrary.Graphics.Pssg;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {

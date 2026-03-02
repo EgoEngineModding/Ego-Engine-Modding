@@ -5,7 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
-
+using EgoEngineLibrary.Graphics.Pssg;
 using EgoPssgEditor.Dialogs.Pssg;
 
 using ObservableCollections;

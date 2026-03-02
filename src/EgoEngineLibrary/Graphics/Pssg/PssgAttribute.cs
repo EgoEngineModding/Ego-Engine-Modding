@@ -7,7 +7,7 @@ using System.Xml.Linq;
 
 using EgoEngineLibrary.Conversion;
 
-namespace EgoEngineLibrary.Graphics
+namespace EgoEngineLibrary.Graphics.Pssg
 {
     public class PssgAttribute
     {

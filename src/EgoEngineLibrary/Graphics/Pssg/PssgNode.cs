@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
-namespace EgoEngineLibrary.Graphics
+namespace EgoEngineLibrary.Graphics.Pssg
 {
     public class PssgNode
     {

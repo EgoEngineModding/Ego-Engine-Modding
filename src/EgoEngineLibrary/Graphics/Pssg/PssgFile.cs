@@ -1,6 +1,6 @@
 ﻿using EgoEngineLibrary.Conversion;
 
-namespace EgoEngineLibrary.Graphics
+namespace EgoEngineLibrary.Graphics.Pssg
 {
     using System;
     using System.Collections.Generic;
