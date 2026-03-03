@@ -1,11 +1,8 @@
-﻿using EgoEngineLibrary.Helper;
-
-using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 using System.Xml.Linq;
-
 using EgoEngineLibrary.Conversion;
+using EgoEngineLibrary.Helper;
 
 namespace EgoEngineLibrary.Graphics.Pssg
 {
@@ -91,13 +88,13 @@ namespace EgoEngineLibrary.Graphics.Pssg
             get;
             set;
         }
-        public PssgSchema.Attribute AttributeInfo
+        public PssgSchemaAttribute AttributeInfo
         {
             get;
             private set;
         }
 
-        public PssgAttribute(PssgSchema.Attribute attributeInfo, object data, PssgFile file, PssgNode ParentNode)
+        public PssgAttribute(PssgSchemaAttribute attributeInfo, object data, PssgFile file, PssgNode ParentNode)
         {
             this.AttributeInfo = attributeInfo;
             this.data = data;
@@ -110,7 +107,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             this.ParentNode = node;
 
             int id = reader.ReadInt32();
-            this.AttributeInfo = PssgSchema.GetAttribute(id);
+            this.AttributeInfo = reader.GetAttributeById(id);
             this.size = reader.ReadInt32();
             this.data = reader.ReadAttributeValue(this.AttributeInfo.DataType, size);
             this.AttributeInfo = PssgSchema.AddAttribute(this.ParentNode.Name, this.Name, this.Value.GetType());
@@ -120,9 +117,8 @@ namespace EgoEngineLibrary.Graphics.Pssg
             this.file = file;
             this.ParentNode = node;
 
-            //this.id = PssgSchema.GetAttributeId(ParentNode.Name, xAttr.Name.LocalName);
             string attrName = xAttr.Name.LocalName.StartsWith("___") ? xAttr.Name.LocalName.Substring(3) : xAttr.Name.LocalName;
-            this.AttributeInfo = PssgSchema.AddAttribute(this.ParentNode.Name, attrName);// PssgSchema.GetAttribute(this.ParentNode.Name, xAttr.Name.LocalName);
+            this.AttributeInfo = PssgSchema.AddAttribute(this.ParentNode.Name, attrName);
             this.data = this.FromString(xAttr.Value);
             PssgSchema.SetAttributeDataTypeIfNull(this.AttributeInfo, this.Value.GetType());
         }
@@ -144,7 +140,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
         public void Write(PssgBinaryWriter writer)
         {
-            writer.Write(this.AttributeInfo.Id);
+            writer.Write(writer.GetAttributeId(AttributeInfo));
             writer.Write(this.size);
             writer.WriteObject(this.data);
         }

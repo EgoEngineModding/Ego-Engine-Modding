@@ -1,11 +1,8 @@
-﻿using EgoEngineLibrary.Helper;
-using System;
-using System.Buffers.Binary;
-using System.Collections.Generic;
+﻿using System.Buffers.Binary;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using EgoEngineLibrary.Helper;
 
 namespace EgoEngineLibrary.Graphics.Pssg
 {
@@ -71,7 +68,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             set;
         }
         // NodeInfo should never be null
-        public PssgSchema.Node NodeInfo
+        public PssgSchemaElement NodeInfo
         {
             get;
             private set;
@@ -83,7 +80,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             this.ParentNode = node;
 
             int id = reader.ReadInt32();
-            this.NodeInfo = PssgSchema.GetNode(id);
+            this.NodeInfo = reader.GetElementById(id);
             this.size = reader.ReadInt32();
             long end = reader.BaseStream.Position + size;
 
@@ -178,7 +175,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
         {
             this.File = file;
             this.ParentNode = node;
-            this.NodeInfo = PssgSchema.AddNode(elem.Name.LocalName);// PssgSchema.GetNode(elem.Name.LocalName);
+            this.NodeInfo = PssgSchema.AddNode(elem.Name.LocalName);
 
             this.Attributes = new PssgAttributeCollection();
             PssgAttribute attr;
@@ -255,12 +252,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
         private Type GetValueType()
         {
-            PssgSchema.Node sNode = this.NodeInfo;// PssgSchema.GetNode(this.Name);
-            if (sNode == null)
-            {
-                return typeof(byte[]);
-            }
-
+            PssgSchemaElement sNode = this.NodeInfo;
             if (!string.IsNullOrEmpty(sNode.LinkAttributeName))
             {
                 PssgNode node;
@@ -300,7 +292,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
         public void Write(PssgBinaryWriter writer)
         {
-            writer.Write(this.NodeInfo.Id);
+            writer.Write(writer.GetElementId(NodeInfo));
             writer.Write(size);
             writer.Write(attributeSize);
             if (Attributes != null)

@@ -1,23 +1,17 @@
-﻿using EgoEngineLibrary.Conversion;
+﻿using System.IO.Compression;
+using System.Text;
+using System.Xml;
+using System.Xml.Linq;
+using EgoEngineLibrary.Collections;
+using EgoEngineLibrary.Conversion;
 
 namespace EgoEngineLibrary.Graphics.Pssg
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.IO.Compression;
-    using System.Linq;
-    using System.Text;
-    using System.Xml;
-    using System.Xml.Linq;
-
-    public enum PssgFileType
-    {
-        Pssg, Xml, CompressedPssg, CompressedXml
-    }
-
     public class PssgFile
     {
+        private OrderedSet<PssgSchemaElement> _elementTable;
+        private OrderedSet<PssgSchemaAttribute> _attributeTable;
+        
         public PssgFileType FileType
         {
             get;
@@ -33,6 +27,8 @@ namespace EgoEngineLibrary.Graphics.Pssg
         {
             this.FileType = fileType;
             this.RootNode = new PssgNode("PSSGDATABASE", this, null);
+            _elementTable = [];
+            _attributeTable = [];
         }
         public static PssgFile Open(Stream stream)
         {
@@ -120,7 +116,6 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 int size = reader.ReadInt32();
 
                 // Load all the pssg node/attribute names
-                PssgSchema.ClearSchemaIds();
                 PssgSchema.LoadFromPssg(reader);
                 long positionAfterInfo = reader.BaseStream.Position;
 
@@ -135,6 +130,9 @@ namespace EgoEngineLibrary.Graphics.Pssg
                             "Get an older version of the program if you wish to take out its contents, but put it back together using this program and the original version of the pssg file.");
                     }
                 }
+
+                file._elementTable = reader.ElementTable;
+                file._attributeTable = reader.AttributeTable;
             }
 
             return file;
@@ -204,15 +202,12 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
                 if (RootNode != null)
                 {
-                    // make all ids -1
-                    PssgSchema.ClearSchemaIds();
+                    UpdateElementAndAttributeTables(this);
 
-                    // Get the counts, and update ids of the nodes/attributes used in this file
-                    GetNodeAttributeNameCount(this, out var nodeNameCount, out var attributeNameCount);
-                    writer.Write(attributeNameCount);
-                    writer.Write(nodeNameCount);
-
-                    // Update ids again to make sequential and save ones used in this file
+                    writer.Write(_attributeTable.Count);
+                    writer.Write(_elementTable.Count);
+                    writer.ElementTable = _elementTable;
+                    writer.AttributeTable = _attributeTable;
                     PssgSchema.SaveToPssg(writer);
 
                     RootNode.UpdateSize();
@@ -223,26 +218,17 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 writer.Write((int)writer.BaseStream.Length - 8);
             }
 
-            static void GetNodeAttributeNameCount(PssgFile file, out int nodeNameCount, out int attributeNameCount)
+            return;
+
+            static void UpdateElementAndAttributeTables(PssgFile file)
             {
-                nodeNameCount = 0;
-                attributeNameCount = 0;
                 foreach (var node in file.GetNodes())
                 {
-                    PssgSchema.Node sNode = node.NodeInfo;
-                    if (sNode.Id == -1)
-                    {
-                        // change this so we don't count it twice
-                        sNode.Id = ++nodeNameCount;
-                    }
+                    file._elementTable.Add(node.NodeInfo);
 
                     foreach (PssgAttribute attr in node.Attributes)
                     {
-                        if (attr.AttributeInfo.Id == -1)
-                        {
-                            // change this so we don't count it twice
-                            attr.AttributeInfo.Id = ++attributeNameCount;
-                        }
+                        file._attributeTable.Add(attr.AttributeInfo);
                     }
                 }
             }

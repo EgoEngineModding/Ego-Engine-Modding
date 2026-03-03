@@ -1,18 +1,42 @@
-﻿using EgoEngineLibrary.Conversion;
+﻿using System.Text;
+using EgoEngineLibrary.Collections;
+using EgoEngineLibrary.Conversion;
 using EgoEngineLibrary.IO;
 
 namespace EgoEngineLibrary.Graphics.Pssg
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-
     public class PssgBinaryWriter : EndianBinaryWriter
     {
-        public PssgBinaryWriter(EndianBitConverter bitConvertor, System.IO.Stream stream, bool leaveOpen)
+        public OrderedSet<PssgSchemaElement> ElementTable { get; set; }
+        public OrderedSet<PssgSchemaAttribute> AttributeTable { get; set; }
+        
+        public PssgBinaryWriter(EndianBitConverter bitConvertor, Stream stream, bool leaveOpen)
             : base(bitConvertor, stream, leaveOpen)
         {
+            ElementTable = [];
+            AttributeTable = [];
+        }
+
+        public int GetElementId(PssgSchemaElement element)
+        {
+            int index = ElementTable.IndexOf(element);
+            if (index == -1)
+            {
+                throw new ArgumentException(@"Element not found", nameof(element));
+            }
+
+            return index + 1;
+        }
+
+        public int GetAttributeId(PssgSchemaAttribute attribute)
+        {
+            int index = AttributeTable.IndexOf(attribute);
+            if (index == -1)
+            {
+                throw new ArgumentException(@"Attribute not found", nameof(attribute));
+            }
+
+            return index + 1;
         }
 
         public void WritePSSGString(string str)

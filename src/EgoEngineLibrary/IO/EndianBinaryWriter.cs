@@ -83,7 +83,7 @@ namespace EgoEngineLibrary.IO
 			}
 			if (!stream.CanWrite)
 			{
-				throw new ArgumentException("Stream isn't writable", "stream");
+				throw new ArgumentException(@"Stream isn't writable", nameof(stream));
 			}
 			this.stream = stream;
 			this.bitConverter = bitConverter;

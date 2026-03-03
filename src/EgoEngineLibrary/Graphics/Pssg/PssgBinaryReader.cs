@@ -1,19 +1,30 @@
-﻿using EgoEngineLibrary.Conversion;
+﻿using System.Text;
+using EgoEngineLibrary.Collections;
+using EgoEngineLibrary.Conversion;
 using EgoEngineLibrary.IO;
 
 namespace EgoEngineLibrary.Graphics.Pssg
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-
     public class PssgBinaryReader : EndianBinaryReader
     {
-        public PssgBinaryReader(EndianBitConverter bitConvertor, System.IO.Stream stream, bool leaveOpen)
+        public OrderedSet<PssgSchemaElement> ElementTable { get; set; }
+        public OrderedSet<PssgSchemaAttribute> AttributeTable { get; set; }
+        
+        public PssgBinaryReader(EndianBitConverter bitConvertor, Stream stream, bool leaveOpen)
             : base(bitConvertor, stream, leaveOpen)
         {
+            ElementTable = [];
+            AttributeTable = [];
+        }
+
+        public PssgSchemaElement GetElementById(int id)
+        {
+            return this.ElementTable[id - 1];
+        }
+
+        public PssgSchemaAttribute GetAttributeById(int id)
+        {
+            return this.AttributeTable[id - 1];
         }
 
         public string ReadPSSGString()
