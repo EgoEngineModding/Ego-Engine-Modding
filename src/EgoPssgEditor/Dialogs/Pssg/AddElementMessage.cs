@@ -2,4 +2,4 @@
 
 namespace EgoPssgEditor.Dialogs.Pssg;
 
-public class AddNodeMessage : AsyncRequestMessage<string?>;
+public class AddElementMessage : AsyncRequestMessage<string?>;

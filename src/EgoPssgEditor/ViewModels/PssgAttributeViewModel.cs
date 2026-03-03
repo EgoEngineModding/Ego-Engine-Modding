@@ -11,13 +11,13 @@ namespace EgoPssgEditor.ViewModels
     public class PssgAttributeViewModel : ViewModelBase
     {
         readonly PssgAttribute attribute;
-        readonly PssgNodeViewModel parent;
+        readonly PssgElementViewModel parent;
 
         public PssgAttribute Attribute
         {
             get { return attribute; }
         }
-        public PssgNodeViewModel Parent
+        public PssgElementViewModel Parent
         {
             get { return parent; }
         }
@@ -32,7 +32,7 @@ namespace EgoPssgEditor.ViewModels
             set { attribute.DisplayValue = value; }
         }
 
-        public PssgAttributeViewModel(PssgAttribute attribute, PssgNodeViewModel parent)
+        public PssgAttributeViewModel(PssgAttribute attribute, PssgElementViewModel parent)
         {
             this.attribute = attribute;
             this.parent = parent;

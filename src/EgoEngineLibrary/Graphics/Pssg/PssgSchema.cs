@@ -10,9 +10,9 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
         static PssgSchema()
         {
-            AddNode(PssgObject.Schema);
-            AddNode(Elements.PssgNode.Schema);
-            AddNode(PssgRootNode.Schema);
+            AddElement(PssgObject.Schema);
+            AddElement(PssgNode.Schema);
+            AddElement(PssgRootNode.Schema);
         }
 
         [RequiresUnreferencedCode("The schema node and attribute DataType may be removed.")]
@@ -41,26 +41,26 @@ namespace EgoEngineLibrary.Graphics.Pssg
             XDocument xDoc = XDocument.Load(stream);
             foreach (XElement xN in xDoc.Descendants("node"))
             {
-                string nodeName = xN.Attribute("name")?.Value ??
+                string elementName = xN.Attribute("name")?.Value ??
                                   throw new InvalidDataException(
                                       $"The schema element {xN.Name} does not have attribute name.");
                 string nType = xN.Attribute("dataType")?.Value ??
                                throw new InvalidDataException(
                                    $"The schema element {xN.Name} does not have attribute dataType.");
 
-                PssgSchemaElement node = AddNode(nodeName);
-                Type? nodeType = Type.GetType(nType, false);
-                if (nodeType != null)
+                PssgSchemaElement element = AddElement(elementName);
+                Type? elementType = Type.GetType(nType, false);
+                if (elementType != null)
                 {
-                    node.DataType = nodeType;
+                    element.DataType = elementType;
                 }
-                node.ElementsPerRow = Convert.ToInt32(xN.Attribute("elementsPerRow")?.Value ??
+                element.ElementsPerRow = Convert.ToInt32(xN.Attribute("elementsPerRow")?.Value ??
                                                       throw new InvalidDataException($"The schema element {xN.Name} does not have attribute elementsPerRow."));
                 string linkAttributeName = xN.Attribute("linkAttributeName")?.Value ??
                                            throw new InvalidDataException($"The schema element {xN.Name} does not have attribute linkAttributeName.");
                 if (!string.IsNullOrEmpty(linkAttributeName))
                 {
-                    node.LinkAttributeName = linkAttributeName;
+                    element.LinkAttributeName = linkAttributeName;
                 }
 
                 foreach (XElement attrElem in xN.Descendants("attribute"))
@@ -74,7 +74,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
                             throw new InvalidDataException(
                                 $"The schema element {attrElem.Name} does not have attribute dataType."), false);
 
-                    PssgSchemaAttribute attr = AddAttribute(node, attrName);
+                    PssgSchemaAttribute attr = AddAttribute(element, attrName);
                     if (attrType != null)
                     {
                         attr.DataType = attrType;
@@ -112,19 +112,19 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
         public static void LoadFromPssg(PssgBinaryReader reader)
         {
-            int attributeInfoCount = reader.ReadInt32();
-            int nodeInfoCount = reader.ReadInt32();
+            int attributeCount = reader.ReadInt32();
+            int elementCount = reader.ReadInt32();
 
-            var elementTable = new PssgSchemaElement[nodeInfoCount];
-            var attributeTable = new PssgSchemaAttribute[attributeInfoCount];
-            for (int i = 0; i < nodeInfoCount; i++)
+            var elementTable = new PssgSchemaElement[elementCount];
+            var attributeTable = new PssgSchemaAttribute[attributeCount];
+            for (int i = 0; i < elementCount; i++)
             {
                 int nId = reader.ReadInt32();
                 var elementName = reader.ReadPSSGString();
 
                 if (!entries.TryGetValue(elementName, out PssgSchemaElement? element))
                 {
-                    element = PssgSchema.AddNode(new PssgSchemaElement(elementName));
+                    element = PssgSchema.AddElement(new PssgSchemaElement(elementName));
                 }
 
                 elementTable[nId - 1] = element;
@@ -171,7 +171,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             }
         }
 
-        public static string[] GetNodeNames()
+        public static string[] GetElementNames()
         {
             return entries.Keys.ToArray();
         }
@@ -189,7 +189,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             return aNames.ToArray();
         }
 
-        public static PssgSchemaElement AddNode(string elementName)
+        public static PssgSchemaElement AddElement(string elementName)
         {
             if (entries.TryGetValue(elementName, out PssgSchemaElement? existingElement))
             {
@@ -201,22 +201,22 @@ namespace EgoEngineLibrary.Graphics.Pssg
             return element;
         }
 
-        public static PssgSchemaElement AddNode(PssgSchemaElement node)
+        public static PssgSchemaElement AddElement(PssgSchemaElement element)
         {
-            if (!entries.TryGetValue(node.Name, out var existingElement))
+            if (!entries.TryGetValue(element.Name, out var existingElement))
             {
-                entries.Add(node.Name, node);
-                return node;
+                entries.Add(element.Name, element);
+                return element;
             }
 
-            existingElement = entries[node.Name];
-            if (ReferenceEquals(existingElement, node))
+            existingElement = entries[element.Name];
+            if (ReferenceEquals(existingElement, element))
             {
                 return existingElement;
             }
                 
-            SetNodeDataTypeIfNull(existingElement, node.DataType);
-            foreach (PssgSchemaAttribute attrEntry in node.Attributes)
+            SetElementDataTypeIfNull(existingElement, element.DataType);
+            foreach (PssgSchemaAttribute attrEntry in element.Attributes)
             {
                 AddAttribute(existingElement, attrEntry.Name, attrEntry.DataType);
             }
@@ -224,9 +224,9 @@ namespace EgoEngineLibrary.Graphics.Pssg
             return existingElement;
         }
 
-        public static PssgSchemaAttribute AddAttribute(string nodeName, string attributeName, Type? attrType = null)
+        public static PssgSchemaAttribute AddAttribute(string elementName, string attributeName, Type? attrType = null)
         {
-            PssgSchemaElement element = AddNode(nodeName);
+            PssgSchemaElement element = AddElement(elementName);
             return AddAttribute(element, attributeName, attrType);
         }
 
@@ -256,11 +256,11 @@ namespace EgoEngineLibrary.Graphics.Pssg
             return attr;
         }
 
-        public static void SetNodeDataTypeIfNull(PssgSchemaElement node, Type dataType)
+        public static void SetElementDataTypeIfNull(PssgSchemaElement element, Type dataType)
         {
-            if (node.DataType == typeof(Exception))
+            if (element.DataType == typeof(Exception))
             {
-                node.DataType = dataType;
+                element.DataType = dataType;
             }
         }
         public static void SetAttributeDataTypeIfNull(PssgSchemaAttribute attribute, Type? attrType = null)

@@ -11,7 +11,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
         private int size;
         private object data;
 
-        public string Name => AttributeInfo.Name;
+        public string Name => SchemaAttribute.Name;
         public int Size => size;
         public object Value
         {
@@ -43,7 +43,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
         }
         public object FromString(string value)
         {
-            Type valueType = this.AttributeInfo.DataType;
+            Type valueType = this.SchemaAttribute.DataType;
             if (valueType == typeof(string))
             {
                 return value;
@@ -83,51 +83,51 @@ namespace EgoEngineLibrary.Graphics.Pssg
         }
 
         private PssgFile file;
-        public PssgNode ParentNode
+        public PssgElement ParentElement
         {
             get;
             set;
         }
-        public PssgSchemaAttribute AttributeInfo
+        public PssgSchemaAttribute SchemaAttribute
         {
             get;
             private set;
         }
 
-        public PssgAttribute(PssgSchemaAttribute attributeInfo, object data, PssgFile file, PssgNode ParentNode)
+        public PssgAttribute(PssgSchemaAttribute schemaAttribute, object data, PssgFile file, PssgElement parentElement)
         {
-            this.AttributeInfo = attributeInfo;
+            this.SchemaAttribute = schemaAttribute;
             this.data = data;
             this.file = file;
-            this.ParentNode = ParentNode;
+            this.ParentElement = parentElement;
         }
-        public PssgAttribute(PssgBinaryReader reader, PssgFile file, PssgNode node)
+        public PssgAttribute(PssgBinaryReader reader, PssgFile file, PssgElement element)
         {
             this.file = file;
-            this.ParentNode = node;
+            this.ParentElement = element;
 
             int id = reader.ReadInt32();
-            this.AttributeInfo = reader.GetAttributeById(id);
+            this.SchemaAttribute = reader.GetAttributeById(id);
             this.size = reader.ReadInt32();
-            this.data = reader.ReadAttributeValue(this.AttributeInfo.DataType, size);
-            this.AttributeInfo = PssgSchema.AddAttribute(this.ParentNode.Name, this.Name, this.Value.GetType());
+            this.data = reader.ReadAttributeValue(this.SchemaAttribute.DataType, size);
+            this.SchemaAttribute = PssgSchema.AddAttribute(this.ParentElement.Name, this.Name, this.Value.GetType());
         }
-        public PssgAttribute(XAttribute xAttr, PssgFile file, PssgNode node)
+        public PssgAttribute(XAttribute xAttr, PssgFile file, PssgElement element)
         {
             this.file = file;
-            this.ParentNode = node;
+            this.ParentElement = element;
 
             string attrName = xAttr.Name.LocalName.StartsWith("___") ? xAttr.Name.LocalName.Substring(3) : xAttr.Name.LocalName;
-            this.AttributeInfo = PssgSchema.AddAttribute(this.ParentNode.Name, attrName);
+            this.SchemaAttribute = PssgSchema.AddAttribute(this.ParentElement.Name, attrName);
             this.data = this.FromString(xAttr.Value);
-            PssgSchema.SetAttributeDataTypeIfNull(this.AttributeInfo, this.Value.GetType());
+            PssgSchema.SetAttributeDataTypeIfNull(this.SchemaAttribute, this.Value.GetType());
         }
         public PssgAttribute(PssgAttribute attrToCopy)
         {
             this.file = attrToCopy.file;
-            this.ParentNode = attrToCopy.ParentNode;
+            this.ParentElement = attrToCopy.ParentElement;
 
-            this.AttributeInfo = attrToCopy.AttributeInfo;
+            this.SchemaAttribute = attrToCopy.SchemaAttribute;
             this.size = attrToCopy.size;
             this.data = attrToCopy.data;
         }
@@ -140,7 +140,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
         public void Write(PssgBinaryWriter writer)
         {
-            writer.Write(writer.GetAttributeId(AttributeInfo));
+            writer.Write(writer.GetAttributeId(SchemaAttribute));
             writer.Write(this.size);
             writer.WriteObject(this.data);
         }

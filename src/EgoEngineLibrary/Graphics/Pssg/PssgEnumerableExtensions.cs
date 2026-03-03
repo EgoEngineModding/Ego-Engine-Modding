@@ -1,46 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EgoEngineLibrary.Graphics.Pssg
+﻿namespace EgoEngineLibrary.Graphics.Pssg
 {
     public static class PssgEnumerableExtensions
     {
-        public static IEnumerable<PssgNode> FindNodes(this IEnumerable<PssgNode> nodes, string nodeName)
+        public static IEnumerable<PssgElement> FindElements(this IEnumerable<PssgElement> elements, string elementName)
         {
-            foreach (var node in nodes)
+            foreach (var element in elements)
             {
-                if (node.Name == nodeName)
+                if (element.Name == elementName)
                 {
-                    yield return node;
+                    yield return element;
                 }
             }
         }
 
-        public static IEnumerable<PssgNode> FindNodes(this IEnumerable<PssgNode> nodes, string nodeName, string attributeName)
+        public static IEnumerable<PssgElement> FindElements(this IEnumerable<PssgElement> elements, string elementName, string attributeName)
         {
-            foreach (var node in nodes)
+            foreach (var element in elements)
             {
-                if (node.Name == nodeName &&
-                    node.HasAttribute(attributeName))
+                if (element.Name == elementName &&
+                    element.HasAttribute(attributeName))
                 {
-                    yield return node;
+                    yield return element;
                 }
             }
         }
 
-        public static IEnumerable<PssgNode> FindNodes<T>(this IEnumerable<PssgNode> nodes, string nodeName, string attributeName, T attributeValue)
+        public static IEnumerable<PssgElement> FindElements<T>(this IEnumerable<PssgElement> elements, string elementName, string attributeName, T attributeValue)
             where T : notnull
         {
-            foreach (var node in nodes)
+            foreach (var element in elements)
             {
-                if (node.Name == nodeName &&
-                    node.HasAttribute(attributeName) &&
-                    node.Attributes[attributeName].GetValue<T>().Equals(attributeValue))
+                if (element.Name == elementName &&
+                    element.HasAttribute(attributeName) &&
+                    element.Attributes[attributeName].GetValue<T>().Equals(attributeValue))
                 {
-                    yield return node;
+                    yield return element;
                 }
             }
         }

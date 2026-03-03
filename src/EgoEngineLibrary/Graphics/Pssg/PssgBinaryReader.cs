@@ -128,7 +128,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 return data;
             }
         }
-        public byte[] ReadNodeValue(int size)
+        public byte[] ReadElementValue(int size)
         {
             var ret = ReadBytes(size);
             if (ret.Length != size)

@@ -1,24 +1,20 @@
-﻿using EgoEngineLibrary.Graphics;
-
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
 using EgoEngineLibrary.Graphics.Pssg;
 
 namespace EgoPssgEditor.Views
 {
     /// <summary>
-    /// Interaction logic for AddNodeWindow.xaml
+    /// Interaction logic for AddElementWindow.xaml
     /// </summary>
-    public partial class AddNodeWindow : Window
+    public partial class AddElementWindow : Window
     {
-        public AddNodeWindow()
+        public AddElementWindow()
         {
             InitializeComponent();
 
-            // NodeInfo Combo
-            nodeNameComboBox.ItemsSource = (PssgSchema.GetNodeNames());
-            // Select
-            nodeNameComboBox.SelectedIndex = 0;
+            NameComboBox.ItemsSource = (PssgSchema.GetElementNames());
+            NameComboBox.SelectedIndex = 0;
         }
 
         private void okButton_Click(object sender, RoutedEventArgs e)
@@ -26,9 +22,9 @@ namespace EgoPssgEditor.Views
             Close(true);
         }
         
-        public string NodeName
+        public string? ElementName
         {
-            get { return nodeNameComboBox.Text; }
+            get { return NameComboBox.Text; }
         }
     }
 }

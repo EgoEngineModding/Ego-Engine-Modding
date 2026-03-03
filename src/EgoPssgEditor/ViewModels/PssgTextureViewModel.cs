@@ -12,15 +12,15 @@ namespace EgoPssgEditor.ViewModels
 {
     public class PssgTextureViewModel : ViewModelBase
     {
-        readonly PssgNodeViewModel nodeView;
+        readonly PssgElementViewModel _elementView;
 
-        public PssgNode Texture
+        public PssgElement Texture
         {
-            get { return nodeView.Node; }
+            get { return _elementView.Element; }
         }
-        public PssgNodeViewModel NodeView
+        public PssgElementViewModel ElementView
         {
-            get { return nodeView; }
+            get { return _elementView; }
         }
         public override string DisplayName
         {
@@ -55,13 +55,13 @@ namespace EgoPssgEditor.ViewModels
                     if (value)
                     {
                         GetPreview();
-                        NodeView.IsSelected = true;
+                        ElementView.IsSelected = true;
                     }
                     else 
                     {
                         Preview?.Dispose();
                         Preview = null;
-                        NodeView.IsSelected = false;
+                        ElementView.IsSelected = false;
                     }
                     OnPropertyChanged(nameof(IsSelected));
                 }
@@ -84,9 +84,9 @@ namespace EgoPssgEditor.ViewModels
         }
         #endregion
 
-        public PssgTextureViewModel(PssgNodeViewModel nodeView)
+        public PssgTextureViewModel(PssgElementViewModel elementView)
         {
-            this.nodeView = nodeView;
+            this._elementView = elementView;
         }
 
         public void GetPreview()

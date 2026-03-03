@@ -44,16 +44,16 @@
                     <MenuItem Header="Save As _Xml" Command="{Binding Path=SaveXmlCommand}"></MenuItem>
                 </MenuItem>
             </MenuItem>
-            <MenuItem Header="_Nodes">
-                <MenuItem Header="_Export" Command="{Binding Path=NodesWorkspace.ExportCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="_Import" Command="{Binding Path=NodesWorkspace.ImportCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="E_xport Data" Command="{Binding Path=NodesWorkspace.ExportDataCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="I_mport Data" Command="{Binding Path=NodesWorkspace.ImportDataCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="Add _Node" Command="{Binding Path=NodesWorkspace.AddNodeCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="_Remove Node" Command="{Binding Path=NodesWorkspace.RemoveNodeCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="_Clone Node" Command="{Binding Path=NodesWorkspace.CloneNodeCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="Add _Attribute" Command="{Binding Path=NodesWorkspace.AddAttributeCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
-                <MenuItem Header="Rem_ove Attribute" Command="{Binding Path=NodesWorkspace.RemoveAttributeCommand}" CommandParameter="{Binding ElementName=attributesDataGrid, Path=SelectedItem}"></MenuItem>
+            <MenuItem Header="_Elements">
+                <MenuItem Header="_Export" Command="{Binding Path=ElementsWorkspace.ExportCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Import" Command="{Binding Path=ElementsWorkspace.ImportCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="E_xport Data" Command="{Binding Path=ElementsWorkspace.ExportDataCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="I_mport Data" Command="{Binding Path=ElementsWorkspace.ImportDataCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="Add _Element" Command="{Binding Path=ElementsWorkspace.AddElementCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Remove Element" Command="{Binding Path=ElementsWorkspace.RemoveElementCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="_Clone Element" Command="{Binding Path=ElementsWorkspace.CloneElementCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="Add _Attribute" Command="{Binding Path=ElementsWorkspace.AddAttributeCommand}" CommandParameter="{Binding ElementName=tvMain, Path=SelectedItem}"></MenuItem>
+                <MenuItem Header="Rem_ove Attribute" Command="{Binding Path=ElementsWorkspace.RemoveAttributeCommand}" CommandParameter="{Binding ElementName=attributesDataGrid, Path=SelectedItem}"></MenuItem>
             </MenuItem>
             <MenuItem Header="_Textures">
                 <MenuItem Header="_Export" Command="{Binding Path=TexturesWorkspace.ExportCommand}" CommandParameter="{Binding ElementName=texListView, Path=SelectedItem}"></MenuItem>
@@ -87,17 +87,17 @@
 
 
         <TabControl SelectedIndex="{Binding SelectedTabIndex}" Padding="0">
-            <TabItem Header="{Binding NodesWorkspace.DisplayName}">
-                <Grid DataContext="{Binding NodesWorkspace}">
+            <TabItem Header="{Binding ElementsWorkspace.DisplayName}">
+                <Grid DataContext="{Binding ElementsWorkspace}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="240" />
                         <ColumnDefinition Width="5" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <DockPanel>
-                        <TreeView Name="tvMain" ItemsSource="{Binding Path=PssgNodes}">
+                        <TreeView Name="tvMain" ItemsSource="{Binding Path=PssgElements}">
                             <TreeView.Styles>
-                                <Style Selector="TreeViewItem" x:DataType="vm:PssgNodeViewModel">
+                                <Style Selector="TreeViewItem" x:DataType="vm:PssgElementViewModel">
                                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                                     <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
                                 </Style>
@@ -112,9 +112,9 @@
                     </DockPanel>
                     <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
                     <UniformGrid Grid.Column="2" Columns="1">
-                        <DockPanel IsVisible="{Binding ElementName=tvMain, Path=((vm:PssgNodeViewModel)SelectedItem).HasAttributes}">
+                        <DockPanel IsVisible="{Binding ElementName=tvMain, Path=((vm:PssgElementViewModel)SelectedItem).HasAttributes}">
                             <DataGrid x:Name="attributesDataGrid"
-                                      ItemsSource="{Binding ElementName=tvMain, Path=((vm:PssgNodeViewModel)SelectedItem).Attributes}"
+                                      ItemsSource="{Binding ElementName=tvMain, Path=((vm:PssgElementViewModel)SelectedItem).Attributes}"
                                       AutoGenerateColumns="False" CanUserSortColumns="False"
                                       HeadersVisibility="All" RowHeight="20" FontSize="14">
                                 <DataGrid.Styles>
@@ -127,9 +127,9 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </DockPanel>
-                        <DockPanel Grid.Row="1" IsVisible="{Binding ElementName=tvMain, Path=((vm:PssgNodeViewModel)SelectedItem).IsDataNode}">
+                        <DockPanel Grid.Row="1" IsVisible="{Binding ElementName=tvMain, Path=((vm:PssgElementViewModel)SelectedItem).IsDataElement}">
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                <SelectableTextBlock Text="{Binding ElementName=tvMain, Path=((vm:PssgNodeViewModel)SelectedItem).DisplayValue, Mode=OneWay}" 
+                                <SelectableTextBlock Text="{Binding ElementName=tvMain, Path=((vm:PssgElementViewModel)SelectedItem).DisplayValue, Mode=OneWay}" 
                                          TextWrapping="Wrap" 
                                          FontFamily="Consolas"></SelectableTextBlock>
                             </ScrollViewer>

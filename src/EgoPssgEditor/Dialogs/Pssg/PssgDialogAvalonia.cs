@@ -1,7 +1,5 @@
 ﻿using Avalonia.Controls;
-
 using CommunityToolkit.Mvvm.Messaging;
-
 using EgoPssgEditor.Views;
 
 namespace EgoPssgEditor.Dialogs.Pssg;
@@ -10,30 +8,30 @@ public class PssgDialogAvalonia
 {
     public static void Register(Window recipient)
     {
-        PssgDialog.Messenger.Register<Window, AddNodeMessage>(recipient, AddNodeHandler);
+        PssgDialog.Messenger.Register<Window, AddElementMessage>(recipient, AddElementHandler);
         PssgDialog.Messenger.Register<Window, AddAttributeMessage>(recipient, AddAttributeHandler);
         PssgDialog.Messenger.Register<Window, DuplicateTextureMessage>(recipient, DuplicateTextureHandler);
     }
 
     public static void Unregister(Window recipient)
     {
-        PssgDialog.Messenger.Unregister<AddNodeMessage>(recipient);
+        PssgDialog.Messenger.Unregister<AddElementMessage>(recipient);
         PssgDialog.Messenger.Unregister<AddAttributeMessage>(recipient);
         PssgDialog.Messenger.Unregister<DuplicateTextureMessage>(recipient);
     }
 
-    private static void AddNodeHandler(Window recipient, AddNodeMessage message)
+    private static void AddElementHandler(Window recipient, AddElementMessage message)
     {
-        message.Reply(ShowAddNode(recipient));
+        message.Reply(Show(recipient));
         return;
 
-        static async Task<string?> ShowAddNode(Window owner)
+        static async Task<string?> Show(Window owner)
         {
             ArgumentNullException.ThrowIfNull(owner);
 
-            AddNodeWindow win = new AddNodeWindow();
+            AddElementWindow win = new();
             var res = await win.ShowDialog<bool>(owner);
-            return res ? win.NodeName : null;
+            return res ? win.ElementName : null;
         }
     }
 

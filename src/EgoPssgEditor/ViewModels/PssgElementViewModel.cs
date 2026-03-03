@@ -1,48 +1,42 @@
-﻿using EgoEngineLibrary.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using EgoEngineLibrary.Graphics.Pssg;
 
 namespace EgoPssgEditor.ViewModels
 {
-    public class PssgNodeViewModel : ViewModelBase
+    public class PssgElementViewModel : ViewModelBase
     {
         #region Data Props
-        static readonly PssgNodeViewModel DummyChild = new PssgNodeViewModel();
-        readonly PssgNode node;
-        PssgNodeViewModel parent;
-        readonly ObservableCollection<PssgNodeViewModel> children;
+        static readonly PssgElementViewModel DummyChild = new PssgElementViewModel();
+        readonly PssgElement _element;
+        PssgElementViewModel parent;
+        readonly ObservableCollection<PssgElementViewModel> children;
         readonly ObservableCollection<PssgAttributeViewModel> attributes;
 
-        public PssgNode Node
+        public PssgElement Element
         {
-            get { return node; }
+            get { return _element; }
         }
         public override string DisplayName
         {
-            get { return node?.Name; }
+            get { return _element?.Name; }
         }
         public string DisplayValue
         {
-            get { return node.DisplayValue; }
+            get { return _element.DisplayValue; }
         }
         public bool HasAttributes
         {
-            get { return node.HasAttributes; }
+            get { return _element.HasAttributes; }
         }
-        public bool IsDataNode
+        public bool IsDataElement
         {
-            get { return node.IsDataNode; }
+            get { return _element.IsDataElement; }
         }
-        public PssgNodeViewModel Parent
+        public PssgElementViewModel Parent
         {
             get { return parent; }
         }
-        public ObservableCollection<PssgNodeViewModel> Children
+        public ObservableCollection<PssgElementViewModel> Children
         {
             get { return children; }
         }
@@ -91,28 +85,25 @@ namespace EgoPssgEditor.ViewModels
         }
         #endregion
 
-        private PssgNodeViewModel()
+        private PssgElementViewModel()
         { }
 
-        public PssgNodeViewModel(PssgNode node)
-            : this(node, null)
+        public PssgElementViewModel(PssgElement element)
+            : this(element, null)
         {
 
         }
 
-        public PssgNodeViewModel(PssgNode node, PssgNodeViewModel parent)
+        public PssgElementViewModel(PssgElement element, PssgElementViewModel parent)
         {
-            this.node = node;
+            this._element = element;
             this.parent = parent;
 
             attributes = new ObservableCollection<PssgAttributeViewModel>();
-            //this.attributes = new ObservableCollection<PssgAttributeViewModel>(
-            //    from attribute in node.Attributes
-            //    select new PssgAttributeViewModel(attribute));
 
-            children = new ObservableCollection<PssgNodeViewModel>(
-                from child in node.ChildNodes
-                select new PssgNodeViewModel(child, this));
+            children = new ObservableCollection<PssgElementViewModel>(
+                from child in element.ChildElements
+                select new PssgElementViewModel(child, this));
         }
 
         private bool HasDummyChild
@@ -123,7 +114,7 @@ namespace EgoPssgEditor.ViewModels
         private void GetAttributes()
         {
             attributes.Clear();
-            foreach (PssgAttribute attr in node.Attributes)
+            foreach (PssgAttribute attr in _element.Attributes)
             {
                 attributes.Add(new PssgAttributeViewModel(attr, this));
             }

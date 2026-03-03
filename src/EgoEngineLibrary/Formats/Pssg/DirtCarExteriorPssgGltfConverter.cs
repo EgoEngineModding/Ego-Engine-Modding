@@ -21,7 +21,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 
         public new static bool SupportsPssg(PssgFile pssg)
         {
-            return pssg.FindNodes("VISIBLERENDERNODE").Any();
+            return pssg.FindElements("VISIBLERENDERNODE").Any();
         }
 
         protected override ExportState CreateState()

@@ -6,9 +6,9 @@ public class PssgDialog
 {
     public static IMessenger Messenger { get; set; } = EgoEngineLibrary.Frontend.Messaging.Messenger.Default;
     
-    public static async Task<string?> ShowAddNodeDialog()
+    public static async Task<string?> ShowAddElementDialog()
     {
-        return await Messenger.Send(new AddNodeMessage());
+        return await Messenger.Send(new AddElementMessage());
     }
     
     public static async Task<AddAttributeResponse?> ShowAddAttributeDialog()

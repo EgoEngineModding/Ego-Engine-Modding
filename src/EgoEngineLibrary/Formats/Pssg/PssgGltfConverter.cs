@@ -17,7 +17,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 {
     public abstract class PssgGltfConverter
 	{
-		protected record PrimitiveData(PssgNode Node, MaterialBuilder Material, bool CreatedNewMaterial, RenderDataSourceReader Rds);
+		protected record PrimitiveData(PssgElement Element, MaterialBuilder Material, bool CreatedNewMaterial, RenderDataSourceReader Rds);
 		protected abstract class PssgModelReaderState
 		{
 			public bool IsF1 { get; set; }
@@ -61,9 +61,9 @@ namespace EgoEngineLibrary.Formats.Pssg
 			}
 		}
 
-		protected static Matrix4x4 GetTransform(PssgNode sceneNode)
+		protected static Matrix4x4 GetTransform(PssgElement sceneElement)
 		{
-			var transformNode = sceneNode.FindNodes("TRANSFORM").First();
+			var transformNode = sceneElement.FindElements("TRANSFORM").First();
 			return GetTransform(transformNode.Value);
 		}
 		private static Matrix4x4 GetTransform(byte[] buffer)
@@ -151,27 +151,27 @@ namespace EgoEngineLibrary.Formats.Pssg
 			return mat;
 		}
 
-		protected static byte[] GetDiffuseTexture(PssgNode? sgNode, IEnumerable<PssgNode> textureInputs)
+		protected static byte[] GetDiffuseTexture(PssgElement? sgNode, IEnumerable<PssgElement> textureInputs)
 		{
 			return GetTextureBytes(sgNode, textureInputs, "TDiffuseAlphaMap") ?? grayImageBytes;
 		}
-		protected static byte[] GetSpecularTexture(PssgNode? sgNode, IEnumerable<PssgNode> textureInputs)
+		protected static byte[] GetSpecularTexture(PssgElement? sgNode, IEnumerable<PssgElement> textureInputs)
 		{
 			return GetTextureBytes(sgNode, textureInputs, "TSpecularMap") ?? blackImageBytes;
 		}
-		protected static byte[] GetEmissiveTexture(PssgNode? sgNode, IEnumerable<PssgNode> textureInputs)
+		protected static byte[] GetEmissiveTexture(PssgElement? sgNode, IEnumerable<PssgElement> textureInputs)
 		{
 			return GetTextureBytes(sgNode, textureInputs, "TEmissiveMap") ?? blackImageBytes;
 		}
-		protected static byte[] GetOcclusionTexture(PssgNode? sgNode, IEnumerable<PssgNode> textureInputs)
+		protected static byte[] GetOcclusionTexture(PssgElement? sgNode, IEnumerable<PssgElement> textureInputs)
 		{
 			return GetTextureBytes(sgNode, textureInputs, "TOcclusionMap") ?? whiteImageBytes;
 		}
-		protected static byte[] GetNormalTexture(PssgNode? sgNode, IEnumerable<PssgNode> textureInputs)
+		protected static byte[] GetNormalTexture(PssgElement? sgNode, IEnumerable<PssgElement> textureInputs)
 		{
 			return GetTextureBytes(sgNode, textureInputs, "TNormalMap") ?? blackImageBytes;
 		}
-		private static byte[]? GetTextureBytes(PssgNode? sgNode, IEnumerable<PssgNode> textureInputs, string texType)
+		private static byte[]? GetTextureBytes(PssgElement? sgNode, IEnumerable<PssgElement> textureInputs, string texType)
 		{
 			try
 			{
@@ -181,7 +181,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 				foreach (var ti in textureInputs)
 				{
 					var paramId = ti.Attributes["parameterID"].GetValue<uint>();
-					if (paramId >= sgNode.ChildNodes.Count)
+					if (paramId >= sgNode.ChildElements.Count)
 						continue;
 
 					var textureId = ti.Attributes["texture"].GetValue<string>();
@@ -190,10 +190,10 @@ namespace EgoEngineLibrary.Formats.Pssg
 						continue;
 					textureId = textureId.Substring(1);
 
-					var sidNode = sgNode.ChildNodes[(int)paramId];
+					var sidNode = sgNode.ChildElements[(int)paramId];
 					if (sidNode.HasAttribute("name") && sidNode.Attributes["name"].GetValue<string>().StartsWith(texType))
 					{
-						var textureNode = sgNode.File.FindNodes("TEXTURE", "id", textureId).FirstOrDefault();
+						var textureNode = sgNode.File.FindElements("TEXTURE", "id", textureId).FirstOrDefault();
 						if (textureNode is null)
 							continue;
 
@@ -208,11 +208,11 @@ namespace EgoEngineLibrary.Formats.Pssg
 				return null;
 			}
 		}
-		private static byte[] GetTextureBytes(PssgNode textureNode)
+		private static byte[] GetTextureBytes(PssgElement textureElement)
 		{
 			using (var ms = new MemoryStream())
 			{
-				var dds = textureNode.ToDdsFile(false);
+				var dds = textureElement.ToDdsFile(false);
 				dds.Write(ms, -1);
 
 				ms.Seek(0, SeekOrigin.Begin);

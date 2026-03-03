@@ -29,11 +29,11 @@ namespace EgoEngineLibrary.Formats.Pssg
         public uint IndexCount { get; }
         public int TexCoordSetCount => _texCoordSets.Count;
 
-        public RenderDataSourceReader(PssgNode rdsNode)
+        public RenderDataSourceReader(PssgElement rdsElement)
         {
-            var risNode = rdsNode.ChildNodes.FirstOrDefault(n => n.Name == "RENDERINDEXSOURCE") ??
-                throw new InvalidDataException($"RDS node {rdsNode.Attributes["id"].GetValue<string>()} must have RENDERINDEXSOURCE as its first child.");
-            var isdNode = risNode.ChildNodes.FirstOrDefault(n => n.Name == "INDEXSOURCEDATA") ??
+            var risNode = rdsElement.ChildElements.FirstOrDefault(n => n.Name == "RENDERINDEXSOURCE") ??
+                throw new InvalidDataException($"RDS node {rdsElement.Attributes["id"].GetValue<string>()} must have RENDERINDEXSOURCE as its first child.");
+            var isdNode = risNode.ChildElements.FirstOrDefault(n => n.Name == "INDEXSOURCEDATA") ??
                 throw new InvalidDataException($"RENDERINDEXSOURCE node {risNode.Attributes["id"].GetValue<string>()} must have INDEXSOURCEDATA as its first child.");
 
             // Setup indices
@@ -44,7 +44,7 @@ namespace EgoEngineLibrary.Formats.Pssg
             _indexData = ((byte[])isdNode.Value);
 
             // Setup vertex attributes
-            var renderStreamNodes = rdsNode.FindNodes("RENDERSTREAM").ToList();
+            var renderStreamNodes = rdsElement.FindElements("RENDERSTREAM").ToList();
             _vertexAttributes = new Dictionary<string, VertexAttributeData>();
             _texCoordSets = new List<VertexAttributeData>();
             foreach (var rsNode in renderStreamNodes)
@@ -52,13 +52,13 @@ namespace EgoEngineLibrary.Formats.Pssg
                 var dbId = rsNode.Attributes["dataBlock"].GetValue<string>().Substring(1);
                 var subStream = rsNode.Attributes["subStream"].GetValue<uint>();
 
-                var dbNode = rsNode.File.FindNodes("DATABLOCK", "id", dbId).First();
-                var dbStreamNode = dbNode.ChildNodes[(int)subStream];
+                var dbNode = rsNode.File.FindElements("DATABLOCK", "id", dbId).First();
+                var dbStreamNode = dbNode.ChildElements[(int)subStream];
 
                 var size = dbNode.Attributes["size"].GetValue<uint>();
                 var elemCount = dbNode.Attributes["elementCount"].GetValue<uint>();
 
-                var dataBlockDataNode = dbNode.FindNodes("DATABLOCKDATA").First();
+                var dataBlockDataNode = dbNode.FindElements("DATABLOCKDATA").First();
                 var data = (byte[])dataBlockDataNode.Value;
 
                 var renderType = dbStreamNode.Attributes["renderType"].GetValue<string>();

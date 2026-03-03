@@ -6,23 +6,21 @@ using EgoEngineLibrary.Helper;
 
 namespace EgoEngineLibrary.Graphics.Pssg
 {
-    public class PssgNode
+    public class PssgElement
     {
         // id, size, and attributeSize are only used during Reading/Writing
         private int size;
         private int attributeSize;
         private byte[] data;
 
-        public string Name
-        {
-            get { return NodeInfo.Name; }
-        }
+        public string Name => SchemaElement.Name;
+
         public PssgAttributeCollection Attributes
         {
             get;
             set;
         }
-        public PssgNodeCollection ChildNodes
+        public PssgElementCollection ChildElements
         {
             get;
             set;
@@ -44,11 +42,11 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 this.Value = this.FromString(value);
             }
         }
-        public bool IsDataNode
+        public bool IsDataElement
         {
             get
             {
-                if (this.ChildNodes.Count == 0)
+                if (this.ChildElements.Count == 0)
                 {
                     return data.Length > 0;
                 }
@@ -60,27 +58,23 @@ namespace EgoEngineLibrary.Graphics.Pssg
         public PssgFile File
         {
             get;
-            set;
+            private set;
         }
-        public PssgNode? ParentNode
-        {
-            get;
-            set;
-        }
-        // NodeInfo should never be null
-        public PssgSchemaElement NodeInfo
+        public PssgElement? ParentElement
         {
             get;
             private set;
         }
 
-        public PssgNode(PssgBinaryReader reader, PssgFile file, PssgNode? node, bool useDataNodeCheck)
+        public PssgSchemaElement SchemaElement { get; }
+
+        public PssgElement(PssgBinaryReader reader, PssgFile file, PssgElement? element, bool useDataElementCheck)
         {
             this.File = file;
-            this.ParentNode = node;
+            this.ParentElement = element;
 
             int id = reader.ReadInt32();
-            this.NodeInfo = reader.GetElementById(id);
+            this.SchemaElement = reader.GetElementById(id);
             this.size = reader.ReadInt32();
             long end = reader.BaseStream.Position + size;
 
@@ -100,7 +94,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 this.Attributes.Add(attr);
             }
 
-            bool isDataNode = false;
+            bool isDataElement = false;
             switch (Name)
             {
                 case "BOUNDINGBOX":
@@ -116,19 +110,19 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 case "SHADERINPUT":
                 case "TEXTUREIMAGEBLOCKDATA":
                 case "TRANSFORM":
-                    isDataNode = true;
+                    isDataElement = true;
                     break;
             }
-            if (isDataNode == false && useDataNodeCheck == true)
+            if (isDataElement == false && useDataElementCheck == true)
             {
                 long currentPos = reader.BaseStream.Position;
-                // Check if it has subnodes
+                // Check if it has children
                 while (reader.BaseStream.Position < end)
                 {
                     int tempID = reader.ReadInt32();
                     if (tempID < 0)//tempID > file.nodeInfo.Length || 
                     {
-                        isDataNode = true;
+                        isDataElement = true;
                         break;
                     }
                     else
@@ -136,7 +130,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
                         int tempSize = reader.ReadInt32();
                         if ((reader.BaseStream.Position + tempSize > end) || (tempSize == 0 && tempID == 0) || tempSize < 0)
                         {
-                            isDataNode = true;
+                            isDataElement = true;
                             break;
                         }
                         else if (reader.BaseStream.Position + tempSize == end)
@@ -152,30 +146,28 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 reader.BaseStream.Position = currentPos;
             }
 
-            if (isDataNode)
+            if (isDataElement)
             {
-                this.data = reader.ReadNodeValue((int)(end - reader.BaseStream.Position));
-                this.ChildNodes = new PssgNodeCollection();
+                this.data = reader.ReadElementValue((int)(end - reader.BaseStream.Position));
+                this.ChildElements = new PssgElementCollection();
             }
             else
             {
                 this.data = Array.Empty<byte>();
-                // Each node at least 12 bytes (id + size + arg size)
-                this.ChildNodes = new PssgNodeCollection((int)(end - reader.BaseStream.Position) / 12);
-                int nodeCount = 0;
+                // Each element at least 12 bytes (id + size + arg size)
+                this.ChildElements = new PssgElementCollection((int)(end - reader.BaseStream.Position) / 12);
                 while (reader.BaseStream.Position < end)
                 {
-                    this.ChildNodes.Add(new PssgNode(reader, file, this, useDataNodeCheck));
-                    nodeCount++;
+                    this.ChildElements.Add(new PssgElement(reader, file, this, useDataElementCheck));
                 }
             }
-            PssgSchema.SetNodeDataTypeIfNull(this.NodeInfo, Value.GetType());
+            PssgSchema.SetElementDataTypeIfNull(this.SchemaElement, Value.GetType());
         }
-        public PssgNode(XElement elem, PssgFile file, PssgNode? node)
+        public PssgElement(XElement elem, PssgFile file, PssgElement? element)
         {
             this.File = file;
-            this.ParentNode = node;
-            this.NodeInfo = PssgSchema.AddNode(elem.Name.LocalName);
+            this.ParentElement = element;
+            this.SchemaElement = PssgSchema.AddElement(elem.Name.LocalName);
 
             this.Attributes = new PssgAttributeCollection();
             PssgAttribute attr;
@@ -185,93 +177,90 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 this.Attributes.Add(attr);
             }
 
-            // Add data, and sub nodes code here
             if (elem.FirstNode != null && elem.FirstNode is XText)
             {
                 this.data = this.FromString(elem.Value);
-                this.ChildNodes = new PssgNodeCollection();
+                this.ChildElements = new PssgElementCollection();
             }
             else
             {
                 this.data = Array.Empty<byte>();
-                this.ChildNodes = new PssgNodeCollection(elem.Elements().Count());
-                int nodeCount = 0;
-                foreach (XElement subElem in elem.Elements())
+                this.ChildElements = new PssgElementCollection(elem.Elements().Count());
+                foreach (XElement child in elem.Elements())
                 {
-                    this.ChildNodes.Add(new PssgNode(subElem, file, this));
-                    ++nodeCount;
+                    this.ChildElements.Add(new PssgElement(child, file, this));
                 }
             }
-            PssgSchema.SetNodeDataTypeIfNull(this.NodeInfo, Value.GetType());
+            PssgSchema.SetElementDataTypeIfNull(this.SchemaElement, Value.GetType());
         }
-        public PssgNode(PssgNode nodeToCopy)
+        public PssgElement(PssgElement elementToCopy)
         {
-            this.File = nodeToCopy.File;
-            this.ParentNode = nodeToCopy.ParentNode;
+            this.File = elementToCopy.File;
+            this.ParentElement = elementToCopy.ParentElement;
 
-            this.NodeInfo = nodeToCopy.NodeInfo;
-            this.size = nodeToCopy.size;
-            this.attributeSize = nodeToCopy.attributeSize;
+            this.SchemaElement = elementToCopy.SchemaElement;
+            this.size = elementToCopy.size;
+            this.attributeSize = elementToCopy.attributeSize;
             this.Attributes = new PssgAttributeCollection();
             PssgAttribute attr;
-            foreach (PssgAttribute attrToCopy in nodeToCopy.Attributes)
+            foreach (PssgAttribute attrToCopy in elementToCopy.Attributes)
             {
                 attr = new PssgAttribute(attrToCopy);
-                attr.ParentNode = this;
+                attr.ParentElement = this;
                 this.Attributes.Add(attr);
             }
 
 
-            if (nodeToCopy.IsDataNode)
+            if (elementToCopy.IsDataElement)
             {
-                this.data = nodeToCopy.data;
-                this.ChildNodes = new PssgNodeCollection();
+                this.data = elementToCopy.data;
+                this.ChildElements = new PssgElementCollection();
             }
             else
             {
                 this.data = Array.Empty<byte>();
-                // Each node at least 12 bytes (id + size + arg size)
-                this.ChildNodes = new PssgNodeCollection(nodeToCopy.ChildNodes.Count);
-                foreach (PssgNode subNodeToCopy in nodeToCopy.ChildNodes)
+                // Each element at least 12 bytes (id + size + arg size)
+                this.ChildElements = new PssgElementCollection(elementToCopy.ChildElements.Count);
+                foreach (PssgElement childElementToCopy in elementToCopy.ChildElements)
                 {
-                    PssgNode node = new PssgNode(subNodeToCopy);
-                    node.ParentNode = this;
-                    this.ChildNodes.Add(node);
+                    PssgElement element = new PssgElement(childElementToCopy);
+                    element.ParentElement = this;
+                    this.ChildElements.Add(element);
                 }
             }
         }
-        public PssgNode(string name, PssgFile file, PssgNode? node)
+        public PssgElement(string name, PssgFile file, PssgElement? element)
         {
             this.File = file;
-            this.ParentNode = node;
-            this.NodeInfo = PssgSchema.AddNode(name);
+            this.ParentElement = element;
+            this.SchemaElement = PssgSchema.AddElement(name);
             this.Attributes = new PssgAttributeCollection();
             this.data = Array.Empty<byte>();
-            this.ChildNodes = new PssgNodeCollection();
+            this.ChildElements = new PssgElementCollection();
         }
 
         private Type GetValueType()
         {
-            PssgSchemaElement sNode = this.NodeInfo;
-            if (!string.IsNullOrEmpty(sNode.LinkAttributeName))
+            PssgSchemaElement schema = this.SchemaElement;
+            if (!string.IsNullOrEmpty(schema.LinkAttributeName))
             {
-                PssgNode node;
+                PssgElement element;
                 string linkAttrName;
-                if (sNode.LinkAttributeName[0] == '^')
+                if (schema.LinkAttributeName[0] == '^')
                 {
-                    if (this.ParentNode == null) throw new InvalidOperationException("Node without parent cannot reference a parent's attribute.");
-                    node = this.ParentNode;
-                    linkAttrName = sNode.LinkAttributeName.Substring(1);
+                    if (this.ParentElement == null) throw new InvalidOperationException("Element without parent cannot reference a parent's attribute.");
+                    element = this.ParentElement;
+                    linkAttrName = schema.LinkAttributeName.Substring(1);
                 }
                 else
                 {
-                    node = this;
-                    linkAttrName = sNode.LinkAttributeName;
+                    element = this;
+                    linkAttrName = schema.LinkAttributeName;
                 }
 
-                if (node.HasAttribute(linkAttrName))
+                if (element.HasAttribute(linkAttrName))
                 {
-                    PssgAttribute attr = node.Attributes[linkAttrName];
+                    PssgAttribute attr = element.Attributes[linkAttrName];
                     if (attr.Value is string)
                     {
                         string format = (string)attr.Value;
@@ -287,12 +276,12 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 }
             }
 
-            return sNode.DataType;
+            return schema.DataType;
         }
 
         public void Write(PssgBinaryWriter writer)
         {
-            writer.Write(writer.GetElementId(NodeInfo));
+            writer.Write(writer.GetElementId(SchemaElement));
             writer.Write(size);
             writer.Write(attributeSize);
             if (Attributes != null)
@@ -302,15 +291,15 @@ namespace EgoEngineLibrary.Graphics.Pssg
                     attr.Write(writer);
                 }
             }
-            if (this.IsDataNode)
+            if (this.IsDataElement)
             {
                 writer.WriteObject(data);
             }
             else
             {
-                foreach (PssgNode node in ChildNodes)
+                foreach (PssgElement child in ChildElements)
                 {
-                    node.Write(writer);
+                    child.Write(writer);
                 }
             }
         }
@@ -328,15 +317,15 @@ namespace EgoEngineLibrary.Graphics.Pssg
             }
 
 
-            if (this.IsDataNode)
+            if (this.IsDataElement)
             {
                 pNode.Add(new XText(this.ToString())); //EndianBitConverter.ToString(data)
             }
             else
             {
-                foreach (PssgNode node in ChildNodes)
+                foreach (PssgElement child in ChildElements)
                 {
-                    node.WriteXml(pNode);
+                    child.WriteXml(pNode);
                 }
             }
 
@@ -355,63 +344,63 @@ namespace EgoEngineLibrary.Graphics.Pssg
             }
             size = 4 + attributeSize;
 
-            if (this.IsDataNode)
+            if (this.IsDataElement)
             {
                 size += data.Length;
             }
             else
             {
-                foreach (PssgNode node in ChildNodes)
+                foreach (PssgElement child in ChildElements)
                 {
-                    node.UpdateSize();
-                    size += 8 + node.size;
+                    child.UpdateSize();
+                    size += 8 + child.size;
                 }
             }
         }
 
-        public PssgNode AppendChild(string nodeName)
+        public PssgElement AppendChild(string elementName)
         {
-            return this.AppendChild(new PssgNode(nodeName, this.File, this));
+            return this.AppendChild(new PssgElement(elementName, this.File, this));
         }
-        public PssgNode AppendChild(PssgNode childNode)
+        public PssgElement AppendChild(PssgElement childElement)
         {
-            if (this.IsDataNode == true)
+            if (this.IsDataElement == true)
             {
-                throw new InvalidOperationException("Cannot append a child node to a data node.");
+                throw new InvalidOperationException("Cannot append a child element to a data element.");
             }
 
-            if (this.ChildNodes == null)
+            if (this.ChildElements == null)
             {
-                this.ChildNodes = new PssgNodeCollection();
+                this.ChildElements = new PssgElementCollection();
             }
 
-            childNode.File = this.File;
-            childNode.ParentNode = this;
-            this.ChildNodes.Add(childNode);
+            childElement.File = this.File;
+            childElement.ParentElement = this;
+            this.ChildElements.Add(childElement);
 
-            return childNode;
+            return childElement;
         }
-        public PssgNode? SetChild(PssgNode childNode, PssgNode newChildNode)
+        public PssgElement? SetChild(PssgElement childElement, PssgElement newChildElement)
         {
-            newChildNode.File = this.File;
-            newChildNode.ParentNode = this;
-            PssgNode? node = this.ChildNodes.Set(childNode, newChildNode);
-            return node;
+            newChildElement.File = this.File;
+            newChildElement.ParentElement = this;
+            PssgElement? element = this.ChildElements.Set(childElement, newChildElement);
+            return element;
         }
-        public void RemoveChild(PssgNode childNode)
+        public void RemoveChild(PssgElement childElement)
         {
-            if (this.ChildNodes.Remove(childNode))
-                childNode.ParentNode = null;
+            if (this.ChildElements.Remove(childElement))
+                childElement.ParentElement = null;
             else
-                throw new InvalidOperationException("Failed to remove child node.");
+                throw new InvalidOperationException("Failed to remove child element.");
         }
 
-        public void RemoveChildNodes(IEnumerable<PssgNode>? childNodes = null)
+        public void RemoveChildElements(IEnumerable<PssgElement>? childElements = null)
         {
-            childNodes ??= ChildNodes;
+            childElements ??= ChildElements;
             while (true)
             {
-                var child = childNodes.FirstOrDefault();
+                var child = childElements.FirstOrDefault();
                 if (child is null)
                     break;
 
@@ -443,45 +432,44 @@ namespace EgoEngineLibrary.Graphics.Pssg
         }
 
         /// <summary>
-        /// Gets this node, and it's hierarchy as a flat sequence.
+        /// Gets this element, and its hierarchy as a flat sequence.
         /// </summary>
-        /// <returns>the flat node hierarchy.</returns>
-        public IEnumerable<PssgNode> GetNodes()
+        public IEnumerable<PssgElement> GetElements()
         {
             yield return this;
 
-            foreach (var c in ChildNodes)
+            foreach (var c in ChildElements)
             {
-                var cc = c.GetNodes();
+                var cc = c.GetElements();
 
                 foreach (var ccc in cc) yield return ccc;
             }
         }
 
-        public IEnumerable<PssgNode> FindNodes(string nodeName)
+        public IEnumerable<PssgElement> FindElements(string elementName)
         {
-            return GetNodes().FindNodes(nodeName);
+            return GetElements().FindElements(elementName);
         }
-        public IEnumerable<PssgNode> FindNodes(string nodeName, string attributeName)
+        public IEnumerable<PssgElement> FindElements(string elementName, string attributeName)
         {
-            return GetNodes().FindNodes(nodeName, attributeName);
+            return GetElements().FindElements(elementName, attributeName);
         }
-        public IEnumerable<PssgNode> FindNodes<T>(string nodeName, string attributeName, T attributeValue)
+        public IEnumerable<PssgElement> FindElements<T>(string elementName, string attributeName, T attributeValue)
             where T : notnull
         {
-            return GetNodes().FindNodes(nodeName, attributeName, attributeValue);
+            return GetElements().FindElements(elementName, attributeName, attributeValue);
         }
 
-        public PssgNode this[int index]
+        public PssgElement this[int index]
         {
             get
             {
-                return this.ChildNodes[index];
+                return this.ChildElements[index];
             }
         }
 
         /// <summary>
-        /// Determines whether the current node has an attribute with the specified name.
+        /// Determines whether the current element has an attribute with the specified name.
         /// </summary>
         /// <param name="attributeName">The name of the attribute to find.</param>
         public bool HasAttribute(string attributeName)
@@ -516,7 +504,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             }
             else
             {
-                return HexHelper.ByteArrayToHexViaLookup32((byte[])Value, NodeInfo.ElementsPerRow);
+                return HexHelper.ByteArrayToHexViaLookup32((byte[])Value, SchemaElement.ElementsPerRow);
             }
         }
         private delegate T ReadDataBigEndian<T>(ReadOnlySpan<byte> source);
@@ -524,7 +512,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             where T : unmanaged
         {
             var elementSize = sizeof(T);
-            var elementsPerRow = NodeInfo.ElementsPerRow;
+            var elementsPerRow = SchemaElement.ElementsPerRow;
 
             var sb = new StringBuilder();
             var dataSpan = data.AsSpan();

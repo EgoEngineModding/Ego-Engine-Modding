@@ -1,12 +1,8 @@
-﻿using EgoEngineLibrary.Graphics;
-
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
-
 using CommunityToolkit.Mvvm.Input;
-
 using EgoEngineLibrary.Conversion;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
@@ -15,54 +11,54 @@ using EgoPssgEditor.Dialogs.Pssg;
 
 namespace EgoPssgEditor.ViewModels
 {
-    public partial class NodesWorkspaceViewModel : WorkspaceViewModel
+    public partial class ElementsWorkspaceViewModel : WorkspaceViewModel
     {
         #region Data
-        PssgNodeViewModel rootNode;
-        readonly ObservableCollection<PssgNodeViewModel> pssgNodes;
+        PssgElementViewModel _rootElement;
+        readonly ObservableCollection<PssgElementViewModel> pssgElements;
 
         public override string DisplayName
         {
             get
             {
-                return "All Nodes";
+                return "All Elements";
             }
         }
-        public PssgNodeViewModel RootNode
+        public PssgElementViewModel RootElement
         {
-            get { return rootNode; }
+            get { return _rootElement; }
             private set
             {
                 ClearData();
-                rootNode = value;
-                pssgNodes.Add(rootNode);
+                _rootElement = value;
+                pssgElements.Add(_rootElement);
             }
         }
-        public ObservableCollection<PssgNodeViewModel> PssgNodes
+        public ObservableCollection<PssgElementViewModel> PssgElements
         {
-            get { return pssgNodes; }
+            get { return pssgElements; }
         }
         #endregion
 
         #region Presentation Props
         #endregion
 
-        public NodesWorkspaceViewModel(MainViewModel mainView)
+        public ElementsWorkspaceViewModel(MainViewModel mainView)
             : base(mainView)
         {
-            pssgNodes = new ObservableCollection<PssgNodeViewModel>();
+            pssgElements = new ObservableCollection<PssgElementViewModel>();
         }
 
         public override void LoadData(object data)
         {
-            RootNode = new PssgNodeViewModel(((PssgFile)data).RootNode);
-            RootNode.IsExpanded = true;
+            RootElement = new PssgElementViewModel(((PssgFile)data).RootElement);
+            RootElement.IsExpanded = true;
         }
 
         public override void ClearData()
         {
-            rootNode = null;
-            pssgNodes.Clear();
+            _rootElement = null;
+            pssgElements.Clear();
         }
 
         #region Menu
@@ -74,13 +70,13 @@ namespace EgoPssgEditor.ViewModels
         [RelayCommand(CanExecute = nameof(Export_CanExecute))]
         private async Task Export(object parameter)
         {
-            PssgNode node = ((PssgNodeViewModel)parameter).Node;
+            PssgElement element = ((PssgElementViewModel)parameter).Element;
             FileSaveOptions saveOptions = new()
             {
                 FileTypeChoices = [FilePickerType.Xml, FilePickerType.All],
-                Title = "Select the node's save location and file name",
+                Title = "Select the element's save location and file name",
                 DefaultExtension = "xml",
-                FileName = "node.xml",
+                FileName = "element.xml",
             };
 
             var result = await FileDialog.ShowSaveFileDialog(saveOptions);
@@ -98,7 +94,7 @@ namespace EgoPssgEditor.ViewModels
                     settings.CloseOutput = true;
 
                     XElement pssg = (XElement)xDoc.FirstNode;
-                    node.WriteXml(pssg);
+                    element.WriteXml(pssg);
 
                     using (XmlWriter writer = XmlWriter.Create(File.Open(result, FileMode.Create, FileAccess.Write, FileShare.Read), settings))
                     {
@@ -107,7 +103,7 @@ namespace EgoPssgEditor.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    await MessageBox.Show("Could not export the node!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not export the element!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, "Export Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -119,12 +115,12 @@ namespace EgoPssgEditor.ViewModels
         [RelayCommand(CanExecute = nameof(Import_CanExecute))]
         private async Task Import(object parameter)
         {
-            PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
+            PssgElementViewModel elementView = (PssgElementViewModel)parameter;
             FileOpenOptions openOptions = new()
             {
                 FileTypeChoices = [FilePickerType.Xml, FilePickerType.All],
                 Title = "Select a xml file",
-                FileName = "node.xml",
+                FileName = "element.xml",
             };
 
             var result = await FileDialog.ShowOpenFileDialog(openOptions);
@@ -132,34 +128,34 @@ namespace EgoPssgEditor.ViewModels
             {
                 try
                 {
-                    PssgNode node = nodeView.Node;
+                    PssgElement element = elementView.Element;
                     using (FileStream fileStream = File.Open(result[0], FileMode.Open, FileAccess.Read, FileShare.Read))
                     {
                         XDocument xDoc = XDocument.Load(fileStream);
 
-                        PssgNode newNode = new PssgNode((XElement)((XElement)xDoc.FirstNode).FirstNode, node.File, node.ParentNode);
-                        if (node.ParentNode != null)
+                        PssgElement newElement = new PssgElement((XElement)((XElement)xDoc.FirstNode).FirstNode, element.File, element.ParentElement);
+                        if (element.ParentElement != null)
                         {
-                            node = node.ParentNode.SetChild(node, newNode);
-                            int index = nodeView.Parent.Children.IndexOf(nodeView);
-                            PssgNodeViewModel newNodeView = new PssgNodeViewModel(node, nodeView.Parent);
-                            nodeView.Parent.Children[index] = newNodeView;
-                            newNodeView.IsSelected = true;
+                            element = element.ParentElement.SetChild(element, newElement);
+                            int index = elementView.Parent.Children.IndexOf(elementView);
+                            PssgElementViewModel newElementView = new PssgElementViewModel(element, elementView.Parent);
+                            elementView.Parent.Children[index] = newElementView;
+                            newElementView.IsSelected = true;
                         }
                         else
                         {
-                            node.File.RootNode = newNode;
-                            LoadData(node.File);
-                            rootNode.IsSelected = true;
+                            element.File.RootElement = newElement;
+                            LoadData(element.File);
+                            _rootElement.IsSelected = true;
                         }
 
                         mainView.TexturesWorkspace.ClearData();
-                        mainView.TexturesWorkspace.LoadData(RootNode);
+                        mainView.TexturesWorkspace.LoadData(RootElement);
                     }
                 }
                 catch (Exception ex)
                 {
-                    await MessageBox.Show("Could not import the node!" + Environment.NewLine + Environment.NewLine +
+                    await MessageBox.Show("Could not import the element!" + Environment.NewLine + Environment.NewLine +
                         ex.Message, "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -169,18 +165,18 @@ namespace EgoPssgEditor.ViewModels
         {
             if (parameter == null) return false;
 
-            return ((PssgNodeViewModel)parameter).IsDataNode;
+            return ((PssgElementViewModel)parameter).IsDataElement;
         }
         [RelayCommand(CanExecute = nameof(ExportData_CanExecute))]
         private async Task ExportData(object parameter)
         {
-            PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
+            PssgElementViewModel elementView = (PssgElementViewModel)parameter;
             FileSaveOptions saveOptions = new()
             {
                 FileTypeChoices = [FilePickerType.Bin, FilePickerType.All],
                 Title = "Select the byte data save location and file name",
                 DefaultExtension = "bin",
-                FileName = "nodeData.bin",
+                FileName = "elementData.bin",
             };
 
             var result = await FileDialog.ShowSaveFileDialog(saveOptions);
@@ -188,11 +184,11 @@ namespace EgoPssgEditor.ViewModels
             {
                 try
                 {
-                    PssgNode node = nodeView.Node;
+                    PssgElement element = elementView.Element;
                     using (var fs = File.Open(result, FileMode.Create))
                     using (PssgBinaryWriter writer = new PssgBinaryWriter(EndianBitConverter.Big, fs, false))
                     {
-                        writer.WriteObject(node.Value);
+                        writer.WriteObject(element.Value);
                     }
                 }
                 catch (Exception ex)
@@ -206,17 +202,17 @@ namespace EgoPssgEditor.ViewModels
         {
             if (parameter == null) return false;
 
-            return ((PssgNodeViewModel)parameter).IsDataNode;
+            return ((PssgElementViewModel)parameter).IsDataElement;
         }
         [RelayCommand(CanExecute = nameof(ImportData_CanExecute))]
         private async Task ImportData(object parameter)
         {
-            PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
+            PssgElementViewModel elementView = (PssgElementViewModel)parameter;
             FileOpenOptions openOptions = new()
             {
                 FileTypeChoices = [FilePickerType.Bin, FilePickerType.All],
                 Title = "Select a bin file",
-                FileName = "nodeData.bin",
+                FileName = "elementData.bin",
             };
 
             var result = await FileDialog.ShowOpenFileDialog(openOptions);
@@ -224,13 +220,13 @@ namespace EgoPssgEditor.ViewModels
             {
                 try
                 {
-                    PssgNode node = nodeView.Node;
+                    PssgElement element = elementView.Element;
                     using (var fs = File.Open(result[0], FileMode.Open, FileAccess.Read, FileShare.Read))
                     using (PssgBinaryReader reader = new PssgBinaryReader(EndianBitConverter.Big, fs, false))
                     {
-                        node.Value = reader.ReadNodeValue((int)reader.BaseStream.Length);
-                        nodeView.IsSelected = false;
-                        nodeView.IsSelected = true;
+                        element.Value = reader.ReadElementValue((int)reader.BaseStream.Length);
+                        elementView.IsSelected = false;
+                        elementView.IsSelected = true;
                     }
                 }
                 catch (Exception ex)
@@ -241,72 +237,72 @@ namespace EgoPssgEditor.ViewModels
             }
         }
 
-        private bool AddNode_CanExecute(object parameter)
+        private bool AddElement_CanExecute(object parameter)
         {
             return parameter != null;
         }
-        [RelayCommand(CanExecute = nameof(AddNode_CanExecute))]
-        private async Task AddNode(object parameter)
+        [RelayCommand(CanExecute = nameof(AddElement_CanExecute))]
+        private async Task AddElement(object parameter)
         {
-            PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
-            if (nodeView.Node.IsDataNode)
+            PssgElementViewModel elementView = (PssgElementViewModel)parameter;
+            if (elementView.Element.IsDataElement)
             {
-                await MessageBox.Show("Adding sub nodes to a node with data is not allowed!", Properties.Resources.AppTitleShort, MessageBoxButton.OK, MessageBoxImage.Stop);
+                await MessageBox.Show("Adding children to an element with data is not allowed!", Properties.Resources.AppTitleShort, MessageBoxButton.OK, MessageBoxImage.Stop);
                 return;
             }
 
-            var nodeName = await PssgDialog.ShowAddNodeDialog();
-            if (nodeName is not null)
+            var elementName = await PssgDialog.ShowAddElementDialog();
+            if (elementName is not null)
             {
-                PssgNode newNode = nodeView.Node.AppendChild(nodeName);
+                PssgElement newElement = elementView.Element.AppendChild(elementName);
 
-                if (newNode == null)
+                if (newElement == null)
                 {
                     return;
                 }
 
-                PssgNodeViewModel newNodeView = new PssgNodeViewModel(newNode, nodeView);
-                nodeView.Children.Add(newNodeView);
+                PssgElementViewModel newElementView = new PssgElementViewModel(newElement, elementView);
+                elementView.Children.Add(newElementView);
             }
         }
-        private bool RemoveNode_CanExecute(object parameter)
+        private bool RemoveElement_CanExecute(object parameter)
         {
-            return parameter != null && parameter != RootNode;
+            return parameter != null && parameter != RootElement;
         }
-        [RelayCommand(CanExecute = nameof(RemoveNode_CanExecute))]
-        private void RemoveNode(object parameter)
+        [RelayCommand(CanExecute = nameof(RemoveElement_CanExecute))]
+        private void RemoveElement(object parameter)
         {
-            PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
-            nodeView.Node.ParentNode.RemoveChild(nodeView.Node);
+            PssgElementViewModel elementView = (PssgElementViewModel)parameter;
+            elementView.Element.ParentElement.RemoveChild(elementView.Element);
 
-            nodeView.Parent.Children.Remove(nodeView);
-            mainView.TexturesWorkspace.RemoveTexture(nodeView);
+            elementView.Parent.Children.Remove(elementView);
+            mainView.TexturesWorkspace.RemoveTexture(elementView);
         }
-        private bool CloneNode_CanExecute(object parameter)
+        private bool CloneElement_CanExecute(object parameter)
         {
-            return parameter != null && parameter != RootNode;
+            return parameter != null && parameter != RootElement;
         }
-        [RelayCommand(CanExecute = nameof(CloneNode_CanExecute))]
-        private async Task CloneNode(object parameter)
+        [RelayCommand(CanExecute = nameof(CloneElement_CanExecute))]
+        private async Task CloneElement(object parameter)
         {
             try
             {
-                PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
-                var newNode = nodeView.Node.File.CloneNode(nodeView.Node);
+                PssgElementViewModel elementView = (PssgElementViewModel)parameter;
+                var newElement = elementView.Element.File.CloneElement(elementView.Element);
 
-                PssgNodeViewModel newNodeView = new PssgNodeViewModel(newNode, nodeView.Parent);
-                var nodeViewIndex = nodeView.Parent.Children.IndexOf(nodeView);
-                if (nodeViewIndex < 0 || nodeViewIndex >= nodeView.Parent.Children.Count)
-                    nodeView.Parent.Children.Add(newNodeView);
+                PssgElementViewModel newElementView = new(newElement, elementView.Parent);
+                var viewIndex = elementView.Parent.Children.IndexOf(elementView);
+                if (viewIndex < 0 || viewIndex >= elementView.Parent.Children.Count)
+                    elementView.Parent.Children.Add(newElementView);
                 else
-                    nodeView.Parent.Children.Insert(nodeViewIndex + 1, newNodeView);
+                    elementView.Parent.Children.Insert(viewIndex + 1, newElementView);
 
-                mainView.TexturesWorkspace.LoadTextures(newNodeView);
-                newNodeView.IsSelected = true;
+                mainView.TexturesWorkspace.LoadTextures(newElementView);
+                newElementView.IsSelected = true;
             }
             catch (Exception ex)
             {
-                await MessageBox.Show("Could not clone node!" + Environment.NewLine + Environment.NewLine +
+                await MessageBox.Show("Could not clone element!" + Environment.NewLine + Environment.NewLine +
                     ex.Message, Properties.Resources.AppTitleLong, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -318,18 +314,18 @@ namespace EgoPssgEditor.ViewModels
         [RelayCommand(CanExecute = nameof(AddAttribute_CanExecute))]
         private async Task AddAttribute(object parameter)
         {
-            PssgNodeViewModel nodeView = (PssgNodeViewModel)parameter;
+            PssgElementViewModel elementView = (PssgElementViewModel)parameter;
             var res = await PssgDialog.ShowAddAttributeDialog();
             if (res is not null)
             {
-                PssgAttribute attr = nodeView.Node.AddAttribute(res.Name, Convert.ChangeType(res.Value, res.Type));
+                PssgAttribute attr = elementView.Element.AddAttribute(res.Name, Convert.ChangeType(res.Value, res.Type));
                 if (attr == null)
                 {
                     return;
                 }
 
-                nodeView.IsSelected = false;
-                nodeView.IsSelected = true;
+                elementView.IsSelected = false;
+                elementView.IsSelected = true;
             }
         }
         private bool RemoveAttribute_CanExecute(object parameter)
@@ -341,7 +337,7 @@ namespace EgoPssgEditor.ViewModels
         {
             PssgAttributeViewModel attrView = (PssgAttributeViewModel)parameter;
 
-            attrView.Attribute.ParentNode.RemoveAttribute(attrView.Attribute.Name);
+            attrView.Attribute.ParentElement.RemoveAttribute(attrView.Attribute.Name);
             attrView.Parent.IsSelected = false;
             attrView.Parent.IsSelected = true;
         }

@@ -1,33 +1,29 @@
-﻿namespace EgoEngineLibrary.Graphics.Pssg
-{
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+﻿using System.Collections;
 
+namespace EgoEngineLibrary.Graphics.Pssg
+{
     public class PssgAttributeCollection : IEnumerable<PssgAttribute>
     {
-        private List<PssgAttribute> attributes;
+        private readonly List<PssgAttribute> _attributes;
 
         public PssgAttributeCollection()
         {
-            attributes = new List<PssgAttribute>();
+            _attributes = new List<PssgAttribute>();
         }
         public PssgAttributeCollection(int capacity)
         {
-            attributes = new List<PssgAttribute>(capacity);
+            _attributes = new List<PssgAttribute>(capacity);
         }
 
         public PssgAttribute this[string attributeName]
         {
             get
             {
-                for (int i = 0; i < attributes.Count; i++)
+                for (int i = 0; i < _attributes.Count; i++)
                 {
-                    if (string.Equals(attributes[i].Name, attributeName, StringComparison.Ordinal))
+                    if (string.Equals(_attributes[i].Name, attributeName, StringComparison.Ordinal))
                     {
-                        return attributes[i];
+                        return _attributes[i];
                     }
                 }
 
@@ -37,9 +33,9 @@
 
         internal bool Contains(string attributeName)
         {
-            for (int i = 0; i < attributes.Count; i++)
+            for (int i = 0; i < _attributes.Count; i++)
             {
-                if (string.Equals(attributes[i].Name, attributeName, StringComparison.Ordinal))
+                if (string.Equals(_attributes[i].Name, attributeName, StringComparison.Ordinal))
                 {
                     return true;
                 }
@@ -50,21 +46,21 @@
 
         internal void Add(PssgAttribute attribute)
         {
-            this.attributes.Add(attribute);
+            this._attributes.Add(attribute);
         }
         internal void Remove(PssgAttribute attribute)
         {
-            this.attributes.Remove(attribute);
+            this._attributes.Remove(attribute);
         }
 
         public int Count
         {
-            get { return attributes.Count; }
+            get { return _attributes.Count; }
         }
 
         public IEnumerator<PssgAttribute> GetEnumerator()
         {
-            return attributes.GetEnumerator();
+            return _attributes.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

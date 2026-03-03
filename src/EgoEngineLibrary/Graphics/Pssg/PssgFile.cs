@@ -17,7 +17,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             get;
             set;
         }
-        public PssgNode RootNode
+        public PssgElement RootElement
         {
             get;
             set;
@@ -26,7 +26,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
         public PssgFile(PssgFileType fileType)
         {
             this.FileType = fileType;
-            this.RootNode = new PssgNode("PSSGDATABASE", this, null);
+            this.RootElement = new PssgElement("PSSGDATABASE", this, null);
             _elementTable = [];
             _attributeTable = [];
         }
@@ -115,15 +115,14 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 reader.ReadPSSGString(4); // "PSSG"
                 int size = reader.ReadInt32();
 
-                // Load all the pssg node/attribute names
                 PssgSchema.LoadFromPssg(reader);
                 long positionAfterInfo = reader.BaseStream.Position;
 
-                file.RootNode = new PssgNode(reader, file, null, true);
+                file.RootElement = new PssgElement(reader, file, null, true);
                 if (reader.BaseStream.Position < reader.BaseStream.Length)
                 {
                     reader.BaseStream.Position = positionAfterInfo;
-                    file.RootNode = new PssgNode(reader, file, null, false);
+                    file.RootElement = new PssgElement(reader, file, null, false);
                     if (reader.BaseStream.Position < reader.BaseStream.Length)
                     {
                         throw new Exception("This file is improperly saved and not supported by this version of the PSSG editor." + Environment.NewLine + Environment.NewLine +
@@ -148,7 +147,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             var firstNode = docElem.FirstNode as XElement ??
                 throw new InvalidDataException("The pssg xml does not have an element within the root element.");
 
-            file.RootNode = new PssgNode(firstNode, file, null);
+            file.RootElement = new PssgElement(firstNode, file, null);
 
             return file;
         }
@@ -200,7 +199,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 writer.Write(Encoding.ASCII.GetBytes("PSSG"));
                 writer.Write(0); // Length, filled in later
 
-                if (RootNode != null)
+                if (RootElement != null)
                 {
                     UpdateElementAndAttributeTables(this);
 
@@ -210,8 +209,8 @@ namespace EgoEngineLibrary.Graphics.Pssg
                     writer.AttributeTable = _attributeTable;
                     PssgSchema.SaveToPssg(writer);
 
-                    RootNode.UpdateSize();
-                    RootNode.Write(writer);
+                    RootElement.UpdateSize();
+                    RootElement.Write(writer);
                 }
 
                 writer.BaseStream.Position = 4;
@@ -222,13 +221,13 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
             static void UpdateElementAndAttributeTables(PssgFile file)
             {
-                foreach (var node in file.GetNodes())
+                foreach (var element in file.GetElements())
                 {
-                    file._elementTable.Add(node.NodeInfo);
+                    file._elementTable.Add(element.SchemaElement);
 
-                    foreach (PssgAttribute attr in node.Attributes)
+                    foreach (PssgAttribute attr in element.Attributes)
                     {
-                        file._attributeTable.Add(attr.AttributeInfo);
+                        file._attributeTable.Add(attr.SchemaAttribute);
                     }
                 }
             }
@@ -245,7 +244,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             settings.CloseOutput = false;
 
             XElement pssg = (XElement)xDoc.FirstNode!;
-            RootNode.WriteXml(pssg);
+            RootElement.WriteXml(pssg);
 
             using (XmlWriter writer = XmlWriter.Create(fileStream, settings))
             {
@@ -254,50 +253,49 @@ namespace EgoEngineLibrary.Graphics.Pssg
         }
 
         /// <summary>
-        /// Gets the file's node hierarchy as a flat sequence.
+        /// Gets the file's element hierarchy as a flat sequence.
         /// </summary>
-        /// <returns>the flat node hierarchy.</returns>
-        public IEnumerable<PssgNode> GetNodes()
+        public IEnumerable<PssgElement> GetElements()
         {
-            if (RootNode is null)
+            if (RootElement is null)
             {
-                return Enumerable.Empty<PssgNode>();
+                return Enumerable.Empty<PssgElement>();
             }
-            return RootNode.GetNodes();
+            return RootElement.GetElements();
         }
 
-        public IEnumerable<PssgNode> FindNodes(string nodeName)
+        public IEnumerable<PssgElement> FindElements(string elementName)
         {
-            return GetNodes().FindNodes(nodeName);
+            return GetElements().FindElements(elementName);
         }
-        public IEnumerable<PssgNode> FindNodes(string nodeName, string attributeName)
+        public IEnumerable<PssgElement> FindElements(string elementName, string attributeName)
         {
-            return GetNodes().FindNodes(nodeName, attributeName);
+            return GetElements().FindElements(elementName, attributeName);
         }
-        public IEnumerable<PssgNode> FindNodes<T>(string nodeName, string attributeName, T attributeValue)
+        public IEnumerable<PssgElement> FindElements<T>(string elementName, string attributeName, T attributeValue)
             where T : notnull
         {
-            return GetNodes().FindNodes(nodeName, attributeName, attributeValue);
+            return GetElements().FindElements(elementName, attributeName, attributeValue);
         }
 
-        public void MoveNode(PssgNode source, PssgNode target)
+        public void MoveElement(PssgElement source, PssgElement target)
         {
-            if (source.ParentNode == null) throw new InvalidOperationException("Cannot move root node");
-            if (target.IsDataNode) throw new InvalidOperationException("Cannot append a child node to a data node");
+            if (source.ParentElement == null) throw new InvalidOperationException("Cannot move root element.");
+            if (target.IsDataElement) throw new InvalidOperationException("Cannot append a child element to a data element.");
 
-            source.ParentNode.RemoveChild(source);
+            source.ParentElement.RemoveChild(source);
             target.AppendChild(source);
         }
 
-        public PssgNode CloneNode(PssgNode nodeToClone)
+        public PssgElement CloneElement(PssgElement elementToClone)
         {
-            if (nodeToClone.ParentNode == null) throw new InvalidOperationException("Cannot clone root node, or a node without a parent.");
-            if (nodeToClone.File != this)
-                throw new InvalidOperationException("Cannot clone a node that doesn't belong to a file");
+            if (elementToClone.ParentElement == null) throw new InvalidOperationException("Cannot clone root element, or an element without a parent.");
+            if (elementToClone.File != this)
+                throw new InvalidOperationException("Cannot clone an element that doesn't belong to a file.");
 
-            var clonedNode = new PssgNode(nodeToClone);
-            clonedNode.ParentNode?.AppendChild(clonedNode);
-            return clonedNode;
+            var cloned = new PssgElement(elementToClone);
+            cloned.ParentElement?.AppendChild(cloned);
+            return cloned;
         }
     }
 }

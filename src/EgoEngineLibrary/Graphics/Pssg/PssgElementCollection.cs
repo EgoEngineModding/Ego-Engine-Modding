@@ -1,76 +1,72 @@
-﻿namespace EgoEngineLibrary.Graphics.Pssg
+﻿using System.Collections;
+
+namespace EgoEngineLibrary.Graphics.Pssg
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-
-    public class PssgNodeCollection : IEnumerable<PssgNode>
+    public class PssgElementCollection : IEnumerable<PssgElement>
     {
-        private List<PssgNode> nodes;
+        private readonly List<PssgElement> _elements;
 
-        public PssgNodeCollection()
+        public PssgElementCollection()
         {
-            nodes = new List<PssgNode>();
+            _elements = new List<PssgElement>();
         }
-        public PssgNodeCollection(int capacity)
+        public PssgElementCollection(int capacity)
         {
-            nodes = new List<PssgNode>(capacity);
+            _elements = new List<PssgElement>(capacity);
         }
 
-        public PssgNode this[int index]
+        public PssgElement this[int index]
         {
             get
             {
-                return nodes[index];
+                return _elements[index];
             }
         }
-        public PssgNode this[string nodeName]
+        public PssgElement this[string name]
         {
             get
             {
-                for (int i = 0; i < nodes.Count; i++)
+                for (int i = 0; i < _elements.Count; i++)
                 {
-                    if (string.Equals(nodes[i].Name, nodeName, StringComparison.Ordinal))
+                    if (string.Equals(_elements[i].Name, name, StringComparison.Ordinal))
                     {
-                        return nodes[i];
+                        return _elements[i];
                     }
                 }
 
-                throw new ArgumentOutOfRangeException(nameof(nodeName));
+                throw new ArgumentOutOfRangeException(nameof(name));
             }
         }
 
-        internal void Add(PssgNode node)
+        internal void Add(PssgElement element)
         {
-            this.nodes.Add(node);
+            this._elements.Add(element);
         }
-        internal PssgNode? Set(PssgNode node, PssgNode newNode)
+        internal PssgElement? Set(PssgElement element, PssgElement newElement)
         {
-            for (int i = 0; i < this.nodes.Count; i++)
+            for (int i = 0; i < this._elements.Count; i++)
             {
-                if (object.ReferenceEquals(this.nodes[i], node))
+                if (object.ReferenceEquals(this._elements[i], element))
                 {
-                    return this.nodes[i] = newNode;
+                    return this._elements[i] = newElement;
                 }
             }
 
             return null;
         }
-        internal bool Remove(PssgNode node)
+        internal bool Remove(PssgElement element)
         {
-            return this.nodes.Remove(node);
+            return this._elements.Remove(element);
         }
 
         public int Count
         {
-            get { return nodes.Count; }
+            get { return _elements.Count; }
         }
 
-        public IEnumerator<PssgNode> GetEnumerator()
+        public IEnumerator<PssgElement> GetEnumerator()
         {
-            return nodes.GetEnumerator();
+            return _elements.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

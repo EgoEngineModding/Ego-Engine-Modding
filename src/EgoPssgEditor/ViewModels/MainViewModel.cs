@@ -12,7 +12,7 @@ namespace EgoPssgEditor.ViewModels
         string windowTitle;
         string filePath;
         PssgFile file;
-        readonly NodesWorkspaceViewModel nodesWorkspace;
+        readonly ElementsWorkspaceViewModel _elementsWorkspace;
         readonly TexturesWorkspaceViewModel texturesWorkspace;
         readonly ModelsWorkspaceViewModel _modelsWorkspace;
 
@@ -34,9 +34,9 @@ namespace EgoPssgEditor.ViewModels
         {
             get { return file; }
         }
-        public NodesWorkspaceViewModel NodesWorkspace
+        public ElementsWorkspaceViewModel ElementsWorkspace
         {
-            get { return nodesWorkspace; }
+            get { return _elementsWorkspace; }
         }
         public TexturesWorkspaceViewModel TexturesWorkspace
         {
@@ -68,7 +68,7 @@ namespace EgoPssgEditor.ViewModels
             this.DisplayName = Properties.Resources.AppTitleLong;
             schemaPath = Path.Combine(AppContext.BaseDirectory, "schema.xml");
 
-            nodesWorkspace = new NodesWorkspaceViewModel(this);
+            _elementsWorkspace = new ElementsWorkspaceViewModel(this);
             texturesWorkspace = new TexturesWorkspaceViewModel(this);
             _modelsWorkspace = new ModelsWorkspaceViewModel(this);
 
@@ -200,8 +200,8 @@ namespace EgoPssgEditor.ViewModels
                 file = pssg;
             }
 
-            nodesWorkspace.LoadData(file);
-            texturesWorkspace.LoadData(nodesWorkspace.RootNode);
+            _elementsWorkspace.LoadData(file);
+            texturesWorkspace.LoadData(_elementsWorkspace.RootElement);
             SelectedTabIndex = texturesWorkspace.Textures.Count > 0 ? 1 : 0;
             _modelsWorkspace.LoadData(file);
         }
@@ -253,7 +253,7 @@ namespace EgoPssgEditor.ViewModels
         {
             if (file == null) return;
 
-            nodesWorkspace.ClearData();
+            _elementsWorkspace.ClearData();
             texturesWorkspace.ClearData();
             _modelsWorkspace.ClearData();
 

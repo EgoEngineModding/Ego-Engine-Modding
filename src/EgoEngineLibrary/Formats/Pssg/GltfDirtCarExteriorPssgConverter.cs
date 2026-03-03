@@ -12,7 +12,7 @@ namespace EgoEngineLibrary.Formats.Pssg
     {
         private class DirtImportState : ImportState
         {
-            public DirtImportState(PssgNode rdsLib, PssgNode ribLib, Dictionary<string, ShaderInputInfo> shaderGroupMap)
+            public DirtImportState(PssgElement rdsLib, PssgElement ribLib, Dictionary<string, ShaderInputInfo> shaderGroupMap)
                 : base(rdsLib, ribLib, shaderGroupMap)
             {
                 RenderNodeName = "VISIBLERENDERNODE";
@@ -21,10 +21,10 @@ namespace EgoEngineLibrary.Formats.Pssg
 
         public new static bool SupportsPssg(PssgFile pssg)
         {
-            return pssg.FindNodes("VISIBLERENDERNODE").Any();
+            return pssg.FindElements("VISIBLERENDERNODE").Any();
         }
 
-        protected override ImportState CreateState(PssgNode rdsLib, PssgNode ribLib, Dictionary<string, ShaderInputInfo> shaderGroupMap)
+        protected override ImportState CreateState(PssgElement rdsLib, PssgElement ribLib, Dictionary<string, ShaderInputInfo> shaderGroupMap)
         {
             return new DirtImportState(rdsLib, ribLib, shaderGroupMap);
         }
