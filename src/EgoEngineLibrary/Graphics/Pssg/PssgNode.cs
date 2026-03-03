@@ -369,11 +369,6 @@ namespace EgoEngineLibrary.Graphics.Pssg
             }
         }
 
-        public void Rename(string nodeName)
-        {
-            this.NodeInfo = PssgSchema.RenameNode(this, nodeName);
-        }
-
         public PssgNode AppendChild(string nodeName)
         {
             return this.AppendChild(new PssgNode(nodeName, this.File, this));
@@ -382,7 +377,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
         {
             if (this.IsDataNode == true)
             {
-                throw new InvalidOperationException("Cannot append a child node to a data node");
+                throw new InvalidOperationException("Cannot append a child node to a data node.");
             }
 
             if (this.ChildNodes == null)
@@ -393,7 +388,6 @@ namespace EgoEngineLibrary.Graphics.Pssg
             childNode.File = this.File;
             childNode.ParentNode = this;
             this.ChildNodes.Add(childNode);
-            childNode.NodeInfo = PssgSchema.AddNode(childNode);
 
             return childNode;
         }
@@ -402,7 +396,6 @@ namespace EgoEngineLibrary.Graphics.Pssg
             newChildNode.File = this.File;
             newChildNode.ParentNode = this;
             PssgNode? node = this.ChildNodes.Set(childNode, newChildNode);
-            if (node != null) node.NodeInfo = PssgSchema.AddNode(node);
             return node;
         }
         public void RemoveChild(PssgNode childNode)

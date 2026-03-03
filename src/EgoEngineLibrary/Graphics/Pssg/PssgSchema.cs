@@ -1,17 +1,23 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
+using EgoEngineLibrary.Graphics.Pssg.Elements;
 
 namespace EgoEngineLibrary.Graphics.Pssg
 {
     public static class PssgSchema
     {
-        private static Dictionary<string, PssgSchemaElement> entries = new Dictionary<string, PssgSchemaElement>();
+        private static Dictionary<string, PssgSchemaElement> entries = new();
+
+        static PssgSchema()
+        {
+            AddNode(PssgObject.Schema);
+            AddNode(Elements.PssgNode.Schema);
+            AddNode(PssgRootNode.Schema);
+        }
 
         [RequiresUnreferencedCode("The schema node and attribute DataType may be removed.")]
         public static void LoadSchema(Stream stream)
         {
-            entries.Clear();
-
             PssgSchema.AddAttribute("FETEXTLAYOUT", "height", typeof(Single));
             PssgSchema.AddAttribute("FETEXTLAYOUT", "depth", typeof(Single));
             PssgSchema.AddAttribute("FETEXTLAYOUT", "tracking", typeof(Single));
@@ -32,93 +38,73 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 return;
             }
 
-            using (stream)
+            XDocument xDoc = XDocument.Load(stream);
+            foreach (XElement xN in xDoc.Descendants("node"))
             {
-                XDocument xDoc = XDocument.Load(stream);
+                string nodeName = xN.Attribute("name")?.Value ??
+                                  throw new InvalidDataException(
+                                      $"The schema element {xN.Name} does not have attribute name.");
+                string nType = xN.Attribute("dataType")?.Value ??
+                               throw new InvalidDataException(
+                                   $"The schema element {xN.Name} does not have attribute dataType.");
 
-                foreach (XNode xN in xDoc.Descendants("node"))
+                PssgSchemaElement node = AddNode(nodeName);
+                Type? nodeType = Type.GetType(nType, false);
+                if (nodeType != null)
                 {
-                    if (xN is XElement)
+                    node.DataType = nodeType;
+                }
+                node.ElementsPerRow = Convert.ToInt32(xN.Attribute("elementsPerRow")?.Value ??
+                                                      throw new InvalidDataException($"The schema element {xN.Name} does not have attribute elementsPerRow."));
+                string linkAttributeName = xN.Attribute("linkAttributeName")?.Value ??
+                                           throw new InvalidDataException($"The schema element {xN.Name} does not have attribute linkAttributeName.");
+                if (!string.IsNullOrEmpty(linkAttributeName))
+                {
+                    node.LinkAttributeName = linkAttributeName;
+                }
+
+                foreach (XElement attrElem in xN.Descendants("attribute"))
+                {
+                    string attrName = attrElem.Attribute("name")?.Value ??
+                                      throw new InvalidDataException(
+                                          $"The schema element {attrElem.Name} does not have attribute name.");
+                    Type? attrType =
+                        Type.GetType(
+                            attrElem.Attribute("dataType")?.Value ??
+                            throw new InvalidDataException(
+                                $"The schema element {attrElem.Name} does not have attribute dataType."), false);
+
+                    PssgSchemaAttribute attr = AddAttribute(node, attrName);
+                    if (attrType != null)
                     {
-                        XElement elemNode = (XElement)xN;
-
-                        string nodeName = elemNode.Attribute("name")?.Value ??
-                                          throw new InvalidDataException($"The schema element {elemNode.Name} does not have attribute name.");
-                        string nType = elemNode.Attribute("dataType")?.Value ??
-                                       throw new InvalidDataException($"The schema element {elemNode.Name} does not have attribute dataType.");
-
-                        PssgSchemaElement node = PssgSchema.AddNode(nodeName);
-                        Type? nodeType = Type.GetType(nType, false);
-                        if (nodeType != null)
-                        {
-                            node.DataType = nodeType;
-                        }
-                        node.ElementsPerRow = Convert.ToInt32(elemNode.Attribute("elementsPerRow")?.Value ??
-                                                              throw new InvalidDataException($"The schema element {elemNode.Name} does not have attribute elementsPerRow."));
-                        string linkAttributeName = elemNode.Attribute("linkAttributeName")?.Value ??
-                                                   throw new InvalidDataException($"The schema element {elemNode.Name} does not have attribute linkAttributeName.");
-                        if (!string.IsNullOrEmpty(linkAttributeName))
-                        {
-                            node.LinkAttributeName = linkAttributeName;
-                        }
-
-                        foreach (XNode subNode in elemNode.Descendants("attribute"))
-                        {
-                            if (subNode is XElement subElem)
-                            {
-                                string attrName = ((XElement)subNode).Attribute("name")?.Value ??
-                                                  throw new InvalidDataException($"The schema element {subElem.Name} does not have attribute name.");
-                                Type? attrType = Type.GetType(((XElement)subNode).Attribute("dataType")?.Value ??
-                                                              throw new InvalidDataException($"The schema element {subElem.Name} does not have attribute dataType."), false);
-                                if (attrType != null)
-                                {
-                                    bool add = true;
-                                    for (int i = 0; i < node.Attributes.Count; i++)
-                                    {
-                                        if (node.Attributes[i].Name == attrName)
-                                        {
-                                            add = false;
-                                            node.Attributes[i].DataType = attrType;
-                                            break;
-                                        }
-                                    }
-
-                                    if (add)
-                                    {
-                                        node.Attributes.Add(new PssgSchemaAttribute(attrName, attrType));
-                                    }
-                                }
-                            }
-                        }
+                        attr.DataType = attrType;
                     }
                 }
             }
         }
         public static void SaveSchema(Stream stream)
         {
-            using (stream)
+            XDocument xDoc = new XDocument();
+            xDoc.Add(new XElement("PSSGFILE", new XAttribute("version", "1.0.0.0")));
+            XElement parent = (XElement)xDoc.FirstNode!;
+
+            foreach (KeyValuePair<string, PssgSchemaElement> entry in entries)
             {
-                XDocument xDoc = new XDocument();
-                xDoc.Add(new XElement("PSSGFILE", new XAttribute("version", "1.0.0.0")));
-                XElement parent = (XElement)xDoc.FirstNode!;
+                XElement pNode = new XElement("node");
+                pNode.Add(new XAttribute("name", entry.Key), new XAttribute("dataType", entry.Value.DataType));
+                pNode.Add(new XAttribute("elementsPerRow", entry.Value.ElementsPerRow), new XAttribute("linkAttributeName", entry.Value.LinkAttributeName));
 
-                foreach (KeyValuePair<string, PssgSchemaElement> entry in entries)
+                foreach (PssgSchemaAttribute attrEntry in entry.Value.Attributes)
                 {
-                    XElement pNode = new XElement("node");
-                    pNode.Add(new XAttribute("name", entry.Key), new XAttribute("dataType", entry.Value.DataType));
-                    pNode.Add(new XAttribute("elementsPerRow", entry.Value.ElementsPerRow), new XAttribute("linkAttributeName", entry.Value.LinkAttributeName));
-
-                    foreach (PssgSchemaAttribute attrEntry in entry.Value.Attributes)
-                    {
-                        pNode.Add(new XElement("attribute", new XAttribute("name", attrEntry.Name), new XAttribute("dataType", attrEntry.DataType)));
-                    }
-
-                    parent.Add(pNode);
+                    pNode.Add(new XElement("attribute", new XAttribute("name", attrEntry.Name), new XAttribute("dataType", attrEntry.DataType)));
                 }
 
-                xDoc.Save(stream);
+                parent.Add(pNode);
             }
+
+            xDoc.Save(stream);
         }
+
         public static void ClearSchema()
         {
             entries.Clear();
@@ -148,13 +134,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
                     int id = reader.ReadInt32();
                     var attributeName = reader.ReadPSSGString();
 
-                    PssgSchemaAttribute? attr = PssgSchema.GetAttribute(element.Name, attributeName);
-                    if (attr == null)
-                    {
-                        attr = new PssgSchemaAttribute(attributeName);
-                        PssgSchema.AddAttribute(element.Name, attr);
-                    }
-                    
+                    PssgSchemaAttribute attr = AddAttribute(element.Name, attributeName);
                     attributeTable[id - 1] = attr;
                 }
             }
@@ -162,6 +142,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             reader.ElementTable.AddRange(elementTable);
             reader.AttributeTable.AddRange(attributeTable);
         }
+
         public static void SaveToPssg(PssgBinaryWriter writer)
         {
             for (var i = 0; i < writer.ElementTable.Count; ++i)
@@ -174,15 +155,13 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 int attributeCount = 0;
                 writer.Write(0); // attributeCount
 
-                foreach (PssgSchemaAttribute attribute in element.Attributes)
+                foreach ((PssgSchemaAttribute attribute, int index) in element.Attributes
+                             .Select(x => (x, writer.AttributeTable.IndexOf(x)))
+                             .Where(x => x.Item2 != -1)
+                             .OrderBy(x => x.Item2))
                 {
-                    if (!writer.AttributeTable.TryGetValue(attribute, out _, out var attributeIndex))
-                    {
-                        continue;
-                    }
-
                     ++attributeCount;
-                    writer.Write(attributeIndex + 1);
+                    writer.Write(index + 1);
                     writer.WritePSSGString(attribute.Name);
                 }
 
@@ -192,49 +171,11 @@ namespace EgoEngineLibrary.Graphics.Pssg
             }
         }
 
-        public static PssgSchemaElement? GetNode(string node)
-        {
-            if (entries.ContainsKey(node))
-            {
-                return entries[node];
-            }
-
-            return null;
-        }
-        public static PssgSchemaAttribute? GetAttribute(string node, string attr)
-        {
-            if (entries.ContainsKey(node))
-            {
-                foreach (PssgSchemaAttribute attrEntry in entries[node].Attributes)
-                {
-                    if (attrEntry.Name == attr)
-                    {
-                        return attrEntry;
-                    }
-                }
-            }
-
-            return null;
-        }
-        //public static Type GetAttributeType(string node, string attr)
-        //{
-        //    if (entries.ContainsKey(node))
-        //    {
-        //        foreach (Attribute attrEntry in entries[node].Attributes)
-        //        {
-        //            if (attrEntry.Name == attr)
-        //            {
-        //                return attrEntry.DataType;
-        //            }
-        //        }
-        //    }
-
-        //    return null;
-        //}
         public static string[] GetNodeNames()
         {
             return entries.Keys.ToArray();
         }
+
         public static string[] GetAttributeNames()
         {
             List<string> aNames = new List<string>();
@@ -248,166 +189,88 @@ namespace EgoEngineLibrary.Graphics.Pssg
             return aNames.ToArray();
         }
 
-        public static PssgSchemaElement AddNode(string nodeName)
+        public static PssgSchemaElement AddNode(string elementName)
         {
-            if (!entries.ContainsKey(nodeName))
+            if (entries.TryGetValue(elementName, out PssgSchemaElement? existingElement))
             {
-                PssgSchemaElement node = new PssgSchemaElement(nodeName);
+                return existingElement;
+            }
+
+            PssgSchemaElement element = new(elementName);
+            entries.Add(element.Name, element);
+            return element;
+        }
+
+        public static PssgSchemaElement AddNode(PssgSchemaElement node)
+        {
+            if (!entries.TryGetValue(node.Name, out var existingElement))
+            {
                 entries.Add(node.Name, node);
                 return node;
             }
 
-            return entries[nodeName];
-        }
-        internal static PssgSchemaElement AddNode(PssgSchemaElement node)
-        {
-            if (!entries.ContainsKey(node.Name))
+            existingElement = entries[node.Name];
+            if (ReferenceEquals(existingElement, node))
             {
-                entries.Add(node.Name, node);
-                return node;
+                return existingElement;
             }
-            else
+                
+            SetNodeDataTypeIfNull(existingElement, node.DataType);
+            foreach (PssgSchemaAttribute attrEntry in node.Attributes)
             {
-                PssgSchema.SetNodeDataTypeIfNull(entries[node.Name], node.DataType);
+                AddAttribute(existingElement, attrEntry.Name, attrEntry.DataType);
+            }
 
-                foreach (PssgSchemaAttribute attrEntry in node.Attributes)
+            return existingElement;
+        }
+
+        public static PssgSchemaAttribute AddAttribute(string nodeName, string attributeName, Type? attrType = null)
+        {
+            PssgSchemaElement element = AddNode(nodeName);
+            return AddAttribute(element, attributeName, attrType);
+        }
+
+        public static PssgSchemaAttribute AddAttribute(PssgSchemaElement element, string attributeName,
+            Type? attrType = null)
+        {
+            PssgSchemaElement? baseElement = element;
+            while (baseElement is not null)
+            {
+                foreach (var attribute in baseElement.Attributes)
                 {
-                    bool add = true;
-                    for (int i = 0; i < entries[node.Name].Attributes.Count; i++)
+                    if (attribute.Name != attributeName)
                     {
-                        if (entries[node.Name].Attributes[i].Name == attrEntry.Name)
-                        {
-                            add = false;
-                            PssgSchema.SetAttributeDataTypeIfNull(entries[node.Name].Attributes[i], attrEntry.DataType);
-                            break;
-                        }
+                        continue;
                     }
 
-                    if (add)
-                    {
-                        entries[node.Name].Attributes.Add(attrEntry);
-                    }
-                }
-
-                return entries[node.Name];
-            }
-        }
-
-        public static PssgSchemaAttribute AddAttribute(string nodeName, string attributeName, Type attrType)
-        {
-            PssgSchemaElement node = PssgSchema.AddNode(nodeName);
-
-            for (int i = 0; i < node.Attributes.Count; i++)
-            {
-                if (node.Attributes[i].Name == attributeName)
-                {
                     // Allow overwrite if current data type is null
-                    PssgSchema.SetAttributeDataTypeIfNull(node.Attributes[i], attrType);
-                    return node.Attributes[i];
+                    SetAttributeDataTypeIfNull(attribute, attrType);
+                    return attribute;
                 }
+
+                baseElement = baseElement.BaseElement;
             }
 
-            PssgSchemaAttribute attr = new PssgSchemaAttribute(attributeName, attrType);
-            node.Attributes.Add(attr);
+            PssgSchemaAttribute attr = new(attributeName, attrType);
+            element.Attributes.Add(attr);
             return attr;
-        }
-        public static PssgSchemaAttribute AddAttribute(string nodeName, string attributeName)
-        {
-            PssgSchemaElement node = PssgSchema.AddNode(nodeName);
-
-            for (int i = 0; i < node.Attributes.Count; i++)
-            {
-                if (node.Attributes[i].Name == attributeName)
-                {
-                    return node.Attributes[i];
-                }
-            }
-
-            PssgSchemaAttribute attr = new PssgSchemaAttribute(attributeName);
-            node.Attributes.Add(attr);
-            return attr;
-        }
-        public static void AddAttribute(string nodeName, PssgSchemaAttribute attribute)
-        {
-            PssgSchemaElement node = PssgSchema.AddNode(nodeName);
-
-            bool add = true;
-            for (int i = 0; i < node.Attributes.Count; i++)
-            {
-                if (node.Attributes[i].Name == attribute.Name)
-                {
-                    add = false;
-                    // Allow overwrite if current data type is null
-                    PssgSchema.SetAttributeDataTypeIfNull(node.Attributes[i], attribute.DataType);
-                    break;
-                }
-            }
-
-            if (add)
-            {
-                node.Attributes.Add(attribute);
-            }
-        }
-
-        //public static void CreatePssgInfo(out PssgNodeInfo[] nodeInfo, out PssgAttributeInfo[] attributeInfo)
-        //{
-        //    nodeInfo = new PssgNodeInfo[entries.Count];
-        //    List<PssgAttributeInfo> attrInfo = new List<PssgAttributeInfo>();
-
-        //    int i = 0, j = 0;
-        //    foreach (KeyValuePair<string, Node> node in entries)
-        //    {
-        //        nodeInfo[i] = new PssgNodeInfo(i + 1, node.Key);
-
-        //        foreach (Attribute attr in node.Value.Attributes)
-        //        {
-        //            attr.Id = ++j;
-        //            PssgAttributeInfo aInfo = new PssgAttributeInfo(attr.Id, attr.Name);
-        //            attrInfo.Add(aInfo);
-        //            nodeInfo[i].attributeInfo.Add(attr.Id, aInfo);
-        //        }
-
-        //        node.Value.Id = ++i;
-        //    }
-
-        //    attributeInfo = attrInfo.ToArray();
-        //}
-
-        public static PssgSchemaElement AddNode(PssgNode node)
-        {
-            PssgSchemaElement sNode = new PssgSchemaElement(node.Name);
-            sNode.DataType = node.Value.GetType();
-
-            foreach (PssgAttribute attr in node.Attributes)
-            {
-                PssgSchemaAttribute sAttr = new PssgSchemaAttribute(attr.Name, attr.Value.GetType());
-                sNode.Attributes.Add(sAttr);
-            }
-
-            return PssgSchema.AddNode(sNode);
-        }
-        public static PssgSchemaElement RenameNode(PssgNode pssgNode, string nodeName)
-        {
-            PssgSchemaElement node = PssgSchema.AddNode(nodeName);
-
-            foreach (PssgAttribute attr in pssgNode.Attributes)
-            {
-                PssgSchema.AddAttribute(node.Name, attr.AttributeInfo.Name, attr.AttributeInfo.DataType);
-            }
-
-            return node;
         }
 
         public static void SetNodeDataTypeIfNull(PssgSchemaElement node, Type dataType)
         {
-            if (node.DataType == typeof(System.Exception))
+            if (node.DataType == typeof(Exception))
             {
                 node.DataType = dataType;
             }
         }
-        public static void SetAttributeDataTypeIfNull(PssgSchemaAttribute attribute, Type attrType)
+        public static void SetAttributeDataTypeIfNull(PssgSchemaAttribute attribute, Type? attrType = null)
         {
-            if (attribute.DataType == typeof(System.Exception))
+            if (attrType is null)
+            {
+                return;
+            }
+            
+            if (attribute.DataType == typeof(Exception))
             {
                 attribute.DataType = attrType;
             }

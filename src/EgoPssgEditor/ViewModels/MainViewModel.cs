@@ -1,7 +1,4 @@
-using EgoEngineLibrary.Graphics;
-
 using CommunityToolkit.Mvvm.Input;
-
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 using EgoEngineLibrary.Graphics.Pssg;
@@ -111,7 +108,6 @@ namespace EgoPssgEditor.ViewModels
         {
             ClearVars(true);
             file = new PssgFile(PssgFileType.Pssg);
-            SaveTag();
         }
         [RelayCommand]
         private async Task Open()
@@ -176,12 +172,14 @@ namespace EgoPssgEditor.ViewModels
         [RelayCommand]
         private void LoadSchema()
         {
-            PssgSchema.LoadSchema(File.Open(schemaPath, FileMode.Open, FileAccess.Read, FileShare.Read));
+            using var fs = File.Open(schemaPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            PssgSchema.LoadSchema(fs);
         }
         [RelayCommand]
         private void SaveSchema()
         {
-            PssgSchema.SaveSchema(File.Open(schemaPath, FileMode.Create, FileAccess.Write, FileShare.Read));
+            using var fs = File.Open(schemaPath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            PssgSchema.SaveSchema(fs);
         }
         [RelayCommand]
         private void ClearSchema()
@@ -228,7 +226,6 @@ namespace EgoPssgEditor.ViewModels
             var result = await FileDialog.ShowSaveFileDialog(saveOptions);
             if (result is not null)
             {
-                SaveTag();
                 try
                 {
                     using (var fileStream = File.Open(result, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
@@ -251,22 +248,6 @@ namespace EgoPssgEditor.ViewModels
                     await MessageBox.Show("The program could not save this file! The error is displayed below:" + Environment.NewLine + Environment.NewLine + ex.Message, "Could Not Save", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-        }
-        private void SaveTag()
-        {
-            PssgNode node;
-            if (file.RootNode == null)
-            {
-                node = new PssgNode("PSSGDATABASE", file, null);
-                file.RootNode = node;
-                nodesWorkspace.LoadData(file);
-            }
-            else
-            {
-                node = file.RootNode;
-            }
-
-            PssgAttribute attribute = node.AddAttribute("creatorApplication", Properties.Resources.AppTitleLong);
         }
         private void ClearVars(bool clearPSSG)
         {

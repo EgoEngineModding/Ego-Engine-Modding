@@ -5,11 +5,8 @@ namespace EgoEngineLibrary.Graphics.Pssg;
 [DebuggerDisplay("{Name}")]
 public class PssgSchemaElement
 {
-    public string Name
-    {
-        get;
-        private set;
-    }
+    public string Name { get; }
+    public PssgSchemaElement? BaseElement { get; init; }
     public Type DataType
     {
         get;
@@ -28,21 +25,12 @@ public class PssgSchemaElement
     public List<PssgSchemaAttribute> Attributes
     {
         get;
-        set;
     }
 
-    public PssgSchemaElement(string name)
+    public PssgSchemaElement(string name, Type? dataType = null)
     {
         this.Name = name;
-        this.DataType = typeof(System.Exception);
-        this.ElementsPerRow = 32;
-        this.LinkAttributeName = string.Empty;
-        this.Attributes = new List<PssgSchemaAttribute>();
-    }
-    public PssgSchemaElement(string name, Type dataType)
-    {
-        this.Name = name;
-        this.DataType = dataType;
+        this.DataType = dataType ?? typeof(Exception);
         this.ElementsPerRow = 32;
         this.LinkAttributeName = string.Empty;
         this.Attributes = new List<PssgSchemaAttribute>();

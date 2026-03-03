@@ -5,25 +5,16 @@ namespace EgoEngineLibrary.Graphics.Pssg;
 [DebuggerDisplay("{Name}")]
 public class PssgSchemaAttribute
 {
-    public string Name
-    {
-        get;
-        private set;
-    }
+    public string Name { get; }
     public Type DataType
     {
         get;
         set;
     }
 
-    public PssgSchemaAttribute(string name)
+    public PssgSchemaAttribute(string name, Type? dataType = null)
     {
         this.Name = name;
-        this.DataType = typeof(System.Exception);
-    }
-    public PssgSchemaAttribute(string name, Type dataType)
-    {
-        this.Name = name;
-        this.DataType = dataType;
+        this.DataType = dataType ?? typeof(Exception);
     }
 }
