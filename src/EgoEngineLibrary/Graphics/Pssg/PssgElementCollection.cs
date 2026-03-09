@@ -15,6 +15,11 @@ namespace EgoEngineLibrary.Graphics.Pssg
             _elements = new List<PssgElement>(capacity);
         }
 
+        public void EnsureCapacity(int capacity)
+        {
+            _elements.EnsureCapacity(capacity);
+        }
+
         public PssgElement this[int index]
         {
             get

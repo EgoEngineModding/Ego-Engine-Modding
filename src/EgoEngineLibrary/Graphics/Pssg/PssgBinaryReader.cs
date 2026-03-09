@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Numerics;
+using System.Text;
 using EgoEngineLibrary.Collections;
 using EgoEngineLibrary.Conversion;
 using EgoEngineLibrary.IO;
@@ -9,6 +10,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
     {
         public OrderedSet<PssgSchemaElement> ElementTable { get; set; }
         public OrderedSet<PssgSchemaAttribute> AttributeTable { get; set; }
+        internal bool UseDataElementCheck { get; set; }
         
         public PssgBinaryReader(EndianBitConverter bitConvertor, Stream stream, bool leaveOpen)
             : base(bitConvertor, stream, leaveOpen)
@@ -37,96 +39,19 @@ namespace EgoEngineLibrary.Graphics.Pssg
             return Encoding.UTF8.GetString(this.ReadBytes(length));
         }
 
-        public object ReadAttributeValue(Type valueType, int size)
+        public object ReadAttributeValue(PssgAttributeType valueType, int size)
         {
-            if (valueType == typeof(string))
+            return valueType switch
             {
-                return this.ReadPSSGString();
-            }
-            else if (valueType == typeof(UInt16))
-            {
-                return this.ReadUInt16();
-            }
-            else if (valueType == typeof(UInt32))
-            {
-                return this.ReadUInt32();
-            }
-            else if (valueType == typeof(Int16))
-            {
-                return this.ReadInt16();
-            }
-            else if (valueType == typeof(Int32))
-            {
-                return this.ReadInt32();
-            }
-            else if (valueType == typeof(Single))
-            {
-                return this.ReadSingle();
-            }
-            else if (valueType == typeof(bool))
-            {
-                return this.ReadBoolean();
-            }
-            else if (valueType == typeof(byte[]))
-            {
-                return this.ReadBytes(size);
-            }
-            else if (valueType == typeof(Single[]))
-            {
-                int length = size / 4;
-                Single[] ret = new Single[length];
-                for (int i = 0; i < length; i++)
-                {
-                    ret[i] = this.ReadSingle();
-                }
-                return ret;
-            }
-            else if (valueType == typeof(UInt16[]))
-            {
-                int length = size / 2;
-                UInt16[] ret = new UInt16[length];
-                for (int i = 0; i < length; i++)
-                {
-                    ret[i] = this.ReadUInt16();
-                }
-                return ret;
-            }
-            else // Null, or Unsupported Type
-            {
-                if (size > 4)
-                {
-                    int strlen = this.ReadInt32();
-                    if (size - 4 == strlen)
-                    {
-                        return this.ReadPSSGString(strlen);
-                    }
-                    else
-                    {
-                        this.Seek(-4, System.IO.SeekOrigin.Current);
-                    }
-                }
-
-                object data = this.ReadBytes(size);
-                // Guess that data is not supposed to be byte array
-                if (((byte[])data).Length == 4)
-                {
-                    UInt32 temp = EndianBitConverter.Big.ToUInt32((byte[])data, 0);
-                    if (temp > 1000000000)
-                    {
-                        data = EndianBitConverter.Big.ToSingle((byte[])data, 0);
-                    }
-                    else
-                    {
-                        data = temp;
-                    }
-                }
-                else if (((byte[])data).Length == 2)
-                {
-                    data = EndianBitConverter.Big.ToUInt16((byte[])data, 0);
-                }
-
-                return data;
-            }
+                PssgAttributeType.Int => ReadInt32(),
+                PssgAttributeType.String => ReadPSSGString(),
+                PssgAttributeType.Float => ReadSingle(),
+                PssgAttributeType.Float2 => new Vector2(ReadSingle(), ReadSingle()),
+                PssgAttributeType.Float3 => new Vector3(ReadSingle(), ReadSingle(), ReadSingle()),
+                PssgAttributeType.Float4 => new Vector4(ReadSingle(), ReadSingle(), ReadSingle(), ReadSingle()),
+                PssgAttributeType.Unknown => ReadBytes(size),
+                _ => throw new ArgumentOutOfRangeException(nameof(valueType), valueType, null)
+            };
         }
         public byte[] ReadElementValue(int size)
         {

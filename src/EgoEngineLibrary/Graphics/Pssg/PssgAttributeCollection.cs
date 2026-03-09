@@ -48,6 +48,18 @@ namespace EgoEngineLibrary.Graphics.Pssg
         {
             this._attributes.Add(attribute);
         }
+        internal PssgAttribute? Get(string name)
+        {
+            for (int i = 0; i < _attributes.Count; i++)
+            {
+                if (string.Equals(_attributes[i].Name, name, StringComparison.Ordinal))
+                {
+                    return _attributes[i];
+                }
+            }
+
+            return null;
+        }
         internal void Remove(PssgAttribute attribute)
         {
             this._attributes.Remove(attribute);

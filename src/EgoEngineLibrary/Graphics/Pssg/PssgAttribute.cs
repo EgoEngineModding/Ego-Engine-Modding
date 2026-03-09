@@ -1,22 +1,24 @@
 ﻿using System.Globalization;
+using System.Numerics;
 using System.Text;
 using System.Xml.Linq;
-using EgoEngineLibrary.Conversion;
 using EgoEngineLibrary.Helper;
 
 namespace EgoEngineLibrary.Graphics.Pssg
 {
     public class PssgAttribute
     {
-        private int size;
-        private object data;
-
         public string Name => SchemaAttribute.Name;
-        public int Size => size;
+        internal int Size { get; private set; }
+
         public object Value
         {
-            get { return data; }
-            set { data = value; }
+            get;
+            set
+            {
+                VerifyType(value);
+                field = value;
+            }
         }
 
         public string DisplayValue
@@ -30,154 +32,122 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 this.Value = this.FromString(value);
             }
         }
-        public override string ToString()
-        {
-            if (Value is byte[] bval)
-            {
-                return HexHelper.ByteArrayToHexViaLookup32(bval);
-            }
-            else
-            {
-                return this.Value.ToString() ?? string.Empty;
-            }
-        }
-        public object FromString(string value)
-        {
-            Type valueType = this.SchemaAttribute.DataType;
-            if (valueType == typeof(string))
-            {
-                return value;
-            }
-            else if (valueType == typeof(UInt16))
-            {
-                return Convert.ToUInt16(value);
-            }
-            else if (valueType == typeof(UInt32))
-            {
-                return Convert.ToUInt32(value);
-            }
-            else if (valueType == typeof(Int16))
-            {
-                return Convert.ToInt16(value);
-            }
-            else if (valueType == typeof(Int32))
-            {
-                return Convert.ToInt32(value);
-            }
-            else if (valueType == typeof(Single))
-            {
-                return Convert.ToSingle(value, CultureInfo.InvariantCulture);
-            }
-            else if (valueType == typeof(bool))
-            {
-                return Convert.ToBoolean(value);
-            }
-            else if (valueType == typeof(byte[]))
-            {
-                return HexHelper.HexToByteUsingByteManipulation(value);
-            }
-            else // Null, or Unsupported Type
-            {
-                return value;
-            }
-        }
 
-        private PssgFile file;
-        public PssgElement ParentElement
-        {
-            get;
-            set;
-        }
-        public PssgSchemaAttribute SchemaAttribute
-        {
-            get;
-            private set;
-        }
+        public PssgElement ParentElement { get; }
+        public PssgSchemaAttribute SchemaAttribute { get; }
 
-        public PssgAttribute(PssgSchemaAttribute schemaAttribute, object data, PssgFile file, PssgElement parentElement)
+        public PssgAttribute(PssgSchemaAttribute schemaAttribute, object data, PssgElement parentElement)
         {
-            this.SchemaAttribute = schemaAttribute;
-            this.data = data;
-            this.file = file;
-            this.ParentElement = parentElement;
+            SchemaAttribute = schemaAttribute;
+            Value = data;
+            ParentElement = parentElement;
         }
-        public PssgAttribute(PssgBinaryReader reader, PssgFile file, PssgElement element)
+        public PssgAttribute(PssgBinaryReader reader, PssgElement element)
         {
-            this.file = file;
             this.ParentElement = element;
 
             int id = reader.ReadInt32();
-            this.SchemaAttribute = reader.GetAttributeById(id);
-            this.size = reader.ReadInt32();
-            this.data = reader.ReadAttributeValue(this.SchemaAttribute.DataType, size);
-            this.SchemaAttribute = PssgSchema.AddAttribute(this.ParentElement.Name, this.Name, this.Value.GetType());
+            SchemaAttribute = reader.GetAttributeById(id);
+            Size = reader.ReadInt32();
+            Value = reader.ReadAttributeValue(this.SchemaAttribute.DataType, Size);
         }
-        public PssgAttribute(XAttribute xAttr, PssgFile file, PssgElement element)
+        public PssgAttribute(XAttribute xAttr, PssgElement element)
         {
-            this.file = file;
-            this.ParentElement = element;
+            ParentElement = element;
 
             string attrName = xAttr.Name.LocalName.StartsWith("___") ? xAttr.Name.LocalName.Substring(3) : xAttr.Name.LocalName;
-            this.SchemaAttribute = PssgSchema.AddAttribute(this.ParentElement.Name, attrName);
-            this.data = this.FromString(xAttr.Value);
-            PssgSchema.SetAttributeDataTypeIfNull(this.SchemaAttribute, this.Value.GetType());
+            SchemaAttribute = PssgSchema.AddAttribute(this.ParentElement.Name, attrName);
+            Value = this.FromString(xAttr.Value);
         }
-        public PssgAttribute(PssgAttribute attrToCopy)
+        public PssgAttribute(PssgAttribute attrToCopy, PssgElement parent)
         {
-            this.file = attrToCopy.file;
-            this.ParentElement = attrToCopy.ParentElement;
+            this.ParentElement = parent;
 
-            this.SchemaAttribute = attrToCopy.SchemaAttribute;
-            this.size = attrToCopy.size;
-            this.data = attrToCopy.data;
+            SchemaAttribute = attrToCopy.SchemaAttribute;
+            Size = attrToCopy.Size;
+            Value = attrToCopy.Value;
         }
 
         public T GetValue<T>()
             where T : notnull
         {
-            return (T)data;
+            return (T)Value;
         }
 
         public void Write(PssgBinaryWriter writer)
         {
             writer.Write(writer.GetAttributeId(SchemaAttribute));
-            writer.Write(this.size);
-            writer.WriteObject(this.data);
+            writer.Write(this.Size);
+            writer.WriteObject(Value);
+        }
+        
+        public override string ToString()
+        {
+            PssgAttributeType dataType = this.SchemaAttribute.DataType;
+            return dataType switch
+            {
+                PssgAttributeType.Int => Value.ToString() ?? string.Empty,
+                PssgAttributeType.String => (string)Value,
+                PssgAttributeType.Float => ((float)Value).ToPssgString(),
+                PssgAttributeType.Float2 => ((Vector2)Value).ToPssgString(),
+                PssgAttributeType.Float3 => ((Vector3)Value).ToPssgString(),
+                PssgAttributeType.Float4 => ((Vector4)Value).ToPssgString(),
+                PssgAttributeType.Unknown => HexHelper.ByteArrayToHexViaLookup32((byte[])Value),
+                _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null)
+            };
+        }
+
+        public object FromString(string value)
+        {
+            PssgAttributeType dataType = this.SchemaAttribute.DataType;
+            return dataType switch
+            {
+                PssgAttributeType.Int => Convert.ToInt32(value),
+                PssgAttributeType.String => value,
+                PssgAttributeType.Float => Convert.ToSingle(value, CultureInfo.InvariantCulture),
+                PssgAttributeType.Float2 => value.ToPssgVector2(),
+                PssgAttributeType.Float3 => value.ToPssgVector3(),
+                PssgAttributeType.Float4 => value.ToPssgVector4(),
+                PssgAttributeType.Unknown => HexHelper.HexToByteUsingByteManipulation(value),
+                _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null)
+            };
         }
 
         internal void UpdateSize()
         {
-            if (data is string)
+            PssgAttributeType dataType = this.SchemaAttribute.DataType;
+            Size = dataType switch
             {
-                size = 4 + Encoding.UTF8.GetBytes((string)data).Length;
-            }
-            else if (data is UInt16)
+                PssgAttributeType.Int => 4,
+                PssgAttributeType.String => 4 + Encoding.UTF8.GetByteCount((string)Value),
+                PssgAttributeType.Float => 4,
+                PssgAttributeType.Float2 => 8,
+                PssgAttributeType.Float3 => 12,
+                PssgAttributeType.Float4 => 16,
+                PssgAttributeType.Unknown => ((byte[])Value).Length,
+                _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null)
+            };
+        }
+
+        private void VerifyType(object value)
+        {
+            var valueType = value.GetType();
+            PssgAttributeType dataType = this.SchemaAttribute.DataType;
+            bool isValid = dataType switch
             {
-                size = 2;
-            }
-            else if (data is UInt32)
+                PssgAttributeType.Int => valueType == typeof(int),
+                PssgAttributeType.String => valueType == typeof(string),
+                PssgAttributeType.Float => valueType == typeof(float),
+                PssgAttributeType.Float2 => valueType == typeof(Vector2),
+                PssgAttributeType.Float3 => valueType == typeof(Vector3),
+                PssgAttributeType.Float4 => valueType == typeof(Vector4),
+                PssgAttributeType.Unknown => valueType == typeof(byte[]),
+                _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null)
+            };
+
+            if (!isValid)
             {
-                size = 4;
-            }
-            else if (data is Int16)
-            {
-                size = 2;
-            }
-            else if (data is Int32)
-            {
-                size = 4;
-            }
-            else if (data is Single)
-            {
-                size = 4;
-            }
-            else if (data is bool)
-            {
-                size = EndianBitConverter.Big.GetBytes((bool)data).Length;
-            }
-            else
-            {
-                size = ((byte[])data).Length;
+                throw new InvalidCastException($"Cannot cast {valueType} to {dataType}.");
             }
         }
     }

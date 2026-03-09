@@ -6,15 +6,15 @@ namespace EgoEngineLibrary.Graphics.Pssg;
 public class PssgSchemaAttribute
 {
     public string Name { get; }
-    public Type DataType
+    public PssgAttributeType DataType
     {
         get;
         set;
     }
 
-    public PssgSchemaAttribute(string name, Type? dataType = null)
+    public PssgSchemaAttribute(string name, PssgAttributeType dataType = PssgAttributeType.Unknown)
     {
         this.Name = name;
-        this.DataType = dataType ?? typeof(Exception);
+        this.DataType = dataType;
     }
 }

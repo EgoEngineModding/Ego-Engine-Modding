@@ -182,9 +182,9 @@ namespace EgoPssgEditor.ViewModels
             PssgSchema.SaveSchema(fs);
         }
         [RelayCommand]
-        private void ClearSchema()
+        private void ResetSchema()
         {
-            PssgSchema.ClearSchema();
+            PssgSchema.ResetSchema();
         }
 
         public void LoadPssg(PssgFile pssg)

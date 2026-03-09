@@ -118,11 +118,13 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 PssgSchema.LoadFromPssg(reader);
                 long positionAfterInfo = reader.BaseStream.Position;
 
-                file.RootElement = new PssgElement(reader, file, null, true);
+                reader.UseDataElementCheck = true;
+                file.RootElement = PssgElement.ReadBinary(reader, file, null);
                 if (reader.BaseStream.Position < reader.BaseStream.Length)
                 {
                     reader.BaseStream.Position = positionAfterInfo;
-                    file.RootElement = new PssgElement(reader, file, null, false);
+                    reader.UseDataElementCheck = false;
+                    file.RootElement = PssgElement.ReadBinary(reader, file, null);
                     if (reader.BaseStream.Position < reader.BaseStream.Length)
                     {
                         throw new Exception("This file is improperly saved and not supported by this version of the PSSG editor." + Environment.NewLine + Environment.NewLine +
