@@ -129,7 +129,7 @@ class Program
                 logger.LogInformation($"Tpk name '{tpk.Name}', image format '{tpk.Format}'.");
                 var dds = tpk.ToDds();
                 using var fso = File.Open(f + ".dds", FileMode.Create, FileAccess.Write, FileShare.Read);
-                dds.Write(fso, -1);
+                dds.Write(fso);
                 logger.LogInformation("Success! Tpk converted.");
             }
             else if (fileName.EndsWith(".tpk.dds"))

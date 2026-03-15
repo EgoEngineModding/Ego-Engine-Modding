@@ -1,12 +1,8 @@
-﻿using EgoEngineLibrary.Archive.Erp.Data;
+﻿using System.Text;
+using EgoEngineLibrary.Archive.Erp.Data;
 using EgoEngineLibrary.Graphics.Dds;
+using EgoEngineLibrary.Graphics.Pssg.Elements;
 using K4os.Compression.LZ4;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using EgoEngineLibrary.Graphics.Pssg;
 using ZstdSharp;
 
 namespace EgoEngineLibrary.Graphics
@@ -492,24 +488,26 @@ namespace EgoEngineLibrary.Graphics
             return imageType;
         }
         
-        public static DdsFile ToDdsFile(this PssgElement element, bool cubePreview)
+        public static DdsFile ToDdsFile(this PssgTexture texture)
         {
             DdsFile dds = new DdsFile();
 
-            dds.header.height = (uint)(element.Attributes["height"].Value);
-            dds.header.width = (uint)(element.Attributes["width"].Value);
-            switch ((string)element.Attributes["texelFormat"].Value)
+            var height = texture.Height;
+            var width = texture.Width;
+            dds.header.height = height;
+            dds.header.width = width;
+            switch (texture.TexelFormat)
             {
                 // gimp doesn't like pitch, so we'll go with linear size
                 case "dxt1":
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    dds.header.pitchOrLinearSize = ((uint)element.Attributes["height"].Value * (uint)element.Attributes["width"].Value) / 2;
+                    dds.header.pitchOrLinearSize = (height * width) / 2;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
-                    dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes(((string)element.Attributes["texelFormat"].Value).ToUpper()), 0);
+                    dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes(texture.TexelFormat.ToUpper()), 0);
                     break;
                 case "dxt1_srgb":
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    dds.header.pitchOrLinearSize = ((uint)element.Attributes["height"].Value * (uint)element.Attributes["width"].Value) / 2;
+                    dds.header.pitchOrLinearSize = (height * width) / 2;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
                     dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC1_UNORM_SRGB;
@@ -519,41 +517,41 @@ namespace EgoEngineLibrary.Graphics
                 case "dxt4":
                 case "dxt5":
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    dds.header.pitchOrLinearSize = ((uint)element.Attributes["height"].Value * (uint)element.Attributes["width"].Value);
+                    dds.header.pitchOrLinearSize = height * width;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
-                    dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes(((string)element.Attributes["texelFormat"].Value).ToUpper()), 0);
+                    dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes(texture.TexelFormat.ToUpper()), 0);
                     break;
                 case "dxt3_srgb":
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    dds.header.pitchOrLinearSize = ((uint)element.Attributes["height"].Value * (uint)element.Attributes["width"].Value);
+                    dds.header.pitchOrLinearSize = height * width;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
                     dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC2_UNORM_SRGB;
                     break;
                 case "dxt5_srgb":
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    dds.header.pitchOrLinearSize = ((uint)element.Attributes["height"].Value * (uint)element.Attributes["width"].Value);
+                    dds.header.pitchOrLinearSize = height * width;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
                     dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB;
                     break;
                 case "bc6h_uf":
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    dds.header.pitchOrLinearSize = ((uint)element.Attributes["height"].Value * (uint)element.Attributes["width"].Value);
+                    dds.header.pitchOrLinearSize = height * width;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
                     dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC6H_UF16;
                     break;
                 case "BC7":
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    dds.header.pitchOrLinearSize = ((uint)element.Attributes["height"].Value * (uint)element.Attributes["width"].Value);
+                    dds.header.pitchOrLinearSize = height * width;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
                     dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC7_UNORM;
                     break;
                 case "BC7_srgb":
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    dds.header.pitchOrLinearSize = ((uint)element.Attributes["height"].Value * (uint)element.Attributes["width"].Value);
+                    dds.header.pitchOrLinearSize = height * width;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_FOURCC;
                     dds.header.ddspf.fourCC = BitConverter.ToUInt32(Encoding.UTF8.GetBytes("DX10"), 0);
                     dds.header10.dxgiFormat = DXGI_Format.DXGI_FORMAT_BC7_UNORM_SRGB;
@@ -561,7 +559,7 @@ namespace EgoEngineLibrary.Graphics
                 case "ui8x4":
                 case "u8x4":
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    dds.header.pitchOrLinearSize = ((uint)element.Attributes["height"].Value * (uint)element.Attributes["width"].Value) * 4;
+                    dds.header.pitchOrLinearSize = height * width * 4;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_ALPHAPIXELS | DdsPixelFormat.Flags.DDPF_RGB;
                     dds.header.ddspf.fourCC = 0;
                     dds.header.ddspf.rGBBitCount = 32;
@@ -572,7 +570,7 @@ namespace EgoEngineLibrary.Graphics
                     break;
                 case "u8":
                     dds.header.flags |= DdsHeader.Flags.DDSD_LINEARSIZE;
-                    dds.header.pitchOrLinearSize = ((uint)element.Attributes["height"].Value * (uint)element.Attributes["width"].Value);
+                    dds.header.pitchOrLinearSize = height * width;
                     dds.header.ddspf.flags |= DdsPixelFormat.Flags.DDPF_LUMINANCE;
                     dds.header.ddspf.fourCC = 0;
                     dds.header.ddspf.rGBBitCount = 8;
@@ -584,59 +582,52 @@ namespace EgoEngineLibrary.Graphics
 
             // Mip Maps
             dds.header.mipMapCount = 1;
-            if (element.HasAttribute("automipmap") == true && element.HasAttribute("numberMipMapLevels") == true)
+            if (!texture.AutoMipMap && texture.MipMapCount > 0)
             {
-                if ((uint)element.Attributes["automipmap"].Value == 0 && (uint)element.Attributes["numberMipMapLevels"].Value > 0)
-                {
-                    dds.header.flags |= DdsHeader.Flags.DDSD_MIPMAPCOUNT;
-                    dds.header.mipMapCount = (uint)((uint)element.Attributes["numberMipMapLevels"].Value + 1);
-                    dds.header.caps |= DdsHeader.Caps.DDSCAPS_MIPMAP | DdsHeader.Caps.DDSCAPS_COMPLEX;
-                }
+                dds.header.flags |= DdsHeader.Flags.DDSD_MIPMAPCOUNT;
+                dds.header.mipMapCount = texture.MipMapCount + 1;
+                dds.header.caps |= DdsHeader.Caps.DDSCAPS_MIPMAP | DdsHeader.Caps.DDSCAPS_COMPLEX;
             }
 
             // Byte Data
-
-            if (element.HasAttribute("imageBlockCount"))
+            if (texture.ImageBlockCount > 0)
             {
-                var textureImageBlocks = element.FindElements("TEXTUREIMAGEBLOCK");
-                if ((uint)element.Attributes["imageBlockCount"].Value > 1)
+                var textureImageBlocks = texture.ImageBlocks;
+                if (texture.ImageBlockCount > 1)
                 {
                     dds.bdata2 = new Dictionary<int, byte[]>();
                     foreach (var textureImageBlock in textureImageBlocks)
                     {
-                        switch (textureImageBlock.Attributes["typename"].ToString())
+                        switch (textureImageBlock.TypeName)
                         {
                             case "Raw":
                                 dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEX;
-                                dds.bdata2.Add(0, textureImageBlock.FindElements("TEXTUREIMAGEBLOCKDATA").First().Value);
+                                dds.bdata2.Add(0, textureImageBlock.ImageData.Value);
                                 break;
                             case "RawNegativeX":
                                 dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEX;
-                                dds.bdata2.Add(1, textureImageBlock.FindElements("TEXTUREIMAGEBLOCKDATA").First().Value);
+                                dds.bdata2.Add(1, textureImageBlock.ImageData.Value);
                                 break;
                             case "RawPositiveY":
                                 dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEY;
-                                dds.bdata2.Add(2, textureImageBlock.FindElements("TEXTUREIMAGEBLOCKDATA").First().Value);
+                                dds.bdata2.Add(2, textureImageBlock.ImageData.Value);
                                 break;
                             case "RawNegativeY":
                                 dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEY;
-                                dds.bdata2.Add(3, textureImageBlock.FindElements("TEXTUREIMAGEBLOCKDATA").First().Value);
+                                dds.bdata2.Add(3, textureImageBlock.ImageData.Value);
                                 break;
                             case "RawPositiveZ":
                                 dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_POSITIVEZ;
-                                dds.bdata2.Add(4, textureImageBlock.FindElements("TEXTUREIMAGEBLOCKDATA").First().Value);
+                                dds.bdata2.Add(4, textureImageBlock.ImageData.Value);
                                 break;
                             case "RawNegativeZ":
                                 dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP_NEGATIVEZ;
-                                dds.bdata2.Add(5, textureImageBlock.FindElements("TEXTUREIMAGEBLOCKDATA").First().Value);
+                                dds.bdata2.Add(5, textureImageBlock.ImageData.Value);
                                 break;
                         }
                     }
-                    if (cubePreview == true)
-                    {
-                        dds.header.caps2 = 0;
-                    }
-                    else if (dds.bdata2.Count == (uint)element.Attributes["imageBlockCount"].Value)
+
+                    if (dds.bdata2.Count == texture.ImageBlockCount)
                     {
                         dds.header.caps2 |= DdsHeader.Caps2.DDSCAPS2_CUBEMAP;
                         dds.header.flags = dds.header.flags ^ DdsHeader.Flags.DDSD_LINEARSIZE;
@@ -650,12 +641,12 @@ namespace EgoEngineLibrary.Graphics
                 }
                 else
                 {
-                    dds.bdata = textureImageBlocks.First().FindElements("TEXTUREIMAGEBLOCKDATA").First().Value;
+                    dds.bdata = textureImageBlocks.First().ImageData.Value;
                 }
             }
             else
             {
-                var texImages = element.FindElements("TEXTUREIMAGE");
+                var texImages = texture.FindElements("TEXTUREIMAGE");
                 if (texImages.Count() == 1)
                 {
                     var texImage = texImages.First();
@@ -670,72 +661,68 @@ namespace EgoEngineLibrary.Graphics
             return dds;
         }
 
-        public static void ToPssgElement(this DdsFile dds, PssgElement element)
+        public static void ToPssgElement(this DdsFile dds, PssgTexture texture)
         {
-
-            element.Attributes["height"].Value = dds.header.height;
-            element.Attributes["width"].Value = dds.header.width;
-            if (element.HasAttribute("numberMipMapLevels") == true)
+            texture.Height = dds.header.height;
+            texture.Width = dds.header.width;
+            if ((int)dds.header.mipMapCount - 1 >= 0)
             {
-                if ((int)dds.header.mipMapCount - 1 >= 0)
-                {
-                    element.Attributes["numberMipMapLevels"].Value = dds.header.mipMapCount - 1;
-                }
-                else
-                {
-                    element.Attributes["numberMipMapLevels"].Value = 0u;
-                }
+                texture.MipMapCount = dds.header.mipMapCount - 1;
+            }
+            else
+            {
+                texture.MipMapCount = 0u;
             }
             if (dds.header.ddspf.rGBBitCount == 32)
             {
-                element.Attributes["texelFormat"].Value = "ui8x4";
+                texture.TexelFormat = "ui8x4";
             }
             else if (dds.header.ddspf.rGBBitCount == 8)
             {
-                element.Attributes["texelFormat"].Value = "u8";
+                texture.TexelFormat = "u8";
             }
             else if (dds.header.ddspf.fourCC == 808540228) //DX10
             {
                 if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_TYPELESS ||
                     dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_UNORM)
                 {
-                    element.Attributes["texelFormat"].Value = "BC7";
+                    texture.TexelFormat = "BC7";
                 }
                 else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC7_UNORM_SRGB)
                 {
-                    element.Attributes["texelFormat"].Value = "BC7_srgb";
+                    texture.TexelFormat = "BC7_srgb";
                 }
                 else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_TYPELESS ||
                     dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM)
                 {
-                    element.Attributes["texelFormat"].Value = "dxt1";
+                    texture.TexelFormat = "dxt1";
                 }
                 else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC1_UNORM_SRGB)
                 {
-                    element.Attributes["texelFormat"].Value = "dxt1_srgb";
+                    texture.TexelFormat = "dxt1_srgb";
                 }
                 else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC2_TYPELESS ||
                     dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC2_UNORM)
                 {
-                    element.Attributes["texelFormat"].Value = "dxt3";
+                    texture.TexelFormat = "dxt3";
                 }
                 else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC2_UNORM_SRGB)
                 {
-                    element.Attributes["texelFormat"].Value = "dxt3_srgb";
+                    texture.TexelFormat = "dxt3_srgb";
                 }
                 else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_TYPELESS ||
                     dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM)
                 {
-                    element.Attributes["texelFormat"].Value = "dxt5";
+                    texture.TexelFormat = "dxt5";
                 }
                 else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC3_UNORM_SRGB)
                 {
-                    element.Attributes["texelFormat"].Value = "dxt5_srgb";
+                    texture.TexelFormat = "dxt5_srgb";
                 }
                 else if (dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC6H_TYPELESS ||
                     dds.header10.dxgiFormat == DXGI_Format.DXGI_FORMAT_BC6H_UF16)
                 {
-                    element.Attributes["texelFormat"].Value = "bc6h_uf";
+                    texture.TexelFormat = "bc6h_uf";
                 }
                 else
                 {
@@ -744,23 +731,23 @@ namespace EgoEngineLibrary.Graphics
             }
             else
             {
-                element.Attributes["texelFormat"].Value = Encoding.UTF8.GetString(BitConverter.GetBytes(dds.header.ddspf.fourCC)).ToLower();
+                texture.TexelFormat = Encoding.UTF8.GetString(BitConverter.GetBytes(dds.header.ddspf.fourCC)).ToLower();
             }
 
-            if (element.HasAttribute("imageBlockCount"))
+            if (texture.ImageBlockCount > 0)
             {
-                var textureImageBlocks = element.FindElements("TEXTUREIMAGEBLOCK");
+                var textureImageBlocks = texture.ImageBlocks;
                 if (dds.bdata2 != null && dds.bdata2.Count > 0)
                 {
                     foreach (var textureImageBlock in textureImageBlocks)
                     {
-                        switch (textureImageBlock.Attributes["typename"].ToString())
+                        switch (textureImageBlock.TypeName)
                         {
                             case "Raw":
                                 if (dds.bdata2.ContainsKey(0) == true)
                                 {
-                                    textureImageBlock.FindElements("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[0];
-                                    textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[0].Length;
+                                    textureImageBlock.ImageData.Value = dds.bdata2[0];
+                                    textureImageBlock.Size = (UInt32)dds.bdata2[0].Length;
                                 }
                                 else
                                 {
@@ -770,8 +757,8 @@ namespace EgoEngineLibrary.Graphics
                             case "RawNegativeX":
                                 if (dds.bdata2.ContainsKey(1) == true)
                                 {
-                                    textureImageBlock.FindElements("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[1];
-                                    textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[1].Length;
+                                    textureImageBlock.ImageData.Value = dds.bdata2[1];
+                                    textureImageBlock.Size = (UInt32)dds.bdata2[1].Length;
                                 }
                                 else
                                 {
@@ -781,8 +768,8 @@ namespace EgoEngineLibrary.Graphics
                             case "RawPositiveY":
                                 if (dds.bdata2.ContainsKey(2) == true)
                                 {
-                                    textureImageBlock.FindElements("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[2];
-                                    textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[2].Length;
+                                    textureImageBlock.ImageData.Value = dds.bdata2[2];
+                                    textureImageBlock.Size = (UInt32)dds.bdata2[2].Length;
                                 }
                                 else
                                 {
@@ -792,8 +779,8 @@ namespace EgoEngineLibrary.Graphics
                             case "RawNegativeY":
                                 if (dds.bdata2.ContainsKey(3) == true)
                                 {
-                                    textureImageBlock.FindElements("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[3];
-                                    textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[3].Length;
+                                    textureImageBlock.ImageData.Value = dds.bdata2[3];
+                                    textureImageBlock.Size = (UInt32)dds.bdata2[3].Length;
                                 }
                                 else
                                 {
@@ -803,8 +790,8 @@ namespace EgoEngineLibrary.Graphics
                             case "RawPositiveZ":
                                 if (dds.bdata2.ContainsKey(4) == true)
                                 {
-                                    textureImageBlock.FindElements("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[4];
-                                    textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[4].Length;
+                                    textureImageBlock.ImageData.Value = dds.bdata2[4];
+                                    textureImageBlock.Size = (UInt32)dds.bdata2[4].Length;
                                 }
                                 else
                                 {
@@ -814,8 +801,8 @@ namespace EgoEngineLibrary.Graphics
                             case "RawNegativeZ":
                                 if (dds.bdata2.ContainsKey(5) == true)
                                 {
-                                    textureImageBlock.FindElements("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata2[5];
-                                    textureImageBlock.Attributes["size"].Value = (UInt32)dds.bdata2[5].Length;
+                                    textureImageBlock.ImageData.Value = dds.bdata2[5];
+                                    textureImageBlock.Size = (UInt32)dds.bdata2[5].Length;
                                 }
                                 else
                                 {
@@ -827,17 +814,17 @@ namespace EgoEngineLibrary.Graphics
                 }
                 else
                 {
-                    if ((uint)element.Attributes["imageBlockCount"].Value > 1)
+                    if (texture.ImageBlockCount > 1)
                     {
                         throw new Exception("Loading cubemap failed because not all blocks were found. (Write)");
                     }
-                    textureImageBlocks.First().FindElements("TEXTUREIMAGEBLOCKDATA").First().Value = dds.bdata;
-                    textureImageBlocks.First().Attributes["size"].Value = (UInt32)dds.bdata.Length;
+                    textureImageBlocks.First().ImageData.Value = dds.bdata;
+                    textureImageBlocks.First().Size = (UInt32)dds.bdata.Length;
                 }
             }
             else
             {
-                var texImages = element.FindElements("TEXTUREIMAGE");
+                var texImages = texture.FindElements("TEXTUREIMAGE");
                 if (texImages.Count() == 1)
                 {
                     var texImage = texImages.First();

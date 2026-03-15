@@ -1,10 +1,7 @@
-﻿namespace EgoEngineLibrary.Graphics.Dds
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+﻿using System.Text;
 
+namespace EgoEngineLibrary.Graphics.Dds
+{
     public class DdsFile
     {
         UInt32 magic;
@@ -139,7 +136,7 @@
             }
         }
 
-        public void Write(System.IO.Stream fileStream, int cubeIndex)
+        public void Write(System.IO.Stream fileStream)
         {
             using (System.IO.BinaryWriter b = new System.IO.BinaryWriter(fileStream, Encoding.UTF8, true))
             {
@@ -176,11 +173,8 @@
                     b.Write(header10.arraySize);
                     b.Write(header10.miscFlags2);
                 }
-                if (cubeIndex != -1)
-                {
-                    b.Write(bdata2[cubeIndex]);
-                }
-                else if (bdata2 != null && bdata2.Count > 0)
+
+                if (bdata2 != null && bdata2.Count > 0)
                 {
                     for (int i = 0; i < bdata2.Count; i++)
                     {

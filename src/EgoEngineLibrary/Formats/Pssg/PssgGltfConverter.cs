@@ -12,6 +12,7 @@ using System.Numerics;
 
 using EgoEngineLibrary.Conversion;
 using EgoEngineLibrary.Graphics.Pssg;
+using EgoEngineLibrary.Graphics.Pssg.Elements;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
@@ -212,8 +213,8 @@ namespace EgoEngineLibrary.Formats.Pssg
 		{
 			using (var ms = new MemoryStream())
 			{
-				var dds = textureElement.ToDdsFile(false);
-				dds.Write(ms, -1);
+				var dds = ((PssgTexture)textureElement).ToDdsFile();
+				dds.Write(ms);
 
 				ms.Seek(0, SeekOrigin.Begin);
                 var bcDds = BCnEncoder.Shared.ImageFiles.DdsFile.Load(ms);
