@@ -1,7 +1,4 @@
-﻿using System.Numerics;
-using System.Runtime.CompilerServices;
-
-namespace EgoEngineLibrary.Graphics.Pssg.Elements;
+﻿namespace EgoEngineLibrary.Graphics.Pssg.Elements;
 
 public class PssgNode : PssgObject
 {
@@ -18,27 +15,19 @@ public class PssgNode : PssgObject
 
     public bool StopTraversal
     {
-        get => Convert.ToBoolean(GetAttributeValue(Schema.Attributes[0].Name, 0));
-        set => AddAttribute(Schema.Attributes[0].Name, Convert.ToInt32(value));
+        get => GetAttributeValue<bool>(Schema.Attributes[0].Name);
+        set => AddAttribute(Schema.Attributes[0].Name, value);
     }
 
-    public Matrix4x4 Transform
+    public string Nickname
     {
-        get => ChildElements.OfType<PssgTransform>().Single().Transform;
-        set => ChildElements.OfType<PssgTransform>().Single().Transform = value;
+        get => GetAttributeValue<string>(Schema.Attributes[1].Name);
+        set => AddAttribute(Schema.Attributes[1].Name, value);
     }
 
-    public Vector3 BoundsMin
-    {
-        get => ChildElements.OfType<PssgBoundingBox>().Single().BoundsMin;
-        set => ChildElements.OfType<PssgBoundingBox>().Single().BoundsMin = value;
-    }
-
-    public Vector3 BoundsMax
-    {
-        get => ChildElements.OfType<PssgBoundingBox>().Single().BoundsMax;
-        set => ChildElements.OfType<PssgBoundingBox>().Single().BoundsMax = value;
-    }
+    public PssgTransform Transform => ChildElements.OfType<PssgTransform>().Single();
+    
+    public PssgBoundingBox BoundingBox => ChildElements.OfType<PssgBoundingBox>().Single();
 
     public PssgNode(PssgFile file, PssgElement? parent)
         : this(Schema, file, parent)

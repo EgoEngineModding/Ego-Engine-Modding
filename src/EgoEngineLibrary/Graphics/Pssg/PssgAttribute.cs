@@ -36,10 +36,10 @@ namespace EgoEngineLibrary.Graphics.Pssg
         public PssgElement ParentElement { get; }
         public PssgSchemaAttribute SchemaAttribute { get; }
 
-        public PssgAttribute(PssgSchemaAttribute schemaAttribute, object data, PssgElement parentElement)
+        public PssgAttribute(PssgSchemaAttribute schemaAttribute, PssgElement parentElement)
         {
             SchemaAttribute = schemaAttribute;
-            Value = data;
+            Value = schemaAttribute.DataType.GetDefaultValue();
             ParentElement = parentElement;
         }
         public PssgAttribute(PssgBinaryReader reader, PssgElement element)
@@ -78,7 +78,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
         {
             writer.Write(writer.GetAttributeId(SchemaAttribute));
             writer.Write(this.Size);
-            writer.WriteObject(Value);
+            writer.WriteAttributeValue(Value);
         }
         
         public override string ToString()

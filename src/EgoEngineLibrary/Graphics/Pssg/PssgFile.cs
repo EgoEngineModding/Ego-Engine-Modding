@@ -149,7 +149,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             var firstNode = docElem.FirstNode as XElement ??
                 throw new InvalidDataException("The pssg xml does not have an element within the root element.");
 
-            file.RootElement = new PssgElement(firstNode, file, null);
+            file.RootElement = PssgElement.ReadXml(firstNode, file, null);
 
             return file;
         }

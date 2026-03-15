@@ -16,26 +16,26 @@ public class PssgDataBlockStream : PssgElement
 
     public string RenderType
     {
-        get => GetAttributeValue(Schema.Attributes[0].Name, string.Empty);
+        get => GetAttributeValue<string>(Schema.Attributes[0].Name);
         set => AddAttribute(Schema.Attributes[0].Name, value);
     }
 
     public string DataType
     {
-        get => GetAttributeValue(Schema.Attributes[1].Name, string.Empty);
+        get => GetAttributeValue<string>(Schema.Attributes[1].Name);
         set => AddAttribute(Schema.Attributes[1].Name, value);
     }
 
     public uint Offset
     {
-        get => GetAttributeValue<uint>(Schema.Attributes[2].Name, 0);
-        set => AddAttribute(Schema.Attributes[2].Name, (int)value);
+        get => GetAttributeValue<uint>(Schema.Attributes[2].Name);
+        set => AddAttribute(Schema.Attributes[2].Name, value);
     }
 
     public uint Stride
     {
-        get => GetAttributeValue<uint>(Schema.Attributes[3].Name, 0);
-        set => AddAttribute(Schema.Attributes[3].Name, (int)value);
+        get => GetAttributeValue<uint>(Schema.Attributes[3].Name);
+        set => AddAttribute(Schema.Attributes[3].Name, value);
     }
 
     public PssgDataBlockStream(PssgFile file, PssgElement? parent)

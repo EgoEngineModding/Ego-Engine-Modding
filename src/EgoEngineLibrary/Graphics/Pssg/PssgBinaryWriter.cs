@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Numerics;
+using System.Text;
 using EgoEngineLibrary.Collections;
 using EgoEngineLibrary.Conversion;
 using EgoEngineLibrary.IO;
@@ -46,57 +47,39 @@ namespace EgoEngineLibrary.Graphics.Pssg
             this.Write(bytes);
         }
 
-        public void WriteObject(object value)
+        public void WriteAttributeValue(object value)
         {
-            if (value is string)
+            switch (value)
             {
-                this.WritePSSGString((string)value);
-            }
-            else if (value is UInt16)
-            {
-                this.Write((UInt16)value);
-            }
-            else if (value is UInt32)
-            {
-                this.Write((UInt32)value);
-            }
-            else if (value is Int16)
-            {
-                this.Write((Int16)value);
-            }
-            else if (value is Int32)
-            {
-                this.Write((Int32)value);
-            }
-            else if (value is Single)
-            {
-                this.Write((Single)value);
-            }
-            else if (value is bool)
-            {
-                this.Write((bool)value);
-            }
-            else if (value is byte[])
-            {
-                this.Write((byte[])value);
-            }
-            else if (value is Single[])
-            {
-                for (int i = 0; i < ((Single[])value).Length; i++)
-                {
-                    this.Write(((Single[])value)[i]);
-                }
-            }
-            else if (value is UInt16[])
-            {
-                for (int i = 0; i < ((UInt16[])value).Length; i++)
-                {
-                    this.Write(((UInt16[])value)[i]);
-                }
-            }
-            else
-            {
-                this.Write((byte[])value);
+                case int i:
+                    Write(i);
+                    break;
+                case string s:
+                    WritePSSGString(s);
+                    break;
+                case float f:
+                    Write(f);
+                    break;
+                case Vector2 v2:
+                    Write(v2.X);
+                    Write(v2.Y);
+                    break;
+                case Vector3 v3:
+                    Write(v3.X);
+                    Write(v3.Y);
+                    Write(v3.Z);
+                    break;
+                case Vector4 v4:
+                    Write(v4.X);
+                    Write(v4.Y);
+                    Write(v4.Z);
+                    Write(v4.W);
+                    break;
+                case byte[] b:
+                    Write(b);
+                    break;
+                default:
+                    throw new InvalidDataException($"Attribute type '{value.GetType().Name}' is not valid.");
             }
         }
     }

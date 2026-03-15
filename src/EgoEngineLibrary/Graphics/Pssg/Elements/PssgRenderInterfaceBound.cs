@@ -1,6 +1,6 @@
 ﻿namespace EgoEngineLibrary.Graphics.Pssg.Elements;
 
-public class PssgRenderInterfaceBound : PssgObject
+public abstract class PssgRenderInterfaceBound : PssgObject
 {
     internal static new PssgSchemaElement Schema { get; } = new("RENDERINTERFACEBOUND", PssgElementType.None)
     {

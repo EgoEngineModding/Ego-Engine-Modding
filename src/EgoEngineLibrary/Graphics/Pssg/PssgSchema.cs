@@ -12,6 +12,83 @@ namespace EgoEngineLibrary.Graphics.Pssg
             ResetSchema();
         }
 
+        public static void ResetSchema()
+        {
+            entries.Clear();
+            AddElement(PssgDataBlock.Schema);
+            AddElement(PssgDataBlockStream.Schema);
+            AddElement(PssgDataBlockData.Schema);
+
+            AddElement(PssgDatabase.Schema);
+            AddElement(PssgLibrary.Schema);
+            
+            AddElement(PssgJointNode.Schema);
+            AddElement(PssgBundleNode.Schema);
+            AddElement(PssgSkeleton.Schema);
+            AddElement(PssgInverseBindMatrix.Schema);
+            AddElement(PssgLayer.Schema);
+            
+            AddElement(PssgModifierNetworkInstance.Schema);
+            AddElement(PssgModifierNetworkInstanceModifierInput.Schema);
+            AddElement(PssgModifierNetworkInstanceCompile.Schema);
+            AddElement(PssgModifierNetworkInstanceUniqueModifierInput.Schema);
+            
+            AddElement(PssgNode.Schema);
+            AddElement(PssgTransform.Schema);
+            AddElement(PssgBoundingBox.Schema);
+            AddElement(PssgObject.Schema);
+            AddElement(PssgUserData.Schema);
+
+            AddElement(PssgRenderStream.Schema);
+            AddElement(PssgRenderIndexSource.Schema);
+            AddElement(PssgIndexSourceData.Schema);
+            AddElement(PssgRenderDataSource.Schema);
+            AddElement(PssgRenderInstance.Schema);
+            AddElement(PssgRenderStreamInstance.Schema);
+            AddElement(PssgRenderInstanceSource.Schema);
+            AddElement(PssgRenderInterfaceBound.Schema);
+
+            AddElement(PssgVisibleRenderNode.Schema);
+            AddElement(PssgRenderNode.Schema);
+            AddElement(PssgRootNode.Schema);
+            AddElement(PssgSegmentSet.Schema);
+
+            AddElement(PssgShaderGroup.Schema);
+            AddElement(PssgShaderStreamDefinition.Schema);
+            AddElement(PssgShaderInstance.Schema);
+            AddElement(PssgShaderInput.Schema);
+            AddElement(PssgShaderInputDefinition.Schema);
+            AddElement(PssgShaderProgramCode.Schema);
+            AddElement(PssgShaderProgramCodeBlock.Schema);
+            AddElement(PssgCgStream.Schema);
+            AddElement(PssgShaderProgram.Schema);
+
+            AddElement(PssgSkinNode.Schema);
+            AddElement(PssgSkinJoint.Schema);
+
+            AddElement(PssgTexture.Schema);
+            AddElement(PssgTextureImageBlock.Schema);
+            AddElement(PssgTextureImageBlockData.Schema);
+            AddElement(PssgCubeMapTexture.Schema);
+
+            AddElement(PssgLodNode.Schema);
+            AddElement(PssgLodRenderInstances.Schema);
+            AddElement(PssgLodRenderInstanceList.Schema);
+            AddElement(PssgLodVisibleRenderNode.Schema);
+            AddElement(PssgLodRenderNode.Schema);
+            AddElement(PssgLodSkinNode.Schema);
+
+            AddElement(PssgMatrixPaletteNode.Schema);
+            AddElement(PssgMatrixPaletteBundleNode.Schema);
+            AddElement(PssgMatrixPaletteJointNode.Schema);
+            AddElement(PssgMatrixPaletteJointRenderInstance.Schema);
+            AddElement(PssgMatrixPaletteRenderInstance.Schema);
+            AddElement(PssgMatrixPaletteSkinJoint.Schema);
+
+            AddElement(PssgNString.Schema);
+            AddElement(PssgData.Schema);
+        }
+
         public static void LoadSchema(Stream stream)
         {
             if (stream.Length == 0)
@@ -82,25 +159,6 @@ namespace EgoEngineLibrary.Graphics.Pssg
             }
 
             xDoc.Save(stream);
-        }
-
-        public static void ResetSchema()
-        {
-            entries.Clear();
-            AddElement(PssgObject.Schema);
-            AddElement(PssgUserData.Schema);
-            AddElement(PssgDatabase.Schema);
-            AddElement(PssgLibrary.Schema);
-
-            AddElement(PssgNode.Schema);
-            AddElement(PssgTransform.Schema);
-            AddElement(PssgBoundingBox.Schema);
-            AddElement(PssgRootNode.Schema);
-
-            AddElement(PssgRenderInterfaceBound.Schema);
-            AddElement(PssgDataBlock.Schema);
-            AddElement(PssgDataBlockStream.Schema);
-            AddElement(PssgDataBlockData.Schema);
         }
 
         public static void LoadFromPssg(PssgBinaryReader reader)

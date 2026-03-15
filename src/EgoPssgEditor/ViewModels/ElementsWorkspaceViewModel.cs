@@ -133,7 +133,7 @@ namespace EgoPssgEditor.ViewModels
                     {
                         XDocument xDoc = XDocument.Load(fileStream);
 
-                        PssgElement newElement = new PssgElement((XElement)((XElement)xDoc.FirstNode).FirstNode, element.File, element.ParentElement);
+                        PssgElement newElement = PssgElement.ReadXml((XElement)((XElement)xDoc.FirstNode).FirstNode, element.File, element.ParentElement);
                         if (element.ParentElement != null)
                         {
                             element = element.ParentElement.SetChild(element, newElement);
@@ -188,7 +188,7 @@ namespace EgoPssgEditor.ViewModels
                     using (var fs = File.Open(result, FileMode.Create))
                     using (PssgBinaryWriter writer = new PssgBinaryWriter(EndianBitConverter.Big, fs, false))
                     {
-                        writer.WriteObject(element.Value);
+                        writer.Write(element.Value);
                     }
                 }
                 catch (Exception ex)

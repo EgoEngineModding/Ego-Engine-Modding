@@ -16,20 +16,20 @@ public class PssgDataBlock : PssgRenderInterfaceBound
 
     public ushort StreamCount
     {
-        get => GetAttributeValue<ushort>(Schema.Attributes[0].Name, 0);
-        set => AddAttribute(Schema.Attributes[0].Name, (int)value);
+        get => GetAttributeValue<ushort>(Schema.Attributes[0].Name);
+        set => AddAttribute(Schema.Attributes[0].Name, value);
     }
 
     public uint Size
     {
-        get => GetAttributeValue<uint>(Schema.Attributes[1].Name, 0);
-        set => AddAttribute(Schema.Attributes[1].Name, (int)value);
+        get => GetAttributeValue<uint>(Schema.Attributes[1].Name);
+        set => AddAttribute(Schema.Attributes[1].Name, value);
     }
 
     public uint ElementCount
     {
-        get => GetAttributeValue<uint>(Schema.Attributes[2].Name, 0);
-        set => AddAttribute(Schema.Attributes[2].Name, (int)value);
+        get => GetAttributeValue<uint>(Schema.Attributes[2].Name);
+        set => AddAttribute(Schema.Attributes[2].Name, value);
     }
 
     public PssgDataBlock(PssgFile file, PssgElement? parent)

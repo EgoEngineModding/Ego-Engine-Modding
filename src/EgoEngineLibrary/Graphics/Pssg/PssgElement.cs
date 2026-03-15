@@ -1,8 +1,11 @@
-﻿using System.Xml.Linq;
+﻿using System.Diagnostics;
+using System.Globalization;
+using System.Xml.Linq;
 using EgoEngineLibrary.Helper;
 
 namespace EgoEngineLibrary.Graphics.Pssg
 {
+    [DebuggerDisplay("{Name}")]
     public class PssgElement
     {
         // id, size, and attributeSize are only used during Reading/Writing
@@ -74,25 +77,20 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 element.Attributes.Add(attr);
             }
 
-            bool isDataElement = false;
-            switch (element.Name)
+            bool isDataElement = schemaElement.DataType is not PssgElementType.None and not PssgElementType.Unknown;
+            if (!isDataElement)
             {
-                case "BOUNDINGBOX":
-                case "DATA":
-                case "DATABLOCKDATA":
-                case "DATABLOCKBUFFERED":
-                case "INDEXSOURCEDATA":
-                case "INVERSEBINDMATRIX":
-                case "MODIFIERNETWORKINSTANCEUNIQUEMODIFIERINPUT":
-                case "NeAnimPacketData_B1":
-                case "NeAnimPacketData_B4":
-                case "RENDERINTERFACEBOUNDBUFFERED":
-                case "SHADERINPUT":
-                case "TEXTUREIMAGEBLOCKDATA":
-                case "TRANSFORM":
-                    isDataElement = true;
-                    break;
+                switch (element.Name)
+                {
+                    case "DATABLOCKBUFFERED":
+                    case "NeAnimPacketData_B1":
+                    case "NeAnimPacketData_B4":
+                    case "RENDERINTERFACEBOUNDBUFFERED":
+                        isDataElement = true;
+                        break;
+                }
             }
+
             if (!isDataElement && reader.UseDataElementCheck)
             {
                 long currentPos = reader.BaseStream.Position;
@@ -100,7 +98,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 while (reader.BaseStream.Position < end)
                 {
                     int tempID = reader.ReadInt32();
-                    if (tempID < 0)//tempID > file.nodeInfo.Length || 
+                    if (tempID < 0 || tempID > reader.ElementTable.Count) 
                     {
                         isDataElement = true;
                         break;
@@ -143,35 +141,36 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
             return element;
         }
-        public PssgElement(XElement elem, PssgFile file, PssgElement? element)
-        {
-            this.File = file;
-            this.ParentElement = element;
-            this.SchemaElement = PssgSchema.AddElement(elem.Name.LocalName);
 
-            this.Attributes = new PssgAttributeCollection();
+        public static PssgElement ReadXml(XElement elem, PssgFile file, PssgElement? parent)
+        {
+            PssgSchemaElement schemaElement = PssgSchema.AddElement(elem.Name.LocalName);
+            var element = schemaElement.Create(file, parent);
+
             PssgAttribute attr;
             foreach (XAttribute xAttr in elem.Attributes())
             {
-                attr = new PssgAttribute(xAttr, this);
-                this.Attributes.Add(attr);
+                attr = new PssgAttribute(xAttr, element);
+                element.Attributes.Add(attr);
             }
 
             if (elem.FirstNode != null && elem.FirstNode is XText)
             {
-                this.Value = this.FromString(elem.Value);
-                this.ChildElements = new PssgElementCollection();
+                element.Value = element.FromString(elem.Value);
             }
             else
             {
-                this.Value = Array.Empty<byte>();
-                this.ChildElements = new PssgElementCollection(elem.Elements().Count());
+                element.Value = [];
+                element.ChildElements.EnsureCapacity(elem.Elements().Count());
                 foreach (XElement child in elem.Elements())
                 {
-                    this.ChildElements.Add(new PssgElement(child, file, this));
+                    element.ChildElements.Add(ReadXml(child, file, element));
                 }
             }
+            
+            return element;
         }
+
         public PssgElement(PssgElement elementToCopy)
         {
             this.File = elementToCopy.File;
@@ -267,7 +266,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
             if (this.IsDataElement)
             {
-                writer.WriteObject(Value);
+                writer.Write(Value);
             }
             else
             {
@@ -374,23 +373,40 @@ namespace EgoEngineLibrary.Graphics.Pssg
         /// </summary>
         public PssgAttribute AddAttribute(string attributeName, object data)
         {
-            if (this.HasAttribute(attributeName))
+            PssgAttribute? attribute = Attributes.Get(attributeName);
+            var attributeSchema =
+                attribute?.SchemaAttribute ?? PssgSchema.AddAttribute(this.SchemaElement, attributeName);
+            var value = attributeSchema.DataType switch
             {
-                this.Attributes[attributeName].Value = data;
-                return this.Attributes[attributeName];
+                PssgAttributeType.Int => Convert.ChangeType(data, TypeCode.Int32, CultureInfo.InvariantCulture),
+                _ => data,
+            };
+            
+            if (attribute is null)
+            {
+                attribute = new PssgAttribute(attributeSchema, this);
+                Attributes.Add(attribute);
             }
-
-            PssgAttribute newAttr = new(PssgSchema.AddAttribute(this.Name, attributeName), data, this);
-            this.Attributes.Add(newAttr);
-
-            return newAttr;
+            
+            attribute.Value = value;
+            return attribute;
         }
 
-        public T GetAttributeValue<T>(string attributeName, T defaultValue)
+        public T GetAttributeValue<T>(string attributeName)
             where T : notnull
         {
-            var value = (Attributes.Get(attributeName)?.Value);
-            return value is null ? defaultValue : (T)value;
+            var attribute = Attributes.Get(attributeName);
+            var attributeSchema = attribute?.SchemaAttribute ?? PssgSchema.AddAttribute(SchemaElement, attributeName);
+            object attributeValue = attribute?.Value ?? attributeSchema.DataType.GetDefaultValue();
+            
+            // Handle integral types
+            var value = attributeSchema.DataType switch
+            {
+                PssgAttributeType.Int => Convert.ChangeType(attributeValue, typeof(T), CultureInfo.InvariantCulture),
+                _ => attributeValue,
+            };
+            
+            return (T)value;
         }
 
         public void RemoveAttribute(string attributeName)

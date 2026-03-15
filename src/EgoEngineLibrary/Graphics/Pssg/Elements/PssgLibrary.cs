@@ -13,7 +13,7 @@ public class PssgLibrary : PssgElement
 
     public string Type
     {
-        get => GetAttributeValue(Schema.Attributes[0].Name, string.Empty);
+        get => GetAttributeValue<string>(Schema.Attributes[0].Name);
         set => AddAttribute(Schema.Attributes[0].Name, value);
     }
 
