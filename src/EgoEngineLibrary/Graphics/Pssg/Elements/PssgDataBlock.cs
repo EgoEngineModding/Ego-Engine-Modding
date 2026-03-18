@@ -31,6 +31,10 @@ public class PssgDataBlock : PssgRenderInterfaceBound
         get => GetAttributeValue<uint>(Schema.Attributes[2].Name);
         set => AddAttribute(Schema.Attributes[2].Name, value);
     }
+    
+    public IEnumerable<PssgDataBlockStream> Streams => ChildElements.OfType<PssgDataBlockStream>();
+    
+    public PssgDataBlockData Data => ChildElements.OfType<PssgDataBlockData>().Single();
 
     public PssgDataBlock(PssgFile file, PssgElement? parent)
         : this(Schema, file, parent)

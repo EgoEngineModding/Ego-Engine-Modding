@@ -67,6 +67,8 @@ namespace EgoEngineLibrary.Graphics.Pssg
             AddElement(PssgSkinJoint.Schema);
 
             AddElement(PssgTexture.Schema);
+            AddElement(PssgTextureImage.Schema);
+            AddElement(PssgTextureMipMap.Schema);
             AddElement(PssgTextureImageBlock.Schema);
             AddElement(PssgTextureImageBlockData.Schema);
             AddElement(PssgCubeMapTexture.Schema);

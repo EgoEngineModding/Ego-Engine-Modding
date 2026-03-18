@@ -1,16 +1,11 @@
-﻿using EgoEngineLibrary.Graphics;
+﻿using System.Numerics;
+using EgoEngineLibrary.Graphics.Pssg;
+using EgoEngineLibrary.Graphics.Pssg.Elements;
 using SharpGLTF.Geometry;
-using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using SharpGLTF.Memory;
 using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using EgoEngineLibrary.Graphics.Pssg;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
@@ -18,17 +13,15 @@ namespace EgoEngineLibrary.Formats.Pssg
 	{
 		protected class ExportState : PssgModelReaderState
 		{
-			public string RenderNodeName { get; protected set; }
-
-			public ExportState()
-			{
-				RenderNodeName = "RENDERNODE";
-			}
+            public virtual bool IsRenderNode(PssgNode element)
+            {
+                return element.IsExactType<PssgRenderNode>();
+            }
 		}
 
 		public static bool SupportsPssg(PssgFile pssg)
 		{
-			return pssg.FindElements("RENDERNODE").Any();
+            return pssg.Elements<PssgRenderNode>().Any(x => x.IsExactType<PssgRenderNode>());
 		}
 
 		protected virtual ExportState CreateState()
@@ -43,16 +36,16 @@ namespace EgoEngineLibrary.Formats.Pssg
 			var state = CreateState();
 
 			// F1 games use lib YYY
-			var parent = pssg.FindElements("LIBRARY", "type", "NODE").FirstOrDefault();
+			var parent = pssg.Elements<PssgLibrary>().FirstOrDefault(x => x.Type == "NODE");
 			if (parent is null)
 			{
-				parent = pssg.FindElements("LIBRARY", "type", "YYY").FirstOrDefault();
+				parent = pssg.Elements<PssgLibrary>().FirstOrDefault(x => x.Type == "YYY");
 				state.IsF1 = true;
 			}
 			if (parent is null)
 				throw new InvalidDataException("Could not find library with scene nodes.");
 
-			foreach (var child in parent.ChildElements)
+			foreach (var child in parent.ChildElements.OfType<PssgNode>())
 			{
 				CreateNode(sceneBuilder, child, null, state);
 			}
@@ -60,44 +53,43 @@ namespace EgoEngineLibrary.Formats.Pssg
 			return sceneBuilder.ToGltf2();
 		}
 
-		private static void CreateNode(SceneBuilder sceneBuilder, PssgElement element, NodeBuilder? parent, ExportState state)
+		private static void CreateNode(SceneBuilder sceneBuilder, PssgNode element, NodeBuilder? parent, ExportState state)
 		{
-			// only consider a scene node if it has a transform child node
-			if (!element.ChildElements.Any(c => c.Name == "TRANSFORM")) return;
-
 			NodeBuilder gltfNode;
 			if (parent is null)
 			{
-				string name = (string)element.Attributes["id"].Value;
-				gltfNode = new NodeBuilder(name);
-				gltfNode.LocalTransform = GetTransform(element);
-			}
-			else if (element.Name == state.RenderNodeName)
+				string name = element.Id;
+                gltfNode = new NodeBuilder(name)
+                {
+                    LocalTransform = element.Transform.Transform
+                };
+            }
+			else if (state.IsRenderNode(element))
 			{
-				gltfNode = CreateMeshNode(sceneBuilder, element, parent, state);
+				gltfNode = CreateMeshNode(sceneBuilder, (PssgVisibleRenderNode)element, parent, state);
 			}
-			else if (element.Name == "NODE")
+			else if (element.IsExactType<PssgNode>())
 			{
-				string name = (string)element.Attributes["id"].Value;
+				string name = element.Id;
 				gltfNode = parent.CreateNode(name);
-				gltfNode.LocalTransform = GetTransform(element);
+				gltfNode.LocalTransform = element.Transform.Transform;
 			}
 			else
 			{
 				throw new NotImplementedException($"Support for node {element.Name} not implemented.");
 			}
 
-			foreach (var child in element.ChildElements)
+			foreach (var child in element.ChildElements.OfType<PssgNode>())
 			{
 				CreateNode(sceneBuilder, child, gltfNode, state);
 			}
 		}
 
-		private static NodeBuilder CreateMeshNode(SceneBuilder sceneBuilder, PssgElement renderElement, NodeBuilder parent, ExportState state)
+		private static NodeBuilder CreateMeshNode(SceneBuilder sceneBuilder, PssgVisibleRenderNode renderElement, NodeBuilder parent, ExportState state)
 		{
-			string name = (string)renderElement.Attributes["id"].Value;
+			string name = renderElement.Id;
 			NodeBuilder node = parent.CreateNode(name);
-			node.LocalTransform = GetTransform(renderElement);
+			node.LocalTransform = renderElement.Transform.Transform;
 
 			var mesh = ConvertMesh(renderElement, state);
 			sceneBuilder.AddRigidMesh(mesh, node);
@@ -105,32 +97,35 @@ namespace EgoEngineLibrary.Formats.Pssg
 			return node;
 		}
 
-		private static IMeshBuilder<MaterialBuilder> ConvertMesh(PssgElement renderElement, ExportState state)
+		private static IMeshBuilder<MaterialBuilder> ConvertMesh(PssgVisibleRenderNode renderElement, ExportState state)
 		{
-			IEnumerable<PssgElement> primitives = renderElement.FindElements("RENDERSTREAMINSTANCE");
+			var primitives = renderElement.RenderInstances;
 
 			var primitiveDatas = new List<PrimitiveData>();
 			var texCoordSets = 0;
 			foreach (var prim in primitives)
 			{
-				var shaderName = ((string)prim.Attributes["shader"].Value).Substring(1);
-				var material = CreateMaterialBuilder(shaderName, state, out var createdNew);
+                if (prim is not PssgRenderStreamInstance streamInstance)
+                {
+                    throw new NotImplementedException($"Support for '{prim.Name}' in node '{renderElement.Name}' is not implemented.");
+                }
+                
+				var shader = prim.GetShaderInstance();
+				var material = CreateMaterialBuilder(shader, state, out var createdNew);
 
-				string rdsId = ((string)prim.Attributes["indices"].Value).Substring(1);
-				var rdsNode = prim.File.FindElements("RENDERDATASOURCE", "id", rdsId).First();
-
+				var rdsNode = streamInstance.GetRenderDataSource();
 				var rds = new RenderDataSourceReader(rdsNode);
 				texCoordSets = Math.Max(texCoordSets, rds.TexCoordSetCount);
 
-				primitiveDatas.Add(new PrimitiveData(prim, material, createdNew, rds));
+				primitiveDatas.Add(new PrimitiveData(streamInstance, shader, material, createdNew, rds));
 			}
 
-			string name = (string)renderElement.Attributes["id"].Value;
+			string name = renderElement.Id;
 			var mb = CreateMeshBuilder(name, texCoordSets);
 			foreach (var prim in primitiveDatas)
 			{
 				if (prim.CreatedNewMaterial)
-					ConvertMaterial(prim.Element.File, prim.Material, prim.Rds.TexCoordSetCount);
+					ConvertMaterial(prim.ShaderInstance, prim.Material, prim.Rds.TexCoordSetCount);
 
 				var pb = mb.UsePrimitive(prim.Material);
 				var rds = prim.Rds;
@@ -148,15 +143,10 @@ namespace EgoEngineLibrary.Formats.Pssg
 			return mb;
 		}
 
-		private static void ConvertMaterial(PssgFile pssg, MaterialBuilder mat, int texCoordSets)
+		private static void ConvertMaterial(PssgShaderInstance shader, MaterialBuilder mat, int texCoordSets)
 		{
-			var shader = pssg.FindElements("SHADERINSTANCE", "id", mat.Name).FirstOrDefault();
-			if (shader is null)
-				throw new InvalidDataException($"Could not find shader instance {mat.Name} referenced by the model.");
-
-			var shaderGroupId = shader.Attributes["shaderGroup"].GetValue<string>().Substring(1);
-			var sgNode = shader.File.FindElements("SHADERGROUP", "id", shaderGroupId).FirstOrDefault();
-			var textureInputs = shader.FindElements("SHADERINPUT", "type", "texture");
+			var sgNode = shader.GetShaderGroup();
+			var textureInputs = shader.Inputs.Where(x => x.Type == "texture");
 
 			mat.WithMetallicRoughnessShader()
 				.WithMetallicRoughness(0.1f, 0.5f)

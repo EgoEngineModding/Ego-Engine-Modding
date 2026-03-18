@@ -416,39 +416,21 @@ namespace EgoEngineLibrary.Graphics.Pssg
         }
 
         /// <summary>
-        /// Gets this element, and its hierarchy as a flat sequence.
+        /// Gets this element, and its descendants as a flat sequence.
         /// </summary>
-        public IEnumerable<PssgElement> GetElements()
+        public IEnumerable<T> Elements<T>()
+            where T : PssgElement
         {
-            yield return this;
+            if (this is T)
+            {
+                yield return (T)this;
+            }
 
             foreach (var c in ChildElements)
             {
-                var cc = c.GetElements();
+                var cc = c.Elements<T>();
 
                 foreach (var ccc in cc) yield return ccc;
-            }
-        }
-
-        public IEnumerable<PssgElement> FindElements(string elementName)
-        {
-            return GetElements().FindElements(elementName);
-        }
-        public IEnumerable<PssgElement> FindElements(string elementName, string attributeName)
-        {
-            return GetElements().FindElements(elementName, attributeName);
-        }
-        public IEnumerable<PssgElement> FindElements<T>(string elementName, string attributeName, T attributeValue)
-            where T : notnull
-        {
-            return GetElements().FindElements(elementName, attributeName, attributeValue);
-        }
-
-        public PssgElement this[int index]
-        {
-            get
-            {
-                return this.ChildElements[index];
             }
         }
 

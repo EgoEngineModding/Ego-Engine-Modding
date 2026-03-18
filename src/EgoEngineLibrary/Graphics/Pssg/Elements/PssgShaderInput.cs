@@ -69,4 +69,6 @@ public class PssgShaderInput : PssgElement
         : base(schemaElement, file, parent)
     {
     }
+
+    public PssgTexture? TryGetTexture() => File.TryGetObject<PssgTexture>(Texture.AsMemory(1));
 }

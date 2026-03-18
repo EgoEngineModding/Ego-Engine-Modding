@@ -11,6 +11,8 @@ public static class PssgStringHelper
 {
     private const string FloatFormat = "e9";
     private static CultureInfo Culture => CultureInfo.InvariantCulture;
+    internal static Encoding Encoding => Encoding.Latin1;
+    internal static StringComparison StringComparison => StringComparison.Ordinal;
 
     private static string ToString<T>(this ReadOnlySpan<byte> value, int elementsPerRow,
         Func<ReadOnlySpan<byte>, string> toStringFunc)

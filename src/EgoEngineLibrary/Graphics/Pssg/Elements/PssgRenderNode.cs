@@ -7,6 +7,8 @@ public class PssgRenderNode : PssgVisibleRenderNode
         CreateElement = (s, f, p) => new PssgRenderNode(s, f, p),
         BaseElement = PssgVisibleRenderNode.Schema
     };
+    
+    public override IEnumerable<PssgRenderStreamInstance> RenderInstances => ChildElements.OfType<PssgRenderStreamInstance>();
 
     public PssgRenderNode(PssgFile file, PssgElement? parent)
         : this(Schema, file, parent)

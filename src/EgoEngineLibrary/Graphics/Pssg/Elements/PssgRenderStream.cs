@@ -34,4 +34,6 @@ public class PssgRenderStream : PssgObject
         : base(schemaElement, file, parent)
     {
     }
+
+    public PssgDataBlock GetDataBlock() => File.GetObject<PssgDataBlock>(DataBlock.AsMemory(1));
 }

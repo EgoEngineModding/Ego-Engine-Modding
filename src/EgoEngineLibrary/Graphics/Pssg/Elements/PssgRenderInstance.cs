@@ -29,4 +29,8 @@ public abstract class PssgRenderInstance : PssgObject
         : base(schemaElement, file, parent)
     {
     }
+
+    public PssgShaderInstance GetShaderInstance() => File.GetObject<PssgShaderInstance>(Shader.AsMemory(1));
+
+    public PssgShaderInstance? TryGetShaderInstance() => File.TryGetObject<PssgShaderInstance>(Shader.AsMemory(1));
 }

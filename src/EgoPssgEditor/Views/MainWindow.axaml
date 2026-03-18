@@ -95,7 +95,8 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <DockPanel>
-                        <TreeView Name="tvMain" ItemsSource="{Binding Path=PssgElements}">
+                        <TreeView Name="tvMain" ItemsSource="{Binding Path=PssgElements}"
+                                  ScrollViewer.AllowAutoHide="False">
                             <TreeView.Styles>
                                 <Style Selector="TreeViewItem" x:DataType="vm:PssgElementViewModel">
                                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />

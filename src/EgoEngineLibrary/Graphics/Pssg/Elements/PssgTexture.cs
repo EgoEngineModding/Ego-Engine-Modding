@@ -178,13 +178,17 @@ public class PssgTexture : PssgRenderInterfaceBound
         get => GetAttributeValue<uint>(Schema.Attributes[23].Name);
         set => AddAttribute(Schema.Attributes[23].Name, value);
     }
+    
+    public PssgTextureImage? Image => ChildElements.OfType<PssgTextureImage>().SingleOrDefault();
+    
+    public IEnumerable<PssgTextureMipMap> MipMaps => ChildElements.OfType<PssgTextureMipMap>();
+    
+    public IEnumerable<PssgTextureImageBlock> ImageBlocks => ChildElements.OfType<PssgTextureImageBlock>();
 
     public PssgTexture(PssgFile file, PssgElement? parent)
         : this(Schema, file, parent)
     {
     }
-    
-    public IEnumerable<PssgTextureImageBlock> ImageBlocks => ChildElements.OfType<PssgTextureImageBlock>();
 
     internal PssgTexture(PssgSchemaElement schemaElement, PssgFile file, PssgElement? parent)
         : base(schemaElement, file, parent)

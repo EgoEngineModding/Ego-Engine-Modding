@@ -1,33 +1,31 @@
 ﻿using BCnEncoder.Decoder;
 using EgoEngineLibrary.Graphics;
+using EgoEngineLibrary.Graphics.Pssg.Elements;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-
-using EgoEngineLibrary.Conversion;
-using EgoEngineLibrary.Graphics.Pssg;
-using EgoEngineLibrary.Graphics.Pssg.Elements;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
     public abstract class PssgGltfConverter
-	{
-		protected record PrimitiveData(PssgElement Element, MaterialBuilder Material, bool CreatedNewMaterial, RenderDataSourceReader Rds);
+    {
+        protected record PrimitiveData(
+            PssgRenderStreamInstance Element,
+            PssgShaderInstance ShaderInstance,
+            MaterialBuilder Material,
+            bool CreatedNewMaterial,
+            RenderDataSourceReader Rds);
 		protected abstract class PssgModelReaderState
 		{
 			public bool IsF1 { get; set; }
 
-			public Dictionary<string, MaterialBuilder> ShaderMaterialMap { get; }
+			public Dictionary<PssgShaderInstance, MaterialBuilder> ShaderMaterialMap { get; }
 
 			public PssgModelReaderState()
 			{
-				ShaderMaterialMap = new Dictionary<string, MaterialBuilder>();
+				ShaderMaterialMap = new Dictionary<PssgShaderInstance, MaterialBuilder>();
 			}
 		}
 
@@ -60,41 +58,6 @@ namespace EgoEngineLibrary.Formats.Pssg
 				image.SaveAsPng(ms);
 				whiteImageBytes = ms.ToArray();
 			}
-		}
-
-		protected static Matrix4x4 GetTransform(PssgElement sceneElement)
-		{
-			var transformNode = sceneElement.FindElements("TRANSFORM").First();
-			return GetTransform(transformNode.Value);
-		}
-		private static Matrix4x4 GetTransform(byte[] buffer)
-		{
-			Matrix4x4 t = new Matrix4x4();
-			BigEndianBitConverter bc = new BigEndianBitConverter();
-
-			// Surely i've missed something and there's a way to loop through this? Please?
-			int i = 0;
-			t.M11 = bc.ToSingle(buffer, i); i += 4;
-			t.M12 = bc.ToSingle(buffer, i); i += 4;
-			t.M13 = bc.ToSingle(buffer, i); i += 4;
-			t.M14 = bc.ToSingle(buffer, i); i += 4;
-
-			t.M21 = bc.ToSingle(buffer, i); i += 4;
-			t.M22 = bc.ToSingle(buffer, i); i += 4;
-			t.M23 = bc.ToSingle(buffer, i); i += 4;
-			t.M24 = bc.ToSingle(buffer, i); i += 4;
-
-			t.M31 = bc.ToSingle(buffer, i); i += 4;
-			t.M32 = bc.ToSingle(buffer, i); i += 4;
-			t.M33 = bc.ToSingle(buffer, i); i += 4;
-			t.M34 = bc.ToSingle(buffer, i); i += 4;
-
-			t.M41 = bc.ToSingle(buffer, i); i += 4;
-			t.M42 = bc.ToSingle(buffer, i); i += 4;
-			t.M43 = bc.ToSingle(buffer, i); i += 4;
-			t.M44 = bc.ToSingle(buffer, i); i += 4;
-
-			return t;
 		}
 
 		protected static IMeshBuilder<MaterialBuilder> CreateMeshBuilder(string name, int texCoordSets)
@@ -137,42 +100,42 @@ namespace EgoEngineLibrary.Formats.Pssg
 			return vb;
 		}
 
-		protected static MaterialBuilder CreateMaterialBuilder(string shaderInstanceId, PssgModelReaderState state, out bool createdNew)
+		protected static MaterialBuilder CreateMaterialBuilder(PssgShaderInstance shader, PssgModelReaderState state, out bool createdNew)
 		{
-			if (state.ShaderMaterialMap.TryGetValue(shaderInstanceId, out MaterialBuilder? mat))
+			if (state.ShaderMaterialMap.TryGetValue(shader, out MaterialBuilder? mat))
 			{
 				createdNew = false;
 				return mat;
 			}
 
-			mat = new MaterialBuilder(shaderInstanceId);
-			state.ShaderMaterialMap.Add(shaderInstanceId, mat);
+			mat = new MaterialBuilder(shader.Id);
+			state.ShaderMaterialMap.Add(shader, mat);
 
 			createdNew = true;
 			return mat;
 		}
 
-		protected static byte[] GetDiffuseTexture(PssgElement? sgNode, IEnumerable<PssgElement> textureInputs)
+		protected static byte[] GetDiffuseTexture(PssgShaderGroup? sgNode, IEnumerable<PssgShaderInput> textureInputs)
 		{
 			return GetTextureBytes(sgNode, textureInputs, "TDiffuseAlphaMap") ?? grayImageBytes;
 		}
-		protected static byte[] GetSpecularTexture(PssgElement? sgNode, IEnumerable<PssgElement> textureInputs)
+		protected static byte[] GetSpecularTexture(PssgShaderGroup? sgNode, IEnumerable<PssgShaderInput> textureInputs)
 		{
 			return GetTextureBytes(sgNode, textureInputs, "TSpecularMap") ?? blackImageBytes;
 		}
-		protected static byte[] GetEmissiveTexture(PssgElement? sgNode, IEnumerable<PssgElement> textureInputs)
+		protected static byte[] GetEmissiveTexture(PssgShaderGroup? sgNode, IEnumerable<PssgShaderInput> textureInputs)
 		{
 			return GetTextureBytes(sgNode, textureInputs, "TEmissiveMap") ?? blackImageBytes;
 		}
-		protected static byte[] GetOcclusionTexture(PssgElement? sgNode, IEnumerable<PssgElement> textureInputs)
+		protected static byte[] GetOcclusionTexture(PssgShaderGroup? sgNode, IEnumerable<PssgShaderInput> textureInputs)
 		{
 			return GetTextureBytes(sgNode, textureInputs, "TOcclusionMap") ?? whiteImageBytes;
 		}
-		protected static byte[] GetNormalTexture(PssgElement? sgNode, IEnumerable<PssgElement> textureInputs)
+		protected static byte[] GetNormalTexture(PssgShaderGroup? sgNode, IEnumerable<PssgShaderInput> textureInputs)
 		{
 			return GetTextureBytes(sgNode, textureInputs, "TNormalMap") ?? blackImageBytes;
 		}
-		private static byte[]? GetTextureBytes(PssgElement? sgNode, IEnumerable<PssgElement> textureInputs, string texType)
+		private static byte[]? GetTextureBytes(PssgShaderGroup? sgNode, IEnumerable<PssgShaderInput> textureInputs, string texType)
 		{
 			try
 			{
@@ -181,20 +144,19 @@ namespace EgoEngineLibrary.Formats.Pssg
 
 				foreach (var ti in textureInputs)
 				{
-					var paramId = ti.Attributes["parameterID"].GetValue<uint>();
-					if (paramId >= sgNode.ChildElements.Count)
+					var paramId = ti.ParameterId;
+					if (paramId >= sgNode.InputDefinitions.Count())
 						continue;
 
-					var textureId = ti.Attributes["texture"].GetValue<string>();
+					var textureId = ti.Texture;
 					var refIndex = textureId.IndexOf('#');
-					if (refIndex != 0) // this means we're refrencing another pssg file
+					if (refIndex != 0) // this means we're referencing another pssg file
 						continue;
-					textureId = textureId.Substring(1);
 
-					var sidNode = sgNode.ChildElements[(int)paramId];
-					if (sidNode.HasAttribute("name") && sidNode.Attributes["name"].GetValue<string>().StartsWith(texType))
+					var sidNode = sgNode.InputDefinitions.ElementAt(Convert.ToInt32(paramId));
+					if (sidNode.InputName.StartsWith(texType))
 					{
-						var textureNode = sgNode.File.FindElements("TEXTURE", "id", textureId).FirstOrDefault();
+						var textureNode = ti.TryGetTexture();
 						if (textureNode is null)
 							continue;
 
@@ -209,11 +171,11 @@ namespace EgoEngineLibrary.Formats.Pssg
 				return null;
 			}
 		}
-		private static byte[] GetTextureBytes(PssgElement textureElement)
+		private static byte[] GetTextureBytes(PssgTexture textureElement)
 		{
 			using (var ms = new MemoryStream())
 			{
-				var dds = ((PssgTexture)textureElement).ToDdsFile();
+				var dds = textureElement.ToDdsFile();
 				dds.Write(ms);
 
 				ms.Seek(0, SeekOrigin.Begin);
@@ -224,8 +186,8 @@ namespace EgoEngineLibrary.Formats.Pssg
                 bcDecode.DecodeDdsToPixels<Rgba32>(bcDds, pixels);
 
                 using var img = Image.WrapMemory<Rgba32>(pixels, (int)dds.header.width, (int)dds.header.height);
-				ms.Seek(0, SeekOrigin.Begin);
-				img.SaveAsPng(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+                img.SaveAsPng(ms);
 				return ms.ToArray();
 			}
 		}

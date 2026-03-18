@@ -23,7 +23,7 @@
     <PackageVersion Include="ObservableCollections" Version="3.3.4" />
     <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageVersion Include="SharpGLTF.Toolkit" Version="1.0.0-alpha0023" />
+    <PackageVersion Include="SharpGLTF.Toolkit" Version="1.0.6" />
     <PackageVersion Include="SixLabors.ImageSharp" Version="2.1.13" />
     <PackageVersion Include="System.IO.Hashing" Version="$(BclVersion)" />
     <PackageVersion Include="System.IO.Packaging" Version="$(BclVersion)" />

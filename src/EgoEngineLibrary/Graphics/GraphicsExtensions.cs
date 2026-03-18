@@ -577,7 +577,7 @@ namespace EgoEngineLibrary.Graphics
                     dds.header.ddspf.rBitMask = 0xFF;
                     break;
                 default:
-                    throw new NotSupportedException("Texel format not supported.");
+                    throw new NotSupportedException($"Texel format '{texture.TexelFormat}' not supported.");
             }
 
             // Mip Maps
@@ -646,11 +646,9 @@ namespace EgoEngineLibrary.Graphics
             }
             else
             {
-                var texImages = texture.FindElements("TEXTUREIMAGE");
-                if (texImages.Count() == 1)
+                if (texture.Image is not null)
                 {
-                    var texImage = texImages.First();
-                    dds.bdata = texImage.Value;
+                    dds.bdata = texture.Image.Value.Concat(texture.MipMaps.SelectMany(x => x.Value)).ToArray();
                 }
                 else
                 {
@@ -824,11 +822,9 @@ namespace EgoEngineLibrary.Graphics
             }
             else
             {
-                var texImages = texture.FindElements("TEXTUREIMAGE");
-                if (texImages.Count() == 1)
+                if (texture.Image is not null)
                 {
-                    var texImage = texImages.First();
-                    texImage.Value = dds.bdata;
+                    texture.Image.Value = dds.bdata;
                 }
                 else
                 {
