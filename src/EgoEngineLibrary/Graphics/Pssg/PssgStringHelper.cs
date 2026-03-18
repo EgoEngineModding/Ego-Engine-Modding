@@ -10,7 +10,7 @@ namespace EgoEngineLibrary.Graphics.Pssg;
 public static class PssgStringHelper
 {
     private const string FloatFormat = "e9";
-    private static CultureInfo Culture => CultureInfo.InvariantCulture;
+    internal static CultureInfo Culture => CultureInfo.InvariantCulture;
     internal static Encoding Encoding => Encoding.Latin1;
     internal static StringComparison StringComparison => StringComparison.Ordinal;
 

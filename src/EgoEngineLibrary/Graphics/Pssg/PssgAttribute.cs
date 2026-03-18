@@ -104,7 +104,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             {
                 PssgAttributeType.Int => Convert.ToInt32(value),
                 PssgAttributeType.String => value,
-                PssgAttributeType.Float => Convert.ToSingle(value, CultureInfo.InvariantCulture),
+                PssgAttributeType.Float => Convert.ToSingle(value, PssgStringHelper.Culture),
                 PssgAttributeType.Float2 => value.ToPssgVector2(),
                 PssgAttributeType.Float3 => value.ToPssgVector3(),
                 PssgAttributeType.Float4 => value.ToPssgVector4(),
@@ -119,7 +119,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             Size = dataType switch
             {
                 PssgAttributeType.Int => 4,
-                PssgAttributeType.String => 4 + Encoding.UTF8.GetByteCount((string)Value),
+                PssgAttributeType.String => 4 + PssgStringHelper.Encoding.GetByteCount((string)Value),
                 PssgAttributeType.Float => 4,
                 PssgAttributeType.Float2 => 8,
                 PssgAttributeType.Float3 => 12,

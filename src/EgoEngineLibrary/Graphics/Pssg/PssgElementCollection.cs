@@ -33,7 +33,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             {
                 for (int i = 0; i < _elements.Count; i++)
                 {
-                    if (string.Equals(_elements[i].Name, name, StringComparison.Ordinal))
+                    if (string.Equals(_elements[i].Name, name, PssgStringHelper.StringComparison))
                     {
                         return _elements[i];
                     }

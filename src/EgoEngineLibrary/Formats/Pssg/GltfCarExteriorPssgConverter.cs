@@ -1,15 +1,9 @@
-﻿using EgoEngineLibrary.Graphics;
-using SharpGLTF.Runtime;
-using SharpGLTF.Schema2;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Text.RegularExpressions;
-
 using EgoEngineLibrary.Conversion;
 using EgoEngineLibrary.Graphics.Pssg;
+using SharpGLTF.Runtime;
+using SharpGLTF.Schema2;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
@@ -21,9 +15,9 @@ namespace EgoEngineLibrary.Formats.Pssg
     // - The DataBlocks are rearranged in how they hold the data, and ST is float4 instead of float2 (assuming this means 2 sets of tex coords)
     // Starting with Dirt 3:
     // - The DataBlocks with ST/Tangent/Binormal now use half4/half4/half4 instead of float4/float3/float3
-    public class GltfCarExteriorPssgConverter
+    public partial class GltfCarExteriorPssgConverter
     {
-        private class ImportState : PssgModelWriterState
+        private partial class ImportState : PssgModelWriterState
         {
             public int LodNumber { get; set; }
 
@@ -41,7 +35,8 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             public Dictionary<int, ShaderInstanceData> MatShaderMapping { get; }
 
-            public Regex LodMatcher { get; }
+            [GeneratedRegex("^LOD([0-9]+)_$", RegexOptions.CultureInvariant)]
+            public partial Regex LodMatcher { get; }
 
             public ImportState(PssgElement rdsLib, PssgElement ribLib, Dictionary<string, ShaderInputInfo> shaderGroupMap)
             {
@@ -49,7 +44,6 @@ namespace EgoEngineLibrary.Formats.Pssg
                 RibLib = ribLib;
                 ShaderGroupMap = shaderGroupMap;
                 MatShaderMapping = new Dictionary<int, ShaderInstanceData>();
-                LodMatcher = new Regex("^LOD([0-9]+)_$", RegexOptions.CultureInvariant);
 
                 if (rdsLib == ribLib)
                     IsF1 = true;

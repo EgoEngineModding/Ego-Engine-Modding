@@ -1,15 +1,8 @@
-﻿using EgoEngineLibrary.Graphics;
-using SharpGLTF.Runtime;
-using SharpGLTF.Schema2;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text.RegularExpressions;
-
+﻿using System.Numerics;
 using EgoEngineLibrary.Conversion;
 using EgoEngineLibrary.Graphics.Pssg;
+using SharpGLTF.Runtime;
+using SharpGLTF.Schema2;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
@@ -77,7 +70,7 @@ namespace EgoEngineLibrary.Formats.Pssg
         {
             // Get a list of nodes in the default scene as a flat list
             var nodeBoneIndexMap = new Dictionary<int, int>();
-            var rootNode = gltf.DefaultScene.FindNode(n => n.Name.StartsWith("Scene Root", StringComparison.InvariantCulture));
+            var rootNode = gltf.DefaultScene.FindNode(n => n.Name.StartsWith("Scene Root", PssgStringHelper.StringComparison));
             if (rootNode is null)
                 throw new InvalidDataException("The default scene must have node name starting with `Scene Root`.");
 
@@ -114,7 +107,7 @@ namespace EgoEngineLibrary.Formats.Pssg
         private static void ConvertSceneNodes(PssgFile pssg, PssgElement parent, Node gltfNode, ImportState state)
         {
             PssgElement element;
-            if (gltfNode.Name.StartsWith("Scene Root", StringComparison.InvariantCulture))
+            if (gltfNode.Name.StartsWith("Scene Root", PssgStringHelper.StringComparison))
             {
                 element = new PssgElement("ROOTNODE", parent.File, parent);
                 element.AddAttribute("stopTraversal", 0u);

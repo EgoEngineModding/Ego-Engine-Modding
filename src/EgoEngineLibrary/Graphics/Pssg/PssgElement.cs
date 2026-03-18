@@ -378,7 +378,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 attribute?.SchemaAttribute ?? PssgSchema.AddAttribute(this.SchemaElement, attributeName);
             var value = attributeSchema.DataType switch
             {
-                PssgAttributeType.Int => Convert.ChangeType(data, TypeCode.Int32, CultureInfo.InvariantCulture),
+                PssgAttributeType.Int => Convert.ChangeType(data, TypeCode.Int32, PssgStringHelper.Culture),
                 _ => data,
             };
             
@@ -402,7 +402,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             // Handle integral types
             var value = attributeSchema.DataType switch
             {
-                PssgAttributeType.Int => Convert.ChangeType(attributeValue, typeof(T), CultureInfo.InvariantCulture),
+                PssgAttributeType.Int => Convert.ChangeType(attributeValue, typeof(T), PssgStringHelper.Culture),
                 _ => attributeValue,
             };
             

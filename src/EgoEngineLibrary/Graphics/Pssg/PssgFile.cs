@@ -85,7 +85,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             Byte[] header = new Byte[4];
             stream.ReadExactly(header, 0, 4);
 
-            string magic = Encoding.UTF8.GetString(header);
+            string magic = PssgStringHelper.Encoding.GetString(header);
 
             if (magic == "PSSG")
             {
@@ -199,7 +199,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
         {
             using (PssgBinaryWriter writer = new PssgBinaryWriter(EndianBitConverter.Big, fileStream, true))
             {
-                writer.Write(Encoding.ASCII.GetBytes("PSSG"));
+                writer.Write(PssgStringHelper.Encoding.GetBytes("PSSG"));
                 writer.Write(0); // Length, filled in later
 
                 if (RootElement != null)
@@ -237,10 +237,10 @@ namespace EgoEngineLibrary.Graphics.Pssg
         }
         public void WriteXml(Stream fileStream)
         {
-            XDocument xDoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
+            XDocument xDoc = new XDocument(new XDeclaration("1.0", PssgStringHelper.Encoding.WebName.ToUpperInvariant(), "yes"));
             xDoc.Add(new XElement("PSSGFILE", new XAttribute("version", "1.0.0.0")));
             XmlWriterSettings settings = new XmlWriterSettings();
-            settings.Encoding = new UTF8Encoding(false);
+            settings.Encoding = PssgStringHelper.Encoding;
             settings.NewLineChars = "\n";
             settings.Indent = true;
             settings.IndentChars = "";

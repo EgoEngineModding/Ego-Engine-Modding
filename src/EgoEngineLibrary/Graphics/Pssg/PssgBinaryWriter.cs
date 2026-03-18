@@ -12,7 +12,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
         public OrderedSet<PssgSchemaAttribute> AttributeTable { get; set; }
         
         public PssgBinaryWriter(EndianBitConverter bitConvertor, Stream stream, bool leaveOpen)
-            : base(bitConvertor, stream, leaveOpen)
+            : base(bitConvertor, stream, PssgStringHelper.Encoding, leaveOpen)
         {
             ElementTable = [];
             AttributeTable = [];
@@ -42,7 +42,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
         public void WritePSSGString(string str)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(str);
+            byte[] bytes = Encoding.GetBytes(str);
             this.Write(bytes.Length);
             this.Write(bytes);
         }

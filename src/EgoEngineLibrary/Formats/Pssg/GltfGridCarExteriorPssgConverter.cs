@@ -1,21 +1,15 @@
-﻿using EgoEngineLibrary.Graphics;
-using SharpGLTF.Runtime;
-using SharpGLTF.Schema2;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Text.RegularExpressions;
-
 using EgoEngineLibrary.Conversion;
 using EgoEngineLibrary.Graphics.Pssg;
+using SharpGLTF.Runtime;
+using SharpGLTF.Schema2;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
-    public class GltfGridCarExteriorPssgConverter
+    public partial class GltfGridCarExteriorPssgConverter
     {
-        private class ImportState : PssgModelWriterState
+        private partial class ImportState : PssgModelWriterState
         {
             public int LodNumber { get; set; }
 
@@ -29,13 +23,13 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             public Dictionary<int, ShaderInstanceData> MatShaderMapping { get; }
 
-            public Regex LodMatcher { get; }
+            [GeneratedRegex("^LOD([0-9]+)_$", RegexOptions.CultureInvariant)]
+            public partial Regex LodMatcher { get; }
 
             public ImportState(Dictionary<string, ShaderInputInfo> shaderGroupMap)
             {
                 ShaderGroupMap = shaderGroupMap;
                 MatShaderMapping = new Dictionary<int, ShaderInstanceData>();
-                LodMatcher = new Regex("^LOD([0-9]+)_$", RegexOptions.CultureInvariant);
             }
         }
         private class ShaderInstanceData
