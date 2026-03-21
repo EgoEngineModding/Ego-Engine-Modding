@@ -21,8 +21,8 @@ public class PssgBoundingBox : PssgElement
         set => Value.AsSpan(12).SetVector3(value);
     }
 
-    public PssgBoundingBox(PssgFile file, PssgElement? parent)
-        : base(Schema, file, parent)
+    public PssgBoundingBox(PssgNode parent)
+        : base(Schema, parent.File, parent)
     {
     }
 

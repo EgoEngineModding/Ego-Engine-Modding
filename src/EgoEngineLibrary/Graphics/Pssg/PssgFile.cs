@@ -1,5 +1,4 @@
 ﻿using System.IO.Compression;
-using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using EgoEngineLibrary.Collections;
@@ -27,7 +26,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
         public PssgFile(PssgFileType fileType)
         {
             this.FileType = fileType;
-            this.RootElement = new PssgElement("PSSGDATABASE", this, null);
+            this.RootElement = new PssgDatabase(this);
             _elementTable = [];
             _attributeTable = [];
         }
@@ -282,16 +281,6 @@ namespace EgoEngineLibrary.Graphics.Pssg
             return Elements<T>().FirstOrDefault(obj => obj.Id.Equals(id.Span, PssgStringHelper.StringComparison));
         }
 
-        public IEnumerable<PssgElement> FindElements(string elementName)
-        {
-            return Elements<PssgElement>().FindElements(elementName);
-        }
-        public IEnumerable<PssgElement> FindElements<T>(string elementName, string attributeName, T attributeValue)
-            where T : notnull
-        {
-            return Elements<PssgElement>().FindElements(elementName, attributeName, attributeValue);
-        }
-
         public void MoveElement(PssgElement source, PssgElement target)
         {
             if (source.ParentElement == null) throw new InvalidOperationException("Cannot move root element.");
@@ -307,7 +296,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             if (elementToClone.File != this)
                 throw new InvalidOperationException("Cannot clone an element that doesn't belong to a file.");
 
-            var cloned = new PssgElement(elementToClone);
+            var cloned = elementToClone.DeepClone();
             cloned.ParentElement?.AppendChild(cloned);
             return cloned;
         }

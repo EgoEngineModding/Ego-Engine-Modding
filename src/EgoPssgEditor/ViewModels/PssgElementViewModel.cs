@@ -26,7 +26,7 @@ namespace EgoPssgEditor.ViewModels
         }
         public bool HasAttributes
         {
-            get { return _element.HasAttributes; }
+            get { return _element.Attributes.Count > 0; }
         }
         public bool IsDataElement
         {

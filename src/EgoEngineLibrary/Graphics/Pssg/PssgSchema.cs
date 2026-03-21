@@ -55,6 +55,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
             AddElement(PssgShaderGroup.Schema);
             AddElement(PssgShaderStreamDefinition.Schema);
+            AddElement(PssgShaderGroupPass.Schema);
             AddElement(PssgShaderInstance.Schema);
             AddElement(PssgShaderInput.Schema);
             AddElement(PssgShaderInputDefinition.Schema);

@@ -109,7 +109,7 @@ namespace EgoPssgEditor.ViewModels
             {
                 FileTypeChoices = [FilePickerType.Dds, FilePickerType.All],
                 Title = "Select the dds save location and file name",
-                FileName = element.Attributes["id"].DisplayValue + ".dds",
+                FileName = element.Id + ".dds",
             };
 
             var result = await FileDialog.ShowSaveFileDialog(saveOptions);
@@ -141,7 +141,7 @@ namespace EgoPssgEditor.ViewModels
             {
                 FileTypeChoices = [FilePickerType.Dds, FilePickerType.All],
                 Title = "Select a dds file",
-                FileName = element.Attributes["id"].DisplayValue + ".dds",
+                FileName = element.Id + ".dds",
             };
 
             var result = await FileDialog.ShowOpenFileDialog(openOptions);
@@ -176,7 +176,7 @@ namespace EgoPssgEditor.ViewModels
                 foreach (PssgTextureViewModel texView in Textures)
                 {
                     dds = texView.Texture.ToDdsFile();
-                    string filePath = Path.Combine(texDir, texView.Texture.Attributes["id"].DisplayValue + ".dds");
+                    string filePath = Path.Combine(texDir, texView.Texture.Id + ".dds");
                     using (var fs = File.Open(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                         dds.Write(fs);
                 }
@@ -204,7 +204,7 @@ namespace EgoPssgEditor.ViewModels
                     {
                         foreach (PssgTextureViewModel texView in Textures)
                         {
-                            if (Path.GetFileNameWithoutExtension(filePath) == texView.Texture.Attributes["id"].ToString())
+                            if (Path.GetFileNameWithoutExtension(filePath) == texView.Texture.Id)
                             {
                                 dds = new DdsFile(File.Open(filePath, FileMode.Open));
                                 dds.ToPssgElement(texView.Texture);
@@ -246,8 +246,8 @@ namespace EgoPssgEditor.ViewModels
             {
                 // Copy and Edit Name
                 PssgElement elementToCopy = texView.Texture;
-                PssgElement newTexture = new PssgElement(elementToCopy);
-                newTexture.Attributes["id"].Value = dtVm.TextureName;
+                PssgTexture newTexture = (PssgTexture)elementToCopy.DeepClone();
+                newTexture.Id = dtVm.TextureName;
 
                 // Add to Library
                 if (elementToCopy.ParentElement != null)
@@ -255,14 +255,14 @@ namespace EgoPssgEditor.ViewModels
                     elementToCopy.ParentElement.AppendChild(newTexture);
                     PssgElementViewModel newElementView = new PssgElementViewModel(newTexture, texView.ElementView.Parent);
                     texView.ElementView.Parent.Children.Add(newElementView);
-                    Textures.Add(new PssgTextureViewModel(newElementView));
+                    _textures.Add(new PssgTextureViewModel(newElementView));
                 }
                 else
                 {
                     elementToCopy.AppendChild(newTexture);
                     PssgElementViewModel newElementView = new PssgElementViewModel(newTexture, texView.ElementView);
                     texView.ElementView.Children.Add(newElementView);
-                    Textures.Add(new PssgTextureViewModel(newElementView));
+                    _textures.Add(new PssgTextureViewModel(newElementView));
                 }
             }
         }
