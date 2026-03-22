@@ -90,6 +90,9 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
             AddElement(PssgNString.Schema);
             AddElement(PssgData.Schema);
+
+            AddElement(PssgFeAtlasInfoData.Schema);
+            AddElement(PssgFeAtlasInfo.Schema);
         }
 
         public static void LoadSchema(Stream stream)
@@ -124,6 +127,25 @@ namespace EgoEngineLibrary.Graphics.Pssg
                     element.LinkAttributeName = linkAttributeName;
                 }
 
+                string? baseElementName = xN.Attribute("baseElementName")?.Value;
+                if (!string.IsNullOrEmpty(baseElementName))
+                {
+                    if (element.BaseElement is not null && element.BaseElement.Name != baseElementName)
+                    {
+                        throw new InvalidDataException(
+                            $"Element '{elementName}' already has a BaseElement and cannot be overriden.");
+                    }
+                    
+                    var previousEntryCount = entries.Count;
+                    var baseElement = AddElement(baseElementName);
+                    if (previousEntryCount != entries.Count)
+                    {
+                        throw new InvalidDataException("BaseElement must be declared before derived elements.");
+                    }
+
+                    element.BaseElement = baseElement;
+                }
+
                 foreach (XElement attrElem in xN.Descendants("attribute"))
                 {
                     string attrName = attrElem.Attribute("name")?.Value ??
@@ -147,11 +169,16 @@ namespace EgoEngineLibrary.Graphics.Pssg
             xDoc.Add(new XElement("PSSGFILE", new XAttribute("version", "1.0.0.0")));
             XElement parent = (XElement)xDoc.FirstNode!;
 
-            foreach (KeyValuePair<string, PssgSchemaElement> entry in entries)
+            foreach (KeyValuePair<string, PssgSchemaElement> entry in entries.OrderBy(x => x.Value, BaseElementComparer.Default))
             {
                 XElement pNode = new XElement("node");
                 pNode.Add(new XAttribute("name", entry.Key), new XAttribute("dataType", entry.Value.DataType.ToString()));
                 pNode.Add(new XAttribute("elementsPerRow", entry.Value.ElementsPerRow), new XAttribute("linkAttributeName", entry.Value.LinkAttributeName));
+
+                if (entry.Value.BaseElement is not null)
+                {
+                    pNode.Add(new XAttribute("baseElementName", entry.Value.BaseElement.Name));
+                }
 
                 foreach (PssgSchemaAttribute attrEntry in entry.Value.Attributes)
                 {
@@ -325,6 +352,29 @@ namespace EgoEngineLibrary.Graphics.Pssg
             {
                 attribute.DataType = attrType;
             }
+        }
+    }
+
+    file class BaseElementComparer : IComparer<PssgSchemaElement>
+    {
+        public static BaseElementComparer Default { get; } = new();
+        
+        public int Compare(PssgSchemaElement? x, PssgSchemaElement? y)
+        {
+            if (x == y) return 0;
+            if (x is null) return -1;
+            if (y is null) return 1;
+
+            if (x.BaseElement == y.BaseElement) return 0;
+            if (x.BaseElement is null) return -1;
+            if (y.BaseElement is null) return 1;
+
+            if (y.BaseElement == x)
+                return -1;
+            if (x.BaseElement == y)
+                return 1;
+
+            return x.GetInheritanceDepth().CompareTo(y.GetInheritanceDepth());
         }
     }
 }

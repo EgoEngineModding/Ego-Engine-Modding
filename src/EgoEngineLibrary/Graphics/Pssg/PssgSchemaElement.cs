@@ -6,21 +6,32 @@ namespace EgoEngineLibrary.Graphics.Pssg;
 public class PssgSchemaElement
 {
     public string Name { get; }
-    public PssgSchemaElement? BaseElement { get; init; }
+
+    public PssgSchemaElement? BaseElement
+    {
+        get;
+        internal set
+        {
+            // Get inheritance depth to validate deep nesting and protect against circular references
+            _ = GetInheritanceDepth();
+            field = value;
+        }
+    }
+
     public PssgElementType DataType
     {
         get;
-        set;
+        internal set;
     }
     public int ElementsPerRow
     {
         get;
-        set;
+        internal set;
     }
     public string LinkAttributeName
     {
         get;
-        set;
+        internal set;
     }
     public List<PssgSchemaAttribute> Attributes
     {
@@ -48,5 +59,23 @@ public class PssgSchemaElement
         return CreateElement is null
             ? throw new InvalidOperationException($"Element '{Name}' cannot be created.")
             : CreateElement(this, file, parent);
+    }
+
+    internal int GetInheritanceDepth()
+    {
+        int depth = 0;
+        var baseElement = BaseElement;
+        while (baseElement is not null)
+        {
+            ++depth;
+            baseElement = baseElement.BaseElement;
+
+            if (depth > 20)
+            {
+                throw new InvalidOperationException("Inheritance depth of schema elements is too large.");
+            }
+        }
+            
+        return depth;
     }
 }

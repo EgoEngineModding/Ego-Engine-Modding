@@ -9,7 +9,7 @@ public class PssgSchemaAttribute
     public PssgAttributeType DataType
     {
         get;
-        set;
+        internal set;
     }
 
     public PssgSchemaAttribute(string name, PssgAttributeType dataType = PssgAttributeType.Unknown)
