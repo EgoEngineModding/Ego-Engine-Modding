@@ -10,11 +10,6 @@ public class PssgDialog
     {
         return await Messenger.Send(new AddElementMessage());
     }
-    
-    public static async Task<AddAttributeResponse?> ShowAddAttributeDialog()
-    {
-        return await Messenger.Send(new AddAttributeMessage());
-    }
 
     public static async Task<bool> ShowDuplicateTextureDialog(DuplicateTextureViewModel viewModel)
     {

@@ -257,19 +257,6 @@ namespace EgoEngineLibrary.Graphics.Pssg
             return entries.Keys.ToArray();
         }
 
-        public static string[] GetAttributeNames()
-        {
-            List<string> aNames = new List<string>();
-            foreach (KeyValuePair<string, PssgSchemaElement> entry in entries)
-            {
-                foreach (PssgSchemaAttribute attrEntry in entry.Value.Attributes)
-                {
-                    aNames.Add(attrEntry.Name);
-                }
-            }
-            return aNames.ToArray();
-        }
-
         public static PssgSchemaElement AddElement(string elementName)
         {
             if (entries.TryGetValue(elementName, out PssgSchemaElement? existingElement))

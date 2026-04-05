@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using System.Xml.Linq;
-using EgoEngineLibrary.Helper;
 
 namespace EgoEngineLibrary.Graphics.Pssg
 {
@@ -25,11 +24,11 @@ namespace EgoEngineLibrary.Graphics.Pssg
         {
             get
             {
-                return ValueToString();
+                return Value.ToPssgString(SchemaAttribute.DataType);
             }
             set
             {
-                Value = ValueFromString(value);
+                Value = value.ToPssgValue(SchemaAttribute.DataType);
             }
         }
 
@@ -57,7 +56,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
             string attrName = xAttr.Name.LocalName.StartsWith("___") ? xAttr.Name.LocalName.Substring(3) : xAttr.Name.LocalName;
             SchemaAttribute = PssgSchema.AddAttribute(this.ParentElement.Name, attrName);
-            Value = ValueFromString(xAttr.Value);
+            Value = xAttr.Value.ToPssgValue(SchemaAttribute.DataType);
         }
         public PssgAttribute(PssgAttribute attrToCopy, PssgElement parent)
         {
@@ -73,38 +72,6 @@ namespace EgoEngineLibrary.Graphics.Pssg
             writer.Write(writer.GetAttributeId(SchemaAttribute));
             writer.Write(this.Size);
             writer.WriteAttributeValue(Value);
-        }
-        
-        public string ValueToString()
-        {
-            PssgAttributeType dataType = this.SchemaAttribute.DataType;
-            return dataType switch
-            {
-                PssgAttributeType.Int => Value.ToString() ?? string.Empty,
-                PssgAttributeType.String => (string)Value,
-                PssgAttributeType.Float => ((float)Value).ToPssgString(),
-                PssgAttributeType.Float2 => ((Vector2)Value).ToPssgString(),
-                PssgAttributeType.Float3 => ((Vector3)Value).ToPssgString(),
-                PssgAttributeType.Float4 => ((Vector4)Value).ToPssgString(),
-                PssgAttributeType.Unknown => HexHelper.ByteArrayToHexViaLookup32((byte[])Value),
-                _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null)
-            };
-        }
-
-        public object ValueFromString(string value)
-        {
-            PssgAttributeType dataType = this.SchemaAttribute.DataType;
-            return dataType switch
-            {
-                PssgAttributeType.Int => Convert.ToInt32(value),
-                PssgAttributeType.String => value,
-                PssgAttributeType.Float => Convert.ToSingle(value, PssgStringHelper.Culture),
-                PssgAttributeType.Float2 => value.ToPssgVector2(),
-                PssgAttributeType.Float3 => value.ToPssgVector3(),
-                PssgAttributeType.Float4 => value.ToPssgVector4(),
-                PssgAttributeType.Unknown => HexHelper.HexToByteUsingByteManipulation(value),
-                _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null)
-            };
         }
 
         internal void UpdateSize()

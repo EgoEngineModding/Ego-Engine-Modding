@@ -4,6 +4,7 @@ using System.Xml;
 using System.Xml.Linq;
 using CommunityToolkit.Mvvm.Input;
 using EgoEngineLibrary.Conversion;
+using EgoEngineLibrary.Frontend.Dialogs.Custom;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 using EgoEngineLibrary.Graphics.Pssg;
@@ -255,12 +256,6 @@ namespace EgoPssgEditor.ViewModels
             if (elementName is not null)
             {
                 PssgElement newElement = elementView.Element.AppendChild(elementName);
-
-                if (newElement == null)
-                {
-                    return;
-                }
-
                 PssgElementViewModel newElementView = new PssgElementViewModel(newElement, elementView);
                 elementView.Children.Add(newElementView);
             }
@@ -315,15 +310,12 @@ namespace EgoPssgEditor.ViewModels
         private async Task AddAttribute(object parameter)
         {
             PssgElementViewModel elementView = (PssgElementViewModel)parameter;
-            var res = await PssgDialog.ShowAddAttributeDialog();
-            if (res is not null)
+            var vm = new AddAttributeViewModel(elementView.Element.SchemaElement);
+            var res = await Dialog.ShowDialog(vm);
+            if (res)
             {
-                PssgAttribute attr = elementView.Element.AddAttribute(res.Name, Convert.ChangeType(res.Value, res.Type));
-                if (attr == null)
-                {
-                    return;
-                }
-
+                PssgAttribute attr = elementView.Element.AddAttribute(vm.AttributeName,
+                    vm.Value.ToPssgValue(vm.SelectedAttributeType));
                 elementView.IsSelected = false;
                 elementView.IsSelected = true;
             }

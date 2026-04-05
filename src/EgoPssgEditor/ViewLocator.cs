@@ -1,8 +1,9 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
+using EgoEngineLibrary.Frontend.Dialogs.Custom;
 using EgoPssgEditor.ViewModels;
+using EgoPssgEditor.Views;
 
 namespace EgoPssgEditor;
 
@@ -18,6 +19,11 @@ public class ViewLocator : IDataTemplate
     {
         if (param is null)
             return null;
+
+        if (param is AddAttributeViewModel)
+        {
+            return new AddAttributeView();
+        }
         
         var name = param.GetType().FullName!.Replace("ViewModel", "View", StringComparison.Ordinal);
         var type = Type.GetType(name);
@@ -32,6 +38,6 @@ public class ViewLocator : IDataTemplate
 
     public bool Match(object? data)
     {
-        return data is ViewModelBase;
+        return data is ViewModelBase or DialogViewModel;
     }
 }

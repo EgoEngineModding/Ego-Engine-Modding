@@ -9,14 +9,12 @@ public class PssgDialogAvalonia
     public static void Register(Window recipient)
     {
         PssgDialog.Messenger.Register<Window, AddElementMessage>(recipient, AddElementHandler);
-        PssgDialog.Messenger.Register<Window, AddAttributeMessage>(recipient, AddAttributeHandler);
         PssgDialog.Messenger.Register<Window, DuplicateTextureMessage>(recipient, DuplicateTextureHandler);
     }
 
     public static void Unregister(Window recipient)
     {
         PssgDialog.Messenger.Unregister<AddElementMessage>(recipient);
-        PssgDialog.Messenger.Unregister<AddAttributeMessage>(recipient);
         PssgDialog.Messenger.Unregister<DuplicateTextureMessage>(recipient);
     }
 
@@ -32,23 +30,6 @@ public class PssgDialogAvalonia
             AddElementWindow win = new();
             var res = await win.ShowDialog<bool>(owner);
             return res ? win.ElementName : null;
-        }
-    }
-
-    private static void AddAttributeHandler(Window recipient, AddAttributeMessage message)
-    {
-        message.Reply(ShowAddAttribute(recipient));
-        return;
-
-        static async Task<AddAttributeResponse?> ShowAddAttribute(Window owner)
-        {
-            ArgumentNullException.ThrowIfNull(owner);
-
-            AddAttributeWindow win = new();
-            var res = await win.ShowDialog<bool>(owner);
-            return res
-                ? new AddAttributeResponse { Name = win.AttributeName, Value = win.Value, Type = win.AttributeValueType, }
-                : null;
         }
     }
 

@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="EgoPssgEditor.Views.AddAttributeView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:EgoPssgEditor.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="viewModels:AddAttributeViewModel">
+    <DockPanel Margin="10">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
+            <Button Margin="0 0 10 0" IsDefault="True" Command="{Binding OkCommand}">Ok</Button>
+            <Button IsCancel="True" Command="{Binding CancelCommand}">Cancel</Button>
+        </StackPanel>
+        <Grid ColumnDefinitions="*,10,*" RowDefinitions="*,10,*">
+            <StackPanel Grid.Row="0" Grid.Column="0">
+                <Label>Attribute Name</Label>
+                <ComboBox IsEditable="True" MinWidth="100"
+                          ItemsSource="{Binding Attributes}"
+                          SelectedItem="{Binding SelectedSchemaAttribute}"
+                          Text="{Binding AttributeName}"
+                          DisplayMemberBinding="{Binding Name}"></ComboBox>
+            </StackPanel>
+            <StackPanel Grid.Row="0" Grid.Column="2">
+                <Label>Value Type</Label>
+                <ComboBox ItemsSource="{Binding AttributeTypes}"
+                          SelectedItem="{Binding SelectedAttributeType}"
+                          IsEnabled="{Binding CanModifyType}"></ComboBox>
+            </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="0">
+                <Label>Value</Label>
+                <TextBox Text="{Binding Value}"></TextBox>
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</UserControl>

@@ -1,14 +1,11 @@
-﻿using EgoPssgEditor.ViewModels;
-
-using System.Diagnostics;
-
+﻿using System.Diagnostics;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-
+using EgoEngineLibrary.Frontend.Dialogs.Custom;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
-
 using EgoPssgEditor.Dialogs.Pssg;
+using EgoPssgEditor.ViewModels;
 
 namespace EgoPssgEditor.Views
 {
@@ -35,6 +32,7 @@ namespace EgoPssgEditor.Views
         {
             InitializeComponent();
             
+            DialogAvalonia.Register(this);
             FileDialogAvalonia.Register(this);
             MessageBoxAvalonia.Register(this);
             PssgDialogAvalonia.Register(this);
