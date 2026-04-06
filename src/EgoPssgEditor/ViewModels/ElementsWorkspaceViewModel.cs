@@ -8,7 +8,6 @@ using EgoEngineLibrary.Frontend.Dialogs.Custom;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 using EgoEngineLibrary.Graphics.Pssg;
-using EgoPssgEditor.Dialogs.Pssg;
 
 namespace EgoPssgEditor.ViewModels
 {
@@ -252,10 +251,11 @@ namespace EgoPssgEditor.ViewModels
                 return;
             }
 
-            var elementName = await PssgDialog.ShowAddElementDialog();
-            if (elementName is not null)
+            var vm = new AddElementViewModel();
+            var ret = await Dialog.ShowDialog(vm);
+            if (ret)
             {
-                PssgElement newElement = elementView.Element.AppendChild(elementName);
+                PssgElement newElement = elementView.Element.AppendChild(vm.ElementName);
                 PssgElementViewModel newElementView = new PssgElementViewModel(newElement, elementView);
                 elementView.Children.Add(newElementView);
             }

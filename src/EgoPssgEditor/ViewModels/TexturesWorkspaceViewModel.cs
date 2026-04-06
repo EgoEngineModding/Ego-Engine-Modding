@@ -1,11 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.Input;
+using EgoEngineLibrary.Frontend.Dialogs.Custom;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 using EgoEngineLibrary.Graphics;
 using EgoEngineLibrary.Graphics.Dds;
 using EgoEngineLibrary.Graphics.Pssg;
 using EgoEngineLibrary.Graphics.Pssg.Elements;
-using EgoPssgEditor.Dialogs.Pssg;
 using ObservableCollections;
 
 namespace EgoPssgEditor.ViewModels
@@ -242,7 +242,7 @@ namespace EgoPssgEditor.ViewModels
                 TextureName = texView.DisplayName + "_2"
             };
 
-            if (await PssgDialog.ShowDuplicateTextureDialog(dtVm))
+            if (await Dialog.ShowDialog(dtVm))
             {
                 // Copy and Edit Name
                 PssgElement elementToCopy = texView.Texture;

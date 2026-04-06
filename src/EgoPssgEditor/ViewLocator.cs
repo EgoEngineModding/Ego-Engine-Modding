@@ -20,9 +20,16 @@ public class ViewLocator : IDataTemplate
         if (param is null)
             return null;
 
-        if (param is AddAttributeViewModel)
+        Control? view = param switch
         {
-            return new AddAttributeView();
+            AddAttributeViewModel => new AddAttributeView(),
+            AddElementViewModel => new AddElementView(),
+            DuplicateTextureViewModel => new DuplicateTextureView(),
+            _ => null
+        };
+        if (view is not null)
+        {
+            return view;
         }
         
         var name = param.GetType().FullName!.Replace("ViewModel", "View", StringComparison.Ordinal);
