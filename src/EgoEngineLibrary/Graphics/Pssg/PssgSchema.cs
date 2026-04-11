@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Diagnostics;
+using System.Xml.Linq;
 using EgoEngineLibrary.Graphics.Pssg.Elements;
 
 namespace EgoEngineLibrary.Graphics.Pssg
@@ -226,6 +227,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
         public static void SaveToPssg(PssgBinaryWriter writer)
         {
+            var numAttributes = 0;
             for (var i = 0; i < writer.ElementTable.Count; ++i)
             {
                 var element = writer.ElementTable[i];
@@ -249,7 +251,10 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 writer.Seek(pos, SeekOrigin.Begin);
                 writer.Write(attributeCount);
                 writer.Seek(0, SeekOrigin.End);
+                numAttributes += attributeCount;
             }
+            
+            Debug.Assert(writer.AttributeTable.Count == numAttributes);
         }
 
         public static string[] GetElementNames()

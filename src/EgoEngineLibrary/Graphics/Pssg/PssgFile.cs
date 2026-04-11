@@ -226,6 +226,12 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 foreach (var element in file.Elements<PssgElement>())
                 {
                     file._elementTable.Add(element.SchemaElement);
+                    var baseElement = element.SchemaElement.BaseElement;
+                    while (baseElement is not null)
+                    {
+                        file._elementTable.Add(baseElement);
+                        baseElement = baseElement.BaseElement;
+                    }
 
                     foreach (PssgAttribute attr in element.Attributes)
                     {
