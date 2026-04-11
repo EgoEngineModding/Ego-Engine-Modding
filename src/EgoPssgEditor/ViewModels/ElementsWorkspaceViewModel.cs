@@ -61,6 +61,16 @@ namespace EgoPssgEditor.ViewModels
             pssgElements.Clear();
         }
 
+        public PssgElementViewModel? TryFindViewModel(PssgElement element)
+        {
+            return GetElements().FirstOrDefault(x => x.Element == element);
+        }
+
+        private IEnumerable<PssgElementViewModel> GetElements()
+        {
+            return RootElement.GetElements();
+        }
+
         #region Menu
 
         private bool Export_CanExecute(object parameter)

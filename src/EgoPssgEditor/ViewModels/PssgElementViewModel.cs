@@ -119,5 +119,15 @@ namespace EgoPssgEditor.ViewModels
                 attributes.Add(new PssgAttributeViewModel(attr, this));
             }
         }
+
+        public IEnumerable<PssgElementViewModel> GetElements()
+        {
+            yield return this;
+
+            foreach (PssgElementViewModel child in Children)
+            {
+                foreach (PssgElementViewModel cc in child.GetElements()) yield return cc;
+            }
+        }
     }
 }

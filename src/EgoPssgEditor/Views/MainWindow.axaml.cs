@@ -53,5 +53,33 @@ namespace EgoPssgEditor.Views
         {
             Process.Start(new ProcessStartInfo("https://petar.page/l/ego-epe-code") { UseShellExecute = true });
         }
+
+        private void AttributesDataGrid_OnCellPointerPressed(object? sender, DataGridCellPointerPressedEventArgs e)
+        {
+            if (view is null || !e.PointerPressedEventArgs.Properties.IsMiddleButtonPressed)
+            {
+                return;
+            }
+
+            if (e.Row.DataContext is not PssgAttributeViewModel attributeViewModel)
+            {
+                return;
+            }
+
+            var obj = attributeViewModel.TryGetLinkedObject();
+            if (obj is null)
+            {
+                return;
+            }
+
+            var vm = view.ElementsWorkspace.TryFindViewModel(obj);
+            if (vm is null)
+            {
+                return;
+            }
+
+            attributeViewModel.Parent.IsSelected = false;
+            vm.IsSelected = true;
+        }
     }
 }
