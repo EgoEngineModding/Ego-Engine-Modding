@@ -231,6 +231,8 @@ namespace EgoEngineLibrary.Formats.Pssg
                         return ReadVector3(data);
                     case "half4": // just read Vec3, pretty sure 4th item is just 1.0
                         return ReadVectorHalf3(data);
+                    case "hend3n":
+                        return ReadHend3N(data);
                     default:
                         throw new NotImplementedException($"Support for {attribute.Name} data type {attribute.DataType} is not implemented.");
                 }
@@ -409,6 +411,22 @@ namespace EgoEngineLibrary.Formats.Pssg
         static unsafe Half Int16BitsToHalf(short value)
         {
             return *(Half*)&value;
+        }
+        
+        private static Vector3 ReadHend3N(ReadOnlySpan<byte> data)
+        {
+            var i = BinaryPrimitives.ReadUInt32BigEndian(data);
+            var y = i >> 11;
+            var z = i >> 22;
+            
+            // use shift to sign extend
+            var vec = new Vector3
+            {
+                X = (((int)(i & 0x7FF)) << 21 >> 21) / (float)0x3FF,
+                Y = (((int)(y & 0x7FF)) << 21 >> 21) / (float)0x3FF,
+                Z = (((int)(z & 0x3FF)) << 22 >> 22) / (float)0x1FF
+            };
+            return vec;
         }
     }
 }
