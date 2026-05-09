@@ -90,6 +90,18 @@ namespace EgoEngineLibrary.Graphics.Pssg
             };
         }
 
+        public T GetValue<T>()
+            where T : notnull
+        {
+            return SchemaAttribute.DataType.CastTo<T>(Value);
+        }
+
+        public void SetValue<T>(T value)
+            where T : notnull
+        {
+            Value = SchemaAttribute.DataType.CastFrom(value);
+        }
+
         private void VerifyType(object value)
         {
             var valueType = value.GetType();

@@ -185,9 +185,9 @@ namespace EgoEngineLibrary.Graphics.Pssg
             return element;
         }
 
-        public PssgElement(string name, PssgFile file, PssgElement? parent)
-            : this(PssgSchema.AddElement(name), file, parent)
+        public static PssgElement Create(string name, PssgFile file, PssgElement? parent)
         {
+            return PssgSchema.AddElement(name).Create(file, parent);
         }
 
         internal PssgElement(PssgSchemaElement schemaElement, PssgFile file, PssgElement? parent)
@@ -302,7 +302,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
         public PssgElement AppendChild(string elementName)
         {
-            return this.AppendChild(new PssgElement(elementName, this.File, this));
+            return this.AppendChild(Create(elementName, File, this));
         }
         public PssgElement AppendChild(PssgElement childElement)
         {
@@ -348,16 +348,13 @@ namespace EgoEngineLibrary.Graphics.Pssg
         /// <summary>
         /// Add an attribute if it doesn't exist, or get the existing one and set its value.
         /// </summary>
-        public PssgAttribute AddAttribute(string attributeName, object data)
+        public PssgAttribute AddAttribute<T>(string attributeName, T value)
+            where T : notnull
         {
             PssgAttribute? attribute = Attributes.Get(attributeName);
             var attributeSchema =
                 attribute?.SchemaAttribute ?? PssgSchema.AddAttribute(this.SchemaElement, attributeName);
-            var value = attributeSchema.DataType switch
-            {
-                PssgAttributeType.Int => Convert.ChangeType(data, TypeCode.Int32, PssgStringHelper.Culture),
-                _ => data,
-            };
+            object val = attributeSchema.DataType.CastFrom(value);
             
             if (attribute is null)
             {
@@ -365,7 +362,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 Attributes.Add(attribute);
             }
             
-            attribute.Value = value;
+            attribute.Value = val;
             return attribute;
         }
 
@@ -375,15 +372,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             var attribute = Attributes.Get(attributeName);
             var attributeSchema = attribute?.SchemaAttribute ?? PssgSchema.AddAttribute(SchemaElement, attributeName);
             object attributeValue = attribute?.Value ?? attributeSchema.DataType.GetDefaultValue();
-            
-            // Handle integral types
-            var value = attributeSchema.DataType switch
-            {
-                PssgAttributeType.Int => Convert.ChangeType(attributeValue, typeof(T), PssgStringHelper.Culture),
-                _ => attributeValue,
-            };
-            
-            return (T)value;
+            return attributeSchema.DataType.CastTo<T>(attributeValue);
         }
 
         public void RemoveAttribute(string attributeName)

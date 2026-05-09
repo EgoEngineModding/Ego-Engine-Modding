@@ -262,7 +262,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             return entries.Keys.ToArray();
         }
 
-        public static PssgSchemaElement AddElement(string elementName)
+        internal static PssgSchemaElement AddElement(string elementName)
         {
             if (entries.TryGetValue(elementName, out PssgSchemaElement? existingElement))
             {
@@ -274,7 +274,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             return element;
         }
 
-        public static PssgSchemaElement AddElement(PssgSchemaElement element)
+        private static PssgSchemaElement AddElement(PssgSchemaElement element)
         {
             if (!entries.TryGetValue(element.Name, out var existingElement))
             {
@@ -297,14 +297,14 @@ namespace EgoEngineLibrary.Graphics.Pssg
             return existingElement;
         }
 
-        public static PssgSchemaAttribute AddAttribute(string elementName, string attributeName,
+        internal static PssgSchemaAttribute AddAttribute(string elementName, string attributeName,
             PssgAttributeType attrType = PssgAttributeType.Unknown)
         {
             PssgSchemaElement element = AddElement(elementName);
             return AddAttribute(element, attributeName, attrType);
         }
 
-        public static PssgSchemaAttribute AddAttribute(PssgSchemaElement element, string attributeName,
+        internal static PssgSchemaAttribute AddAttribute(PssgSchemaElement element, string attributeName,
             PssgAttributeType attrType = PssgAttributeType.Unknown)
         {
             PssgSchemaElement? baseElement = element;
