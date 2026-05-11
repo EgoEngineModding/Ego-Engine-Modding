@@ -4,13 +4,13 @@
     <AssemblyName>Ego PSSG Editor</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <PublishTrimmed>true</PublishTrimmed>
+    <PublishSelfContained>true</PublishSelfContained>
   </PropertyGroup>
   
   <PropertyGroup>
     <ApplicationIcon>Assets\Ryder25.ico</ApplicationIcon>
-    <Copyright>Copyright © Petar Tasev 2010 - 2024</Copyright>
-    <Authors>Petar Tasev</Authors>
-    <Company>Petar Tasev</Company>
     <Description>Opens Ego Engine pssg files</Description>
     <Version>12.1.1</Version>
   </PropertyGroup>
