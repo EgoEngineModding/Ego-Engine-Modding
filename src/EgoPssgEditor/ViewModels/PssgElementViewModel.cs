@@ -26,7 +26,7 @@ namespace EgoPssgEditor.ViewModels
         }
         public bool HasAttributes
         {
-            get { return _element.HasAttributes; }
+            get { return _element.Attributes.Count > 0; }
         }
         public bool IsDataElement
         {
@@ -117,6 +117,16 @@ namespace EgoPssgEditor.ViewModels
             foreach (PssgAttribute attr in _element.Attributes)
             {
                 attributes.Add(new PssgAttributeViewModel(attr, this));
+            }
+        }
+
+        public IEnumerable<PssgElementViewModel> GetElements()
+        {
+            yield return this;
+
+            foreach (PssgElementViewModel child in Children)
+            {
+                foreach (PssgElementViewModel cc in child.GetElements()) yield return cc;
             }
         }
     }

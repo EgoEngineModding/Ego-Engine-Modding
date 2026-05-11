@@ -1,9 +1,9 @@
 ﻿using System.IO.Compression;
-using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using EgoEngineLibrary.Collections;
 using EgoEngineLibrary.Conversion;
+using EgoEngineLibrary.Graphics.Pssg.Elements;
 
 namespace EgoEngineLibrary.Graphics.Pssg
 {
@@ -26,7 +26,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
         public PssgFile(PssgFileType fileType)
         {
             this.FileType = fileType;
-            this.RootElement = new PssgElement("PSSGDATABASE", this, null);
+            this.RootElement = new PssgDatabase(this);
             _elementTable = [];
             _attributeTable = [];
         }
@@ -84,7 +84,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             Byte[] header = new Byte[4];
             stream.ReadExactly(header, 0, 4);
 
-            string magic = Encoding.UTF8.GetString(header);
+            string magic = PssgStringHelper.Encoding.GetString(header);
 
             if (magic == "PSSG")
             {
@@ -198,7 +198,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
         {
             using (PssgBinaryWriter writer = new PssgBinaryWriter(EndianBitConverter.Big, fileStream, true))
             {
-                writer.Write(Encoding.ASCII.GetBytes("PSSG"));
+                writer.Write(PssgStringHelper.Encoding.GetBytes("PSSG"));
                 writer.Write(0); // Length, filled in later
 
                 if (RootElement != null)
@@ -223,9 +223,15 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
             static void UpdateElementAndAttributeTables(PssgFile file)
             {
-                foreach (var element in file.GetElements())
+                foreach (var element in file.Elements<PssgElement>())
                 {
                     file._elementTable.Add(element.SchemaElement);
+                    var baseElement = element.SchemaElement.BaseElement;
+                    while (baseElement is not null)
+                    {
+                        file._elementTable.Add(baseElement);
+                        baseElement = baseElement.BaseElement;
+                    }
 
                     foreach (PssgAttribute attr in element.Attributes)
                     {
@@ -236,10 +242,10 @@ namespace EgoEngineLibrary.Graphics.Pssg
         }
         public void WriteXml(Stream fileStream)
         {
-            XDocument xDoc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"));
+            XDocument xDoc = new XDocument(new XDeclaration("1.0", PssgStringHelper.Encoding.WebName.ToUpperInvariant(), "yes"));
             xDoc.Add(new XElement("PSSGFILE", new XAttribute("version", "1.0.0.0")));
             XmlWriterSettings settings = new XmlWriterSettings();
-            settings.Encoding = new UTF8Encoding(false);
+            settings.Encoding = PssgStringHelper.Encoding;
             settings.NewLineChars = "\n";
             settings.Indent = true;
             settings.IndentChars = "";
@@ -257,27 +263,28 @@ namespace EgoEngineLibrary.Graphics.Pssg
         /// <summary>
         /// Gets the file's element hierarchy as a flat sequence.
         /// </summary>
-        public IEnumerable<PssgElement> GetElements()
+        public IEnumerable<T> Elements<T>()
+            where T : PssgElement
         {
             if (RootElement is null)
             {
-                return Enumerable.Empty<PssgElement>();
+                return [];
             }
-            return RootElement.GetElements();
+
+            return RootElement.Elements<T>();
         }
 
-        public IEnumerable<PssgElement> FindElements(string elementName)
+        public T GetObject<T>(ReadOnlyMemory<char> id)
+            where T : PssgObject
         {
-            return GetElements().FindElements(elementName);
+            return TryGetObject<T>(id) ??
+                   throw new KeyNotFoundException($"Object '{typeof(T).Name}' with id '{id}' not found.");
         }
-        public IEnumerable<PssgElement> FindElements(string elementName, string attributeName)
+
+        public T? TryGetObject<T>(ReadOnlyMemory<char> id)
+            where T : PssgObject
         {
-            return GetElements().FindElements(elementName, attributeName);
-        }
-        public IEnumerable<PssgElement> FindElements<T>(string elementName, string attributeName, T attributeValue)
-            where T : notnull
-        {
-            return GetElements().FindElements(elementName, attributeName, attributeValue);
+            return Elements<T>().FirstOrDefault(obj => obj.Id.Equals(id.Span, PssgStringHelper.StringComparison));
         }
 
         public void MoveElement(PssgElement source, PssgElement target)
@@ -295,7 +302,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             if (elementToClone.File != this)
                 throw new InvalidOperationException("Cannot clone an element that doesn't belong to a file.");
 
-            var cloned = new PssgElement(elementToClone);
+            var cloned = elementToClone.DeepClone();
             cloned.ParentElement?.AppendChild(cloned);
             return cloned;
         }

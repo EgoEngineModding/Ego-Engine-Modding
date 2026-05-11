@@ -13,7 +13,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
         internal bool UseDataElementCheck { get; set; }
         
         public PssgBinaryReader(EndianBitConverter bitConvertor, Stream stream, bool leaveOpen)
-            : base(bitConvertor, stream, leaveOpen)
+            : base(bitConvertor, stream, PssgStringHelper.Encoding, leaveOpen)
         {
             ElementTable = [];
             AttributeTable = [];
@@ -32,11 +32,11 @@ namespace EgoEngineLibrary.Graphics.Pssg
         public string ReadPSSGString()
         {
             int length = this.ReadInt32();
-            return Encoding.UTF8.GetString(this.ReadBytes(length));
+            return Encoding.GetString(this.ReadBytes(length));
         }
         public string ReadPSSGString(int length)
         {
-            return Encoding.UTF8.GetString(this.ReadBytes(length));
+            return Encoding.GetString(this.ReadBytes(length));
         }
 
         public object ReadAttributeValue(PssgAttributeType valueType, int size)

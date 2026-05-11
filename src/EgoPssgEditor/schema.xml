@@ -14,11 +14,4 @@
     <attribute name="kerningData" dataType="Unknown" />
     <attribute name="codePoint" dataType="Unknown" />
   </node>
-  <node name="FEATLASINFODATA" dataType="Unknown" elementsPerRow="32" linkAttributeName="">
-    <attribute name="u0" dataType="Float" />
-    <attribute name="v0" dataType="Float" />
-    <attribute name="u1" dataType="Float" />
-    <attribute name="v1" dataType="Float" />
-    <attribute name="texturename" dataType="Unknown" />
-  </node>
 </PSSGFILE>

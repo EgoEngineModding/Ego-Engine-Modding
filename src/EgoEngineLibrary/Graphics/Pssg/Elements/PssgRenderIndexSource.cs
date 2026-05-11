@@ -46,6 +46,8 @@ public class PssgRenderIndexSource : PssgRenderInterfaceBound
         set => AddAttribute(Schema.Attributes[4].Name, value);
     }
 
+    public PssgIndexSourceData Data => ChildElements.OfType<PssgIndexSourceData>().Single();
+
     public PssgRenderIndexSource(PssgFile file, PssgElement? parent)
         : this(Schema, file, parent)
     {

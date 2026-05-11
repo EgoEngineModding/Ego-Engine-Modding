@@ -350,7 +350,7 @@ namespace EgoErpArchiver.ViewModels
                 dds = srvRes.ToDdsFile(mipMapStream, exportTexArray, _texArrayIndex);
             }
 
-            dds.Write(stream, -1);
+            dds.Write(stream);
             return dds;
         }
 

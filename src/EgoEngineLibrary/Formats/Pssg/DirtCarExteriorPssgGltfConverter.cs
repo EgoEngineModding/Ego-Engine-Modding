@@ -1,10 +1,5 @@
-﻿using EgoEngineLibrary.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EgoEngineLibrary.Graphics.Pssg;
+﻿using EgoEngineLibrary.Graphics.Pssg;
+using EgoEngineLibrary.Graphics.Pssg.Elements;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
@@ -13,15 +8,15 @@ namespace EgoEngineLibrary.Formats.Pssg
 	{
         private class DirtExportState : ExportState
         {
-            public DirtExportState()
+            public override bool IsRenderNode(PssgNode element)
             {
-                RenderNodeName = "VISIBLERENDERNODE";
+                return element.IsExactType<PssgVisibleRenderNode>();
             }
         }
 
-        public new static bool SupportsPssg(PssgFile pssg)
+        public static new bool SupportsPssg(PssgFile pssg)
         {
-            return pssg.FindElements("VISIBLERENDERNODE").Any();
+            return pssg.Elements<PssgVisibleRenderNode>().Any(x => x.IsExactType<PssgVisibleRenderNode>());
         }
 
         protected override ExportState CreateState()

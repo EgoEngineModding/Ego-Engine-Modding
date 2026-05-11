@@ -6,7 +6,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using EgoEngineLibrary.Graphics.Pssg;
+using EgoEngineLibrary.Graphics.Pssg.Elements;
 
 namespace EgoPssgEditor.ViewModels
 {
@@ -14,9 +14,9 @@ namespace EgoPssgEditor.ViewModels
     {
         readonly PssgElementViewModel _elementView;
 
-        public PssgElement Texture
+        public PssgTexture Texture
         {
-            get { return _elementView.Element; }
+            get { return (PssgTexture)_elementView.Element; }
         }
         public PssgElementViewModel ElementView
         {
@@ -24,23 +24,23 @@ namespace EgoPssgEditor.ViewModels
         }
         public override string DisplayName
         {
-            get { return Texture.Attributes["id"].DisplayValue; }
+            get { return Texture.Id; }
         }
-        public int Width
+        public uint Width
         {
-            get { return (int)(uint)Texture.Attributes["width"].Value; }
+            get { return Texture.Width; }
         }
-        public int Height
+        public uint Height
         {
-            get { return (int)(uint)Texture.Attributes["height"].Value; }
+            get { return Texture.Height; }
         }
-        private string Format => (string)Texture.Attributes["texelFormat"].Value;
-        private uint MipMaps => Texture.HasAttribute("numberMipMapLevels") ? Texture.Attributes["numberMipMapLevels"].GetValue<uint>() : 0u;
+        private string Format => Texture.TexelFormat;
+        private uint MipMaps => Texture.MipMapCount;
         public string TextureInfo => $"{Width}x{Height} MipMaps: {MipMaps} Format: {Format}";
 
         #region Presentation Props
         bool isSelected;
-        Bitmap preview;
+        Bitmap? preview;
         string previewError;
         bool previewErrorVisibility;
 
@@ -67,7 +67,7 @@ namespace EgoPssgEditor.ViewModels
                 }
             }
         }
-        public Bitmap Preview
+        public Bitmap? Preview
         {
             get { return preview; }
             set { preview = value; OnPropertyChanged(nameof(Preview)); }
@@ -99,8 +99,8 @@ namespace EgoPssgEditor.ViewModels
                 BCnEncoder.Shared.ImageFiles.DdsFile bcDds;
                 using (var ms = new MemoryStream())
                 {
-                    var dds = Texture.ToDdsFile(false);
-                    dds.Write(ms, -1);
+                    var dds = Texture.ToDdsFile();
+                    dds.Write(ms);
                     ddsReadSuccess = true;
 
                     ms.Seek(0, SeekOrigin.Begin);

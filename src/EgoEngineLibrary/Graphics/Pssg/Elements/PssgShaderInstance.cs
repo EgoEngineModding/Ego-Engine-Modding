@@ -50,4 +50,8 @@ public class PssgShaderInstance : PssgObject
         : base(schemaElement, file, parent)
     {
     }
+
+    public PssgShaderGroup GetShaderGroup() => File.GetObject<PssgShaderGroup>(ShaderGroup.AsMemory(1));
+
+    public PssgShaderGroup? TryGetShaderGroup() => File.TryGetObject<PssgShaderGroup>(ShaderGroup.AsMemory(1));
 }

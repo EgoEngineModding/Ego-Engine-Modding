@@ -4,13 +4,16 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using EgoEngineLibrary.Helper;
 
 namespace EgoEngineLibrary.Graphics.Pssg;
 
 public static class PssgStringHelper
 {
     private const string FloatFormat = "e9";
-    private static CultureInfo Culture => CultureInfo.InvariantCulture;
+    internal static CultureInfo Culture => CultureInfo.InvariantCulture;
+    internal static Encoding Encoding => Encoding.Latin1;
+    internal static StringComparison StringComparison => StringComparison.Ordinal;
 
     private static string ToString<T>(this ReadOnlySpan<byte> value, int elementsPerRow,
         Func<ReadOnlySpan<byte>, string> toStringFunc)
@@ -202,5 +205,35 @@ public static class PssgStringHelper
         }
         
         return i != 4 ? throw new FormatException() : ret;
+    }
+
+    public static string ToPssgString(this object value, PssgAttributeType dataType)
+    {
+        return dataType switch
+        {
+            PssgAttributeType.Int => value.ToString() ?? string.Empty,
+            PssgAttributeType.String => (string)value,
+            PssgAttributeType.Float => ((float)value).ToPssgString(),
+            PssgAttributeType.Float2 => ((Vector2)value).ToPssgString(),
+            PssgAttributeType.Float3 => ((Vector3)value).ToPssgString(),
+            PssgAttributeType.Float4 => ((Vector4)value).ToPssgString(),
+            PssgAttributeType.Unknown => HexHelper.ByteArrayToHexViaLookup32((byte[])value),
+            _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null)
+        };
+    }
+
+    public static object ToPssgValue(this string value, PssgAttributeType dataType)
+    {
+        return dataType switch
+        {
+            PssgAttributeType.Int => Convert.ToInt32(value),
+            PssgAttributeType.String => value,
+            PssgAttributeType.Float => Convert.ToSingle(value, Culture),
+            PssgAttributeType.Float2 => value.ToPssgVector2(),
+            PssgAttributeType.Float3 => value.ToPssgVector3(),
+            PssgAttributeType.Float4 => value.ToPssgVector4(),
+            PssgAttributeType.Unknown => HexHelper.HexToByteUsingByteManipulation(value),
+            _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null)
+        };
     }
 }

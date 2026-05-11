@@ -4,10 +4,10 @@ using System.Xml;
 using System.Xml.Linq;
 using CommunityToolkit.Mvvm.Input;
 using EgoEngineLibrary.Conversion;
+using EgoEngineLibrary.Frontend.Dialogs.Custom;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 using EgoEngineLibrary.Graphics.Pssg;
-using EgoPssgEditor.Dialogs.Pssg;
 
 namespace EgoPssgEditor.ViewModels
 {
@@ -59,6 +59,16 @@ namespace EgoPssgEditor.ViewModels
         {
             _rootElement = null;
             pssgElements.Clear();
+        }
+
+        public PssgElementViewModel? TryFindViewModel(PssgElement element)
+        {
+            return GetElements().FirstOrDefault(x => x.Element == element);
+        }
+
+        private IEnumerable<PssgElementViewModel> GetElements()
+        {
+            return RootElement.GetElements();
         }
 
         #region Menu
@@ -251,16 +261,11 @@ namespace EgoPssgEditor.ViewModels
                 return;
             }
 
-            var elementName = await PssgDialog.ShowAddElementDialog();
-            if (elementName is not null)
+            var vm = new AddElementViewModel();
+            var ret = await Dialog.ShowDialog(vm);
+            if (ret)
             {
-                PssgElement newElement = elementView.Element.AppendChild(elementName);
-
-                if (newElement == null)
-                {
-                    return;
-                }
-
+                PssgElement newElement = elementView.Element.AppendChild(vm.ElementName);
                 PssgElementViewModel newElementView = new PssgElementViewModel(newElement, elementView);
                 elementView.Children.Add(newElementView);
             }
@@ -315,15 +320,12 @@ namespace EgoPssgEditor.ViewModels
         private async Task AddAttribute(object parameter)
         {
             PssgElementViewModel elementView = (PssgElementViewModel)parameter;
-            var res = await PssgDialog.ShowAddAttributeDialog();
-            if (res is not null)
+            var vm = new AddAttributeViewModel(elementView.Element.SchemaElement);
+            var res = await Dialog.ShowDialog(vm);
+            if (res)
             {
-                PssgAttribute attr = elementView.Element.AddAttribute(res.Name, Convert.ChangeType(res.Value, res.Type));
-                if (attr == null)
-                {
-                    return;
-                }
-
+                PssgAttribute attr = elementView.Element.AddAttribute(vm.AttributeName,
+                    vm.Value.ToPssgValue(vm.SelectedAttributeType));
                 elementView.IsSelected = false;
                 elementView.IsSelected = true;
             }

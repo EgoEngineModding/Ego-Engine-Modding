@@ -21,8 +21,8 @@ public class PssgRenderStreamInstance : PssgRenderInstance
 
     public string Indices
     {
-        get => GetAttributeValue<string>(Schema.Attributes[0].Name);
-        set => AddAttribute(Schema.Attributes[0].Name, value);
+        get => GetAttributeValue<string>(Schema.Attributes[1].Name);
+        set => AddAttribute(Schema.Attributes[1].Name, value);
     }
 
     public PssgRenderInstanceSource RenderInstanceSource => ChildElements.OfType<PssgRenderInstanceSource>().Single();
@@ -36,4 +36,6 @@ public class PssgRenderStreamInstance : PssgRenderInstance
         : base(schemaElement, file, parent)
     {
     }
+
+    public PssgRenderDataSource GetRenderDataSource() => File.GetObject<PssgRenderDataSource>(Indices.AsMemory(1));
 }

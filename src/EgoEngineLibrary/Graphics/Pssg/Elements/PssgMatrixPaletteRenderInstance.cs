@@ -1,6 +1,6 @@
 ﻿namespace EgoEngineLibrary.Graphics.Pssg.Elements;
 
-public class PssgMatrixPaletteRenderInstance : PssgRenderStreamInstance
+public class PssgMatrixPaletteRenderInstance : PssgMatrixPaletteRenderStreamInstance
 {
     internal static new PssgSchemaElement Schema { get; } = new("MATRIXPALETTERENDERINSTANCE", PssgElementType.None)
     {
@@ -37,7 +37,7 @@ public class PssgMatrixPaletteRenderInstance : PssgRenderStreamInstance
     /// <summary>
     /// Used in RD: Grid.
     /// </summary>
-    public uint IndexOffset
+    public override uint IndexOffset
     {
         get => GetAttributeValue<uint>(Schema.Attributes[2].Name);
         set => AddAttribute(Schema.Attributes[2].Name, value);
@@ -46,7 +46,7 @@ public class PssgMatrixPaletteRenderInstance : PssgRenderStreamInstance
     /// <summary>
     /// Used in RD: Grid.
     /// </summary>
-    public uint IndicesCountFromOffset
+    public override uint IndicesCountFromOffset
     {
         get => GetAttributeValue<uint>(Schema.Attributes[3].Name);
         set => AddAttribute(Schema.Attributes[3].Name, value);

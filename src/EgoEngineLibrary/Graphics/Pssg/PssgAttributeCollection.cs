@@ -21,7 +21,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             {
                 for (int i = 0; i < _attributes.Count; i++)
                 {
-                    if (string.Equals(_attributes[i].Name, attributeName, StringComparison.Ordinal))
+                    if (string.Equals(_attributes[i].Name, attributeName, PssgStringHelper.StringComparison))
                     {
                         return _attributes[i];
                     }
@@ -35,7 +35,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
         {
             for (int i = 0; i < _attributes.Count; i++)
             {
-                if (string.Equals(_attributes[i].Name, attributeName, StringComparison.Ordinal))
+                if (string.Equals(_attributes[i].Name, attributeName, PssgStringHelper.StringComparison))
                 {
                     return true;
                 }
@@ -52,7 +52,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
         {
             for (int i = 0; i < _attributes.Count; i++)
             {
-                if (string.Equals(_attributes[i].Name, name, StringComparison.Ordinal))
+                if (string.Equals(_attributes[i].Name, name, PssgStringHelper.StringComparison))
                 {
                     return _attributes[i];
                 }

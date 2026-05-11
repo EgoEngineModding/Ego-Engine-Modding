@@ -1,14 +1,11 @@
-﻿using EgoPssgEditor.ViewModels;
-
-using System.Diagnostics;
-
+﻿using System.Diagnostics;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-
+using EgoEngineLibrary.Frontend.Dialogs.Custom;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
-
 using EgoPssgEditor.Dialogs.Pssg;
+using EgoPssgEditor.ViewModels;
 
 namespace EgoPssgEditor.Views
 {
@@ -35,6 +32,7 @@ namespace EgoPssgEditor.Views
         {
             InitializeComponent();
             
+            DialogAvalonia.Register(this);
             FileDialogAvalonia.Register(this);
             MessageBoxAvalonia.Register(this);
             PssgDialogAvalonia.Register(this);
@@ -54,6 +52,34 @@ namespace EgoPssgEditor.Views
         private void sourceCodeMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Process.Start(new ProcessStartInfo("https://petar.page/l/ego-epe-code") { UseShellExecute = true });
+        }
+
+        private void AttributesDataGrid_OnCellPointerPressed(object? sender, DataGridCellPointerPressedEventArgs e)
+        {
+            if (view is null || !e.PointerPressedEventArgs.Properties.IsMiddleButtonPressed)
+            {
+                return;
+            }
+
+            if (e.Row.DataContext is not PssgAttributeViewModel attributeViewModel)
+            {
+                return;
+            }
+
+            var obj = attributeViewModel.TryGetLinkedObject();
+            if (obj is null)
+            {
+                return;
+            }
+
+            var vm = view.ElementsWorkspace.TryFindViewModel(obj);
+            if (vm is null)
+            {
+                return;
+            }
+
+            attributeViewModel.Parent.IsSelected = false;
+            vm.IsSelected = true;
         }
     }
 }

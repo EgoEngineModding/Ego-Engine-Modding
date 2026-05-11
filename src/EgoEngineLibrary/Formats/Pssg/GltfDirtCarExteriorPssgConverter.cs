@@ -1,10 +1,5 @@
-﻿using EgoEngineLibrary.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EgoEngineLibrary.Graphics.Pssg;
+﻿using EgoEngineLibrary.Graphics.Pssg;
+using EgoEngineLibrary.Graphics.Pssg.Elements;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
@@ -15,13 +10,17 @@ namespace EgoEngineLibrary.Formats.Pssg
             public DirtImportState(PssgElement rdsLib, PssgElement ribLib, Dictionary<string, ShaderInputInfo> shaderGroupMap)
                 : base(rdsLib, ribLib, shaderGroupMap)
             {
-                RenderNodeName = "VISIBLERENDERNODE";
+            }
+
+            public override PssgNode CreateRenderNode(PssgFile pssg, PssgElement? parent)
+            {
+                return new PssgVisibleRenderNode(pssg, parent);
             }
         }
 
-        public new static bool SupportsPssg(PssgFile pssg)
+        public static new bool SupportsPssg(PssgFile pssg)
         {
-            return pssg.FindElements("VISIBLERENDERNODE").Any();
+            return pssg.Elements<PssgVisibleRenderNode>().Any(x => x.IsExactType<PssgVisibleRenderNode>());
         }
 
         protected override ImportState CreateState(PssgElement rdsLib, PssgElement ribLib, Dictionary<string, ShaderInputInfo> shaderGroupMap)

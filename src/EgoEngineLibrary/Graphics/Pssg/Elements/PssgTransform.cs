@@ -16,8 +16,8 @@ public class PssgTransform : PssgElement
         set => Value.SetMatrix4(value);
     }
 
-    public PssgTransform(PssgFile file, PssgElement? parent)
-        : base(Schema, file, parent)
+    public PssgTransform(PssgNode parent)
+        : base(Schema, parent.File, parent)
     {
     }
 

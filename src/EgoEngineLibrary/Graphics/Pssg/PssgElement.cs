@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Globalization;
 using System.Xml.Linq;
 using EgoEngineLibrary.Helper;
 
@@ -16,29 +15,43 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
         public PssgAttributeCollection Attributes { get; }
         public PssgElementCollection ChildElements { get; }
-        public byte[] Value { get; set; }
+
+        public byte[] Value
+        {
+            get;
+            set
+            {
+                if (SchemaElement.DataType is PssgElementType.None && value.Length > 0)
+                {
+                    throw new InvalidOperationException("Element cannot have any data.");
+                }
+                
+                field = value;
+            }
+        }
 
         public string DisplayValue
         {
             get
             {
-                return this.ToString();
+                return ValueToString();
             }
             set
             {
-                this.Value = this.FromString(value);
+                this.Value = ValueFromString(value);
             }
         }
+
         public bool IsDataElement
         {
             get
             {
-                if (this.ChildElements.Count == 0)
+                return SchemaElement.DataType switch
                 {
-                    return Value.Length > 0;
-                }
-
-                return false;
+                    PssgElementType.Unknown => ChildElements.Count == 0 && Value.Length > 0,
+                    PssgElementType.None => false,
+                    _ => true,
+                };
             }
         }
 
@@ -47,6 +60,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             get;
             private set;
         }
+
         public PssgElement? ParentElement
         {
             get;
@@ -156,7 +170,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
             if (elem.FirstNode != null && elem.FirstNode is XText)
             {
-                element.Value = element.FromString(elem.Value);
+                element.DisplayValue = elem.Value;
             }
             else
             {
@@ -171,53 +185,19 @@ namespace EgoEngineLibrary.Graphics.Pssg
             return element;
         }
 
-        public PssgElement(PssgElement elementToCopy)
+        public static PssgElement Create(string name, PssgFile file, PssgElement? parent)
         {
-            this.File = elementToCopy.File;
-            this.ParentElement = elementToCopy.ParentElement;
-
-            this.SchemaElement = elementToCopy.SchemaElement;
-            this.size = elementToCopy.size;
-            this.attributeSize = elementToCopy.attributeSize;
-            this.Attributes = new PssgAttributeCollection();
-            PssgAttribute attr;
-            foreach (PssgAttribute attrToCopy in elementToCopy.Attributes)
-            {
-                attr = new PssgAttribute(attrToCopy, this);
-                this.Attributes.Add(attr);
-            }
-
-
-            if (elementToCopy.IsDataElement)
-            {
-                this.Value = elementToCopy.Value;
-                this.ChildElements = new PssgElementCollection();
-            }
-            else
-            {
-                this.Value = Array.Empty<byte>();
-                // Each element at least 12 bytes (id + size + arg size)
-                this.ChildElements = new PssgElementCollection(elementToCopy.ChildElements.Count);
-                foreach (PssgElement childElementToCopy in elementToCopy.ChildElements)
-                {
-                    PssgElement element = new PssgElement(childElementToCopy);
-                    element.ParentElement = this;
-                    this.ChildElements.Add(element);
-                }
-            }
+            return PssgSchema.AddElement(name).Create(file, parent);
         }
-        public PssgElement(string name, PssgFile file, PssgElement? parent)
-            : this(PssgSchema.AddElement(name), file, parent)
-        {
-        }
+
         internal PssgElement(PssgSchemaElement schemaElement, PssgFile file, PssgElement? parent)
         {
-            this.File = file;
-            this.ParentElement = parent;
-            this.SchemaElement = schemaElement;
-            this.Attributes = new PssgAttributeCollection();
-            this.Value = Array.Empty<byte>();
-            this.ChildElements = new PssgElementCollection();
+            File = file;
+            ParentElement = parent;
+            SchemaElement = schemaElement;
+            Attributes = [];
+            Value = [];
+            ChildElements = [];
         }
 
         private PssgElementType GetValueType()
@@ -240,14 +220,11 @@ namespace EgoEngineLibrary.Graphics.Pssg
                     linkAttrName = schema.LinkAttributeName;
                 }
 
-                if (element.HasAttribute(linkAttrName))
+                var attr = element.Attributes.Get(linkAttrName);
+                if (attr?.Value is string format &&
+                    Enum.TryParsePssgElementComplexType(format, out var simpleType))
                 {
-                    PssgAttribute attr = element.Attributes[linkAttrName];
-                    if (attr.Value is string format &&
-                        Enum.TryParsePssgElementComplexType(format, out var simpleType))
-                    {
-                        return simpleType.ToSimpleType();
-                    }
+                    return simpleType.ToSimpleType();
                 }
             }
 
@@ -282,12 +259,12 @@ namespace EgoEngineLibrary.Graphics.Pssg
             foreach (PssgAttribute attr in Attributes)
             {
                 string attrName = attr.Name.StartsWith("2") ? "___" + attr.Name : attr.Name;
-                pNode.Add(new XAttribute(attrName, attr.ToString()));
+                pNode.Add(new XAttribute(attrName, attr.DisplayValue));
             }
 
             if (this.IsDataElement)
             {
-                pNode.Add(new XText(this.ToString())); //EndianBitConverter.ToString(data)
+                pNode.Add(new XText(DisplayValue));
             }
             else
             {
@@ -325,7 +302,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
         public PssgElement AppendChild(string elementName)
         {
-            return this.AppendChild(new PssgElement(elementName, this.File, this));
+            return this.AppendChild(Create(elementName, File, this));
         }
         public PssgElement AppendChild(PssgElement childElement)
         {
@@ -371,16 +348,13 @@ namespace EgoEngineLibrary.Graphics.Pssg
         /// <summary>
         /// Add an attribute if it doesn't exist, or get the existing one and set its value.
         /// </summary>
-        public PssgAttribute AddAttribute(string attributeName, object data)
+        public PssgAttribute AddAttribute<T>(string attributeName, T value)
+            where T : notnull
         {
             PssgAttribute? attribute = Attributes.Get(attributeName);
             var attributeSchema =
                 attribute?.SchemaAttribute ?? PssgSchema.AddAttribute(this.SchemaElement, attributeName);
-            var value = attributeSchema.DataType switch
-            {
-                PssgAttributeType.Int => Convert.ChangeType(data, TypeCode.Int32, CultureInfo.InvariantCulture),
-                _ => data,
-            };
+            object val = attributeSchema.DataType.CastFrom(value);
             
             if (attribute is null)
             {
@@ -388,7 +362,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 Attributes.Add(attribute);
             }
             
-            attribute.Value = value;
+            attribute.Value = val;
             return attribute;
         }
 
@@ -398,80 +372,40 @@ namespace EgoEngineLibrary.Graphics.Pssg
             var attribute = Attributes.Get(attributeName);
             var attributeSchema = attribute?.SchemaAttribute ?? PssgSchema.AddAttribute(SchemaElement, attributeName);
             object attributeValue = attribute?.Value ?? attributeSchema.DataType.GetDefaultValue();
-            
-            // Handle integral types
-            var value = attributeSchema.DataType switch
-            {
-                PssgAttributeType.Int => Convert.ChangeType(attributeValue, typeof(T), CultureInfo.InvariantCulture),
-                _ => attributeValue,
-            };
-            
-            return (T)value;
+            return attributeSchema.DataType.CastTo<T>(attributeValue);
         }
 
         public void RemoveAttribute(string attributeName)
         {
-            if (this.HasAttribute(attributeName))
-                this.Attributes.Remove(this.Attributes[attributeName]);
+            var attr = Attributes.Get(attributeName);
+            if (attr is not null)
+                this.Attributes.Remove(attr);
         }
 
         /// <summary>
-        /// Gets this element, and its hierarchy as a flat sequence.
+        /// Gets this element, and its descendants as a flat sequence.
         /// </summary>
-        public IEnumerable<PssgElement> GetElements()
+        public IEnumerable<T> Elements<T>()
+            where T : PssgElement
         {
-            yield return this;
+            if (this is T)
+            {
+                yield return (T)this;
+            }
 
             foreach (var c in ChildElements)
             {
-                var cc = c.GetElements();
+                var cc = c.Elements<T>();
 
                 foreach (var ccc in cc) yield return ccc;
             }
         }
 
-        public IEnumerable<PssgElement> FindElements(string elementName)
-        {
-            return GetElements().FindElements(elementName);
-        }
-        public IEnumerable<PssgElement> FindElements(string elementName, string attributeName)
-        {
-            return GetElements().FindElements(elementName, attributeName);
-        }
-        public IEnumerable<PssgElement> FindElements<T>(string elementName, string attributeName, T attributeValue)
-            where T : notnull
-        {
-            return GetElements().FindElements(elementName, attributeName, attributeValue);
-        }
-
-        public PssgElement this[int index]
-        {
-            get
-            {
-                return this.ChildElements[index];
-            }
-        }
-
-        /// <summary>
-        /// Determines whether the current element has an attribute with the specified name.
-        /// </summary>
-        /// <param name="attributeName">The name of the attribute to find.</param>
-        public bool HasAttribute(string attributeName)
-        {
-            return this.Attributes.Contains(attributeName);
-        }
-        public bool HasAttributes
-        {
-            get
-            {
-                return this.Attributes.Count > 0;
-            }
-        }
-
-        public override string ToString()
+        private string ValueToString()
         {
             return GetValueType() switch
             {
+                PssgElementType.None => string.Empty,
                 PssgElementType.Float => Value.ToPssgFloatString(SchemaElement.ElementsPerRow),
                 PssgElementType.UInt => Value.ToPssgUIntString(SchemaElement.ElementsPerRow),
                 PssgElementType.Short => Value.ToPssgShortString(SchemaElement.ElementsPerRow),
@@ -482,10 +416,13 @@ namespace EgoEngineLibrary.Graphics.Pssg
             };
         }
 
-        public byte[] FromString(string value)
+        private byte[] ValueFromString(string value)
         {
             return GetValueType() switch
             {
+                PssgElementType.None => string.IsNullOrWhiteSpace(value)
+                    ? []
+                    : throw new InvalidOperationException("Element cannot have any data."),
                 PssgElementType.Float => value.ToPssgFloatByteArray(),
                 PssgElementType.UInt => value.ToPssgUIntByteArray(),
                 PssgElementType.Short => value.ToPssgShortByteArray(),
@@ -494,6 +431,36 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 PssgElementType.Half => value.ToPssgHalfByteArray(),
                 _ => HexHelper.HexLineToByteUsingByteManipulation(value),
             };
+        }
+
+        public PssgElement DeepClone()
+        {
+            PssgElement elementToCopy = this;
+            PssgElement copy = elementToCopy.SchemaElement.Create(elementToCopy.File, elementToCopy.ParentElement);
+            copy.size = elementToCopy.size;
+            copy.attributeSize = elementToCopy.attributeSize;
+            foreach (PssgAttribute attrToCopy in elementToCopy.Attributes)
+            {
+                PssgAttribute attr = new(attrToCopy, copy);
+                copy.Attributes.Add(attr);
+            }
+
+            if (elementToCopy.IsDataElement)
+            {
+                copy.Value = elementToCopy.Value;
+            }
+            else
+            {
+                copy.ChildElements.EnsureCapacity(elementToCopy.ChildElements.Count);
+                foreach (PssgElement childElementToCopy in elementToCopy.ChildElements)
+                {
+                    PssgElement element = childElementToCopy.DeepClone();
+                    element.ParentElement = copy;
+                    copy.ChildElements.Add(element);
+                }
+            }
+
+            return copy;
         }
     }
 }

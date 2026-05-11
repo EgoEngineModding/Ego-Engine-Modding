@@ -1,11 +1,10 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
 using System.Numerics;
-using System.Text;
 using System.Xml.Linq;
-using EgoEngineLibrary.Helper;
 
 namespace EgoEngineLibrary.Graphics.Pssg
 {
+    [DebuggerDisplay("{Name}")]
     public class PssgAttribute
     {
         public string Name => SchemaAttribute.Name;
@@ -25,11 +24,11 @@ namespace EgoEngineLibrary.Graphics.Pssg
         {
             get
             {
-                return this.ToString();
+                return Value.ToPssgString(SchemaAttribute.DataType);
             }
             set
             {
-                this.Value = this.FromString(value);
+                Value = value.ToPssgValue(SchemaAttribute.DataType);
             }
         }
 
@@ -57,7 +56,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
 
             string attrName = xAttr.Name.LocalName.StartsWith("___") ? xAttr.Name.LocalName.Substring(3) : xAttr.Name.LocalName;
             SchemaAttribute = PssgSchema.AddAttribute(this.ParentElement.Name, attrName);
-            Value = this.FromString(xAttr.Value);
+            Value = xAttr.Value.ToPssgValue(SchemaAttribute.DataType);
         }
         public PssgAttribute(PssgAttribute attrToCopy, PssgElement parent)
         {
@@ -68,49 +67,11 @@ namespace EgoEngineLibrary.Graphics.Pssg
             Value = attrToCopy.Value;
         }
 
-        public T GetValue<T>()
-            where T : notnull
-        {
-            return (T)Value;
-        }
-
         public void Write(PssgBinaryWriter writer)
         {
             writer.Write(writer.GetAttributeId(SchemaAttribute));
             writer.Write(this.Size);
             writer.WriteAttributeValue(Value);
-        }
-        
-        public override string ToString()
-        {
-            PssgAttributeType dataType = this.SchemaAttribute.DataType;
-            return dataType switch
-            {
-                PssgAttributeType.Int => Value.ToString() ?? string.Empty,
-                PssgAttributeType.String => (string)Value,
-                PssgAttributeType.Float => ((float)Value).ToPssgString(),
-                PssgAttributeType.Float2 => ((Vector2)Value).ToPssgString(),
-                PssgAttributeType.Float3 => ((Vector3)Value).ToPssgString(),
-                PssgAttributeType.Float4 => ((Vector4)Value).ToPssgString(),
-                PssgAttributeType.Unknown => HexHelper.ByteArrayToHexViaLookup32((byte[])Value),
-                _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null)
-            };
-        }
-
-        public object FromString(string value)
-        {
-            PssgAttributeType dataType = this.SchemaAttribute.DataType;
-            return dataType switch
-            {
-                PssgAttributeType.Int => Convert.ToInt32(value),
-                PssgAttributeType.String => value,
-                PssgAttributeType.Float => Convert.ToSingle(value, CultureInfo.InvariantCulture),
-                PssgAttributeType.Float2 => value.ToPssgVector2(),
-                PssgAttributeType.Float3 => value.ToPssgVector3(),
-                PssgAttributeType.Float4 => value.ToPssgVector4(),
-                PssgAttributeType.Unknown => HexHelper.HexToByteUsingByteManipulation(value),
-                _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null)
-            };
         }
 
         internal void UpdateSize()
@@ -119,7 +80,7 @@ namespace EgoEngineLibrary.Graphics.Pssg
             Size = dataType switch
             {
                 PssgAttributeType.Int => 4,
-                PssgAttributeType.String => 4 + Encoding.UTF8.GetByteCount((string)Value),
+                PssgAttributeType.String => 4 + PssgStringHelper.Encoding.GetByteCount((string)Value),
                 PssgAttributeType.Float => 4,
                 PssgAttributeType.Float2 => 8,
                 PssgAttributeType.Float3 => 12,
@@ -127,6 +88,18 @@ namespace EgoEngineLibrary.Graphics.Pssg
                 PssgAttributeType.Unknown => ((byte[])Value).Length,
                 _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null)
             };
+        }
+
+        public T GetValue<T>()
+            where T : notnull
+        {
+            return SchemaAttribute.DataType.CastTo<T>(Value);
+        }
+
+        public void SetValue<T>(T value)
+            where T : notnull
+        {
+            Value = SchemaAttribute.DataType.CastFrom(value);
         }
 
         private void VerifyType(object value)

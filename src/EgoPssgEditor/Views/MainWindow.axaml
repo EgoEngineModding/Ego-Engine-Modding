@@ -95,7 +95,8 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <DockPanel>
-                        <TreeView Name="tvMain" ItemsSource="{Binding Path=PssgElements}">
+                        <TreeView Name="tvMain" ItemsSource="{Binding Path=PssgElements}"
+                                  ScrollViewer.AllowAutoHide="False">
                             <TreeView.Styles>
                                 <Style Selector="TreeViewItem" x:DataType="vm:PssgElementViewModel">
                                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
@@ -116,7 +117,8 @@
                             <DataGrid x:Name="attributesDataGrid"
                                       ItemsSource="{Binding ElementName=tvMain, Path=((vm:PssgElementViewModel)SelectedItem).Attributes}"
                                       AutoGenerateColumns="False" CanUserSortColumns="False"
-                                      HeadersVisibility="All" RowHeight="20" FontSize="14">
+                                      HeadersVisibility="All" RowHeight="20" FontSize="14"
+                                      CellPointerPressed="AttributesDataGrid_OnCellPointerPressed">
                                 <DataGrid.Styles>
                                     <Style Selector="DataGridRow" x:DataType="vm:PssgAttributeViewModel">
                                         <Setter Property="Header" Value="{Binding DisplayName}"></Setter>

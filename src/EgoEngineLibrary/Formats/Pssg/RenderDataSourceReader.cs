@@ -1,14 +1,7 @@
-﻿using EgoEngineLibrary.Graphics;
-using System;
-using System.Buffers.Binary;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.Buffers.Binary;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using EgoEngineLibrary.Graphics.Pssg;
+using EgoEngineLibrary.Graphics.Pssg.Elements;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
@@ -29,42 +22,37 @@ namespace EgoEngineLibrary.Formats.Pssg
         public uint IndexCount { get; }
         public int TexCoordSetCount => _texCoordSets.Count;
 
-        public RenderDataSourceReader(PssgElement rdsElement)
+        public RenderDataSourceReader(PssgRenderDataSource rdsElement)
         {
-            var risNode = rdsElement.ChildElements.FirstOrDefault(n => n.Name == "RENDERINDEXSOURCE") ??
-                throw new InvalidDataException($"RDS node {rdsElement.Attributes["id"].GetValue<string>()} must have RENDERINDEXSOURCE as its first child.");
-            var isdNode = risNode.ChildElements.FirstOrDefault(n => n.Name == "INDEXSOURCEDATA") ??
-                throw new InvalidDataException($"RENDERINDEXSOURCE node {risNode.Attributes["id"].GetValue<string>()} must have INDEXSOURCEDATA as its first child.");
+            var risNode = rdsElement.IndexSource ??
+                          throw new InvalidDataException(
+                              $"RDS node {rdsElement.Id} must have RENDERINDEXSOURCE as its first child.");
 
             // Setup indices
-            _indexFormat = risNode.Attributes["format"].GetValue<string>();
+            _indexFormat = risNode.Format;
             _indexStride = GetIndexStride(_indexFormat);
-            Primitive = risNode.Attributes["primitive"].GetValue<string>();
-            IndexCount = risNode.Attributes["count"].GetValue<uint>();
-            _indexData = ((byte[])isdNode.Value);
+            Primitive = risNode.Primitive;
+            IndexCount = risNode.Count;
+            _indexData = risNode.Data.Value;
 
             // Setup vertex attributes
-            var renderStreamNodes = rdsElement.FindElements("RENDERSTREAM").ToList();
             _vertexAttributes = new Dictionary<string, VertexAttributeData>();
             _texCoordSets = new List<VertexAttributeData>();
-            foreach (var rsNode in renderStreamNodes)
+            foreach (var rsNode in rdsElement.Streams)
             {
-                var dbId = rsNode.Attributes["dataBlock"].GetValue<string>().Substring(1);
-                var subStream = rsNode.Attributes["subStream"].GetValue<uint>();
+                var subStream = rsNode.SubStream;
 
-                var dbNode = rsNode.File.FindElements("DATABLOCK", "id", dbId).First();
-                var dbStreamNode = dbNode.ChildElements[(int)subStream];
+                var dbNode = rsNode.GetDataBlock();
+                var dbStreamNode = dbNode.Streams.ElementAt(Convert.ToInt32(subStream));
 
-                var size = dbNode.Attributes["size"].GetValue<uint>();
-                var elemCount = dbNode.Attributes["elementCount"].GetValue<uint>();
+                var size = dbNode.Size;
+                var elemCount = dbNode.ElementCount;
+                var data = dbNode.Data.Value;
 
-                var dataBlockDataNode = dbNode.FindElements("DATABLOCKDATA").First();
-                var data = (byte[])dataBlockDataNode.Value;
-
-                var renderType = dbStreamNode.Attributes["renderType"].GetValue<string>();
-                var offset = dbStreamNode.Attributes["offset"].GetValue<uint>();
-                var stride = dbStreamNode.Attributes["stride"].GetValue<uint>();
-                var dataType = dbStreamNode.Attributes["dataType"].GetValue<string>();
+                var renderType = dbStreamNode.RenderType;
+                var offset = dbStreamNode.Offset;
+                var stride = dbStreamNode.Stride;
+                var dataType = dbStreamNode.DataType;
 
                 if (data.Length != size)
                     throw new InvalidDataException($"The data block size ({size}) is different than data block data size ({data.Length}).");

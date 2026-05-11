@@ -2,20 +2,20 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
-    <BclVersion>10.0.3</BclVersion>
-    <AvaloniaVersion>11.3.12</AvaloniaVersion>
+    <BclVersion>10.0.7</BclVersion>
+    <AvaloniaVersion>12.0.2</AvaloniaVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Avalonia" Version="$(AvaloniaVersion)" />
-    <PackageVersion Include="Avalonia.AvaloniaEdit" Version="11.4.1" />
-    <PackageVersion Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.AvaloniaEdit" Version="12.0.0" />
+    <PackageVersion Include="Avalonia.Controls.DataGrid" Version="12.0.0" />
     <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
-    <PackageVersion Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
-    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageVersion Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1" />
     <PackageVersion Include="BCnEncoder.Net" Version="2.2.1" />
-    <PackageVersion Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageVersion Include="CommunityToolkit.Diagnostics" Version="8.4.2" />
     <PackageVersion Include="ConsoleAppFramework" Version="5.2.4" />
     <PackageVersion Include="K4os.Compression.LZ4" Version="1.3.8" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="$(BclVersion)" />
@@ -23,7 +23,7 @@
     <PackageVersion Include="ObservableCollections" Version="3.3.4" />
     <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageVersion Include="SharpGLTF.Toolkit" Version="1.0.0-alpha0023" />
+    <PackageVersion Include="SharpGLTF.Toolkit" Version="1.0.6" />
     <PackageVersion Include="SixLabors.ImageSharp" Version="2.1.13" />
     <PackageVersion Include="System.IO.Hashing" Version="$(BclVersion)" />
     <PackageVersion Include="System.IO.Packaging" Version="$(BclVersion)" />

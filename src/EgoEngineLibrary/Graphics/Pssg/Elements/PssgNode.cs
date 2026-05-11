@@ -38,4 +38,16 @@ public class PssgNode : PssgObject
         : base(schemaElement, file, parent)
     {
     }
+
+    public void Initialize()
+    {
+        ChildElements.Add(new PssgTransform(this)
+        {
+            Value = new byte[64],
+        });
+        ChildElements.Add(new PssgBoundingBox(this)
+        {
+            Value = new byte[24],
+        });
+    }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EgoEngineLibrary.Graphics.Pssg;
+using EgoEngineLibrary.Graphics.Pssg.Elements;
 
 namespace EgoPssgEditor.ViewModels
 {
@@ -36,6 +37,25 @@ namespace EgoPssgEditor.ViewModels
         {
             this.attribute = attribute;
             this.parent = parent;
+        }
+
+        public PssgObject? TryGetLinkedObject()
+        {
+            if (Attribute.SchemaAttribute.DataType is not PssgAttributeType.String)
+            {
+                return null;
+            }
+
+            var str = (string)Attribute.Value;
+            var linkIndex = str.IndexOf('#');
+            if (linkIndex != 0)
+            {
+                return null;
+            }
+
+            var objectId = str.AsMemory(1);
+            var obj = Attribute.ParentElement.File.TryGetObject<PssgObject>(objectId);
+            return obj;
         }
     }
 }

@@ -25,7 +25,7 @@ public class PssgNString : PssgObject
         set => AddAttribute(Schema.Attributes[1].Name, value);
     }
     
-    public PssgData DataElement => ChildElements.OfType<PssgData>().Single();
+    public PssgData? DataElement => ChildElements.OfType<PssgData>().SingleOrDefault();
 
     public PssgNString(PssgFile file, PssgElement? parent)
         : this(Schema, file, parent)

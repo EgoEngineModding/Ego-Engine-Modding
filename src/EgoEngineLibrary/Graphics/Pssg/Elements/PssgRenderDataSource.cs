@@ -38,6 +38,10 @@ public class PssgRenderDataSource : PssgObject
         get => GetAttributeValue<string>(Schema.Attributes[3].Name);
         set => AddAttribute(Schema.Attributes[3].Name, value);
     }
+    
+    public PssgRenderIndexSource? IndexSource => ChildElements.OfType<PssgRenderIndexSource>().FirstOrDefault();
+    
+    public IEnumerable<PssgRenderStream> Streams => ChildElements.OfType<PssgRenderStream>();
 
     public PssgRenderDataSource(PssgFile file, PssgElement? parent)
         : this(Schema, file, parent)
