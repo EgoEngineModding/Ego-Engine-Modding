@@ -1,9 +1,7 @@
-using EgoEngineLibrary.Graphics;
-
 using CommunityToolkit.Mvvm.Input;
-
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
+using EgoEngineLibrary.Graphics.Pssg;
 
 namespace EgoPssgEditor.ViewModels
 {
@@ -14,7 +12,7 @@ namespace EgoPssgEditor.ViewModels
         string windowTitle;
         string filePath;
         PssgFile file;
-        readonly NodesWorkspaceViewModel nodesWorkspace;
+        readonly ElementsWorkspaceViewModel _elementsWorkspace;
         readonly TexturesWorkspaceViewModel texturesWorkspace;
         readonly ModelsWorkspaceViewModel _modelsWorkspace;
 
@@ -36,9 +34,9 @@ namespace EgoPssgEditor.ViewModels
         {
             get { return file; }
         }
-        public NodesWorkspaceViewModel NodesWorkspace
+        public ElementsWorkspaceViewModel ElementsWorkspace
         {
-            get { return nodesWorkspace; }
+            get { return _elementsWorkspace; }
         }
         public TexturesWorkspaceViewModel TexturesWorkspace
         {
@@ -70,7 +68,7 @@ namespace EgoPssgEditor.ViewModels
             this.DisplayName = Properties.Resources.AppTitleLong;
             schemaPath = Path.Combine(AppContext.BaseDirectory, "schema.xml");
 
-            nodesWorkspace = new NodesWorkspaceViewModel(this);
+            _elementsWorkspace = new ElementsWorkspaceViewModel(this);
             texturesWorkspace = new TexturesWorkspaceViewModel(this);
             _modelsWorkspace = new ModelsWorkspaceViewModel(this);
 
@@ -110,7 +108,6 @@ namespace EgoPssgEditor.ViewModels
         {
             ClearVars(true);
             file = new PssgFile(PssgFileType.Pssg);
-            SaveTag();
         }
         [RelayCommand]
         private async Task Open()
@@ -175,17 +172,19 @@ namespace EgoPssgEditor.ViewModels
         [RelayCommand]
         private void LoadSchema()
         {
-            PssgSchema.LoadSchema(File.Open(schemaPath, FileMode.Open, FileAccess.Read, FileShare.Read));
+            using var fs = File.Open(schemaPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            PssgSchema.LoadSchema(fs);
         }
         [RelayCommand]
         private void SaveSchema()
         {
-            PssgSchema.SaveSchema(File.Open(schemaPath, FileMode.Create, FileAccess.Write, FileShare.Read));
+            using var fs = File.Open(schemaPath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            PssgSchema.SaveSchema(fs);
         }
         [RelayCommand]
-        private void ClearSchema()
+        private void ResetSchema()
         {
-            PssgSchema.ClearSchema();
+            PssgSchema.ResetSchema();
         }
 
         public void LoadPssg(PssgFile pssg)
@@ -201,8 +200,8 @@ namespace EgoPssgEditor.ViewModels
                 file = pssg;
             }
 
-            nodesWorkspace.LoadData(file);
-            texturesWorkspace.LoadData(nodesWorkspace.RootNode);
+            _elementsWorkspace.LoadData(file);
+            texturesWorkspace.LoadData(_elementsWorkspace.RootElement);
             SelectedTabIndex = texturesWorkspace.Textures.Count > 0 ? 1 : 0;
             _modelsWorkspace.LoadData(file);
         }
@@ -227,7 +226,6 @@ namespace EgoPssgEditor.ViewModels
             var result = await FileDialog.ShowSaveFileDialog(saveOptions);
             if (result is not null)
             {
-                SaveTag();
                 try
                 {
                     using (var fileStream = File.Open(result, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
@@ -251,27 +249,11 @@ namespace EgoPssgEditor.ViewModels
                 }
             }
         }
-        private void SaveTag()
-        {
-            PssgNode node;
-            if (file.RootNode == null)
-            {
-                node = new PssgNode("PSSGDATABASE", file, null);
-                file.RootNode = node;
-                nodesWorkspace.LoadData(file);
-            }
-            else
-            {
-                node = file.RootNode;
-            }
-
-            PssgAttribute attribute = node.AddAttribute("creatorApplication", Properties.Resources.AppTitleLong);
-        }
         private void ClearVars(bool clearPSSG)
         {
             if (file == null) return;
 
-            nodesWorkspace.ClearData();
+            _elementsWorkspace.ClearData();
             texturesWorkspace.ClearData();
             _modelsWorkspace.ClearData();
 

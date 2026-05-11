@@ -319,7 +319,7 @@ namespace EgoEngineLibrary.Collections;
     }
 
     /// <summary>Adds each element of the enumerable to the set.</summary>
-    private void AddRange(IEnumerable<T> collection)
+    public void AddRange(IEnumerable<T> collection)
     {
         Debug.Assert(collection is not null);
 

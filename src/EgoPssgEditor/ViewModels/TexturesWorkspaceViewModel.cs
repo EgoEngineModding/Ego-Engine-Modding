@@ -5,7 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
-
+using EgoEngineLibrary.Graphics.Pssg;
 using EgoPssgEditor.Dialogs.Pssg;
 
 using ObservableCollections;
@@ -47,18 +47,18 @@ namespace EgoPssgEditor.ViewModels
         public override void LoadData(object data)
         {
             ClearData();
-            LoadTextures((PssgNodeViewModel)data);
+            LoadTextures((PssgElementViewModel)data);
         }
-        public void LoadTextures(PssgNodeViewModel nodeView)
+        public void LoadTextures(PssgElementViewModel elementView)
         {
-            if (nodeView.Node.Name == "TEXTURE" && nodeView.Node.HasAttribute("id"))
+            if (elementView.Element.Name == "TEXTURE" && elementView.Element.HasAttribute("id"))
             {
-                _textures.Add(new PssgTextureViewModel(nodeView));
+                _textures.Add(new PssgTextureViewModel(elementView));
             }
 
-            foreach (PssgNodeViewModel childNodeView in nodeView.Children)
+            foreach (PssgElementViewModel child in elementView.Children)
             {
-                LoadTextures(childNodeView);
+                LoadTextures(child);
             }
         }
 
@@ -67,12 +67,12 @@ namespace EgoPssgEditor.ViewModels
             _textures.Clear();
         }
 
-        public void RemoveTexture(PssgNodeViewModel nodeView)
+        public void RemoveTexture(PssgElementViewModel elementView)
         {
             int index = -1;
             for (int i = 0; i < _textures.Count; ++i)
             {
-                if (object.ReferenceEquals(_textures[i].NodeView, nodeView))
+                if (object.ReferenceEquals(_textures[i].ElementView, elementView))
                 {
                     index = i;
                     break;
@@ -83,9 +83,9 @@ namespace EgoPssgEditor.ViewModels
                 _textures.RemoveAt(index);
             }
 
-            foreach (PssgNodeViewModel childNodeView in nodeView.Children)
+            foreach (PssgElementViewModel child in elementView.Children)
             {
-                RemoveTexture(childNodeView);
+                RemoveTexture(child);
             }
         }
 
@@ -106,12 +106,12 @@ namespace EgoPssgEditor.ViewModels
         [RelayCommand(CanExecute = nameof(Export_CanExecute))]
         private async Task Export(object parameter)
         {
-            PssgNode node = ((PssgTextureViewModel)parameter).Texture;
+            PssgElement element = ((PssgTextureViewModel)parameter).Texture;
             FileSaveOptions saveOptions = new()
             {
                 FileTypeChoices = [FilePickerType.Dds, FilePickerType.All],
                 Title = "Select the dds save location and file name",
-                FileName = node.Attributes["id"].DisplayValue + ".dds",
+                FileName = element.Attributes["id"].DisplayValue + ".dds",
             };
 
             var result = await FileDialog.ShowSaveFileDialog(saveOptions);
@@ -119,7 +119,7 @@ namespace EgoPssgEditor.ViewModels
             {
                 try
                 {
-                    DdsFile dds = node.ToDdsFile(false);
+                    DdsFile dds = element.ToDdsFile(false);
                     using (var fs = File.Open(result, FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
                         dds.Write(fs, -1);
                 }
@@ -138,12 +138,12 @@ namespace EgoPssgEditor.ViewModels
         private async Task Import(object parameter)
         {
             PssgTextureViewModel texView = (PssgTextureViewModel)parameter;
-            PssgNode node = texView.Texture;
+            PssgElement element = texView.Texture;
             FileOpenOptions openOptions = new()
             {
                 FileTypeChoices = [FilePickerType.Dds, FilePickerType.All],
                 Title = "Select a dds file",
-                FileName = node.Attributes["id"].DisplayValue + ".dds",
+                FileName = element.Attributes["id"].DisplayValue + ".dds",
             };
 
             var result = await FileDialog.ShowOpenFileDialog(openOptions);
@@ -152,7 +152,7 @@ namespace EgoPssgEditor.ViewModels
                 try
                 {
                     DdsFile dds = new DdsFile(File.Open(result[0], FileMode.Open));
-                    dds.ToPssgNode(node);
+                    dds.ToPssgElement(element);
                     texView.GetPreview();
                 }
                 catch (Exception ex)
@@ -209,7 +209,7 @@ namespace EgoPssgEditor.ViewModels
                             if (Path.GetFileNameWithoutExtension(filePath) == texView.Texture.Attributes["id"].ToString())
                             {
                                 dds = new DdsFile(File.Open(filePath, FileMode.Open));
-                                dds.ToPssgNode(texView.Texture);
+                                dds.ToPssgElement(texView.Texture);
                                 if (texView.IsSelected)
                                 {
                                     texView.GetPreview();
@@ -247,39 +247,39 @@ namespace EgoPssgEditor.ViewModels
             if (await PssgDialog.ShowDuplicateTextureDialog(dtVm))
             {
                 // Copy and Edit Name
-                PssgNode nodeToCopy = texView.Texture;
-                PssgNode newTexture = new PssgNode(nodeToCopy);
+                PssgElement elementToCopy = texView.Texture;
+                PssgElement newTexture = new PssgElement(elementToCopy);
                 newTexture.Attributes["id"].Value = dtVm.TextureName;
 
                 // Add to Library
-                if (nodeToCopy.ParentNode != null)
+                if (elementToCopy.ParentElement != null)
                 {
-                    nodeToCopy.ParentNode.AppendChild(newTexture);
-                    PssgNodeViewModel newNodeView = new PssgNodeViewModel(newTexture, texView.NodeView.Parent);
-                    texView.NodeView.Parent.Children.Add(newNodeView);
-                    Textures.Add(new PssgTextureViewModel(newNodeView));
+                    elementToCopy.ParentElement.AppendChild(newTexture);
+                    PssgElementViewModel newElementView = new PssgElementViewModel(newTexture, texView.ElementView.Parent);
+                    texView.ElementView.Parent.Children.Add(newElementView);
+                    Textures.Add(new PssgTextureViewModel(newElementView));
                 }
                 else
                 {
-                    nodeToCopy.AppendChild(newTexture);
-                    PssgNodeViewModel newNodeView = new PssgNodeViewModel(newTexture, texView.NodeView);
-                    texView.NodeView.Children.Add(newNodeView);
-                    Textures.Add(new PssgTextureViewModel(newNodeView));
+                    elementToCopy.AppendChild(newTexture);
+                    PssgElementViewModel newElementView = new PssgElementViewModel(newTexture, texView.ElementView);
+                    texView.ElementView.Children.Add(newElementView);
+                    Textures.Add(new PssgTextureViewModel(newElementView));
                 }
             }
         }
         private bool RemoveTextureC_CanExecute(object parameter)
         {
-            return parameter != null && ((PssgTextureViewModel)parameter).Texture != mainView.PssgFile.RootNode;
+            return parameter != null && ((PssgTextureViewModel)parameter).Texture != mainView.PssgFile.RootElement;
         }
         [RelayCommand(CanExecute = nameof(RemoveTextureC_CanExecute))]
         private void RemoveTextureC(object parameter)
         {
             PssgTextureViewModel texView = (PssgTextureViewModel)parameter;
 
-            texView.Texture.ParentNode.RemoveChild(texView.Texture);
-            texView.NodeView.Parent.Children.Remove(texView.NodeView);
-            RemoveTexture(texView.NodeView);
+            texView.Texture.ParentElement.RemoveChild(texView.Texture);
+            texView.ElementView.Parent.Children.Remove(texView.ElementView);
+            RemoveTexture(texView.ElementView);
         }
         #endregion
     }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EgoEngineLibrary.Graphics.Pssg;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
@@ -20,7 +21,7 @@ namespace EgoEngineLibrary.Formats.Pssg
 
         public new static bool SupportsPssg(PssgFile pssg)
         {
-            return pssg.FindNodes("VISIBLERENDERNODE").Any();
+            return pssg.FindElements("VISIBLERENDERNODE").Any();
         }
 
         protected override ExportState CreateState()

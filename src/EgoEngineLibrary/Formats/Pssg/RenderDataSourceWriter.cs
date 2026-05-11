@@ -4,6 +4,7 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using EgoEngineLibrary.Graphics.Pssg;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
@@ -47,14 +48,14 @@ namespace EgoEngineLibrary.Formats.Pssg
             SkinIndices = new List<float>();
         }
 
-        public void Write(ShaderInputInfo shaderInput, PssgNode rdsLib, PssgNode ribLib, PssgModelWriterState state)
+        public void Write(ShaderInputInfo shaderInput, PssgElement rdsLib, PssgElement ribLib, PssgModelWriterState state)
         {
             var streamCount = (uint)shaderInput.BlockInputs.Sum(bi => bi.VertexInputs.Count);
 
-            var rdsNode = new PssgNode("RENDERDATASOURCE", rdsLib.File, rdsLib);
+            var rdsNode = new PssgElement("RENDERDATASOURCE", rdsLib.File, rdsLib);
             rdsNode.AddAttribute("streamCount", streamCount);
             rdsNode.AddAttribute("id", Name);
-            rdsLib.ChildNodes.Add(rdsNode);
+            rdsLib.ChildElements.Add(rdsNode);
 
             WriteIndices(rdsNode);
 
@@ -72,17 +73,17 @@ namespace EgoEngineLibrary.Formats.Pssg
                 state.DataBlockCount++;
             }
 
-            static void WriteRenderStream(PssgNode rdsNode, uint dataBlockId, uint streamId, uint subStream)
+            static void WriteRenderStream(PssgElement rdsElement, uint dataBlockId, uint streamId, uint subStream)
             {
-                PssgNode rsNode = new PssgNode("RENDERSTREAM", rdsNode.File, rdsNode);
-                rsNode.AddAttribute("dataBlock", $"#block{dataBlockId}");
-                rsNode.AddAttribute("subStream", subStream);
-                rsNode.AddAttribute("id", $"stream{streamId}");
-                rdsNode.ChildNodes.Add(rsNode);
+                PssgElement rsElement = new PssgElement("RENDERSTREAM", rdsElement.File, rdsElement);
+                rsElement.AddAttribute("dataBlock", $"#block{dataBlockId}");
+                rsElement.AddAttribute("subStream", subStream);
+                rsElement.AddAttribute("id", $"stream{streamId}");
+                rdsElement.ChildElements.Add(rsElement);
             }
         }
 
-        private void WriteIndices(PssgNode rdsNode)
+        private void WriteIndices(PssgElement rdsElement)
         {
             var stride = sizeof(ushort);
             var dataType = "ushort";
@@ -124,42 +125,42 @@ namespace EgoEngineLibrary.Formats.Pssg
                     throw new NotImplementedException($"Support for {dataType} primitive index format not implemented.");
             }
 
-            var risNode = new PssgNode("RENDERINDEXSOURCE", rdsNode.File, rdsNode);
+            var risNode = new PssgElement("RENDERINDEXSOURCE", rdsElement.File, rdsElement);
             risNode.AddAttribute("primitive", "triangles");
             risNode.AddAttribute("maximumIndex", maxIndex);
             risNode.AddAttribute("format", dataType);
             risNode.AddAttribute("count", (uint)Indices.Count);
             risNode.AddAttribute("id", Name.Replace("RDS", "RIS"));
-            rdsNode.ChildNodes.Add(risNode);
+            rdsElement.ChildElements.Add(risNode);
 
-            var isdNode = new PssgNode("INDEXSOURCEDATA", risNode.File, risNode);
+            var isdNode = new PssgElement("INDEXSOURCEDATA", risNode.File, risNode);
             isdNode.Value = isdData;
-            risNode.ChildNodes.Add(isdNode);
+            risNode.ChildElements.Add(isdNode);
         }
 
-        private void WriteDataBlock(ShaderBlockInputInfo bi, PssgNode ribLib, uint dataBlockId)
+        private void WriteDataBlock(ShaderBlockInputInfo bi, PssgElement ribLib, uint dataBlockId)
         {
             var stride = bi.VertexInputs.First().Stride;
             var size = (uint)(stride * Positions.Count);
 
-            var dbNode = new PssgNode("DATABLOCK", ribLib.File, ribLib);
+            var dbNode = new PssgElement("DATABLOCK", ribLib.File, ribLib);
             dbNode.AddAttribute("streamCount", (uint)bi.VertexInputs.Count);
             dbNode.AddAttribute("size", size);
             dbNode.AddAttribute("elementCount", (uint)Positions.Count);
             dbNode.AddAttribute("id", $"block{dataBlockId}");
-            ribLib.ChildNodes.Add(dbNode);
+            ribLib.ChildElements.Add(dbNode);
 
             var data = new byte[size];
             var dataSpan = data.AsSpan();
             var texCoordSet = 0;
             foreach (var vi in bi.VertexInputs)
             {
-                var dbsNode = new PssgNode("DATABLOCKSTREAM", dbNode.File, dbNode);
+                var dbsNode = new PssgElement("DATABLOCKSTREAM", dbNode.File, dbNode);
                 dbsNode.AddAttribute("renderType", vi.Name);
                 dbsNode.AddAttribute("dataType", vi.DataType);
                 dbsNode.AddAttribute("offset", vi.Offset);
                 dbsNode.AddAttribute("stride", vi.Stride);
-                dbNode.ChildNodes.Add(dbsNode);
+                dbNode.ChildElements.Add(dbsNode);
 
                 // Write the data
                 for (uint i = 0, e = 0; i < size; i += stride, ++e)
@@ -197,9 +198,9 @@ namespace EgoEngineLibrary.Formats.Pssg
                     texCoordSet += GetTexCoordSets(vi);
             }
 
-            var dbdNode = new PssgNode("DATABLOCKDATA", dbNode.File, dbNode);
+            var dbdNode = new PssgElement("DATABLOCKDATA", dbNode.File, dbNode);
             dbdNode.Value = data;
-            dbNode.ChildNodes.Add(dbdNode);
+            dbNode.ChildElements.Add(dbdNode);
 
             static int GetTexCoordSets(ShaderVertexInputInfo vi)
             {

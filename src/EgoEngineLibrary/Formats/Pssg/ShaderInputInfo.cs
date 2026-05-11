@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using EgoEngineLibrary.Graphics.Pssg;
 
 namespace EgoEngineLibrary.Formats.Pssg
 {
@@ -26,7 +27,7 @@ namespace EgoEngineLibrary.Formats.Pssg
             var inputInfos = new List<ShaderInputInfo>();
 
             // Figure out the layout of the vertex data for each shader group by going through rds nodes
-            var rdsNodes = pssg.FindNodes("RENDERDATASOURCE");
+            var rdsNodes = pssg.FindElements("RENDERDATASOURCE");
             foreach (var rdsNode in rdsNodes)
             {
                 var info = GetShaderInfo(rdsNode, visitedShaders);
@@ -36,20 +37,20 @@ namespace EgoEngineLibrary.Formats.Pssg
 
             return inputInfos;
 
-            static ShaderInputInfo? GetShaderInfo(PssgNode rdsNode, HashSet<string> visitedShaders)
+            static ShaderInputInfo? GetShaderInfo(PssgElement rdsElement, HashSet<string> visitedShaders)
             {
-                var rdsId = rdsNode.Attributes["id"].GetValue<string>();
-                var risNode = rdsNode.File.FindNodes("RENDERINSTANCESOURCE", "source", '#' + rdsId).FirstOrDefault();
-                var shaderInstanceId = risNode?.ParentNode?.Attributes["shader"].GetValue<string>().Substring(1);
+                var rdsId = rdsElement.Attributes["id"].GetValue<string>();
+                var risNode = rdsElement.File.FindElements("RENDERINSTANCESOURCE", "source", '#' + rdsId).FirstOrDefault();
+                var shaderInstanceId = risNode?.ParentElement?.Attributes["shader"].GetValue<string>().Substring(1);
                 if (shaderInstanceId is null)
                     return null;
 
-                var siNode = rdsNode.File.FindNodes("SHADERINSTANCE", "id", shaderInstanceId).FirstOrDefault();
+                var siNode = rdsElement.File.FindElements("SHADERINSTANCE", "id", shaderInstanceId).FirstOrDefault();
                 if (siNode is null)
                     return null;
 
                 var shaderGroupId = siNode.Attributes["shaderGroup"].GetValue<string>().Substring(1);
-                var sgNode = rdsNode.File.FindNodes("SHADERGROUP", "id", shaderGroupId).FirstOrDefault();
+                var sgNode = rdsElement.File.FindElements("SHADERGROUP", "id", shaderGroupId).FirstOrDefault();
                 if (sgNode is null)
                     return null;
                 if (visitedShaders.Contains(shaderGroupId))
@@ -57,14 +58,14 @@ namespace EgoEngineLibrary.Formats.Pssg
 
                 var dataBlockIdMap = new Dictionary<string, int>();
                 var blockInputs = new List<ShaderBlockInputInfo>();
-                var renderStreamNodes = rdsNode.FindNodes("RENDERSTREAM");
+                var renderStreamNodes = rdsElement.FindElements("RENDERSTREAM");
                 foreach (var rsNode in renderStreamNodes)
                 {
                     var dbId = rsNode.Attributes["dataBlock"].GetValue<string>().Substring(1);
                     var subStream = rsNode.Attributes["subStream"].GetValue<uint>();
 
-                    var dbNode = rsNode.File.FindNodes("DATABLOCK", "id", dbId).First();
-                    var dbStreamNode = dbNode.ChildNodes[(int)subStream];
+                    var dbNode = rsNode.File.FindElements("DATABLOCK", "id", dbId).First();
+                    var dbStreamNode = dbNode.ChildElements[(int)subStream];
 
                     var renderType = dbStreamNode.Attributes["renderType"].GetValue<string>();
                     var offset = dbStreamNode.Attributes["offset"].GetValue<uint>();

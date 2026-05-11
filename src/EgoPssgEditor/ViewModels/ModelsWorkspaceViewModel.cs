@@ -9,14 +9,15 @@ using CommunityToolkit.Mvvm.Input;
 
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
+using EgoEngineLibrary.Graphics.Pssg;
 
 namespace EgoPssgEditor.ViewModels
 {
     public partial class ModelsWorkspaceViewModel : WorkspaceViewModel
     {
         private PssgFile _pssg;
-        PssgNodeViewModel rootNode;
-        readonly ObservableCollection<PssgNodeViewModel> pssgNodes;
+        PssgElementViewModel _rootElement;
+        readonly ObservableCollection<PssgElementViewModel> pssgElements;
 
         public override string DisplayName
         {
@@ -25,25 +26,25 @@ namespace EgoPssgEditor.ViewModels
                 return "Models";
             }
         }
-        public PssgNodeViewModel RootNode
+        public PssgElementViewModel RootElement
         {
-            get { return rootNode; }
+            get { return _rootElement; }
             private set
             {
                 ClearData();
-                rootNode = value;
-                pssgNodes.Add(rootNode);
+                _rootElement = value;
+                pssgElements.Add(_rootElement);
             }
         }
-        public ObservableCollection<PssgNodeViewModel> PssgNodes
+        public ObservableCollection<PssgElementViewModel> PssgElements
         {
-            get { return pssgNodes; }
+            get { return pssgElements; }
         }
 
         public ModelsWorkspaceViewModel(MainViewModel mainView)
             : base(mainView)
         {
-            pssgNodes = new ObservableCollection<PssgNodeViewModel>();
+            pssgElements = new ObservableCollection<PssgElementViewModel>();
         }
 
         public override void LoadData(object data)
@@ -54,8 +55,8 @@ namespace EgoPssgEditor.ViewModels
         public override void ClearData()
         {
             _pssg = null;
-            rootNode = null;
-            pssgNodes.Clear();
+            _rootElement = null;
+            pssgElements.Clear();
         }
 
         #region Menu
