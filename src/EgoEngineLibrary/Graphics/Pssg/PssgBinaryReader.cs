@@ -1,6 +1,4 @@
 ﻿using System.Numerics;
-using System.Text;
-using EgoEngineLibrary.Collections;
 using EgoEngineLibrary.Conversion;
 using EgoEngineLibrary.IO;
 
@@ -8,8 +6,8 @@ namespace EgoEngineLibrary.Graphics.Pssg
 {
     public class PssgBinaryReader : EndianBinaryReader
     {
-        public OrderedSet<PssgSchemaElement> ElementTable { get; set; }
-        public OrderedSet<PssgSchemaAttribute> AttributeTable { get; set; }
+        public List<PssgSchemaElement> ElementTable { get; set; }
+        public List<PssgSchemaAttribute> AttributeTable { get; set; }
         internal bool UseDataElementCheck { get; set; }
         
         public PssgBinaryReader(EndianBitConverter bitConvertor, Stream stream, bool leaveOpen)

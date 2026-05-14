@@ -81,6 +81,7 @@ struct NODE {
         case "SHADERINPUT":
         case "TEXTUREIMAGEBLOCKDATA":
         case "TRANSFORM":
+        case "SHADERPROGRAMCODEBLOCK":
             char data[end - FTell()] <bgcolor=cRed>;
         break;
         default:

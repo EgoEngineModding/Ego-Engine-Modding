@@ -10,6 +10,13 @@
     <Application.Styles>
         <FluentTheme DensityStyle="Compact" />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        <Style Selector="DataGridCell">
+            <Setter Property="FontSize" Value="14"></Setter>
+            <Setter Property="MinHeight" Value="26"></Setter>
+        </Style>
+        <Style Selector="TabItem">
+            <Setter Property="FontSize" Value="20"></Setter>
+        </Style>
         <!-- See https://github.com/AvaloniaUI/Avalonia/issues/20530 -->
         <Style Selector="TreeViewItem /template/ StackPanel > Border > Grid">
             <Setter Property="HorizontalAlignment" Value="Left"></Setter>
