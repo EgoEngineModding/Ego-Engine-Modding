@@ -258,6 +258,8 @@ namespace EgoEngineLibrary.Formats.Pssg
                         return ReadVectorHalf4(data);
                     case "float3":
                         return new Vector4(ReadVector3(data), 0);
+                    case "hend3n":
+                        return new Vector4(ReadHend3N(data), 0);
                     default:
                         throw new NotImplementedException($"Support for {attribute.Name} data type {attribute.DataType} is not implemented.");
                 }
@@ -283,6 +285,8 @@ namespace EgoEngineLibrary.Formats.Pssg
                         return ReadVectorHalf4(data);
                     case "float3":
                         return new Vector4(ReadVector3(data), 0);
+                    case "hend3n":
+                        return new Vector4(ReadHend3N(data), 0);
                     default:
                         throw new NotImplementedException($"Support for {attribute.Name} data type {attribute.DataType} is not implemented.");
                 }
@@ -380,41 +384,33 @@ namespace EgoEngineLibrary.Formats.Pssg
         private static Vector4 ReadVectorHalf4(ReadOnlySpan<byte> data)
         {
             var vec = new Vector4();
-            vec.X = (float)BigToHalf(data);
-            vec.Y = (float)BigToHalf(data.Slice(2));
-            vec.Z = (float)BigToHalf(data.Slice(4));
-            vec.W = (float)BigToHalf(data.Slice(6));
+            vec.X = (float)BinaryPrimitives.ReadHalfBigEndian(data);
+            vec.Y = (float)BinaryPrimitives.ReadHalfBigEndian(data[2..]);
+            vec.Z = (float)BinaryPrimitives.ReadHalfBigEndian(data[4..]);
+            vec.W = (float)BinaryPrimitives.ReadHalfBigEndian(data[6..]);
             return vec;
         }
 
         private static Vector3 ReadVectorHalf3(ReadOnlySpan<byte> data)
         {
             var vec = new Vector3();
-            vec.X = (float)BigToHalf(data);
-            vec.Y = (float)BigToHalf(data.Slice(2));
-            vec.Z = (float)BigToHalf(data.Slice(4));
+            vec.X = (float)BinaryPrimitives.ReadHalfBigEndian(data);
+            vec.Y = (float)BinaryPrimitives.ReadHalfBigEndian(data[2..]);
+            vec.Z = (float)BinaryPrimitives.ReadHalfBigEndian(data[4..]);
             return vec;
         }
 
         private static Vector2 ReadVectorHalf2(ReadOnlySpan<byte> data)
         {
             var vec = new Vector2();
-            vec.X = (float)BigToHalf(data);
-            vec.Y = (float)BigToHalf(data.Slice(2));
+            vec.X = (float)BinaryPrimitives.ReadHalfBigEndian(data);
+            vec.Y = (float)BinaryPrimitives.ReadHalfBigEndian(data[2..]);
             return vec;
-        }
-
-        static Half BigToHalf(ReadOnlySpan<byte> source)
-        {
-            return Int16BitsToHalf(BinaryPrimitives.ReadInt16BigEndian(source));
-        }
-        static unsafe Half Int16BitsToHalf(short value)
-        {
-            return *(Half*)&value;
         }
         
         private static Vector3 ReadHend3N(ReadOnlySpan<byte> data)
         {
+            // 11 11 10 bit signed values
             var i = BinaryPrimitives.ReadUInt32BigEndian(data);
             var y = i >> 11;
             var z = i >> 22;
