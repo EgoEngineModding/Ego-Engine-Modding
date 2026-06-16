@@ -341,9 +341,14 @@ namespace EgoEngineLibrary.Formats.Pssg
                 case "uint_color_argb":
                     BinaryPrimitives.WriteUInt32BigEndian(destination, PackArgbColor(value));
                     break;
+                case "uchar4":
+                    BinaryPrimitives.WriteUInt32BigEndian(destination, PackRgbaColor(value));
+                    break;
                 default:
                     throw new NotImplementedException($"Support for {vi.Name} data type {vi.DataType} is not implemented.");
             }
+
+            return;
 
             static uint PackArgbColor(Vector4 vector)
             {
@@ -354,6 +359,17 @@ namespace EgoEngineLibrary.Formats.Pssg
                 vector = Vector4.Clamp(vector, Vector4.Zero, MaxBytes);
 
                 return (uint)((((byte)vector.W) << 0) | (((byte)vector.X) << 8) | (((byte)vector.Y) << 16) | (((byte)vector.Z) << 24));
+            }
+
+            static uint PackRgbaColor(Vector4 vector)
+            {
+                Vector4 MaxBytes = new Vector4(byte.MaxValue);
+                Vector4 Half = new Vector4(0.5f);
+                vector *= MaxBytes;
+                vector += Half;
+                vector = Vector4.Clamp(vector, Vector4.Zero, MaxBytes);
+
+                return (uint)((((byte)vector.X) << 0) | (((byte)vector.Y) << 8) | (((byte)vector.Z) << 16) | (((byte)vector.W) << 24));
             }
         }
 

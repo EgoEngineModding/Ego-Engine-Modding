@@ -345,6 +345,8 @@ namespace EgoEngineLibrary.Formats.Pssg
                 {
                     case "uint_color_argb":
                         return UnpackArgbColor(BinaryPrimitives.ReadUInt32BigEndian(data));
+                    case "uchar4":
+                        return UnpackRgbaColor(BinaryPrimitives.ReadUInt32BigEndian(data));
                     default:
                         throw new NotImplementedException($"Support for {attribute.Name} data type {attribute.DataType} is not implemented.");
                 }
@@ -361,6 +363,15 @@ namespace EgoEngineLibrary.Formats.Pssg
                 ((color >> 16) & 0xFF) / (float)byte.MaxValue,
                 ((color >> 24) & 0xFF) / (float)byte.MaxValue,
                 ((color >> 0) & 0xFF) / (float)byte.MaxValue);
+            }
+
+            static Vector4 UnpackRgbaColor(uint color)
+            {
+                return new Vector4(
+                    ((color >> 0) & 0xFF) / (float)byte.MaxValue,
+                    ((color >> 8) & 0xFF) / (float)byte.MaxValue,
+                    ((color >> 16) & 0xFF) / (float)byte.MaxValue,
+                    ((color >> 24) & 0xFF) / (float)byte.MaxValue);
             }
         }
 
