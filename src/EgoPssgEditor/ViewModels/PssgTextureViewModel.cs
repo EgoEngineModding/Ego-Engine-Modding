@@ -1,12 +1,11 @@
-﻿using BCnEncoder.Decoder;
-using EgoEngineLibrary.Graphics;
-
-using SixLabors.ImageSharp.PixelFormats;
-
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using BCnEncoder.Decoder;
+using EgoEngineLibrary.Frontend.ViewModels;
+using EgoEngineLibrary.Graphics;
 using EgoEngineLibrary.Graphics.Pssg.Elements;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace EgoPssgEditor.ViewModels
 {

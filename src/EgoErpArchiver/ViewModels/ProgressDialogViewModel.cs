@@ -1,16 +1,19 @@
 ﻿using System.Text;
-
+using EgoEngineLibrary.Frontend.Dialogs;
 using EgoEngineLibrary.Frontend.ViewModels;
 
 namespace EgoErpArchiver.ViewModels
 {
-    public class ProgressDialogViewModel : ViewModelBase
+    public class ProgressDialogViewModel : ViewModelBase, IDialogViewModel
     {
         private readonly StringBuilder _stringBuilder;
         private int _percentage;
         private int _percentageMax;
         private string _percentageText;
         private string _status;
+
+        public string Title => DisplayName;
+        public IDialogContext? DialogContext { get; set; }
 
         public override string DisplayName
         {

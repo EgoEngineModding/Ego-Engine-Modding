@@ -1,34 +1,39 @@
-﻿using System.ComponentModel.DataAnnotations;
-using CommunityToolkit.Mvvm.Input;
-using EgoEngineLibrary.Frontend.Dialogs.Custom;
+﻿using CommunityToolkit.Mvvm.Input;
+using EgoEngineLibrary.Frontend.Dialogs;
+using EgoEngineLibrary.Frontend.ViewModels;
+using FluentValidation;
 
 namespace EgoPssgEditor.ViewModels;
 
-public partial class DuplicateTextureViewModel : DialogViewModel<bool>
+public partial class DuplicateTextureViewModel : ValidatableViewModelBase<DuplicateTextureViewModel>, IDialogViewModel
 {
-    public override string Title => "Duplicate Texture";
+    public string Title => "Duplicate Texture";
 
-    [Required]
-    [MinLength(1)]
+    public IDialogContext? DialogContext { get; set; }
+
     public string TextureName
     {
         get;
         set
         {
-            SetProperty(ref field, value, true);
+            SetProperty(ref field, value);
+            ValidateProperty(x => x.TextureName);
             OkCommand.NotifyCanExecuteChanged();
         }
     }
 
+    protected override IValidator<DuplicateTextureViewModel> Validator { get; }
+
     public DuplicateTextureViewModel()
     {
+        Validator = new ClassValidator();
         TextureName = string.Empty;
     }
 
     [RelayCommand(CanExecute = nameof(OkCanExecute))]
     private void Ok()
     {
-        SetDialogResult(true);
+        DialogContext?.Close();
     }
 
     private bool OkCanExecute()
@@ -39,6 +44,14 @@ public partial class DuplicateTextureViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void Cancel()
     {
-        SetDialogResult(false);
+        DialogContext?.Close(false);
+    }
+
+    private class ClassValidator : AbstractValidator<DuplicateTextureViewModel>
+    {
+        public ClassValidator()
+        {
+            RuleFor(x => x.TextureName).NotNull().MinimumLength(1);
+        }
     }
 }

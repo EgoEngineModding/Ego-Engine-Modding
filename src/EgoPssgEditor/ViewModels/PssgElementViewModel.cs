@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using EgoEngineLibrary.Frontend.ViewModels;
 using EgoEngineLibrary.Graphics.Pssg;
 
 namespace EgoPssgEditor.ViewModels

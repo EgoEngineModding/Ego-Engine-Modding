@@ -1,9 +1,4 @@
-﻿using EgoEngineLibrary.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EgoEngineLibrary.Frontend.ViewModels;
 using EgoEngineLibrary.Graphics.Pssg;
 using EgoEngineLibrary.Graphics.Pssg.Elements;
 
