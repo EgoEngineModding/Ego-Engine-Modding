@@ -71,11 +71,8 @@
     <Content Include="schema\schemaGridAutosport.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <None Update="schema\schemaGrid2.xml">
+    <Content Include="schema\schemaGrid2.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
   </ItemGroup>
 </Project>
