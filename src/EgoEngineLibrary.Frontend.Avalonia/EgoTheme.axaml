@@ -1,0 +1,24 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <!-- Add Styles Here -->
+    <Style Selector="DataGridCell">
+        <Setter Property="FontSize" Value="14"></Setter>
+        <Setter Property="MinHeight" Value="26"></Setter>
+        <Style Selector="^.rightAlignedText">
+            <Setter Property="HorizontalContentAlignment" Value="Right"></Setter>
+        </Style>
+    </Style>
+    <Style Selector="TabItem">
+        <Setter Property="FontSize" Value="20"></Setter>
+    </Style>
+    <!-- See https://github.com/AvaloniaUI/Avalonia/issues/20530 -->
+    <Style Selector="TreeViewItem /template/ StackPanel > Border > Grid">
+        <Setter Property="HorizontalAlignment" Value="Left"></Setter>
+    </Style>
+</Styles>

@@ -2,11 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using AvaloniaEdit.Folding;
-using EgoEngineLibrary.Frontend.Dialogs.File;
-using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
-
 using EgoErpArchiver.Controls;
-using EgoErpArchiver.Dialogs.Erp;
 using EgoErpArchiver.ViewModels;
 
 namespace EgoErpArchiver.Views
@@ -21,10 +17,6 @@ namespace EgoErpArchiver.Views
         public MainWindow()
         {
             InitializeComponent();
-            
-            FileDialogAvalonia.Register(this);
-            MessageBoxAvalonia.Register(this);
-            ErpDialogAvalonia.Register(this);
         }
 
         protected override void OnLoaded(RoutedEventArgs e)

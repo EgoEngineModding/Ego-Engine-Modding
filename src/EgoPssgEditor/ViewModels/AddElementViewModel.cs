@@ -1,31 +1,36 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
 using CommunityToolkit.Mvvm.Input;
-using EgoEngineLibrary.Frontend.Dialogs.Custom;
+using EgoEngineLibrary.Frontend.Dialogs;
+using EgoEngineLibrary.Frontend.ViewModels;
 using EgoEngineLibrary.Graphics.Pssg;
+using FluentValidation;
 
 namespace EgoPssgEditor.ViewModels;
 
-public partial class AddElementViewModel : DialogViewModel<bool>
+public partial class AddElementViewModel : ValidatableViewModelBase<AddElementViewModel>, IDialogViewModel
 {
-    public override string Title => "Add Element";
+    public string Title => "Add Element";
+    
+    public IDialogContext? DialogContext { get; set; }
     
     public ObservableCollection<string> Elements { get; }
 
-    [Required]
-    [MinLength(1)]
     public string ElementName
     {
         get;
         set
         {
-            SetProperty(ref field, value, true);
+            SetProperty(ref field, value);
+            ValidateProperty(x => x.ElementName);
             OkCommand.NotifyCanExecuteChanged();
         }
     }
 
+    protected override IValidator<AddElementViewModel> Validator { get; }
+
     public AddElementViewModel()
     {
+        Validator = new ClassValidator();
         Elements = new ObservableCollection<string>(GetAllElements());
         ElementName = string.Empty;
     }
@@ -38,7 +43,7 @@ public partial class AddElementViewModel : DialogViewModel<bool>
     [RelayCommand(CanExecute = nameof(OkCanExecute))]
     private void Ok()
     {
-        SetDialogResult(true);
+        DialogContext?.Close();
     }
     private bool OkCanExecute()
     {
@@ -48,6 +53,14 @@ public partial class AddElementViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void Cancel()
     {
-        SetDialogResult(false);
+        DialogContext?.Close(false);
+    }
+
+    private class ClassValidator : AbstractValidator<AddElementViewModel>
+    {
+        public ClassValidator()
+        {
+            RuleFor(x => x.ElementName).NotNull().MinimumLength(1);
+        }
     }
 }

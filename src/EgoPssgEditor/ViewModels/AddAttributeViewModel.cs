@@ -1,16 +1,19 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
 using CommunityToolkit.Mvvm.Input;
-using EgoEngineLibrary.Frontend.Dialogs.Custom;
+using EgoEngineLibrary.Frontend.Dialogs;
+using EgoEngineLibrary.Frontend.ViewModels;
 using EgoEngineLibrary.Graphics.Pssg;
+using FluentValidation;
 
 namespace EgoPssgEditor.ViewModels;
 
-public partial class AddAttributeViewModel : DialogViewModel<bool>
+public partial class AddAttributeViewModel : ValidatableViewModelBase<AddAttributeViewModel>, IDialogViewModel
 {
     private readonly PssgSchemaElement _schemaElement;
 
-    public override string Title => "Add Attribute";
+    public string Title => "Add Attribute";
+    
+    public IDialogContext? DialogContext { get; set; }
 
     public ObservableCollection<PssgAttributeType> AttributeTypes { get; }
     
@@ -33,38 +36,39 @@ public partial class AddAttributeViewModel : DialogViewModel<bool>
         set 
         {
             SetProperty(ref field, value);
-            ValidateProperty(Value, nameof(Value));
+            ValidateProperty(x => x.Value);
             OkCommand.NotifyCanExecuteChanged();
         }
     }
     
     public bool CanModifyType => SelectedSchemaAttribute is null;
 
-    [Required]
-    [CustomValidation(typeof(AddAttributeViewModel), nameof(ValidateValue))]
     public string Value
     {
         get;
         set
         {
-            SetProperty(ref field, value, true);
+            SetProperty(ref field, value);
+            ValidateProperty(x => x.Value);
             OkCommand.NotifyCanExecuteChanged();
         }
     }
 
-    [Required]
-    [MinLength(1)]
     public string AttributeName
     {
         get;
         set
         {
-            SetProperty(ref field, value, true);
+            SetProperty(ref field, value);
+            ValidateProperty(x => x.AttributeName);
         }
     }
 
+    protected override IValidator<AddAttributeViewModel> Validator { get; }
+
     public AddAttributeViewModel(PssgSchemaElement schemaElement)
     {
+        Validator = new ClassValidator();
         _schemaElement = schemaElement;
         AttributeTypes = new ObservableCollection<PssgAttributeType>(Enum.GetValues<PssgAttributeType>());
         Attributes = new ObservableCollection<PssgSchemaAttribute>(GetAllAttributes());
@@ -88,24 +92,10 @@ public partial class AddAttributeViewModel : DialogViewModel<bool>
         }
     }
 
-    public static ValidationResult? ValidateValue(string value, ValidationContext context)
-    {
-        AddAttributeViewModel instance = (AddAttributeViewModel)context.ObjectInstance;
-        try
-        {
-            _ = value.ToPssgValue(instance.SelectedAttributeType);
-            return ValidationResult.Success;
-        }
-        catch
-        {
-            return new ValidationResult("The value could not be converted to the selected data type.");
-        }
-    }
-
     [RelayCommand(CanExecute = nameof(OkCanExecute))]
     private void Ok()
     {
-        SetDialogResult(true);
+        DialogContext?.Close();
     }
     private bool OkCanExecute()
     {
@@ -115,6 +105,28 @@ public partial class AddAttributeViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void Cancel()
     {
-        SetDialogResult(false);
+        DialogContext?.Close(false);
+    }
+
+    private class ClassValidator : AbstractValidator<AddAttributeViewModel>
+    {
+        public ClassValidator()
+        {
+            RuleFor(x => x.Value).NotNull().Custom(ValidateValue);
+            RuleFor(x => x.AttributeName).NotNull().MinimumLength(1);
+        }
+        
+        private static void ValidateValue(string value, ValidationContext<AddAttributeViewModel> ctx)
+        {
+            AddAttributeViewModel instance = ctx.InstanceToValidate;
+            try
+            {
+                _ = value.ToPssgValue(instance.SelectedAttributeType);
+            }
+            catch
+            {
+                ctx.AddFailure("The value could not be converted to the selected data type.");
+            }
+        }
     }
 }

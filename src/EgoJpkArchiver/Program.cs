@@ -1,5 +1,8 @@
 ﻿using Avalonia;
 using System.Globalization;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using EgoEngineLibrary.Frontend.Dialogs;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EgoJpkArchiver;
 
@@ -18,6 +21,7 @@ sealed class Program
         CultureInfo.DefaultThreadCurrentCulture = culture;
         CultureInfo.DefaultThreadCurrentUICulture = culture;
 
+        ConfigureServices();
         BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
     }
@@ -28,4 +32,16 @@ sealed class Program
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();
+
+    private static void ConfigureServices()
+    {
+        var services = new ServiceCollection();
+
+        services.AddSingleton<IDialogService, AvaloniaDialogService>();
+        
+        var serviceProvider = services.BuildServiceProvider();
+        DialogService.Instance = serviceProvider.GetRequiredService<IDialogService>();
+
+        Ioc.Default.ConfigureServices(serviceProvider);
+    }
 }

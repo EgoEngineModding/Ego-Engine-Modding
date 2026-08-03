@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
+using EgoEngineLibrary.Frontend.ViewModels;
 using EgoEngineLibrary.Graphics.Pssg;
 
 namespace EgoPssgEditor.ViewModels

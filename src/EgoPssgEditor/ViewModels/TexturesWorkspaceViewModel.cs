@@ -1,5 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using EgoEngineLibrary.Frontend.Dialogs.Custom;
+using EgoEngineLibrary.Frontend.Dialogs;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 using EgoEngineLibrary.Graphics;
@@ -242,7 +242,7 @@ namespace EgoPssgEditor.ViewModels
                 TextureName = texView.DisplayName + "_2"
             };
 
-            if (await Dialog.ShowDialog(dtVm))
+            if (await DialogService.Instance.ShowDialogAsync(dtVm) == true)
             {
                 // Copy and Edit Name
                 PssgElement elementToCopy = texView.Texture;

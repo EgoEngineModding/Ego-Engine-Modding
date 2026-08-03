@@ -3,6 +3,7 @@ using Avalonia;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using EgoEngineLibrary.Frontend.Configuration;
 using EgoEngineLibrary.Frontend.DependencyInjection;
+using EgoEngineLibrary.Frontend.Dialogs;
 using EgoErpArchiver.Configuration;
 using EgoErpArchiver.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -84,7 +85,8 @@ sealed class Program
             .AddSingleton(typeof(ILogger<>), typeof(Logger<>))
             .AddSingleton<ILoggerProvider>(_ => new SerilogLoggerProvider(logger))
             .AddConfigOptions();
-
+        
+        services.AddSingleton<IDialogService, AvaloniaDialogService>();
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<ErpFileViewModel>();
@@ -94,6 +96,8 @@ sealed class Program
         services.AddSingleton<XmlFilesWorkspaceViewModel>();
         
         var serviceProvider = services.BuildServiceProvider();
+        DialogService.Instance = serviceProvider.GetRequiredService<IDialogService>();
+
         Ioc.Default.ConfigureServices(serviceProvider);
     }
 }

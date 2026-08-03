@@ -4,7 +4,7 @@ using System.Xml;
 using System.Xml.Linq;
 using CommunityToolkit.Mvvm.Input;
 using EgoEngineLibrary.Conversion;
-using EgoEngineLibrary.Frontend.Dialogs.Custom;
+using EgoEngineLibrary.Frontend.Dialogs;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 using EgoEngineLibrary.Graphics.Pssg;
@@ -262,8 +262,8 @@ namespace EgoPssgEditor.ViewModels
             }
 
             var vm = new AddElementViewModel();
-            var ret = await Dialog.ShowDialog(vm);
-            if (ret)
+            var ret = await DialogService.Instance.ShowDialogAsync(vm);
+            if (ret == true)
             {
                 PssgElement newElement = elementView.Element.AppendChild(vm.ElementName);
                 PssgElementViewModel newElementView = new PssgElementViewModel(newElement, elementView);
@@ -321,8 +321,8 @@ namespace EgoPssgEditor.ViewModels
         {
             PssgElementViewModel elementView = (PssgElementViewModel)parameter;
             var vm = new AddAttributeViewModel(elementView.Element.SchemaElement);
-            var res = await Dialog.ShowDialog(vm);
-            if (res)
+            var res = await DialogService.Instance.ShowDialogAsync(vm);
+            if (res == true)
             {
                 PssgAttribute attr = elementView.Element.AddAttribute(vm.AttributeName,
                     vm.Value.ToPssgValue(vm.SelectedAttributeType));

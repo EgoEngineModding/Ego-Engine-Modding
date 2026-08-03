@@ -2,41 +2,20 @@
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 
-using CommunityToolkit.Mvvm.Messaging;
-
 namespace EgoEngineLibrary.Frontend.Dialogs.File;
 
-public static class FileDialogAvalonia
+internal static class FileDialogAvalonia
 {
-    public static void Register(Visual recipient)
-    {
-        FileDialog.Messenger.Register<Visual, FileOpenMessage>(recipient, FileOpenHandler);
-        FileDialog.Messenger.Register<Visual, FileSaveMessage>(recipient, FileSaveHandler);
-        FileDialog.Messenger.Register<Visual, FolderOpenMessage>(recipient, FolderOpenHandler);
-    }
-
-    public static void Unregister(Visual recipient)
-    {
-        FileDialog.Messenger.Unregister<FileOpenMessage>(recipient);
-        FileDialog.Messenger.Unregister<FileSaveMessage>(recipient);
-        FileDialog.Messenger.Unregister<FolderOpenMessage>(recipient);
-    }
-
-    private static void FileOpenHandler(Visual recipient, FileOpenMessage message)
-    {
-        message.Reply(FileOpen(recipient, message));
-    }
-
-    private static async Task<IReadOnlyList<string>> FileOpen(Visual recipient, FileOpenMessage message)
+    public static async Task FileOpen(Visual recipient, FileOpenViewModel viewModel)
     {
         // Get a reference to our TopLevel (in our case the parent Window)
         var topLevel = TopLevel.GetTopLevel(recipient);
         if (topLevel is null)
         {
-            return [];
+            return;
         }
 
-        var openOptions = message.Options;
+        var openOptions = viewModel.Options;
         var options = new FilePickerOpenOptions
         {
             Title = openOptions.Title,
@@ -50,24 +29,19 @@ public static class FileDialogAvalonia
         };
 
         var storageFiles = await topLevel.StorageProvider.OpenFilePickerAsync(options);
-        return storageFiles.Select(x => x.Path.LocalPath).ToArray();
+        viewModel.Result = storageFiles.Select(x => x.Path.LocalPath).ToArray();
     }
 
-    private static void FileSaveHandler(Visual recipient, FileSaveMessage message)
-    {
-        message.Reply(FileSave(recipient, message));
-    }
-
-    private static async Task<string?> FileSave(Visual recipient, FileSaveMessage message)
+    public static async Task FileSave(Visual recipient, FileSaveViewModel viewModel)
     {
         // Get a reference to our TopLevel (in our case the parent Window)
         var topLevel = TopLevel.GetTopLevel(recipient);
         if (topLevel is null)
         {
-            return null;
+            return;
         }
 
-        var saveOptions = message.Options;
+        var saveOptions = viewModel.Options;
         var options = new FilePickerSaveOptions
         {
             Title = saveOptions.Title,
@@ -82,36 +56,30 @@ public static class FileDialogAvalonia
         };
 
         var storageFiles = await topLevel.StorageProvider.SaveFilePickerAsync(options);
-        return storageFiles?.Path.LocalPath;
+        viewModel.Result = storageFiles?.Path.LocalPath;
     }
 
-    private static void FolderOpenHandler(Visual recipient, FolderOpenMessage message)
+    public static async Task FolderOpen(Visual recipient, FolderOpenViewModel viewModel)
     {
-        message.Reply(Handle(recipient, message));
-        return;
-
-        static async Task<IReadOnlyList<string>> Handle(Visual recipient, FolderOpenMessage message)
+        // Get a reference to our TopLevel (in our case the parent Window)
+        var topLevel = TopLevel.GetTopLevel(recipient);
+        if (topLevel is null)
         {
-            // Get a reference to our TopLevel (in our case the parent Window)
-            var topLevel = TopLevel.GetTopLevel(recipient);
-            if (topLevel is null)
-            {
-                return [];
-            }
-
-            var openOptions = message.Options;
-            var options = new FolderPickerOpenOptions
-            {
-                Title = openOptions.Title,
-                AllowMultiple = openOptions.AllowMultiple,
-                SuggestedFileName = openOptions.FileName,
-                SuggestedStartLocation = openOptions.InitialDirectory is null
-                    ? null
-                    : await topLevel.StorageProvider.TryGetFolderFromPathAsync(openOptions.InitialDirectory),
-            };
-
-            var storageFiles = await topLevel.StorageProvider.OpenFolderPickerAsync(options);
-            return storageFiles.Select(x => x.Path.LocalPath).ToArray();
+            return;
         }
+
+        var openOptions = viewModel.Options;
+        var options = new FolderPickerOpenOptions
+        {
+            Title = openOptions.Title,
+            AllowMultiple = openOptions.AllowMultiple,
+            SuggestedFileName = openOptions.FileName,
+            SuggestedStartLocation = openOptions.InitialDirectory is null
+                ? null
+                : await topLevel.StorageProvider.TryGetFolderFromPathAsync(openOptions.InitialDirectory),
+        };
+
+        var storageFiles = await topLevel.StorageProvider.OpenFolderPickerAsync(options);
+        viewModel.Result = storageFiles.Select(x => x.Path.LocalPath).ToArray();
     }
 }
