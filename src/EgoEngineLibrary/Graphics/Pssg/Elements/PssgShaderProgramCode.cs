@@ -11,7 +11,7 @@ public class PssgShaderProgramCode : PssgElement
             new PssgSchemaAttribute("codeType", PssgAttributeType.String),
             new PssgSchemaAttribute("profileType", PssgAttributeType.Int),
             new PssgSchemaAttribute("profile", PssgAttributeType.Int),
-            new PssgSchemaAttribute("codeEntry", PssgAttributeType.Int),
+            new PssgSchemaAttribute("codeEntry", PssgAttributeType.String),
             new PssgSchemaAttribute("parameterCount", PssgAttributeType.Int),
             new PssgSchemaAttribute("streamCount", PssgAttributeType.Int),
         }
@@ -41,9 +41,9 @@ public class PssgShaderProgramCode : PssgElement
         set => AddAttribute(Schema.Attributes[3].Name, value);
     }
 
-    public byte CodeEntry
+    public string CodeEntry
     {
-        get => GetAttributeValue<byte>(Schema.Attributes[4].Name);
+        get => GetAttributeValue<string>(Schema.Attributes[4].Name);
         set => AddAttribute(Schema.Attributes[4].Name, value);
     }
 

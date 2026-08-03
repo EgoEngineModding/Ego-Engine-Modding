@@ -1,0 +1,35 @@
+//--------------------------------------
+//--- 010 Editor v15.0.1 Binary Template
+//
+// File: clm.bt
+// Author: Petar Tasev
+// Revision: 1
+// Purpose: Label Ego Engine clm files
+//--------------------------------------
+LittleEndian();
+SetBackColor(cLtGray);
+// Compressed Light Map
+// Supports RD:G and D2 for now
+
+// MapHeader
+float offsetX;
+float offsetZ;
+float scaleX;
+float scaleZ;
+uint32 mapSize;
+uint32 tileWidth;
+
+struct MapCell {
+    uint32 subOffset;
+    int8 cellData[100];
+    
+    local int32 i <hidden=true> = 0;
+    local int32 val <hidden=true>;
+    for (i = 0; i < 100; ++i) {
+        val = cellData[i];
+        if (val < 0) {
+            FSeek(~val * 0x68 + subOffset);
+            struct MapCell subCell;
+        }
+    }
+} firstCell;

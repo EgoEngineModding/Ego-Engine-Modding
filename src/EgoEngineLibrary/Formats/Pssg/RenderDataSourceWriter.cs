@@ -245,6 +245,9 @@ namespace EgoEngineLibrary.Formats.Pssg
                 case "half4":
                     WriteVectorHalf4(destination, new Vector4(value, 1));
                     break;
+                case "hend3n":
+                    WriteHend3N(destination, value);
+                    break;
                 default:
                     throw new NotImplementedException($"Support for {vi.Name} data type {vi.DataType} is not implemented.");
             }
@@ -261,6 +264,9 @@ namespace EgoEngineLibrary.Formats.Pssg
                     break;
                 case "float3":
                     WriteVector3(destination, new Vector3(value.X, value.Y, value.Z));
+                    break;
+                case "hend3n":
+                    WriteHend3N(destination, value.AsVector3());
                     break;
                 default:
                     throw new NotImplementedException($"Support for {vi.Name} data type {vi.DataType} is not implemented.");
@@ -281,6 +287,9 @@ namespace EgoEngineLibrary.Formats.Pssg
                     break;
                 case "float3":
                     WriteVector3(destination, new Vector3(value.X, value.Y, value.Z));
+                    break;
+                case "hend3n":
+                    WriteHend3N(destination, value.AsVector3());
                     break;
                 default:
                     throw new NotImplementedException($"Support for {vi.Name} data type {vi.DataType} is not implemented.");
@@ -332,9 +341,14 @@ namespace EgoEngineLibrary.Formats.Pssg
                 case "uint_color_argb":
                     BinaryPrimitives.WriteUInt32BigEndian(destination, PackArgbColor(value));
                     break;
+                case "uchar4":
+                    BinaryPrimitives.WriteUInt32BigEndian(destination, PackRgbaColor(value));
+                    break;
                 default:
                     throw new NotImplementedException($"Support for {vi.Name} data type {vi.DataType} is not implemented.");
             }
+
+            return;
 
             static uint PackArgbColor(Vector4 vector)
             {
@@ -345,6 +359,17 @@ namespace EgoEngineLibrary.Formats.Pssg
                 vector = Vector4.Clamp(vector, Vector4.Zero, MaxBytes);
 
                 return (uint)((((byte)vector.W) << 0) | (((byte)vector.X) << 8) | (((byte)vector.Y) << 16) | (((byte)vector.Z) << 24));
+            }
+
+            static uint PackRgbaColor(Vector4 vector)
+            {
+                Vector4 MaxBytes = new Vector4(byte.MaxValue);
+                Vector4 Half = new Vector4(0.5f);
+                vector *= MaxBytes;
+                vector += Half;
+                vector = Vector4.Clamp(vector, Vector4.Zero, MaxBytes);
+
+                return (uint)((((byte)vector.X) << 0) | (((byte)vector.Y) << 8) | (((byte)vector.Z) << 16) | (((byte)vector.W) << 24));
             }
         }
 
@@ -377,25 +402,27 @@ namespace EgoEngineLibrary.Formats.Pssg
 
         private static void WriteVectorHalf2(Span<byte> destination, Vector2 value)
         {
-            WriteHalfBigEndian(destination, (Half)value.X);
-            WriteHalfBigEndian(destination.Slice(2), (Half)value.Y);
+            BinaryPrimitives.WriteHalfBigEndian(destination, (Half)value.X);
+            BinaryPrimitives.WriteHalfBigEndian(destination.Slice(2), (Half)value.Y);
         }
 
         private static void WriteVectorHalf4(Span<byte> destination, Vector4 value)
         {
-            WriteHalfBigEndian(destination, (Half)value.X);
-            WriteHalfBigEndian(destination.Slice(2), (Half)value.Y);
-            WriteHalfBigEndian(destination.Slice(4), (Half)value.Z);
-            WriteHalfBigEndian(destination.Slice(6), (Half)value.W);
+            BinaryPrimitives.WriteHalfBigEndian(destination, (Half)value.X);
+            BinaryPrimitives.WriteHalfBigEndian(destination.Slice(2), (Half)value.Y);
+            BinaryPrimitives.WriteHalfBigEndian(destination.Slice(4), (Half)value.Z);
+            BinaryPrimitives.WriteHalfBigEndian(destination.Slice(6), (Half)value.W);
         }
 
-        private static void WriteHalfBigEndian(Span<byte> destination, Half value)
+        private static void WriteHend3N(Span<byte> destination, Vector3 value)
         {
-            BinaryPrimitives.WriteInt16BigEndian(destination, HalfToInt16Bits(value));
-        }
-        private static unsafe short HalfToInt16Bits(Half value)
-        {
-            return *(short*)&value;
+            // 11 11 10 bit signed values
+            // Shift up to capture sign bit, then unsigned shift back
+            var x = ((int)(float.Clamp(value.X, -1, 1) * 0x3FF)) << 21 >>> 21;
+            var y = ((int)(float.Clamp(value.Y, -1, 1) * 0x3FF)) << 21 >>> 21;
+            var z = ((int)(float.Clamp(value.Z, -1, 1) * 0x1FF)) << 22 >>> 22;
+            uint val = (uint)x | ((uint)y << 11) | ((uint)z << 22);
+            BinaryPrimitives.WriteUInt32BigEndian(destination, val);
         }
     }
 }

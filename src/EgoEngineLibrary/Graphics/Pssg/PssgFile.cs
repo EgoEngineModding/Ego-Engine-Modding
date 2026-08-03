@@ -132,8 +132,8 @@ namespace EgoEngineLibrary.Graphics.Pssg
                     }
                 }
 
-                file._elementTable = reader.ElementTable;
-                file._attributeTable = reader.AttributeTable;
+                file._elementTable = new OrderedSet<PssgSchemaElement>(reader.ElementTable);
+                file._attributeTable = new OrderedSet<PssgSchemaAttribute>(reader.AttributeTable);
             }
 
             return file;

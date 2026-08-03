@@ -117,7 +117,7 @@
                             <DataGrid x:Name="attributesDataGrid"
                                       ItemsSource="{Binding ElementName=tvMain, Path=((vm:PssgElementViewModel)SelectedItem).Attributes}"
                                       AutoGenerateColumns="False" CanUserSortColumns="False"
-                                      HeadersVisibility="All" RowHeight="20" FontSize="14"
+                                      HeadersVisibility="All"
                                       CellPointerPressed="AttributesDataGrid_OnCellPointerPressed">
                                 <DataGrid.Styles>
                                     <Style Selector="DataGridRow" x:DataType="vm:PssgAttributeViewModel">
