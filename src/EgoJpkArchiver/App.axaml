@@ -10,12 +10,6 @@
     <Application.Styles>
         <FluentTheme DensityStyle="Compact" />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
-        <Style Selector="DataGridCell">
-            <Setter Property="FontSize" Value="14"></Setter>
-            <Setter Property="MinHeight" Value="26"></Setter>
-            <Style Selector="^.rightAlignedText">
-                <Setter Property="HorizontalContentAlignment" Value="Right"></Setter>
-            </Style>
-        </Style>
+        <StyleInclude Source="avares://EgoEngineLibrary.Frontend.Avalonia/EgoTheme.axaml" />
     </Application.Styles>
 </Application>

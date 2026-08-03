@@ -6,14 +6,11 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EgoEngineLibrary.Frontend\EgoEngineLibrary.Frontend.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="Dialogs\MessageBox\MessageBoxWindow.axaml" />
   </ItemGroup>
 
 </Project>
