@@ -4,14 +4,9 @@ namespace EgoPssgEditor.ViewModels
 {
     public abstract class WorkspaceViewModel : ViewModelBase
     {
-        protected readonly MainViewModel mainView;
+        public MainViewModel MainView { get; set; }
 
-        public WorkspaceViewModel(MainViewModel mainView)
-        {
-            this.mainView = mainView;
-        }
-
-        public abstract void LoadData(object data);
+        public abstract void LoadData();
 
         public abstract void ClearData();
     }

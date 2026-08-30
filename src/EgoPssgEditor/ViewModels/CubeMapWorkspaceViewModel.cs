@@ -8,18 +8,12 @@ namespace EgoPssgEditor.ViewModels
 {
     public class CubeMapWorkspaceViewModel : WorkspaceViewModel
     {
-        public CubeMapWorkspaceViewModel(MainViewModel mainView)
-            : base(mainView)
-        {
-
-        }
-
         public override void ClearData()
         {
             throw new NotImplementedException();
         }
 
-        public override void LoadData(object data)
+        public override void LoadData()
         {
             throw new NotImplementedException();
         }

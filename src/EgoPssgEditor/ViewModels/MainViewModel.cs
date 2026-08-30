@@ -69,9 +69,13 @@ namespace EgoPssgEditor.ViewModels
             this.DisplayName = Properties.Resources.AppTitleLong;
             schemaPath = Path.Combine(AppContext.BaseDirectory, "schema.xml");
 
-            _elementsWorkspace = new ElementsWorkspaceViewModel(this);
-            texturesWorkspace = new TexturesWorkspaceViewModel(this);
-            _modelsWorkspace = new ModelsWorkspaceViewModel(this);
+            _elementsWorkspace = new ElementsWorkspaceViewModel();
+            texturesWorkspace = new TexturesWorkspaceViewModel();
+            _modelsWorkspace = new ModelsWorkspaceViewModel();
+
+            _elementsWorkspace.MainView = this;
+            texturesWorkspace.MainView = this;
+            _modelsWorkspace.MainView = this;
 
             try { LoadSchema(); } catch { }
             ParseCommandLineArguments();
@@ -188,7 +192,7 @@ namespace EgoPssgEditor.ViewModels
             PssgSchema.ResetSchema();
         }
 
-        public void LoadPssg(PssgFile pssg)
+        public void LoadPssg(PssgFile? pssg)
         {
             // if pssg is null, we just want to reload the workspaces
             if (pssg is null)
@@ -201,10 +205,10 @@ namespace EgoPssgEditor.ViewModels
                 file = pssg;
             }
 
-            _elementsWorkspace.LoadData(file);
-            texturesWorkspace.LoadData(_elementsWorkspace.RootElement);
+            _elementsWorkspace.LoadData();
+            texturesWorkspace.LoadData();
             SelectedTabIndex = texturesWorkspace.Textures.Count > 0 ? 1 : 0;
-            _modelsWorkspace.LoadData(file);
+            _modelsWorkspace.LoadData();
         }
         private async Task SavePssg(PssgFileType type)
         {
