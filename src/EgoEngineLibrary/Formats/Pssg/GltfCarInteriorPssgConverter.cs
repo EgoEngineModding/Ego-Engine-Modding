@@ -116,14 +116,11 @@ namespace EgoEngineLibrary.Formats.Pssg
                 element.Id = "Scene Root";
                 parent.ChildElements.Add(element);
             }
-            else if (gltfNode.Mesh is not null)
-            {
-                _ = CreateRenderNode(parent, gltfNode, state);
-                return;
-            }
             else
             {
-                element = new PssgNode(parent.File, parent);
+                element = gltfNode.Mesh is null
+                    ? new PssgNode(parent.File, parent)
+                    : state.CreateRenderNode(parent.File, parent);
                 element.StopTraversal = false;
                 element.Nickname = gltfNode.Name;
                 element.Id = gltfNode.Name;
@@ -139,25 +136,19 @@ namespace EgoEngineLibrary.Formats.Pssg
             {
                 ConvertSceneNodes(pssg, element, child, state);
             }
-        }
 
-        private static PssgElement CreateRenderNode(PssgElement parent, Node gltfNode, ImportState state)
-        {
-            var node = state.CreateRenderNode(parent.File, parent);
-            node.StopTraversal = false;
-            node.Nickname = gltfNode.Name;
-            node.Id = gltfNode.Name;
-            parent.ChildElements.Add(node);
+            if (gltfNode.Mesh is null)
+            {
+                return;
+            }
 
             state.MatShaderMapping.Clear();
 
             // Now add a new mesh from mesh builder
-            ConvertMesh(node, gltfNode, state);
+            ConvertMesh(element, gltfNode, state);
 
             // Write the mesh data
             WriteMeshData(state);
-
-            return node;
         }
 
         private static void ConvertMesh(PssgNode renderElement, Node gltfNode, ImportState state)
@@ -165,9 +156,6 @@ namespace EgoEngineLibrary.Formats.Pssg
             var mesh = gltfNode.Mesh;
             if (mesh.Primitives.Any(p => p.Material == null))
                 throw new NotImplementedException($"The converter does not support primitives ({mesh.Name}) with a null material.");
-
-            renderElement.Initialize();
-            renderElement.Transform.Transform = gltfNode.LocalMatrix;
 
             // Add to the material shader mapping
             var gltfMats = mesh.Primitives.Select(p => p.Material);
