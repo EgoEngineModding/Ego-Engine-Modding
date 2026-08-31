@@ -1,23 +1,15 @@
-﻿using EgoEngineLibrary.Formats.Pssg;
-using EgoEngineLibrary.Graphics;
-
-using SharpGLTF.Schema2;
-
-using System.Collections.ObjectModel;
-
-using CommunityToolkit.Mvvm.Input;
-
+﻿using CommunityToolkit.Mvvm.Input;
+using EgoEngineLibrary.Formats.Pssg;
 using EgoEngineLibrary.Frontend.Dialogs.File;
 using EgoEngineLibrary.Frontend.Dialogs.MessageBox;
 using EgoEngineLibrary.Graphics.Pssg;
+using SharpGLTF.Schema2;
 
 namespace EgoPssgEditor.ViewModels
 {
     public partial class ModelsWorkspaceViewModel : WorkspaceViewModel
     {
-        private PssgFile _pssg;
-        PssgElementViewModel _rootElement;
-        readonly ObservableCollection<PssgElementViewModel> pssgElements;
+        private PssgFile? _pssg;
 
         public override string DisplayName
         {
@@ -26,37 +18,15 @@ namespace EgoPssgEditor.ViewModels
                 return "Models";
             }
         }
-        public PssgElementViewModel RootElement
-        {
-            get { return _rootElement; }
-            private set
-            {
-                ClearData();
-                _rootElement = value;
-                pssgElements.Add(_rootElement);
-            }
-        }
-        public ObservableCollection<PssgElementViewModel> PssgElements
-        {
-            get { return pssgElements; }
-        }
 
-        public ModelsWorkspaceViewModel(MainViewModel mainView)
-            : base(mainView)
+        public override void LoadData()
         {
-            pssgElements = new ObservableCollection<PssgElementViewModel>();
-        }
-
-        public override void LoadData(object data)
-        {
-            _pssg = (PssgFile)data;
+            _pssg = MainView.PssgFile;
         }
 
         public override void ClearData()
         {
             _pssg = null;
-            _rootElement = null;
-            pssgElements.Clear();
         }
 
         #region Menu
@@ -78,10 +48,10 @@ namespace EgoPssgEditor.ViewModels
                 Title = "Select the model's save location and file name",
                 DefaultExtension = "glb",
             };
-            if (!string.IsNullOrEmpty(mainView.FilePath))
+            if (!string.IsNullOrEmpty(MainView.FilePath))
             {
-                saveOptions.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
-                saveOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+                saveOptions.FileName = Path.GetFileNameWithoutExtension(MainView.FilePath);
+                saveOptions.InitialDirectory = Path.GetDirectoryName(MainView.FilePath);
             }
 
             var result = await FileDialog.ShowSaveFileDialog(saveOptions);
@@ -90,7 +60,7 @@ namespace EgoPssgEditor.ViewModels
                 try
                 {
                     var converter = new CarExteriorPssgGltfConverter();
-                    var model = converter.Convert(_pssg);
+                    var model = converter.Convert(_pssg!);
                     model.Save(result);
                 }
                 catch (Exception ex)
@@ -117,10 +87,10 @@ namespace EgoPssgEditor.ViewModels
                 FileTypeChoices = [FilePickerType.Gltf, FilePickerType.All],
                 Title = "Select a gltf model file",
             };
-            if (!string.IsNullOrEmpty(mainView.FilePath))
+            if (!string.IsNullOrEmpty(MainView.FilePath))
             {
-                openOptions.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
-                openOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+                openOptions.FileName = Path.GetFileNameWithoutExtension(MainView.FilePath);
+                openOptions.InitialDirectory = Path.GetDirectoryName(MainView.FilePath);
             }
 
             var result = await FileDialog.ShowOpenFileDialog(openOptions);
@@ -131,9 +101,9 @@ namespace EgoPssgEditor.ViewModels
                     var gltf = ModelRoot.Load(result[0]);
 
                     var conv = new GltfCarExteriorPssgConverter();
-                    conv.Convert(gltf, _pssg);
+                    conv.Convert(gltf, _pssg!);
 
-                    mainView.LoadPssg(null);
+                    MainView.LoadPssg(null);
                 }
                 catch (Exception ex)
                 {
@@ -160,10 +130,10 @@ namespace EgoPssgEditor.ViewModels
                 Title = "Select the model's save location and file name",
                 DefaultExtension = "glb",
             };
-            if (!string.IsNullOrEmpty(mainView.FilePath))
+            if (!string.IsNullOrEmpty(MainView.FilePath))
             {
-                saveOptions.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
-                saveOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+                saveOptions.FileName = Path.GetFileNameWithoutExtension(MainView.FilePath);
+                saveOptions.InitialDirectory = Path.GetDirectoryName(MainView.FilePath);
             }
 
             var result = await FileDialog.ShowSaveFileDialog(saveOptions);
@@ -172,7 +142,7 @@ namespace EgoPssgEditor.ViewModels
                 try
                 {
                     var converter = new DirtCarExteriorPssgGltfConverter();
-                    var model = converter.Convert(_pssg);
+                    var model = converter.Convert(_pssg!);
                     model.Save(result);
                 }
                 catch (Exception ex)
@@ -199,10 +169,10 @@ namespace EgoPssgEditor.ViewModels
                 FileTypeChoices = [FilePickerType.Gltf, FilePickerType.All],
                 Title = "Select a gltf model file",
             };
-            if (!string.IsNullOrEmpty(mainView.FilePath))
+            if (!string.IsNullOrEmpty(MainView.FilePath))
             {
-                openOptions.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
-                openOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+                openOptions.FileName = Path.GetFileNameWithoutExtension(MainView.FilePath);
+                openOptions.InitialDirectory = Path.GetDirectoryName(MainView.FilePath);
             }
 
             var result = await FileDialog.ShowOpenFileDialog(openOptions);
@@ -213,9 +183,9 @@ namespace EgoPssgEditor.ViewModels
                     var gltf = ModelRoot.Load(result[0]);
 
                     var conv = new GltfDirtCarExteriorPssgConverter();
-                    conv.Convert(gltf, _pssg);
+                    conv.Convert(gltf, _pssg!);
 
-                    mainView.LoadPssg(null);
+                    MainView.LoadPssg(null);
                 }
                 catch (Exception ex)
                 {
@@ -241,10 +211,10 @@ namespace EgoPssgEditor.ViewModels
                 FileTypeChoices = [FilePickerType.Gltf, FilePickerType.All],
                 Title = "Select a gltf model file",
             };
-            if (!string.IsNullOrEmpty(mainView.FilePath))
+            if (!string.IsNullOrEmpty(MainView.FilePath))
             {
-                openOptions.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
-                openOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+                openOptions.FileName = Path.GetFileNameWithoutExtension(MainView.FilePath);
+                openOptions.InitialDirectory = Path.GetDirectoryName(MainView.FilePath);
             }
 
             var result = await FileDialog.ShowOpenFileDialog(openOptions);
@@ -255,9 +225,9 @@ namespace EgoPssgEditor.ViewModels
                     var gltf = ModelRoot.Load(result[0]);
 
                     var conv = new GltfGridCarExteriorPssgConverter();
-                    conv.Convert(gltf, _pssg);
+                    conv.Convert(gltf, _pssg!);
 
-                    mainView.LoadPssg(null);
+                    MainView.LoadPssg(null);
                 }
                 catch (Exception ex)
                 {
@@ -284,10 +254,10 @@ namespace EgoPssgEditor.ViewModels
                 Title = "Select the model's save location and file name",
                 DefaultExtension = "glb",
             };
-            if (!string.IsNullOrEmpty(mainView.FilePath))
+            if (!string.IsNullOrEmpty(MainView.FilePath))
             {
-                saveOptions.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
-                saveOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+                saveOptions.FileName = Path.GetFileNameWithoutExtension(MainView.FilePath);
+                saveOptions.InitialDirectory = Path.GetDirectoryName(MainView.FilePath);
             }
 
             var result = await FileDialog.ShowSaveFileDialog(saveOptions);
@@ -296,7 +266,7 @@ namespace EgoPssgEditor.ViewModels
                 try
                 {
                     var converter = new CarInteriorPssgGltfConverter();
-                    var model = converter.Convert(_pssg);
+                    var model = converter.Convert(_pssg!);
                     model.Save(result);
                 }
                 catch (Exception ex)
@@ -324,10 +294,10 @@ namespace EgoPssgEditor.ViewModels
                 FileTypeChoices = [FilePickerType.Gltf, FilePickerType.All],
                 Title = "Select a gltf model file",
             };
-            if (!string.IsNullOrEmpty(mainView.FilePath))
+            if (!string.IsNullOrEmpty(MainView.FilePath))
             {
-                openOptions.FileName = Path.GetFileNameWithoutExtension(mainView.FilePath);
-                openOptions.InitialDirectory = Path.GetDirectoryName(mainView.FilePath);
+                openOptions.FileName = Path.GetFileNameWithoutExtension(MainView.FilePath);
+                openOptions.InitialDirectory = Path.GetDirectoryName(MainView.FilePath);
             }
 
             var result = await FileDialog.ShowOpenFileDialog(openOptions);
@@ -338,9 +308,9 @@ namespace EgoPssgEditor.ViewModels
                     var gltf = ModelRoot.Load(result[0]);
 
                     var conv = new GltfCarInteriorPssgConverter();
-                    conv.Convert(gltf, _pssg);
+                    conv.Convert(gltf, _pssg!);
 
-                    mainView.LoadPssg(null);
+                    MainView.LoadPssg(null);
                 }
                 catch (Exception ex)
                 {

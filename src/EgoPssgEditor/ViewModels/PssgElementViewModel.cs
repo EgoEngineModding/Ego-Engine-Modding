@@ -1,134 +1,96 @@
 ﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using EgoEngineLibrary.Frontend.ViewModels;
 using EgoEngineLibrary.Graphics.Pssg;
 
-namespace EgoPssgEditor.ViewModels
+namespace EgoPssgEditor.ViewModels;
+
+public partial class PssgElementViewModel : ViewModelBase
 {
-    public class PssgElementViewModel : ViewModelBase
+    public PssgElement Element { get; }
+
+    public override string DisplayName
     {
-        #region Data Props
-        static readonly PssgElementViewModel DummyChild = new PssgElementViewModel();
-        readonly PssgElement _element;
-        PssgElementViewModel parent;
-        readonly ObservableCollection<PssgElementViewModel> children;
-        readonly ObservableCollection<PssgAttributeViewModel> attributes;
+        get { return Element.Name; }
+    }
+    public string DisplayValue
+    {
+        get { return Element.DisplayValue; }
+    }
+    public bool HasAttributes
+    {
+        get { return Element.Attributes.Count > 0; }
+    }
+    public bool IsDataElement
+    {
+        get { return Element.IsDataElement; }
+    }
+    public PssgElementViewModel? Parent { get; }
 
-        public PssgElement Element
-        {
-            get { return _element; }
-        }
-        public override string DisplayName
-        {
-            get { return _element?.Name; }
-        }
-        public string DisplayValue
-        {
-            get { return _element.DisplayValue; }
-        }
-        public bool HasAttributes
-        {
-            get { return _element.Attributes.Count > 0; }
-        }
-        public bool IsDataElement
-        {
-            get { return _element.IsDataElement; }
-        }
-        public PssgElementViewModel Parent
-        {
-            get { return parent; }
-        }
-        public ObservableCollection<PssgElementViewModel> Children
-        {
-            get { return children; }
-        }
-        public ObservableCollection<PssgAttributeViewModel> Attributes
-        {
-            get { return attributes; }
-        }
-        #endregion
+    public ObservableCollection<PssgElementViewModel> Children { get; }
 
-        #region Presentation Props
-        bool isExpanded;
-        bool isSelected;
+    public ObservableCollection<PssgAttributeViewModel> Attributes { get; }
 
-        public bool IsExpanded
+    [ObservableProperty]
+    public partial bool IsExpanded
+    {
+        get;
+        set;
+    }
+
+    [ObservableProperty]
+    public partial bool IsSelected
+    {
+        get;
+        set;
+    }
+
+    public PssgElementViewModel(PssgElement element, PssgElementViewModel? parent = null)
+    {
+        Element = element;
+        Parent = parent;
+        Attributes = new ObservableCollection<PssgAttributeViewModel>();
+        Children =
+        [
+            .. from child in element.ChildElements
+            select new PssgElementViewModel(child, this)
+        ];
+    }
+
+    public IEnumerable<PssgElementViewModel> GetElements()
+    {
+        yield return this;
+
+        foreach (PssgElementViewModel child in Children)
         {
-            get { return isExpanded; }
-            set
+            foreach (PssgElementViewModel cc in child.GetElements()) yield return cc;
+        }
+    }
+
+    partial void OnIsExpandedChanged(bool value)
+    {
+        // Expand all the way up to the root.
+        if (value && Parent is not null)
+        {
+            Parent.IsExpanded = true;
+        }
+    }
+
+    partial void OnIsSelectedChanged(bool value)
+    {
+        if (value)
+        {
+            Parent?.IsExpanded = true;
+            Attributes.Clear();
+            foreach (PssgAttribute attr in Element.Attributes)
             {
-                if (value != isExpanded)
-                {
-                    isExpanded = value;
-                    this.OnPropertyChanged("IsExpanded");
-                }
-
-                // Expand all the way up to the root.
-                if (isExpanded && parent != null)
-                    parent.IsExpanded = true;
+                Attributes.Add(new PssgAttributeViewModel(attr, this));
             }
         }
-        public bool IsSelected
+        else
         {
-            get { return isSelected; }
-            set
-            {
-                if (value != isSelected)
-                {
-                    if (value)
-                    {
-                        if (parent != null) parent.IsExpanded = true;
-                        GetAttributes();
-                    }
-                    isSelected = value;
-                    OnPropertyChanged("IsSelected");
-                }
-            }
-        }
-        #endregion
-
-        private PssgElementViewModel()
-        { }
-
-        public PssgElementViewModel(PssgElement element)
-            : this(element, null)
-        {
-
-        }
-
-        public PssgElementViewModel(PssgElement element, PssgElementViewModel parent)
-        {
-            this._element = element;
-            this.parent = parent;
-
-            attributes = new ObservableCollection<PssgAttributeViewModel>();
-
-            children = new ObservableCollection<PssgElementViewModel>(
-                from child in element.ChildElements
-                select new PssgElementViewModel(child, this));
-        }
-
-        private bool HasDummyChild
-        {
-            get { return this.Children.Count == 1 && this.Children[0] == DummyChild; }
-        }
-
-        private void GetAttributes()
-        {
-            attributes.Clear();
-            foreach (PssgAttribute attr in _element.Attributes)
-            {
-                attributes.Add(new PssgAttributeViewModel(attr, this));
-            }
-        }
-
-        public IEnumerable<PssgElementViewModel> GetElements()
-        {
-            yield return this;
-
-            foreach (PssgElementViewModel child in Children)
-            {
-                foreach (PssgElementViewModel cc in child.GetElements()) yield return cc;
-            }
+            // Don't hold in memory
+            Attributes.Clear();
         }
     }
 }

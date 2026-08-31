@@ -13,10 +13,6 @@ namespace EgoPssgEditor.ViewModels
 {
     public partial class ElementsWorkspaceViewModel : WorkspaceViewModel
     {
-        #region Data
-        PssgElementViewModel _rootElement;
-        readonly ObservableCollection<PssgElementViewModel> pssgElements;
-
         public override string DisplayName
         {
             get
@@ -24,41 +20,28 @@ namespace EgoPssgEditor.ViewModels
                 return "All Elements";
             }
         }
-        public PssgElementViewModel RootElement
-        {
-            get { return _rootElement; }
-            private set
-            {
-                ClearData();
-                _rootElement = value;
-                pssgElements.Add(_rootElement);
-            }
-        }
-        public ObservableCollection<PssgElementViewModel> PssgElements
-        {
-            get { return pssgElements; }
-        }
-        #endregion
+        
+        public PssgElementViewModel? RootElement { get; private set; }
 
-        #region Presentation Props
-        #endregion
+        public ObservableCollection<PssgElementViewModel> PssgElements { get; }
 
-        public ElementsWorkspaceViewModel(MainViewModel mainView)
-            : base(mainView)
+        public ElementsWorkspaceViewModel()
         {
-            pssgElements = new ObservableCollection<PssgElementViewModel>();
+            PssgElements = new ObservableCollection<PssgElementViewModel>();
         }
 
-        public override void LoadData(object data)
+        public override void LoadData()
         {
-            RootElement = new PssgElementViewModel(((PssgFile)data).RootElement);
+            ClearData();
+            RootElement = new PssgElementViewModel(MainView.PssgFile.RootElement);
+            PssgElements.Add(RootElement);
             RootElement.IsExpanded = true;
         }
 
         public override void ClearData()
         {
-            _rootElement = null;
-            pssgElements.Clear();
+            RootElement = null;
+            PssgElements.Clear();
         }
 
         public PssgElementViewModel? TryFindViewModel(PssgElement element)
@@ -68,7 +51,7 @@ namespace EgoPssgEditor.ViewModels
 
         private IEnumerable<PssgElementViewModel> GetElements()
         {
-            return RootElement.GetElements();
+            return RootElement?.GetElements() ?? [];
         }
 
         #region Menu
@@ -155,12 +138,11 @@ namespace EgoPssgEditor.ViewModels
                         else
                         {
                             element.File.RootElement = newElement;
-                            LoadData(element.File);
-                            _rootElement.IsSelected = true;
+                            LoadData();
+                            RootElement?.IsSelected = true;
                         }
 
-                        mainView.TexturesWorkspace.ClearData();
-                        mainView.TexturesWorkspace.LoadData(RootElement);
+                        MainView.TexturesWorkspace.LoadData();
                     }
                 }
                 catch (Exception ex)
@@ -281,7 +263,7 @@ namespace EgoPssgEditor.ViewModels
             elementView.Element.ParentElement.RemoveChild(elementView.Element);
 
             elementView.Parent.Children.Remove(elementView);
-            mainView.TexturesWorkspace.RemoveTexture(elementView);
+            MainView.TexturesWorkspace.RemoveTexture(elementView);
         }
         private bool CloneElement_CanExecute(object parameter)
         {
@@ -302,7 +284,7 @@ namespace EgoPssgEditor.ViewModels
                 else
                     elementView.Parent.Children.Insert(viewIndex + 1, newElementView);
 
-                mainView.TexturesWorkspace.LoadTextures(newElementView);
+                MainView.TexturesWorkspace.LoadTextures(newElementView);
                 newElementView.IsSelected = true;
             }
             catch (Exception ex)

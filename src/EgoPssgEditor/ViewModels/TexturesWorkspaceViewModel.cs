@@ -33,8 +33,7 @@ namespace EgoPssgEditor.ViewModels
             }
         }
 
-        public TexturesWorkspaceViewModel(MainViewModel mainView)
-            : base(mainView)
+        public TexturesWorkspaceViewModel()
         {
             _textures = [];
             _texturesView = _textures.CreateView(x => x);
@@ -42,10 +41,10 @@ namespace EgoPssgEditor.ViewModels
             Textures = _texturesView.ToNotifyCollectionChanged(SynchronizationContextCollectionEventDispatcher.Current);
         }
 
-        public override void LoadData(object data)
+        public override void LoadData()
         {
             ClearData();
-            LoadTextures((PssgElementViewModel)data);
+            LoadTextures(MainView.ElementsWorkspace.RootElement);
         }
         public void LoadTextures(PssgElementViewModel elementView)
         {
@@ -170,7 +169,7 @@ namespace EgoPssgEditor.ViewModels
         {
             try
             {
-                var texDir = mainView.FilePath + "_textures";
+                var texDir = MainView.FilePath + "_textures";
                 Directory.CreateDirectory(texDir);
                 DdsFile dds;
                 foreach (PssgTextureViewModel texView in Textures)
@@ -196,7 +195,7 @@ namespace EgoPssgEditor.ViewModels
         {
             try
             {
-                string directory = mainView.FilePath + "_textures";
+                string directory = MainView.FilePath + "_textures";
                 if (Directory.Exists(directory) == true)
                 {
                     DdsFile dds;
@@ -268,7 +267,7 @@ namespace EgoPssgEditor.ViewModels
         }
         private bool RemoveTextureC_CanExecute(object parameter)
         {
-            return parameter != null && ((PssgTextureViewModel)parameter).Texture != mainView.PssgFile.RootElement;
+            return parameter != null && ((PssgTextureViewModel)parameter).Texture != MainView.PssgFile.RootElement;
         }
         [RelayCommand(CanExecute = nameof(RemoveTextureC_CanExecute))]
         private void RemoveTextureC(object parameter)
