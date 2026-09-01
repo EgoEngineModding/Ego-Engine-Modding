@@ -1,13 +1,7 @@
-﻿using System;
-using System.IO;
-using System.Windows.Forms;
-using System.Drawing;
-using DGVColumnSelector;
+﻿using DGVColumnSelector;
 using DgvFilterPopup;
 using System.Data;
-using System.Collections.Generic;
 using EgoEngineLibrary.Data;
-using System.Linq;
 
 namespace EgoDatabaseEditor
 {
@@ -17,6 +11,7 @@ namespace EgoDatabaseEditor
         // 2.2.1 -- Fixed Edit Row Form, Fixed Error When Pasting with Hidden Columns, Added F1 2012 support, Improve Open/SaveDlg
         // 11.0 -- Fixed Compare, F1 2013 Support, Minor UI Improvements, Pasting Change, Xml Internal Schema/Predict Schema, Dirt Import
         // ToDo -- Disable Constraints Button
+        private static readonly string SchemaFolderPath = Path.Combine(Application.StartupPath, "schema");
         readonly List<string> schemaPaths = new();
 		DatabaseFile dbFile;
         string fileName = "";
@@ -29,7 +24,7 @@ namespace EgoDatabaseEditor
 			ClearInterface();
 
             // Load Schema List
-            foreach (string schemaPath in Directory.GetFiles(Path.Combine(Application.StartupPath, "schema"), "schema*.xml", SearchOption.TopDirectoryOnly))
+            foreach (string schemaPath in Directory.GetFiles(SchemaFolderPath, "schema*.xml", SearchOption.TopDirectoryOnly))
             {
                 schemaPaths.Add(schemaPath);
             }
@@ -124,48 +119,54 @@ namespace EgoDatabaseEditor
                 }
                 else
                 {
-					switch (conversionType) {
-						case 0:
-							ClearInterface();
-							dbFile = new DatabaseFile(path, schemaPaths[i]);
-							WriteErrorLog(dbFile.LoadErrors);
-							for (int j = 0; j < dbFile.Tables.Count; j++) {
-								tableListBox.Items.Add(dbFile.Tables[j].TableName);
-							}
-							fileName = path;
-							this.Text = $"{Properties.Resources.AppTitleShort} - {path}";
-							break;
-						case 1:
-							dbFile.Write(File.Open(path, FileMode.Create, FileAccess.Write, FileShare.Read));
-							this.Text = $"{Properties.Resources.AppTitleShort} - {path}";
-							break;
-						case 2:
-							ClearInterface();
-							dbFile = new DatabaseFile(path);
-							WriteErrorLog(dbFile.LoadErrors);
-							for (int j = 0; j < dbFile.Tables.Count; j++) {
-								tableListBox.Items.Add(dbFile.Tables[j].TableName);
-							}
-							fileName = path;
-							this.Text = $"{Properties.Resources.AppTitleShort} - {path}";
-							break;
-						case 3:
-							dbFile.WriteXML(path);
-							this.Text = $"{Properties.Resources.AppTitleShort} - {path}";
-							break;
-						default:
-							MessageBox.Show("Incorrect Conversion Type! 0 - binToXml, 1 - xmlToBin", "Incorrect Conversion Type", MessageBoxButtons.OK, MessageBoxIcon.Error);
-							break;
-					}
+                    switch (conversionType)
+                    {
+                        case 0:
+                            ClearInterface();
+                            dbFile = new DatabaseFile(path, schemaPaths[i]);
+                            WriteErrorLog(dbFile.LoadErrors);
+                            for (int j = 0; j < dbFile.Tables.Count; j++)
+                            {
+                                tableListBox.Items.Add(dbFile.Tables[j].TableName);
+                            }
+                            fileName = path;
+                            this.Text = $"{Properties.Resources.AppTitleShort} - {path}";
+                            break;
+                        case 1:
+                            dbFile.Write(File.Open(path, FileMode.Create, FileAccess.Write, FileShare.Read));
+                            this.Text = $"{Properties.Resources.AppTitleShort} - {path}";
+                            break;
+                        case 2:
+                            ClearInterface();
+                            dbFile = new DatabaseFile(path);
+                            WriteErrorLog(dbFile.LoadErrors);
+                            for (int j = 0; j < dbFile.Tables.Count; j++)
+                            {
+                                tableListBox.Items.Add(dbFile.Tables[j].TableName);
+                            }
+                            fileName = path;
+                            this.Text = $"{Properties.Resources.AppTitleShort} - {path}";
+                            break;
+                        case 3:
+                            dbFile.WriteXML(path);
+                            this.Text = $"{Properties.Resources.AppTitleShort} - {path}";
+                            break;
+                        default:
+                            MessageBox.Show("Incorrect Conversion Type! 0 - binToXml, 1 - xmlToBin", "Incorrect Conversion Type", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            break;
+                    }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-				if (conversionType == 0) {
-					OpenController(path, conversionType, i + 1);
-				} else {
-					OpenController(string.Empty, -1, schemaPaths.Count);
-				}
+                if (conversionType == 0)
+                {
+                    OpenController(path, conversionType, i + 1);
+                }
+                else
+                {
+                    MessageBox.Show($"The program failed to convert!{Environment.NewLine}{ex}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 		private void WriteErrorLog(List<string[]> errors) {
@@ -373,7 +374,7 @@ namespace EgoDatabaseEditor
             {
 				try
                 {
-                    var two = new DatabaseFile(openFileDialog.FileName, Path.Combine(Application.StartupPath, dbFile.Namespace));
+                    var two = new DatabaseFile(openFileDialog.FileName, Path.Combine(SchemaFolderPath, dbFile.Namespace));
                     openFileDialog.Dispose();
                     saveFileDialog.FilterIndex = 2;
                     saveFileDialog.FileName = fileName.Replace(".bin", "Differences.xml");
