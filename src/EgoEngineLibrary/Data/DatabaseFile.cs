@@ -1,15 +1,10 @@
-﻿using EgoEngineLibrary.Conversion;
+﻿using System.Data;
+using System.Text;
+using System.Xml;
+using EgoEngineLibrary.Conversion;
 
 namespace EgoEngineLibrary.Data
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Data;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-    using System.Xml;
-
     internal static class XmlNodeExtensions
     {
         public static XmlNode ChildNode(this XmlNode? parent, int index)
@@ -31,7 +26,7 @@ namespace EgoEngineLibrary.Data
 
     internal static class DataSetExtensions
     {
-        public static DataTable Table(this DataSet set, string name)
+        public static DataTable Table(this DataSet? set, string name)
         {
             var table = set?.Tables[name];
             if (table is null)
@@ -540,13 +535,14 @@ namespace EgoEngineLibrary.Data
                 {
                     for (int j = 0; j < table3.Rows.Count; j++)
                     {
-                        if (!((table3.Rows[j].RowState != DataRowState.Deleted) && table4.Row(num2).ItemArray[ordinal] == table3.Rows[j].ItemArray[ordinal]))
+                        if (table3.Rows[j].RowState == DataRowState.Deleted ||
+                            !Equals(table4.Rows[num2].ItemArray[ordinal], table3.Rows[j].ItemArray[ordinal]))
                         {
                             continue;
                         }
                         for (int k = 0; k < table3.Rows[j].ItemArray.Length; k++)
                         {
-                            if (table4.Row(num2).ItemArray[k] != table3.Rows[j].ItemArray[k])
+                            if (!Equals(table4.Rows[num2].ItemArray[k], table3.Rows[j].ItemArray[k]))
                             {
                                 file.Table(table3.TableName).ImportRow(table3.Rows[j]);
                                 break;
