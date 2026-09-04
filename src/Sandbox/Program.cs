@@ -6,7 +6,7 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        GvdbSandbox.Run(args);
+        TrackTreesSandbox.Run(args);
     }
 
     private static void XmlSandbox()
