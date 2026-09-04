@@ -56,7 +56,7 @@ struct InstanceRef {
     if (isDirt3 || isGridAutosport) {
         int32 distant;
         int32 maxInstances;
-        local int32 numInstances = 0;
+        local int32 numInstances <hidden=true> = 0;
     }
     else {
         int32 maxInstances;
