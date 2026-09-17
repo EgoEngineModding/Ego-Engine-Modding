@@ -18,7 +18,10 @@ local ubyte isGrid2 <hidden=true> = 0;
 local ubyte isGridAutosport <hidden=true> = 0; // GA, Dirt Rally
 SetBackColor(cLtGray);
 
+
+
 int32 version;
+//  instancedata
 if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
     int32 instanceListOffset;
     int32 numInstanceList;
@@ -33,28 +36,35 @@ else
     local int32 numInstanceList <hidden=true> = 1;
 }
 
+
 FSeek(instanceListOffset);
 struct InstanceList {
-float boundsMin[3];
-float boundsMax[3];
-if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
-    int32 referenceNum;
-}
-int32 totalInstances;
-if (isDirt2 || isF12010 || isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport)
-{
-    int32 totalLandmarks; // does not exist in RD: Grid
-}
-int32 instanceRefOffset;
-int32 numInstanceRef;
-if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
-    int32 instanceOffset;
-    int32 numInstance;
+
+    float boundsMin[3];
+    float boundsMax[3];
+
+    if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
+        int32 referenceNum;
+    }
+
+    int32 totalInstances;  // number of possible instances across all routes?
+
+    if (isDirt2 || isF12010 || isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport)
+    {
+        int32 totalLandmarks; // does not exist in RD: Grid
+    }
+
+    int32 instanceRefOffset;  //  offset to first instanceRef
+    int32 numInstanceRef;  //  actual number of instanceRefs, same as referenceNum (always same?)
+
+    if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
+        int32 instanceOffset;  //   offset to first instance of first instanceRef
+        int32 numInstance;  // actual number of instances in file
 }
 
 FSeek(instanceRefOffset);
 struct InstanceRef {
-    int32 fileNameOffset;
+    int32 fileNameOffset;  //  string offset, unique
     if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
         int32 referenceId;
     }
@@ -63,8 +73,8 @@ struct InstanceRef {
     if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
         int32 sponsor;
         int32 prebakedShadows;
-        int32 maxInstances;
-        int32 renderTypeOffset;
+        int32 maxInstances;  //  number of instances across all routes? (doesnt really make sense as route 0 should have all)
+        int32 renderTypeOffset;   //  string offset, shared
         local int32 numInstances = 0;
     }
     else if (isDirt2 || isF12010) {
@@ -73,7 +83,7 @@ struct InstanceRef {
         int32 maxInstances;
         int32 offset; // index offset into total instance list
         int32 instancesOffset;
-        int32 numInstances;
+        int32 numInstances;    //  reflects number of instances actually in file (number of instances actually used in route?)
         int32 renderTypeOffset;
     }
     else {
@@ -82,12 +92,15 @@ struct InstanceRef {
         int32 instancesOffset;
         int32 numInstances;
         int32 renderTypeOffset;
-        int32 unknown;
+        int32 unknown;  //  may be prebakedShadows? (value always either 0 or 1, bool)
     }
     
     if (numInstances <= 0) {
         return;
     }
+
+
+   //  instance for rdg, dirt 2, all f1
     
     local int64 pos <hidden=true> = FTell();
     FSeek(instancesOffset);
@@ -102,7 +115,7 @@ struct InstanceRef {
                 int16 sessionVis;
             }
             else {
-                int32 landmark;
+                int32 landmark;  //  not offset?
             }
         }
         else {
@@ -118,27 +131,32 @@ struct Instance2 {
     int32 referenceId;
     int32 instanceId;
     float transform[12];
-    int32 offsetSkyMap;
+
+    if (isGrid2 || isGridAutosport) {
+        int32 offsetSkyMap;   //  doesnt seem to be string offset, default is 0
+    }
+
     ubyte color[4];
     int32 godRayGroup;
     int32 dynamic;
     int32 doNotCastShadows;
-    int32 landmark;
+    int32 landmark;   //  not offset
     int32 instanceTag;
-    int32 todSpecificOffset;
+    int32 todSpecificOffset;  //  string offset, shared
+    int32 modeLayerOffset;
     
+
     if (isGrid2 || isGridAutosport)
     {
-        int32 modeLayerOffset;
-        int32 piaoTextureOffset;
-        int32 atlasU;
+        int32 piaoTextureOffset;  //  string offset, shared?
+        int32 atlasU;  //  all default to 0 if not used
         int32 atlasV;
         int32 atlasW;
         int32 atlasH;
-        int32 hueShiftIdOffset;
+        int32 hueShiftIdOffset;  //  string offset, shared
         
         if (isGridAutosport) {
-            int32 sponsorHueShiftIdOffset;
+            int32 sponsorHueShiftIdOffset;  //  string offset, shared
         }
     }
 } instances[numInstance] <optimize=false>;
@@ -160,12 +178,12 @@ struct DependentList {
     FSeek(dependentReferenceOffset);
     struct DependentRef {
         int32 referenceId;
-        int32 fileNameOffset;
-        int32 dependentTypeOffset;
+        int32 fileNameOffset;   //  string offset, unique
+        int32 dependentTypeOffset;  //  string offset, shared
         int32 prebakedShadows;
         float boundsMin[3];
         float boundsMax[3];
-        int32 maxInstances;
+        int32 maxInstances;  //  always reflects actual number in file?
     } dependentRefs[numDependentReference] <optimize=false,read=ReadString(fileNameOffset)>;
     }
     
@@ -189,7 +207,7 @@ struct PathAnimRoot {
     FSeek(pathAnimOffset);
     struct PathAnim {
         int32 id;
-        int32 animClipNameOffset;
+        int32 animClipNameOffset;  //   string offset, shared?
         int32 instanceTag;
         int32 loop;
         int32 cantTriggerEveryLap;
@@ -211,7 +229,7 @@ struct PathAnimRoot {
         local int64 pos <hidden=true> = FTell();
         FSeek(emitterOffset);
         struct Emitter {
-            int32 nameOffset;
+            int32 nameOffset;  //  string offset, shared?
             float startTime;
             float endTime;
             float transform[12];
