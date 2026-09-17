@@ -73,7 +73,7 @@ struct InstanceRef {
     if (isDirt3 || isDirtShowdown || isGrid2 || isGridAutosport) {
         int32 sponsor;
         int32 prebakedShadows;
-        int32 maxInstances;  //  number of instances across all routes
+        int32 maxInstances;  //  number of instances across all routes? (doesnt really make sense as route 0 should have all)
         int32 renderTypeOffset;   //  string offset, shared
         local int32 numInstances = 0;
     }
